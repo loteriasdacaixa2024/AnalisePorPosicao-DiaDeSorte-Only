@@ -1,0 +1,681 @@
+{% extends "base.html" %}
+{% block title %}Dashboard de Análises - Dia de Sorte{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/analise_linhas.css">
+<style>
+    :root {
+        --cor-primary: #D4B31A;
+        --cor-primary-dark: #B89615;
+        --cor-primary-light: #E5C942;
+    }
+
+    .dashboard-container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--cor-primary) 0%, var(--cor-primary-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .btn-sincronizar {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-sincronizar:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-sincronizar:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-sincronizar .spinner {
+        display: none;
+        animation: spin 1s linear infinite;
+    }
+
+    .btn-sincronizar.loading .spinner {
+        display: inline-block;
+    }
+
+    .btn-sincronizar.loading .fa-sync-alt {
+        display: none;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .stats-resumo {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--cor-primary);
+    }
+
+    .dark .stat-card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .stat-card h3 {
+        font-size: 2.5rem;
+        color: var(--cor-primary);
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .stat-card p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .dark .stat-card p {
+        color: #aaa;
+    }
+
+    .categoria-section {
+        margin-bottom: 40px;
+    }
+
+    .categoria-titulo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cor-primary);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid var(--cor-primary);
+    }
+
+    .analises-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .analise-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .dark .analise-card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .analise-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(212, 179, 26, 0.3);
+    }
+
+    .analise-header {
+        background: linear-gradient(135deg, var(--cor-primary-light) 0%, var(--cor-primary) 100%);
+        color: #333;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+    }
+
+    .analise-header i {
+        font-size: 1.3rem;
+    }
+
+    .analise-body {
+        padding: 20px;
+    }
+
+    .analise-descricao {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+
+    .dark .analise-descricao {
+        color: #aaa;
+    }
+
+    .analise-dados {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .dado-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        border-left: 3px solid var(--cor-primary);
+    }
+
+    .dark .dado-card {
+        background: #1e1e1e;
+    }
+
+    .dado-titulo {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .dark .dado-titulo {
+        color: #999;
+    }
+
+    .dado-conteudo {
+        font-size: 0.85rem;
+        color: #333;
+        line-height: 1.4;
+    }
+
+    .dark .dado-conteudo {
+        color: #ccc;
+    }
+
+    .medalha {
+        font-size: 1rem;
+        margin-right: 4px;
+    }
+
+    .insight-texto {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: #856404;
+        margin-bottom: 15px;
+    }
+
+    .dark .insight-texto {
+        background: #3d3418;
+        color: #f0d18a;
+    }
+
+    .insight-texto i {
+        margin-right: 8px;
+    }
+
+    .analise-footer {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-visualizar {
+        flex: 1;
+        background: var(--cor-primary);
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .btn-visualizar:hover {
+        background: var(--cor-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-overlay.show {
+        display: flex;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .dark .loading-content {
+        background: #2d2d2d;
+        color: white;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--cor-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px auto;
+    }
+
+    .loading-progress {
+        width: 100%;
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 15px;
+    }
+
+    .loading-progress-bar {
+        height: 100%;
+        background: var(--cor-primary);
+        transition: width 0.3s;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+        .analises-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .analise-dados {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-tachometer-alt"></i> Dashboard de Análises</h1>
+            <p>Visão consolidada de todas as análises do sistema</p>
+        </div>
+        <button class="btn-sincronizar" onclick="sincronizarDados()">
+            <i class="fas fa-sync-alt"></i>
+            <i class="fas fa-spinner spinner"></i>
+            <span>Sincronizar API</span>
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" style="text-align: center; padding: 60px;">
+        <div class="loading-spinner"></div>
+        <p>Carregando análises...</p>
+    </div>
+
+    <!-- Content -->
+    <div id="content" style="display: none;">
+        <!-- Stats Resumo -->
+        <div class="stats-resumo">
+            <div class="stat-card">
+                <h3 id="totalAnalises">0</h3>
+                <p>Análises Disponíveis</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalCategorias">0</h3>
+                <p>Categorias</p>
+            </div>
+            <div class="stat-card">
+                <h3><i class="fas fa-check-circle" style="color: var(--cor-primary);"></i></h3>
+                <p>Sistema Atualizado</p>
+            </div>
+        </div>
+
+        <!-- Panorama Geral: Análise de Linhas -->
+        <div id="panoramaAnaliseLinhasContainer" class="mb-4"></div>
+
+        <!-- Categorias e Análises -->
+        <div id="analisesContainer"></div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h4>Sincronizando dados...</h4>
+        <p id="loadingStatus">Atualizando análises do sistema</p>
+        <div class="loading-progress">
+            <div class="loading-progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;"><span id="progressPercentage">0</span>%</p>
+    </div>
+</div>
+
+<script>
+let analisesData = null;
+
+// Carregar dados ao iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    carregarAnalises();
+    carregarDadosLinhas();
+});
+
+async function carregarDadosLinhas() {
+    try {
+        const response = await fetch('/api/sorteios/todos');
+        const data = await response.json();
+        
+        if (data.sorteios && data.sorteios.length > 0) {
+            // Converter para o formato esperado pelo componente
+            const concursosCarregados = data.sorteios.map(sorteio => {
+                return {
+                    concurso: sorteio.concurso,
+                    numeros: [
+                        sorteio.posicoes.posicao_1,
+                        sorteio.posicoes.posicao_2,
+                        sorteio.posicoes.posicao_3,
+                        sorteio.posicoes.posicao_4,
+                        sorteio.posicoes.posicao_5,
+                        sorteio.posicoes.posicao_6,
+                        sorteio.posicoes.posicao_7
+                    ]
+                };
+            });
+            // Ordenar descrescente para a análise
+            concursosCarregados.sort((a, b) => b.concurso - a.concurso);
+            
+            if (typeof analiseLinhasEngine !== 'undefined') {
+                analiseLinhasEngine.renderizar('panoramaAnaliseLinhasContainer', concursosCarregados);
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dados para análise de linhas:', error);
+    }
+}
+
+async function carregarAnalises() {
+    try {
+        const response = await fetch('/api/dashboard/analises');
+        const data = await response.json();
+
+        if (data.erro) {
+            mostrarErro(data.erro);
+            return;
+        }
+
+        analisesData = data;
+        renderizarDashboard(data);
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (error) {
+        console.error('Erro ao carregar análises:', error);
+        mostrarErro('Erro ao carregar análises do sistema');
+    }
+}
+
+function renderizarDashboard(data) {
+    // Stats
+    document.getElementById('totalAnalises').textContent = data.total_analises || 0;
+    document.getElementById('totalCategorias').textContent = Object.keys(data.categorias || {}).length;
+
+    // Container de análises
+    const container = document.getElementById('analisesContainer');
+    container.innerHTML = '';
+
+    if (!data.analises || data.analises.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Nenhuma análise disponível</h3>
+                <p>Não há análises cadastradas no sistema</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Organizar por categoria
+    const categorias = data.categorias || {};
+    const analisesMap = {};
+
+    data.analises.forEach(analise => {
+        analisesMap[analise.nome] = analise;
+    });
+
+    // Renderizar cada categoria
+    for (const [nomeCategoria, nomesAnalises] of Object.entries(categorias)) {
+        const analisesDaCategoria = nomesAnalises
+            .map(nome => analisesMap[nome])
+            .filter(a => a !== undefined);
+
+        if (analisesDaCategoria.length === 0) continue;
+
+        const categoriaHTML = `
+            <div class="categoria-section">
+                <h2 class="categoria-titulo">
+                    <i class="fas fa-folder-open"></i> ${nomeCategoria}
+                </h2>
+                <div class="analises-grid">
+                    ${analisesDaCategoria.map(analise => renderizarAnaliseCard(analise)).join('')}
+                </div>
+            </div>
+        `;
+
+        container.innerHTML += categoriaHTML;
+    }
+
+    // Análises sem categoria
+    const analisesComCategoria = new Set();
+    Object.values(categorias).forEach(lista => {
+        lista.forEach(nome => analisesComCategoria.add(nome));
+    });
+
+    const analisesSemCategoria = data.analises.filter(a => !analisesComCategoria.has(a.nome));
+
+    if (analisesSemCategoria.length > 0) {
+        const outrasHTML = `
+            <div class="categoria-section">
+                <h2 class="categoria-titulo">
+                    <i class="fas fa-folder"></i> Outras Análises
+                </h2>
+                <div class="analises-grid">
+                    ${analisesSemCategoria.map(analise => renderizarAnaliseCard(analise)).join('')}
+                </div>
+            </div>
+        `;
+
+        container.innerHTML += outrasHTML;
+    }
+}
+
+function renderizarAnaliseCard(analise) {
+    return `
+        <div class="analise-card">
+            <div class="analise-header">
+                <i class="fas ${analise.icone}"></i>
+                <span>${analise.titulo}</span>
+            </div>
+            <div class="analise-body">
+                <p class="analise-descricao">${analise.descricao}</p>
+
+                <div class="analise-dados">
+                    <div class="dado-card">
+                        <div class="dado-titulo">📊 Top 3 Padrões</div>
+                        <div class="dado-conteudo">
+                            <small style="color: #999;">Carregue a análise para ver os dados atualizados</small>
+                        </div>
+                    </div>
+
+                    <div class="dado-card">
+                        <div class="dado-titulo">💡 Insight Inteligente</div>
+                        <div class="dado-conteudo">
+                            <small style="color: #999;">Análise disponível ao acessar</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-texto">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Acesse a análise completa</strong> para visualizar TOP 3 em tempo real, insights estratégicos e recomendações baseadas nos dados mais recentes.
+                </div>
+
+                <div class="analise-footer">
+                    <a href="${analise.link_visualizar}" class="btn-visualizar">
+                        <i class="fas fa-chart-line"></i>
+                        Visualizar Análise
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function sincronizarDados() {
+    const btn = document.querySelector('.btn-sincronizar');
+    const overlay = document.getElementById('loadingOverlay');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const loadingStatus = document.getElementById('loadingStatus');
+
+    btn.disabled = true;
+    btn.classList.add('loading');
+    overlay.classList.add('show');
+
+    try {
+        // Simular progresso
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            if (progress <= 90) {
+                progressBar.style.width = progress + '%';
+                progressPercentage.textContent = progress;
+
+                if (progress === 30) loadingStatus.textContent = 'Conectando com API...';
+                if (progress === 60) loadingStatus.textContent = 'Carregando análises...';
+                if (progress === 90) loadingStatus.textContent = 'Finalizando...';
+            }
+        }, 200);
+
+        // Recarregar dados
+        await carregarAnalises();
+
+        clearInterval(interval);
+        progressBar.style.width = '100%';
+        progressPercentage.textContent = '100';
+        loadingStatus.textContent = 'Concluído!';
+
+        setTimeout(() => {
+            overlay.classList.remove('show');
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            progressBar.style.width = '0%';
+            progressPercentage.textContent = '0';
+            loadingStatus.textContent = 'Atualizando análises do sistema';
+        }, 500);
+
+    } catch (error) {
+        console.error('Erro ao sincronizar:', error);
+        loadingStatus.textContent = 'Erro ao sincronizar';
+        setTimeout(() => {
+            overlay.classList.remove('show');
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        }, 2000);
+    }
+}
+
+    }
+}
+
+function mostrarErro(mensagem) {
+    const loading = document.getElementById('loading');
+    loading.innerHTML = `
+        <div style="text-align: center; color: #dc3545;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+            <h3>Erro ao carregar dashboard</h3>
+            <p>${mensagem}</p>
+            <button class="btn-sincronizar" style="margin: 20px auto;" onclick="location.reload()">
+                <i class="fas fa-redo"></i>
+                Tentar Novamente
+            </button>
+        </div>
+    `;
+}
+</script>
+<script src="/static/js/components/analise_linhas.js"></script>
+{% endblock %}

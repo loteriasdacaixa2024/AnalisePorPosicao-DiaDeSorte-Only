@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-link-45deg"></i> Análise de Números Consecutivos/Vizinhos
+                </h2>
+                <div>
+                    <a href="/" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button class="btn btn-primary" onclick="carregarAnalise()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted">
+                Analisa a frequência de números consecutivos como 12-13, 20-21, etc. nos sorteios
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3">Carregando análise...</p>
+            </div>
+
+            <div id="resultado" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="insightsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+    document.getElementById('insightsCard').style.display = 'none';
+
+    fetch('/api/analise/numeros-consecutivos')
+        .then(response => response.json())
+        .then(data => {
+            exibirResultado(data);
+            gerarInsights(data);
+            loading.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Erro ao carregar análise: ${error.message}
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function exibirResultado(data) {
+    const resultado = document.getElementById('resultado');
+
+    let html = `
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-fill"></i> Resumo Geral (${data.total_concursos} concursos)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <strong>Sorteios COM consecutivos:</strong> ${data.sorteios_com_consecutivos} (${data.percentual_com_consecutivos}%)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger">
+                            <strong>Sorteios SEM consecutivos:</strong> ${data.sorteios_sem_consecutivos} (${data.percentual_sem_consecutivos}%)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-info">
+                            <strong>Média de pares por sorteio:</strong> ${data.media_quantidade}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert alert-secondary">
+                            <strong>Quantidade Mínima:</strong> ${data.quantidade_minima} pares
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-warning">
+                            <strong>Quantidade Máxima:</strong> ${data.quantidade_maxima} pares
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pie-chart-fill"></i> Distribuição por Quantidade de Pares Consecutivos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Quantidade de Pares</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Barra Visual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.distribuicao_quantidade.forEach(item => {
+        const larguraBarra = Math.min(item.porcentagem * 2, 100);
+        const destaque = item.quantidade === 0 ? 'table-danger' : item.quantidade >= 2 ? 'table-success' : '';
+
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${item.quantidade} ${item.quantidade === 1 ? 'par' : 'pares'}</strong></td>
+                <td>${item.frequencia}x</td>
+                <td>${item.porcentagem}%</td>
+                <td>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar ${item.quantidade === 0 ? 'bg-danger' : 'bg-success'}" 
+                             role="progressbar"
+                             style="width: ${larguraBarra}%"
+                             aria-valuenow="${item.porcentagem}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                             ${item.porcentagem}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trophy-fill"></i> Top 20 Pares Consecutivos Mais Frequentes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Posição</th>
+                                <th>Par Consecutivo</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                                <th>Atraso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    data.top_pares.forEach((par, index) => {
+        const posicao = index < 3 ? medalhas[index] : `${index + 1}º`;
+        const destaque = index < 3 ? 'table-success' : '';
+        const badgeColor = par.atraso > 50 ? 'danger' : par.atraso > 20 ? 'warning' : 'success';
+
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${posicao}</strong></td>
+                <td><span class="badge bg-primary fs-6">${par.par}</span></td>
+                <td><strong>${par.frequencia}x</strong></td>
+                <td>${par.porcentagem}%</td>
+                <td>${par.ultimo_concurso}</td>
+                <td><span class="badge bg-${badgeColor}">${par.atraso}</span></td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    resultado.innerHTML = html;
+    resultado.style.display = 'block';
+}
+
+function gerarInsights(data) {
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+
+    const top3 = data.top_pares.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    const com_1_ou_mais = data.distribuicao_quantidade.filter(d => d.quantidade >= 1);
+    const total_1_ou_mais = com_1_ou_mais.reduce((sum, d) => sum + d.frequencia, 0);
+    const perc_1_ou_mais = ((total_1_ou_mais / data.total_concursos) * 100).toFixed(2);
+
+    const com_2_ou_mais = data.distribuicao_quantidade.filter(d => d.quantidade >= 2);
+    const total_2_ou_mais = com_2_ou_mais.reduce((sum, d) => sum + d.frequencia, 0);
+    const perc_2_ou_mais = ((total_2_ou_mais / data.total_concursos) * 100).toFixed(2);
+
+    let html = `
+        <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-trophy-fill text-warning"></i> Top 3 Pares Consecutivos Mais Frequentes:</h6>
+            <ul class="list-group">
+    `;
+
+    top3.forEach((par, index) => {
+        html += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${medalhas[index]} <strong>${par.par}</strong></span>
+                <span>
+                    <span class="badge bg-primary rounded-pill">${par.frequencia}x</span>
+                    <span class="badge bg-info rounded-pill">${par.porcentagem}%</span>
+                </span>
+            </li>
+        `;
+    });
+
+    html += `
+            </ul>
+        </div>
+
+        <div class="alert alert-success">
+            <h6 class="fw-bold"><i class="bi bi-check-circle-fill"></i> Sorteios com Consecutivos:</h6>
+            <p class="mb-0">
+                <strong>${data.percentual_com_consecutivos}%</strong> dos sorteios (${data.sorteios_com_consecutivos} concursos) 
+                têm pelo menos 1 par de números consecutivos!
+            </p>
+        </div>
+
+        <div class="alert alert-info">
+            <h6 class="fw-bold"><i class="bi bi-star-fill"></i> Sorteios com 1+ pares:</h6>
+            <p class="mb-0">
+                <strong>${perc_1_ou_mais}%</strong> dos sorteios têm 1 ou mais pares consecutivos.
+            </p>
+        </div>
+
+        <div class="alert alert-warning">
+            <h6 class="fw-bold"><i class="bi bi-fire"></i> Sorteios com 2+ pares:</h6>
+            <p class="mb-0">
+                <strong>${perc_2_ou_mais}%</strong> dos sorteios têm 2 ou mais pares consecutivos.
+            </p>
+        </div>
+
+        <div class="alert alert-${data.percentual_sem_consecutivos > 20 ? 'danger' : 'secondary'}">
+            <h6 class="fw-bold"><i class="bi bi-x-circle-fill"></i> Sorteios SEM Consecutivos:</h6>
+            <p class="mb-0">
+                <strong>${data.percentual_sem_consecutivos}%</strong> dos sorteios (${data.sorteios_sem_consecutivos} concursos) 
+                não têm nenhum par consecutivo.
+            </p>
+        </div>
+
+        <div class="alert alert-primary">
+            <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas:</h6>
+            <ul class="mb-0">
+                <li>Considere incluir <strong>pelo menos 1 par consecutivo</strong> em seu jogo (${data.percentual_com_consecutivos}% dos sorteios)</li>
+                <li>Os pares mais frequentes são: <strong>${top3[0].par}</strong>, <strong>${top3[1].par}</strong> e <strong>${top3[2].par}</strong></li>
+                <li>Média de pares por sorteio: <strong>${data.media_quantidade}</strong></li>
+                <li>Evite jogos com muitos pares consecutivos (acima de ${data.quantidade_maxima} é raro)</li>
+            </ul>
+        </div>
+
+        <div class="alert alert-light border">
+            <h6 class="fw-bold"><i class="bi bi-info-circle-fill"></i> Como Interpretar:</h6>
+            <p class="mb-0">
+                <strong>Números Consecutivos/Vizinhos</strong> são números que aparecem em sequência.<br>
+                Exemplo: Se o sorteio tem <strong>5, 12, 13, 20, 25, 26, 30</strong><br>
+                Os pares consecutivos são: <strong>12-13</strong> e <strong>25-26</strong> (2 pares no total)
+            </p>
+        </div>
+    `;
+
+    insightsContent.innerHTML = html;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+{% endblock %}

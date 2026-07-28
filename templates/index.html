@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+
+{% block title %}Início - Análise por Posição{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+
+<!--
+<style>
+    /* Cores do Dia de Sorte - Paleta Dourada Oficial */
+    :root {
+        --ds-dourado-principal: #D4B31A;
+        --ds-dourado-95: #fcf9e8;
+        --ds-dourado-90: #f9f2d2;
+        --ds-dourado-80: #f4e5a4;
+        --ds-dourado-70: #eed877;
+        --ds-dourado-60: #e9cb49;
+        --ds-dourado-50: #e3be1c;
+        --ds-dourado-45: #ccab19;
+        --ds-dourado-40: #b69816;
+        --ds-dourado-30: #887211;
+    }
+
+    /* Background dourado sutil */
+    body {
+        background: linear-gradient(135deg, var(--ds-dourado-95) 0%, #ffffff 50%, var(--ds-dourado-95) 100%);
+        background-attachment: fixed;
+    }
+
+    .container-fluid {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(212, 179, 26, 0.15);
+    }
+
+    /* Título personalizado com dourado */
+    .text-primary-custom {
+        color: var(--ds-dourado-principal) !important;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(212, 179, 26, 0.2);
+    }
+
+    /* Cards com borda dourada */
+    .card {
+        border: 2px solid var(--ds-dourado-90);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, var(--ds-dourado-principal) 0%, var(--ds-dourado-40) 100%) !important;
+        border-bottom: 3px solid var(--ds-dourado-30);
+    }
+
+    /* Números em círculos dourados com fundo branco (estilo oficial) */
+    .numero-circulo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        background: var(--ds-dourado-principal);
+        color: #ffffff;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 3px 8px rgba(212, 179, 26, 0.4);
+        transition: transform 0.2s ease;
+    }
+
+    .numero-circulo:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.6);
+    }
+
+    /* Mês da Sorte com cores dinâmicas */
+    .mes-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Botões dourados */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--ds-dourado-principal) 0%, var(--ds-dourado-40) 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 3px 8px rgba(212, 179, 26, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--ds-dourado-40) 0%, var(--ds-dourado-30) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(212, 179, 26, 0.5);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        border: none;
+        box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.5);
+    }
+
+    /* Tabela estilizada */
+    .table thead.table-primary {
+        background: linear-gradient(135deg, var(--ds-dourado-80) 0%, var(--ds-dourado-70) 100%);
+        color: var(--ds-dourado-30);
+        font-weight: bold;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: var(--ds-dourado-95);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: var(--ds-dourado-90);
+        transition: background-color 0.2s ease;
+    }
+
+    /* Inputs e selects dourados */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ds-dourado-principal);
+        box-shadow: 0 0 0 0.25rem rgba(212, 179, 26, 0.25);
+    }
+
+    /* Spinner dourado */
+    .spinner-border.text-primary {
+        color: var(--ds-dourado-principal) !important;
+    }
+
+    /* Badge de concurso */
+    .badge-concurso {
+        background: linear-gradient(135deg, var(--ds-dourado-50) 0%, var(--ds-dourado-principal) 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(212, 179, 26, 0.3);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .numero-circulo {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+    }
+</style>-->
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary-custom">
+                <i class="fas fa-trophy me-2"></i>Dia de Sorte - Análise por Posição
+            </h2>
+            <p class="text-muted">Consulte todos os sorteios e filtre por número, posição, mês ou intervalo de concursos
+            </p>
+        </div>
+    </div>
+
+    <!-- Painel de Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros de Busca</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Filtro por Número -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-hashtag me-1"></i>Número (1-31)
+                    </label>
+                    <input type="number" class="form-control" id="filtroNumero" min="1" max="31"
+                        placeholder="Digite um número">
+                </div>
+
+                <!-- Filtro por Posição -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-map-marker-alt me-1"></i>Posição (1-7)
+                    </label>
+                    <select class="form-select" id="filtroPosicao">
+                        <option value="">Todas as posições</option>
+                        <option value="1">Posição 1</option>
+                        <option value="2">Posição 2</option>
+                        <option value="3">Posição 3</option>
+                        <option value="4">Posição 4</option>
+                        <option value="5">Posição 5</option>
+                        <option value="6">Posição 6</option>
+                        <option value="7">Posição 7</option>
+                    </select>
+                </div>
+
+                <!-- Filtro por Mês -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        Mês da Sorte
+                    </label>
+                    <select class="form-select" id="filtroMes">
+                        <option value="">Todos os meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+
+                <!-- Quantidade de Resultados -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-list-ol me-1"></i>Mostrar
+                    </label>
+                    <select class="form-select" id="quantidadeResultados">
+                        <option value="10">Últimos 10</option>
+                        <option value="50" selected>Últimos 50</option>
+                        <option value="100">Últimos 100</option>
+                        <option value="0">Todos</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Intervalo de Concursos -->
+            <div class="row g-3 mt-2">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-arrow-right me-1"></i>Concurso Inicial
+                    </label>
+                    <input type="number" class="form-control" id="concursoInicio" min="1" placeholder="Ex: 1">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-arrow-left me-1"></i>Concurso Final
+                    </label>
+                    <input type="number" class="form-control" id="concursoFim" min="1" placeholder="Ex: 100">
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                    <button class="btn btn-primary me-2" id="btnFiltrar">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                    <button class="btn btn-secondary" id="btnLimpar">
+                        <i class="fas fa-eraser me-2"></i>Limpar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- NOVO: Filtro por DATA (Destacado em VERMELHO) -->
+            <div class="row g-3 mt-3 pt-3" style="border-top: 2px dashed #dc3545;">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-danger">
+                        Data Inicial
+                    </label>
+                    <input type="date" class="form-control border-danger" id="dataInicio"
+                        style="font-size: 16px; border-width: 2px; color: #dc3545;">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-danger">
+                        Data Final
+                    </label>
+                    <input type="date" class="form-control border-danger" id="dataFim"
+                        style="font-size: 16px; border-width: 2px; color: #dc3545;">
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="alert alert-danger mb-0 py-2 w-100" role="alert">
+                        <small>
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <strong>NOVO!</strong> Use as datas para filtrar sorteios por período específico.
+                            Os filtros de data podem ser combinados com outros filtros.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status e Informações -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div id="infoResultados" class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>Carregando resultados...
+            </div>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false" id="btnDownloadDropdown">
+                    <i class="fas fa-download me-1"></i>Download Posições (.txt)
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" id="btnDownloadPagina"><i
+                                class="fas fa-file-alt me-2"></i>Página Atual</a></li>
+                    <li><a class="dropdown-item" href="#" id="btnDownloadTodos"><i
+                                class="fas fa-database me-2"></i>Todos os Resultados</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-success btn-sm" id="btnSincronizar">
+                <i class="fas fa-sync-alt me-1"></i>Sincronizar API
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabela de Resultados -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-table me-2"></i>Resultados</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0" id="tabelaSorteios">
+                    <thead class="table-primary">
+                        <tr>
+                            <th class="text-center">Concurso</th>
+                            <th class="text-center">1º Sorteio</th>
+                            <th class="text-center">2º Sorteio</th>
+                            <th class="text-center">3º Sorteio</th>
+                            <th class="text-center">4º Sorteio</th>
+                            <th class="text-center">5º Sorteio</th>
+                            <th class="text-center">6º Sorteio</th>
+                            <th class="text-center">7º Sorteio</th>
+                            <th class="text-center">Mês da Sorte</th>
+                            <th class="text-center">Data</th>
+                            <th class="text-center">Padrão</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabela">
+                        <tr>
+                            <td colspan="11" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Carregando sorteios...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    <nav class="mt-4" id="paginacaoNav" style="display: none;">
+        <ul class="pagination justify-content-center" id="paginacao">
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let paginaAtual = 1;
+    let totalPaginas = 1;
+    let totalRegistros = 0;
+    let sorteiosAtuais = []; // Armazena os sorteios exibidos para download
+    const ITENS_POR_PAGINA = 50;
+
+    // Helper function para obter índice da cor do mês (0-11)
+    function obterIndiceMes(numeroMes) {
+        return numeroMes - 1;
+    }
+
+    // Carregar sorteios
+    async function carregarSorteios(pagina = 1) {
+        const corpoTabela = document.getElementById('corpoTabela');
+        corpoTabela.innerHTML = `
+            <tr>
+                <td colspan="11" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Carregando...</p>
+                </td>
+            </tr>
+        `;
+
+        try {
+            const quantidade = document.getElementById('quantidadeResultados').value;
+            let url = '';
+            let usaPaginacao = false;
+
+            if (quantidade === '0') {
+                // Mostrar TODOS com paginação
+                url = `/api/sorteios?pagina=${pagina}&por_pagina=${ITENS_POR_PAGINA}`;
+                usaPaginacao = true;
+            } else {
+                // Mostrar quantidade específica (10, 50 ou 100)
+                url = `/api/sorteios/ultimos/${quantidade}`;
+                usaPaginacao = false;
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (response.ok) {
+                sorteiosAtuais = data.sorteios || [];
+                exibirSorteios(sorteiosAtuais);
+
+                if (usaPaginacao && data.total_paginas) {
+                    totalPaginas = data.total_paginas;
+                    totalRegistros = data.total || 0;
+                    paginaAtual = pagina;
+                    atualizarPaginacao();
+                    document.getElementById('paginacaoNav').style.display = 'block';
+                } else {
+                    document.getElementById('paginacaoNav').style.display = 'none';
+                    totalRegistros = data.quantidade || sorteiosAtuais.length;
+                }
+
+                document.getElementById('infoResultados').innerHTML = `
+                    <i class="fas fa-check-circle me-1 text-success"></i>
+                    Exibindo ${sorteiosAtuais.length} de ${usaPaginacao ? totalRegistros : sorteiosAtuais.length} sorteios
+                `;
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            corpoTabela.innerHTML = `
+                <tr>
+                    <td colspan="11" class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Erro ao carregar sorteios
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Exibir sorteios na tabela
+    function exibirSorteios(sorteios) {
+        const corpoTabela = document.getElementById('corpoTabela');
+
+        if (!sorteios || sorteios.length === 0) {
+            corpoTabela.innerHTML = `
+                <tr>
+                    <td colspan="11" class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox me-2"></i>
+                        Nenhum sorteio encontrado
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        corpoTabela.innerHTML = '';
+
+        sorteios.forEach(sorteio => {
+            const mesIndex = obterIndiceMes(sorteio.mes_sorte);
+
+            let nums = [
+                sorteio.posicoes.posicao_1,
+                sorteio.posicoes.posicao_2,
+                sorteio.posicoes.posicao_3,
+                sorteio.posicoes.posicao_4,
+                sorteio.posicoes.posicao_5,
+                sorteio.posicoes.posicao_6,
+                sorteio.posicoes.posicao_7
+            ];
+            let soma = 0;
+            let digitos = new Set();
+            nums.forEach(n => {
+                soma += n;
+                digitos.add(Math.floor(n / 10));
+                digitos.add(n % 10);
+            });
+            let padraoStr = `${digitos.size} / ${soma}`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center"><span class="badge-concurso">${sorteio.concurso}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_1).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_2).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_3).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_4).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_5).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_6).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="numero-circulo">${String(sorteio.posicoes.posicao_7).padStart(2, '0')}</span></td>
+                <td class="text-center"><span class="badge mes-badge mes-cor-${mesIndex}">${sorteio.mes_sorte_nome}</span></td>
+                <td class="text-center">${sorteio.data_sorteio}</td>
+                <td class="text-center"><span class="badge bg-secondary" style="font-size: 13px;">${padraoStr}</span></td>
+            `;
+            corpoTabela.appendChild(tr);
+        });
+    }
+
+    // Aplicar filtros
+    async function aplicarFiltros() {
+        const numero = document.getElementById('filtroNumero').value;
+        const posicao = document.getElementById('filtroPosicao').value;
+        const mes = document.getElementById('filtroMes').value;
+        const inicio = document.getElementById('concursoInicio').value;
+        const fim = document.getElementById('concursoFim').value;
+        const dataInicio = document.getElementById('dataInicio').value;
+        const dataFim = document.getElementById('dataFim').value;
+
+        let url = '';
+        let params = new URLSearchParams();
+
+        if (dataInicio) params.append('data_inicio', dataInicio);
+        if (dataFim) params.append('data_fim', dataFim);
+
+        if (numero && posicao) {
+            url = `/api/sorteios/filtrar/posicao/${posicao}/numero/${numero}`;
+        } else if (numero) {
+            url = `/api/sorteios/filtrar/numero/${numero}`;
+        } else if (mes) {
+            url = `/api/sorteios/filtrar/mes/${mes}`;
+        } else if (inicio && fim) {
+            url = `/api/sorteios/filtrar/intervalo?inicio=${inicio}&fim=${fim}`;
+        } else if (dataInicio || dataFim) {
+            url = `/api/sorteios/filtrar/data`;
+        } else {
+            carregarSorteios();
+            return;
+        }
+
+        if (params.toString()) {
+            url += (url.includes('?') ? '&' : '?') + params.toString();
+        }
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (response.ok) {
+                sorteiosAtuais = data.sorteios || [];
+                exibirSorteios(sorteiosAtuais);
+                document.getElementById('paginacaoNav').style.display = 'none';
+                document.getElementById('infoResultados').innerHTML = `
+                    <i class="fas fa-filter me-1 text-primary"></i>
+                    ${data.total} sorteios encontrados
+                `;
+            }
+        } catch (error) {
+            mostrarMensagem('Erro ao aplicar filtros', 'danger');
+        }
+    }
+
+    // Limpar filtros
+    function limparFiltros() {
+        document.getElementById('filtroNumero').value = '';
+        document.getElementById('filtroPosicao').value = '';
+        document.getElementById('filtroMes').value = '';
+        document.getElementById('concursoInicio').value = '';
+        document.getElementById('concursoFim').value = '';
+        document.getElementById('dataInicio').value = '';
+        document.getElementById('dataFim').value = '';
+        document.getElementById('quantidadeResultados').value = '50';
+        carregarSorteios();
+    }
+
+    // Sincronizar API
+    async function sincronizarAPI() {
+        const btn = document.getElementById('btnSincronizar');
+        const textoOriginal = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sincronizando...';
+
+        try {
+            const response = await fetch('/api/sincronizar/novos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                mostrarMensagem(`Sincronização concluída! Novos: ${data.criados || 0}, Atualizados: ${data.atualizados || 0}`, 'success');
+                carregarSorteios();
+            } else {
+                mostrarMensagem(data.erro || 'Erro ao sincronizar', 'danger');
+            }
+        } catch (error) {
+            mostrarMensagem('Erro ao conectar ao servidor', 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
+
+    // Gerar conteúdo TXT a partir de sorteios
+    function gerarConteudoTXT(sorteios) {
+        let conteudo = '';
+        sorteios.forEach(sorteio => {
+            const p1 = String(sorteio.posicoes.posicao_1).padStart(2, '0');
+            const p2 = String(sorteio.posicoes.posicao_2).padStart(2, '0');
+            const p3 = String(sorteio.posicoes.posicao_3).padStart(2, '0');
+            const p4 = String(sorteio.posicoes.posicao_4).padStart(2, '0');
+            const p5 = String(sorteio.posicoes.posicao_5).padStart(2, '0');
+            const p6 = String(sorteio.posicoes.posicao_6).padStart(2, '0');
+            const p7 = String(sorteio.posicoes.posicao_7).padStart(2, '0');
+            conteudo += `${p1}\t${p2}\t${p3}\t${p4}\t${p5}\t${p6}\t${p7}\n`;
+        });
+        return conteudo;
+    }
+
+    // Baixar arquivo TXT
+    function baixarArquivo(conteudo, nomeBase) {
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${nomeBase}_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Download da PÁGINA ATUAL
+    function downloadPaginaAtual() {
+        if (!sorteiosAtuais || sorteiosAtuais.length === 0) {
+            mostrarMensagem('Nenhum sorteio na página atual para download', 'warning');
+            return;
+        }
+
+        const conteudo = gerarConteudoTXT(sorteiosAtuais);
+        baixarArquivo(conteudo, 'posicoes_pagina_atual');
+        mostrarMensagem(`Download concluído! ${sorteiosAtuais.length} sorteios da página atual`, 'success');
+    }
+
+    // Download de TODOS os resultados
+    async function downloadTodosResultados() {
+        const btn = document.getElementById('btnDownloadDropdown');
+        const textoOriginal = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gerando...';
+
+        try {
+            // Buscar TODOS os sorteios do banco (endpoint sem limite de paginação)
+            const response = await fetch('/api/sorteios/todos');
+            const data = await response.json();
+
+            if (!response.ok || !data.sorteios || data.sorteios.length === 0) {
+                mostrarMensagem('Nenhum sorteio disponível para download', 'warning');
+                return;
+            }
+
+            const conteudo = gerarConteudoTXT(data.sorteios);
+            baixarArquivo(conteudo, 'posicoes_todos_resultados');
+            mostrarMensagem(`Download concluído! ${data.sorteios.length} sorteios (todos)`, 'success');
+        } catch (error) {
+            console.error('Erro no download:', error);
+            mostrarMensagem('Erro ao gerar arquivo de download', 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
+
+    // Mostrar mensagem customizada
+    function mostrarMensagem(mensagem, tipo = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    // Atualizar paginação
+    function atualizarPaginacao() {
+        const paginacao = document.getElementById('paginacao');
+        paginacao.innerHTML = '';
+
+        if (totalPaginas <= 1) {
+            document.getElementById('paginacaoNav').style.display = 'none';
+            return;
+        }
+
+        // Botão Anterior
+        const liAnterior = document.createElement('li');
+        liAnterior.className = `page-item ${paginaAtual === 1 ? 'disabled' : ''}`;
+        liAnterior.innerHTML = `<a class="page-link" href="#" data-pagina="${paginaAtual - 1}">&laquo; Anterior</a>`;
+        paginacao.appendChild(liAnterior);
+
+        // Páginas
+        let inicio = Math.max(1, paginaAtual - 2);
+        let fim = Math.min(totalPaginas, paginaAtual + 2);
+
+        if (inicio > 1) {
+            const li1 = document.createElement('li');
+            li1.className = 'page-item';
+            li1.innerHTML = `<a class="page-link" href="#" data-pagina="1">1</a>`;
+            paginacao.appendChild(li1);
+
+            if (inicio > 2) {
+                const liEllipsis = document.createElement('li');
+                liEllipsis.className = 'page-item disabled';
+                liEllipsis.innerHTML = `<span class="page-link">...</span>`;
+                paginacao.appendChild(liEllipsis);
+            }
+        }
+
+        for (let i = inicio; i <= fim; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === paginaAtual ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" data-pagina="${i}">${i}</a>`;
+            paginacao.appendChild(li);
+        }
+
+        if (fim < totalPaginas) {
+            if (fim < totalPaginas - 1) {
+                const liEllipsis = document.createElement('li');
+                liEllipsis.className = 'page-item disabled';
+                liEllipsis.innerHTML = `<span class="page-link">...</span>`;
+                paginacao.appendChild(liEllipsis);
+            }
+
+            const liUltimo = document.createElement('li');
+            liUltimo.className = 'page-item';
+            liUltimo.innerHTML = `<a class="page-link" href="#" data-pagina="${totalPaginas}">${totalPaginas}</a>`;
+            paginacao.appendChild(liUltimo);
+        }
+
+        // Botão Próximo
+        const liProximo = document.createElement('li');
+        liProximo.className = `page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}`;
+        liProximo.innerHTML = `<a class="page-link" href="#" data-pagina="${paginaAtual + 1}">Próximo &raquo;</a>`;
+        paginacao.appendChild(liProximo);
+
+        // Info de página
+        const liInfo = document.createElement('li');
+        liInfo.className = 'page-item disabled ms-3';
+        liInfo.innerHTML = `<span class="page-link bg-light">Página ${paginaAtual} de ${totalPaginas}</span>`;
+        paginacao.appendChild(liInfo);
+    }
+
+    // Event Listeners
+    document.getElementById('btnFiltrar').addEventListener('click', aplicarFiltros);
+    document.getElementById('btnLimpar').addEventListener('click', limparFiltros);
+    document.getElementById('btnSincronizar').addEventListener('click', sincronizarAPI);
+
+    // Event listeners para download
+    document.getElementById('btnDownloadPagina').addEventListener('click', function (e) {
+        e.preventDefault();
+        downloadPaginaAtual();
+    });
+    document.getElementById('btnDownloadTodos').addEventListener('click', function (e) {
+        e.preventDefault();
+        downloadTodosResultados();
+    });
+
+    document.getElementById('quantidadeResultados').addEventListener('change', function () {
+        paginaAtual = 1;
+        carregarSorteios(1);
+    });
+
+    // Delegação de evento para paginação
+    document.getElementById('paginacao').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (e.target.tagName === 'A' && e.target.dataset.pagina) {
+            const novaPagina = parseInt(e.target.dataset.pagina);
+            if (novaPagina >= 1 && novaPagina <= totalPaginas && novaPagina !== paginaAtual) {
+                carregarSorteios(novaPagina);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    });
+
+    // Carregar ao iniciar
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarSorteios();
+    });
+</script>
+{% endblock %}

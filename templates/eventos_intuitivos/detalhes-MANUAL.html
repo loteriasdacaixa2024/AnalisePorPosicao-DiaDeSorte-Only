@@ -1,0 +1,609 @@
+<!-- Sistema: Análise por Posição - Dia de Sorte -->
+<!-- Template: Detalhes do Evento -->
+<!-- ESTE ARQUIVO VAI EM: templates/eventos_intuitivos/detalhes.html -->
+
+{% extends "base.html" %}
+
+{% block title %}{{ evento.titulo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-primary: #D4B31A;
+        --ds-primary-dark: #b69816;
+        --ds-primary-darker: #9f8514;
+        --ds-primary-light: #e6c533;
+        --ds-primary-lighter: #f1df8e;
+        --ds-primary-pale: #fcf9e8;
+        --ds-accent: #2d2606;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .page-header h2 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .page-header .meta-info {
+        margin-top: 10px;
+        opacity: 0.95;
+    }
+
+    .badge-tipo {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .badge-sonho { background: #6c5ce7; color: white; }
+    .badge-fato { background: #00b894; color: white; }
+    .badge-sinal { background: #fdcb6e; color: #2d3436; }
+    .badge-outro { background: #e17055; color: white; }
+
+    .btn-ds-secondary {
+        background: rgba(255,255,255,0.2);
+        border: 2px solid white;
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ds-secondary:hover {
+        background: white;
+        color: var(--ds-primary-dark);
+    }
+
+    .section-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+
+    .section-card .card-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+        padding: 15px 20px;
+        border-bottom: none;
+        font-weight: 600;
+    }
+
+    .section-card .card-header.bg-apostas {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    }
+
+    .section-card .card-body {
+        padding: 25px;
+    }
+
+    .descricao-texto {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #333;
+    }
+
+    .aposta-card {
+        border: 2px solid var(--ds-primary-lighter);
+        border-radius: 10px;
+        margin-bottom: 15px;
+        overflow: visible;
+    }
+
+    .aposta-card .card-header {
+        background: var(--ds-primary-pale);
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--ds-primary-lighter);
+    }
+
+    .aposta-card .card-body {
+        padding: 20px;
+    }
+
+    .badge-modalidade {
+        background: var(--ds-primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .numeros-aposta {
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ds-accent);
+    }
+
+    .btn-ds-primary {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ds-primary:hover {
+        background: linear-gradient(135deg, var(--ds-primary-dark) 0%, var(--ds-primary-darker) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.4);
+    }
+
+    .btn-conferir {
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-conferir:hover {
+        background: #2980b9;
+        color: white;
+    }
+
+    .resultado-box {
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .resultado-box.sucesso {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 1px solid #28a745;
+    }
+
+    .resultado-box.neutro {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+        border: 1px solid #ffc107;
+    }
+
+    .resultado-box h6 {
+        color: #155724;
+        font-weight: 700;
+    }
+
+    .resultado-box.neutro h6 {
+        color: #856404;
+    }
+
+    .acertos-badge {
+        font-size: 1.2rem;
+        padding: 8px 20px;
+        border-radius: 25px;
+    }
+
+    .interpretacao-box {
+        background: var(--ds-primary-pale);
+        border-left: 4px solid var(--ds-primary);
+        padding: 15px 20px;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 15px;
+    }
+
+    .interpretacao-box strong {
+        color: var(--ds-primary-dark);
+    }
+
+    .empty-apostas {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+    .empty-apostas i {
+        font-size: 3rem;
+        color: var(--ds-primary-lighter);
+        margin-bottom: 15px;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        font-size: 16px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ds-primary);
+        box-shadow: 0 0 0 3px rgba(212, 179, 26, 0.2);
+    }
+
+    .analise-box {
+        background: #e8f4fd;
+        border-left: 4px solid #3498db;
+        padding: 15px 20px;
+        border-radius: 0 8px 8px 0;
+        margin-top: 15px;
+    }
+
+    .analise-box strong {
+        color: #2980b9;
+    }
+
+    /* Fix para modais */
+    .modal {
+        z-index: 1050;
+    }
+    .modal-backdrop {
+        z-index: 1040;
+    }
+    .modal-dialog {
+        z-index: 1060;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Header do Evento -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2>
+                        {% if evento.tipo == 'sonho' %}
+                            <i class="fas fa-moon"></i>
+                        {% elif evento.tipo == 'fato' %}
+                            
+                        {% elif evento.tipo == 'sinal' %}
+                            <i class="fas fa-lightbulb"></i>
+                        {% else %}
+                            <i class="fas fa-star"></i>
+                        {% endif %}
+                        {{ evento.titulo }}
+                    </h2>
+                    <div class="meta-info">
+                        <span class="badge-tipo badge-{{ evento.tipo }}">{{ evento.tipo|upper }}</span>
+                        <span class="ms-3"><i class="fas fa-clock"></i> {{ evento.data_evento }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('eventos.listar') }}" class="btn btn-ds-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Descrição do Evento -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card section-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt"></i> Descrição do Evento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="descricao-texto mb-0">{{ evento.descricao }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apostas -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card section-card">
+                <div class="card-header bg-apostas d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ticket-alt"></i> Apostas Geradas ({{ evento.apostas|length }})
+                    </h5>
+                    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovaAposta">
+                        <i class="fas fa-plus"></i> Adicionar Aposta
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if evento.apostas %}
+                        {% for aposta in evento.apostas %}
+                        <div class="card aposta-card">
+                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <span class="badge-modalidade">{{ aposta.modalidade|upper }}</span>
+                                    <span class="numeros-aposta ms-3">
+                                        {{ aposta.numeros|join(' - ') }}
+                                    </span>
+                                    {% if aposta.mes_sorte %}
+                                        <span class="ms-2 text-muted">| Mês: {{ aposta.mes_sorte }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if not aposta.tem_conferencia %}
+                                <button class="btn btn-conferir btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalConferir{{ aposta.id }}">
+                                    <i class="fas fa-check-circle"></i> Conferir Resultado
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if aposta.interpretacao %}
+                                <div class="interpretacao-box">
+                                    <strong><i class="fas fa-brain"></i> Interpretação:</strong>
+                                    <p class="mb-0 mt-2">{{ aposta.interpretacao }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if aposta.conferencia %}
+                                <div class="resultado-box {{ 'sucesso' if aposta.conferencia.acertos > 0 else 'neutro' }}">
+                                    <h6><i class="fas fa-chart-bar"></i> Resultado do Concurso {{ aposta.conferencia.concurso }}</h6>
+
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <p class="mb-1">
+                                                <strong> Data:</strong>
+                                                {{ aposta.conferencia.data_sorteio }}
+                                            </p>
+                                            <p class="mb-1">
+                                                <strong><i class="fas fa-list-ol"></i> Números Sorteados:</strong><br>
+                                                <span class="numeros-aposta">{{ aposta.conferencia.numeros_sorteados|join(' - ') }}</span>
+                                            </p>
+                                            {% if aposta.conferencia.mes_sorteado %}
+                                            <p class="mb-0">
+                                                <strong> Mês Sorteado:</strong>
+                                                {{ aposta.conferencia.mes_sorteado }}
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 text-center">
+                                            <span class="badge acertos-badge {{ 'bg-success' if aposta.conferencia.acertos > 0 else 'bg-secondary' }}">
+                                                {{ aposta.conferencia.acertos }} acerto(s)
+                                            </span>
+                                            {% if aposta.conferencia.acertou_mes %}
+                                            <span class="badge bg-success acertos-badge ms-2">
+                                                <i class="fas fa-check"></i> Mês!
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if aposta.conferencia.analise_final %}
+                                    <div class="analise-box mt-3">
+                                        <strong><i class="fas fa-search"></i> Análise Retrospectiva:</strong>
+                                        <p class="mb-0 mt-2">{{ aposta.conferencia.analise_final }}</p>
+                                    </div>
+                                    {% else %}
+                                    <div class="mt-3">
+                                        <button class="btn btn-warning btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalAnalise{{ aposta.conferencia.id }}">
+                                            <i class="fas fa-pen"></i> Adicionar Análise Retrospectiva
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-apostas">
+                            <i class="fas fa-ticket-alt"></i>
+                            <h5>Nenhuma aposta cadastrada</h5>
+                            <p class="text-muted">Clique em "Adicionar Aposta" para criar sua primeira aposta baseada neste evento.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- TODOS OS MODAIS FICAM AQUI FORA DOS CARDS -->
+<!-- ========================================== -->
+
+<!-- Modal para Nova Aposta -->
+<div class="modal fade" id="modalNovaAposta" tabindex="-1" aria-labelledby="modalNovaApostaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNovaApostaLabel">
+                    <i class="fas fa-plus"></i> Adicionar Nova Aposta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="POST" action="{{ url_for('eventos.adicionar_aposta', evento_id=evento.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modalidade</label>
+                        <select class="form-select" name="modalidade" id="modalidade" required>
+                            <option value="">Selecione a loteria...</option>
+                            <option value="diadesorte">🍀 Dia de Sorte</option>
+                            <option value="mega">🎯 Mega-Sena</option>
+                            <option value="lotofacil">🎲 Lotofácil</option>
+                            <option value="quina">⭐ Quina</option>
+                            <option value="lotomania">🎰 Lotomania</option>
+                            <option value="duplasena">🎱 Dupla Sena</option>
+                            <option value="timemania">🕒 Timemania</option>
+                            <option value="supersete">7️⃣ Super Sete</option>
+                            <option value="maismilionaria">💰 +Milionária</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Números</label>
+                        <input type="text" class="form-control" name="numeros"
+                               placeholder="Ex: 1, 5, 12, 23, 34, 45" required>
+                        <small class="text-muted">
+                            Separe os números por vírgula. Dia de Sorte: 7-15 números
+                        </small>
+                    </div>
+
+                    <div class="mb-3" id="mesSorteDiv" style="display:none;">
+                        <label class="form-label fw-bold">Mês da Sorte</label>
+                        <select class="form-select" name="mes_sorte">
+                            <option value="">Selecione...</option>
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-brain"></i> Interpretação
+                        </label>
+                        <textarea class="form-control" name="interpretacao" rows="3"
+                                  placeholder="Como você chegou nesses números? Qual foi sua interpretação do evento?"></textarea>
+                        <small class="text-muted">
+                            Este campo é importante para análise posterior!
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-ds-primary">
+                        <i class="fas fa-save"></i> Adicionar Aposta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modais para Conferir Resultado (um para cada aposta) -->
+{% for aposta in evento.apostas %}
+{% if not aposta.tem_conferencia %}
+<div class="modal fade" id="modalConferir{{ aposta.id }}" tabindex="-1" aria-labelledby="modalConferirLabel{{ aposta.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalConferirLabel{{ aposta.id }}">
+                    <i class="fas fa-check-circle"></i> Conferir Resultado
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="POST" action="/eventos-intuitivos/aposta/{{ aposta.id }}/conferir">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Número do Concurso</label>
+                        <input type="number" class="form-control" name="concurso"
+                               placeholder="Ex: 1234" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Data do Sorteio</label>
+                        <input type="date" class="form-control" name="data_sorteio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Números Sorteados</label>
+                        <input type="text" class="form-control" name="numeros_sorteados"
+                               placeholder="Ex: 5, 12, 23, 34, 45, 56" required>
+                        <small class="text-muted">Separe os números por vírgula</small>
+                    </div>
+                    {% if aposta.modalidade == 'diadesorte' %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mês da Sorte Sorteado</label>
+                        <select class="form-select" name="mes_sorteado">
+                            <option value="">Selecione...</option>
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-ds-primary">
+                        <i class="fas fa-check"></i> Conferir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal para Análise Retrospectiva -->
+{% if aposta.conferencia and not aposta.conferencia.analise_final %}
+<div class="modal fade" id="modalAnalise{{ aposta.conferencia.id }}" tabindex="-1" aria-labelledby="modalAnaliseLabel{{ aposta.conferencia.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAnaliseLabel{{ aposta.conferencia.id }}">
+                    <i class="fas fa-search"></i> Análise Retrospectiva
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="POST" action="{{ url_for('eventos.adicionar_analise', conferencia_id=aposta.conferencia.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Por que funcionou ou não funcionou?
+                        </label>
+                        <textarea class="form-control" name="analise_final"
+                                  rows="4" required
+                                  placeholder="Ex: Funcionou porque interpretei corretamente as cores do sonho..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-ds-primary">
+                        <i class="fas fa-save"></i> Salvar Análise
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<script>
+// Mostrar campo de mês apenas para Dia de Sorte
+document.getElementById('modalidade').addEventListener('change', function() {
+    const mesSorteDiv = document.getElementById('mesSorteDiv');
+    if (this.value === 'diadesorte') {
+        mesSorteDiv.style.display = 'block';
+    } else {
+        mesSorteDiv.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

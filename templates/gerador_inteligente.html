@@ -1,0 +1,1518 @@
+{% extends "base.html" %}
+
+{% block title %}Gerador Inteligente - 2.629.575 Combinações{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Cores e animações Dia de Sorte */
+    .card-header-custom {
+        background: linear-gradient(135deg, #d4b31a 0%, #887211 100%);
+        color: white;
+        font-weight: bold;
+    }
+
+    .badge-disponivel {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .badge-sorteada {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        min-width: 400px;
+    }
+
+    /* ===== ESTILO BOLINHAS - PADRÃO DIA DE SORTE ===== */
+    .numero-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        margin: 3px;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 15px;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .numero-box-input {
+        display: inline-block;
+        width: 50px;
+        text-align: center;
+        font-weight: bold;
+        border: 2px solid #667eea;
+        border-radius: 5px;
+        padding: 6px;
+        margin: 2px;
+        font-size: 14px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 200px;
+        height: 34px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "🎲 Original";
+        height: 26px;
+        width: 95px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 34px;
+        text-align: center;
+        line-height: 26px;
+        font-size: 12px;
+    }
+
+    input:checked+.toggle-slider {
+        background-color: #2196F3;
+    }
+
+    input:checked+.toggle-slider:before {
+        transform: translateX(96px);
+        content: "🔢 Crescente";
+    }
+
+    .search-result-box {
+        background: #f0f9ff;
+        border: 2px solid #3b82f6;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .search-result-sorteada {
+        background: #fee2e2;
+        border-color: #ef4444;
+    }
+
+    .search-result-disponivel {
+        background: #dcfce7;
+        border-color: #16a34a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- ================================================================ -->
+    <!-- CABEÇALHO -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 style="color: #d4b31a; font-weight: bold;">
+                <i class="fas fa-brain text-warning" style="text-shadow: 0 1px 1px rgba(0,0,0,0.2);"></i> Gerador
+                Inteligente de Apostas
+            </h2>
+            <p class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px; font-size: 13px;">Sistema
+                profissional com cache de 2.629.575 combinações e filtro inteligente</p>
+
+            <!-- DICA RÁPIDA FIXA (PADRÃO DIA DE SORTE) -->
+            <div class="alert shadow-sm mt-3 mb-0"
+                style="background-color: #fcf9e8; border-left: 4px solid #d4b31a; color: #5b4c0b; font-size: 14px; text-align: left;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong><i class="fas fa-crown text-warning" style="text-shadow: 0 1px 1px rgba(0,0,0,0.2);"></i> A
+                        Rota "O Cofre Absoluto" (Motor Base de Alta Performance)</strong>
+                </div>
+                <p class="mb-2" style="font-size: 15px;"><strong>O que esta rota faz:</strong> Este é o cérebro que
+                    mantém o <em>Mapeamento de 2.629.575 apostas possíveis</em> armazenado diretamente no seu software.
+                    É ele que elimina cirurgicamente todos os jogos que já foram premiados na história (para você não
+                    jogar dinheiro fora) e fornece a Matriz Ouro Limpa que será consumida pelo módulo Filtrador.</p>
+                <hr style="border-top: 1px dashed #d4b31a; opacity: 0.5;">
+                <ul class="mb-0 mt-2 ps-3" style="line-height: 1.7;">
+                    <li><strong>1. Sincronização:</strong> Mantenha seu Status Verde em 100%. Sempre que houver um
+                        sorteio novo na Caixa, o sistema apagará o jogo vencedor do arquivo!</li>
+                    <li><strong>2. Busca Inteligente:</strong> Confirme a disponibilidade e o histórico de qualquer
+                        palpite sem precisar abrir outro módulo.</li>
+                    <li><strong>3. Exportador de Bolso:</strong> Aplique seu <em>Núcleo Estratégico</em> e os descartes
+                        para baixar listas cruas em TXT instantaneamente.</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- STATUS DO CACHE -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header card-header-custom">
+                    <i class="fas fa-database"></i> Status do Cache
+                </div>
+                <div class="card-body">
+                    <div class="row" id="stats-container">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Total Possível</h6>
+                                    <h3 class="text-primary" id="stat-total">2.629.575</h3>
+                                    <small>combinações C(31,7)</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Geradas</h6>
+                                    <h3 class="text-success" id="stat-geradas">{{
+                                        "{:,}".format(stats.total_geradas).replace(',', '.') }}</h3>
+                                    <small id="stat-perc-geradas">{{ "%.1f"|format(stats.percentual_gerado) }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Já Sorteadas</h6>
+                                    <h3 class="text-danger" id="stat-sorteadas">{{
+                                        "{:,}".format(stats.total_sorteadas).replace(',', '.') }}</h3>
+                                    <small id="stat-perc-sorteadas">{{ "%.2f"|format(stats.percentual_sorteado)
+                                        }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Disponíveis</h6>
+                                    <h3 class="text-info" id="stat-disponiveis">{{
+                                        "{:,}".format(stats.total_disponiveis).replace(',', '.') }}</h3>
+                                    <small id="stat-perc-disponiveis">{{ "%.2f"|format(stats.percentual_disponivel)
+                                        }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> <span
+                                    class="badge bg-{{ 'success' if stats.status == 'completo' else 'warning' }}"
+                                    id="stat-status">{{ stats.status }}</span></p>
+                            <p><strong>Data da geração:</strong> <span id="stat-data-geracao">{{ stats.data_geracao or
+                                    'Nunca' }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Último concurso sincronizado:</strong> <span id="stat-ultimo-concurso">{{
+                                    stats.ultimo_concurso_sincronizado }}</span></p>
+                            <p><strong>Última sincronização:</strong> <span id="stat-data-sinc">{{
+                                    stats.data_ultima_sincronizacao or 'Nunca' }}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button class="btn btn-primary" id="btn-gerar-cache" {% if stats.status=='completo'
+                                %}disabled{% endif %}>
+                                <i class="fas fa-cog"></i> Gerar Cache pela 1ª Vez
+                            </button>
+                            <button class="btn btn-success" id="btn-sincronizar">
+                                <i class="fas fa-sync"></i> Sincronizar com Novos Sorteios
+                            </button>
+                            <button class="btn btn-danger" id="btn-limpar-cache">
+                                <i class="fas fa-trash"></i> Limpar Cache
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- DESDOBRAMENTO: ENTRADA DE PARES E DEZENAS SELECIONADAS -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header card-header-custom">
+                    <i class="fas fa-random"></i> Desdobramento (21 jogos com pares)
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chk-usar-desdobramento">
+                        <label class="form-check-label" for="chk-usar-desdobramento">
+                            <strong>🔗 USAR DESDOBRAMENTO NA GERAÇÃO (força 21 jogos)</strong>
+                        </label>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Pares desdobrados (21 linhas)</strong></label>
+                            <textarea id="txt-pares-desdobrados" class="form-control" rows="6"
+                                placeholder="Ex.:\n2 11\n2 13\n2 16\n...\n23 25"></textarea>
+                            <small class="text-muted">Cole aqui os 21 pares (um por linha). Formato: "A B".</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Dezenas selecionadas (complemento)</strong></label>
+                            <input id="txt-dezenas-selecionadas" class="form-control" type="text"
+                                placeholder="Ex.: 03 04 06 07 13 14 17 19 23 24 26 28 30">
+                            <small class="text-muted">Separe por espaço ou vírgula. Serão usadas para completar os jogos
+                                até 7 números.</small>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="chk-respeitar-quantidade">
+                                <label class="form-check-label" for="chk-respeitar-quantidade">
+                                    <strong>📦 Respeitar "Quantidade de Apostas"</strong>
+                                </label>
+                            </div>
+                            <input id="input-quantidade" class="form-control mt-2" type="number" min="1" value="10">
+                            <small class="text-muted">Dica: quando "Usar Desdobramento" estiver ativo, a quantidade será
+                                ignorada e fixada em 21.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-info mb-0">
+                                <small>
+                                    ✓ Desdobramento gera exatamente <strong>21 jogos</strong> (C(7,2) = 21).<br>
+                                    ✓ Se "🎯 Usar Núcleo" estiver ativo, o núcleo será mesclado nos jogos sem duplicar
+                                    números.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- BUSCA INTELIGENTE - NOVA FUNCIONALIDADE -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header card-header-custom">
+                    <i class="fas fa-search"></i> Busca Inteligente - Verificar se Combinação Foi Sorteada
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <label class="form-label" style="font-size: 14px;"><strong>Digite 7 números
+                                    (1-31):</strong></label>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <input type="number" class="form-control numero-box-input" id="busca-n1" min="1"
+                                    max="31" placeholder="N1">
+                                <input type="number" class="form-control numero-box-input" id="busca-n2" min="1"
+                                    max="31" placeholder="N2">
+                                <input type="number" class="form-control numero-box-input" id="busca-n3" min="1"
+                                    max="31" placeholder="N3">
+                                <input type="number" class="form-control numero-box-input" id="busca-n4" min="1"
+                                    max="31" placeholder="N4">
+                                <input type="number" class="form-control numero-box-input" id="busca-n5" min="1"
+                                    max="31" placeholder="N5">
+                                <input type="number" class="form-control numero-box-input" id="busca-n6" min="1"
+                                    max="31" placeholder="N6">
+                                <input type="number" class="form-control numero-box-input" id="busca-n7" min="1"
+                                    max="31" placeholder="N7">
+                                <button class="btn btn-primary" id="btn-buscar-combinacao" style="padding: 6px 20px;">
+                                    <i class="fas fa-search"></i> BUSCAR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado da Busca -->
+                    <div id="resultado-busca" style="display: none;">
+                        <!-- Será preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- FILTRO POR PADRÃO DÍGITO INICIAL/FINAL - NOVO! -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header card-header-custom">
+                    <i class="fas fa-hashtag"></i> Filtro por Padrão Dígito Inicial/Final
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="form-label"><strong>Selecione o padrão (TOP 3 mais
+                                    frequentes):</strong></label>
+                            <select class="form-select form-select-lg" id="sel-padrao-digito">
+                                <option value="">Carregando padrões...</option>
+                            </select>
+
+                            <div class="alert alert-info mt-3">
+                                <h6><i class="fas fa-info-circle"></i> Como funciona?</h6>
+                                <p class="mb-0">
+                                    <strong>Padrão <span id="exemplo-padrao-visual">0 0 1 1 2 2 2</span></strong>
+                                    significa:<br>
+                                    • 2 números começam com <strong>0</strong> (01-09)<br>
+                                    • 2 números começam com <strong>1</strong> (10-19)<br>
+                                    • 2 números começam com <strong>2</strong> (20-29)<br>
+                                    • 1 número começa com <strong>3</strong> (30-31)
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Ações:</strong></label>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary btn-lg" id="btn-filtrar-padrao">
+                                    <i class="fas fa-filter"></i> Filtrar por Padrão
+                                </button>
+                                <button class="btn btn-success btn-lg" id="btn-baixar-padrao-txt" disabled>
+                                    <i class="fas fa-download"></i> Baixar TXT
+                                </button>
+                            </div>
+
+                            <div id="info-padrao" class="alert alert-success mt-3" style="display: none;">
+                                <small>
+                                    <strong>Encontradas:</strong> <span id="total-padrao">0</span><br>
+                                    <strong>Mês:</strong> <span id="mes-atrasado">-</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- FILTRO INTELIGENTE -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header card-header-custom">
+                    <i class="fas fa-filter"></i> Filtro Inteligente de Histórico
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chk-excluir-sorteadas" checked>
+                        <label class="form-check-label" for="chk-excluir-sorteadas">
+                            <strong>EXCLUIR combinações já sorteadas (Recomendado!)</strong>
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="chk-usar-nucleo">
+                        <label class="form-check-label" for="chk-usar-nucleo">
+                            <strong>🎯 USAR NÚCLEO ESTRATÉGICO (concentra acertos)</strong>
+                        </label>
+                    </div>
+                    <div id="info-nucleo" class="alert alert-warning mt-2" style="display: none;">
+                        <small>
+                            <i class="fas fa-bullseye me-1"></i>
+                            <strong>Núcleo ativo:</strong> <span id="nucleo-numeros">--</span><br>
+                            <small class="text-muted">Esses números aparecerão fixos em todas as apostas geradas.
+                                <a href="/gerador-padroes" target="_blank">Configurar núcleo <i
+                                        class="fas fa-external-link-alt"></i></a>
+                            </small>
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="fas fa-lightbulb"></i> Por quê ativar?</h6>
+                        <ul class="mb-0">
+                            <li>✓ Evita apostar em jogos que JÁ ganharam antes</li>
+                            <li>✓ Aumenta chances estatísticas (eliminação)</li>
+                            <li>✓ Economiza dinheiro (não joga em repetidos)</li>
+                            <li>✓ <strong>Núcleo concentra acertos em menos jogos</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-secondary">
+                        <h6>📊 Impacto:</h6>
+                        <p class="mb-0">
+                            <strong>Sem filtro:</strong> 2.629.575 apostas<br>
+                            <strong>Com filtro:</strong> <span id="txt-disponiveis-filtro">{{
+                                "{:,}".format(stats.total_disponiveis).replace(',', '.') }}</span> apostas
+                            (<span class="text-danger">-{{ "{:,}".format(stats.total_sorteadas).replace(',', '.') }}
+                                eliminadas</span>)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- APLICAR FILTROS E GERAR -->
+    <!-- ================================================================ -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-success btn-lg" id="btn-aplicar-filtros">
+                <i class="fas fa-rocket"></i> APLICAR FILTROS E GERAR APOSTAS
+            </button>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- RESULTADOS -->
+    <!-- ================================================================ -->
+    <div class="row" id="resultados-container" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header card-header-custom">
+                    <i class="fas fa-list"></i> Resultados da Filtragem
+                </div>
+                <div class="card-body">
+
+                    <!-- Informações -->
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle"></i> Filtragem Concluída!</h5>
+                        <p class="mb-0">
+                            Total de apostas geradas: <strong id="total-resultados">0</strong>
+                        </p>
+                    </div>
+
+                    <!-- Toggle Ordem -->
+                    <div class="mb-3 text-center">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-ordem" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Controles -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>Mostrar por página:</label>
+                            <select class="form-select" id="sel-por-pagina">
+                                <option value="50">50</option>
+                                <option value="100" selected>100</option>
+                                <option value="250">250</option>
+                                <option value="500">500</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Exportar:</label>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-outline-primary" id="btn-exportar-txt"
+                                    title="Baixa apenas a página atual (100 linhas)">
+                                    <i class="fas fa-file-alt"></i> TXT (Página Atual)
+                                </button>
+                                <button class="btn btn-primary fw-bold" id="btn-exportar-txt-completo"
+                                    title="Baixa TODAS as apostas filtradas em TXT (+40MB)">
+                                    <i class="fas fa-download"></i> TXT Completo
+                                </button>
+                                <button class="btn btn-outline-success" id="btn-exportar-json">
+                                    <i class="fas fa-file-code"></i> JSON
+                                </button>
+                                <button class="btn btn-outline-info" id="btn-exportar-excel">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="tabela-resultados">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>SEL</th>
+                                    <th>#</th>
+                                    <th>N1</th>
+                                    <th>N2</th>
+                                    <th>N3</th>
+                                    <th>N4</th>
+                                    <th>N5</th>
+                                    <th>N6</th>
+                                    <th>N7</th>
+                                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Mês da sorte selecionado pelo usuário para a aposta">
+                                        Mês <i class="fas fa-info-circle text-muted" style="font-size: 12px;"></i>
+                                    </th>
+                                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Pontuação calculada com base em análises estatísticas (quanto maior, melhor)">
+                                        Score <i class="fas fa-info-circle text-muted" style="font-size: 12px;"></i>
+                                    </th>
+                                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Resumo das análises aplicadas à combinação (padrões, filtros, etc)">
+                                        Análises <i class="fas fa-info-circle text-muted" style="font-size: 12px;"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-resultados">
+                                <!-- Será preenchido via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação -->
+                    <nav>
+                        <ul class="pagination justify-content-center" id="paginacao">
+                            <!-- Será preenchido via JavaScript -->
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- LOADING OVERLAY -->
+<!-- ================================================================ -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+        <h5 id="loading-texto">Processando...</h5>
+        <p id="loading-detalhe" class="text-muted"></p>
+        <div class="progress mt-3">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="loading-progress"
+                style="width: 0%"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ============================================================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================================================
+    let ordemCrescente = true;
+    let paginaAtual = 1;
+    let porPagina = 100;
+    let resultadosCache = [];
+    let totalRegistros = 0;
+
+    // ============================================================================
+    // FUNÇÕES DE MODAL CUSTOMIZADO
+    // ============================================================================
+    function showAlert(mensagem) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'position-fixed top-50 start-50 translate-middle';
+        alertDiv.style.zIndex = '10000';
+        alertDiv.innerHTML = `
+        <div class="alert alert-info alert-dismissible fade show" role="alert" style="min-width: 300px;">
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    function showConfirm(mensagem, onConfirm) {
+        const modalDiv = document.createElement('div');
+        modalDiv.innerHTML = `
+        <div class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmação</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">${mensagem}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btn-confirmar">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(modalDiv);
+        const modal = new bootstrap.Modal(modalDiv.querySelector('.modal'));
+        modalDiv.querySelector('#btn-confirmar').addEventListener('click', () => {
+            modal.hide();
+            onConfirm();
+        });
+        modalDiv.addEventListener('hidden.bs.modal', () => modalDiv.remove());
+        modal.show();
+    }
+
+    // ============================================================================
+    // FUNÇÕES DE LOADING
+    // ============================================================================
+    function mostrarLoading(texto, detalhe = '') {
+        document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('loading-texto').textContent = texto;
+        document.getElementById('loading-detalhe').textContent = detalhe;
+    }
+
+    function esconderLoading() {
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    function atualizarProgresso(percentual, texto = '') {
+        document.getElementById('loading-progress').style.width = percentual + '%';
+        if (texto) {
+            document.getElementById('loading-detalhe').textContent = texto;
+        }
+    }
+
+    // ============================================================================
+    // BUSCA INTELIGENTE - VERIFICAR SE COMBINAÇÃO FOI SORTEADA
+    // ============================================================================
+    document.getElementById('btn-buscar-combinacao').addEventListener('click', async () => {
+        const numeros = [
+            parseInt(document.getElementById('busca-n1').value),
+            parseInt(document.getElementById('busca-n2').value),
+            parseInt(document.getElementById('busca-n3').value),
+            parseInt(document.getElementById('busca-n4').value),
+            parseInt(document.getElementById('busca-n5').value),
+            parseInt(document.getElementById('busca-n6').value),
+            parseInt(document.getElementById('busca-n7').value)
+        ];
+
+        // Validar
+        if (numeros.some(n => isNaN(n) || n < 1 || n > 31)) {
+            showAlert('⚠️ Digite 7 números válidos entre 1 e 31!');
+            return;
+        }
+
+        // Verificar duplicados
+        const numerosSet = new Set(numeros);
+        if (numerosSet.size !== 7) {
+            showAlert('⚠️ Os números não podem se repetir!');
+            return;
+        }
+
+        mostrarLoading('Buscando combinação...', 'Verificando histórico de sorteios');
+
+        try {
+            const response = await fetch('/gerador-inteligente/api/buscar-combinacao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numeros: numeros })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                exibirResultadoBusca(data);
+            } else {
+                showAlert('❌ Erro: ' + data.erro);
+            }
+        } catch (erro) {
+            showAlert('❌ Erro: ' + erro);
+        } finally {
+            esconderLoading();
+        }
+    });
+
+    // ============================================================================
+    // EXIBIR RESULTADO DA BUSCA
+    // ============================================================================
+    function exibirResultadoBusca(data) {
+        const resultadoDiv = document.getElementById('resultado-busca');
+        const info = data.informacoes;
+
+        if (info.ja_sorteada) {
+            // COMBINAÇÃO JÁ FOI SORTEADA
+            const nums = info.numeros_ordenados.map(n => String(n).padStart(2, '0'));
+
+            resultadoDiv.innerHTML = `
+            <div class="search-result-box search-result-sorteada">
+                <h4 class="text-danger"><i class="fas fa-exclamation-circle"></i> ATENÇÃO! Esta combinação JÁ FOI SORTEADA!</h4>
+
+                <div class="row mt-3">
+                    <div class="col-md-12 mb-3">
+                        <h5>Números Sorteados:</h5>
+                        <div>
+                            ${nums.map(n => `<span class="numero-box">${n}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>🎯 Concurso:</strong> ${info.concurso}</p>
+                        <p><strong>📅 Data do Sorteio:</strong> ${info.data_sorteio}</p>
+                        <p><strong>🗓️ Mês da Sorte:</strong> ${info.mes_sorte_nome}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>🏆 Ganhadores 7 acertos:</strong> ${info.ganhadores_7_acertos}</p>
+                        <p><strong>💰 Prêmio 7 acertos:</strong> ${info.valor_premio_7_acertos}</p>
+                        <p><strong>🥈 Ganhadores 6 acertos:</strong> ${info.ganhadores_6_acertos}</p>
+                        <p><strong>💵 Prêmio 6 acertos:</strong> ${info.valor_premio_6_acertos}</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-info-circle"></i> <strong>Recomendação:</strong> Evite apostar nesta combinação, pois ela já foi sorteada!
+                </div>
+            </div>
+        `;
+        } else {
+            // COMBINAÇÃO DISPONÍVEL
+            const nums = info.numeros_ordenados.map(n => String(n).padStart(2, '0'));
+
+            resultadoDiv.innerHTML = `
+            <div class="search-result-box search-result-disponivel">
+                <h4 class="text-success"><i class="fas fa-check-circle"></i> Combinação DISPONÍVEL!</h4>
+
+                <div class="row mt-3">
+                    <div class="col-md-12 mb-3">
+                        <h5>Números:</h5>
+                        <div>
+                            ${nums.map(n => `<span class="numero-box">${n}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <i class="fas fa-thumbs-up"></i> <strong>Boa notícia!</strong> Esta combinação NUNCA foi sorteada antes. Você pode apostar nela!
+                </div>
+            </div>
+        `;
+        }
+
+        resultadoDiv.style.display = 'block';
+    }
+
+    // ============================================================================
+    // GERAR CACHE PELA 1ª VEZ
+    // ============================================================================
+    document.getElementById('btn-gerar-cache').addEventListener('click', async () => {
+        showConfirm('Tem certeza? Este processo levará 30-60 segundos.', async () => {
+            mostrarLoading('Gerando 2.629.575 combinações...', 'Isso pode levar até 1 minuto');
+
+            try {
+                const response = await fetch('/gerador-inteligente/api/gerar-cache', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    showAlert('✅ ' + data.mensagem);
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showAlert('❌ Erro: ' + data.erro);
+                }
+            } catch (erro) {
+                showAlert('❌ Erro: ' + erro);
+            } finally {
+                esconderLoading();
+            }
+        });
+    });
+
+    // ============================================================================
+    // SINCRONIZAR COM HISTÓRICO
+    // ============================================================================
+    document.getElementById('btn-sincronizar').addEventListener('click', async () => {
+        mostrarLoading('Sincronizando com histórico...', 'Marcando combinações já sorteadas');
+
+        try {
+            const response = await fetch('/gerador-inteligente/api/sincronizar-historico', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                showAlert('✅ ' + data.mensagem);
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showAlert('❌ Erro: ' + data.erro);
+            }
+        } catch (erro) {
+            showAlert('❌ Erro: ' + erro);
+        } finally {
+            esconderLoading();
+        }
+    });
+
+    // ============================================================================
+    // APLICAR FILTROS
+    // ============================================================================
+    document.getElementById('btn-aplicar-filtros').addEventListener('click', async () => {
+        const usarDesdobramento = document.getElementById('chk-usar-desdobramento').checked;
+        if (usarDesdobramento) {
+            await gerarComDesdobramento();
+        } else {
+            await carregarResultados(1);
+        }
+    });
+
+    // ============================================================================
+    // FUNÇÃO PARA CARREGAR RESULTADOS (COM PAGINAÇÃO)
+    // ============================================================================
+    async function carregarResultados(pagina) {
+        mostrarLoading('Aplicando filtros...', 'Buscando combinações');
+
+        const excluirSorteadas = document.getElementById('chk-excluir-sorteadas').checked;
+        paginaAtual = pagina;
+
+        try {
+            const response = await fetch('/gerador-inteligente/api/aplicar-filtros', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    excluir_ja_sorteadas: excluirSorteadas,
+                    pagina: paginaAtual,
+                    por_pagina: porPagina,
+                    ordenacao: 'score_desc'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                resultadosCache = data.resultados;
+                totalRegistros = data.paginacao.total_registros;
+                exibirResultados(data);
+                exibirPaginacao(data.paginacao);
+                document.getElementById('resultados-container').style.display = 'block';
+            } else {
+                showAlert('❌ Erro: ' + data.erro);
+            }
+        } catch (erro) {
+            showAlert('❌ Erro: ' + erro);
+        } finally {
+            esconderLoading();
+        }
+    }
+
+    // ============================================================================
+    // GERAR VIA DESDOBRAMENTO (21 JOGOS)
+    // ============================================================================
+    function parseParesDesdobrados(texto) {
+        const linhas = (texto || '').split(/\r?\n/).map(l => l.trim()).filter(l => l);
+        const pares = [];
+        for (const linha of linhas) {
+            const nums = linha.replace(/,/g, ' ').split(/\s+/).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+            if (nums.length === 2) {
+                pares.push(nums);
+            }
+        }
+        return pares;
+    }
+
+    function parseDezenasSelecionadas(texto) {
+        return (texto || '')
+            .replace(/,/g, ' ')
+            .split(/\s+/)
+            .map(n => parseInt(n, 10))
+            .filter(n => !isNaN(n) && n >= 1 && n <= 31);
+    }
+
+    async function gerarComDesdobramento() {
+        mostrarLoading('Gerando por desdobramento...', 'Construindo 21 jogos a partir dos pares');
+
+        try {
+            const paresTexto = document.getElementById('txt-pares-desdobrados').value;
+            const selecionadasTexto = document.getElementById('txt-dezenas-selecionadas').value;
+            const pares = parseParesDesdobrados(paresTexto);
+            const selecionadas = parseDezenasSelecionadas(selecionadasTexto);
+
+            if (pares.length !== 21) {
+                showAlert(`⚠️ Você informou ${pares.length} linha(s). São obrigatórias 21 linhas de pares.`);
+                return;
+            }
+            if (selecionadas.length < 5) {
+                showAlert('⚠️ Informe ao menos 5 dezenas selecionadas para complementar os jogos.');
+                return;
+            }
+
+            const payload = {
+                dezenas_desdobradas: pares,
+                dezenas_selecionadas: selecionadas,
+                mes: 'Jan',
+                ignorar_quantidade: true
+            };
+
+            const resp = await fetch('/api/desdobramento/gerar-com-desdobradas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await resp.json();
+            if (!data.sucesso) {
+                showAlert('❌ Erro: ' + (data.erro || 'Falha ao gerar desdobramento'));
+                return;
+            }
+
+            // Aplicar Núcleo, se ativo
+            const usarNucleo = document.getElementById('chk-usar-nucleo').checked && Array.isArray(nucleoAtivo) && nucleoAtivo.length > 0;
+            if (usarNucleo) {
+                data.jogos = data.jogos.map(jogo => {
+                    const base = [];
+                    // 1) Núcleo primeiro
+                    nucleoAtivo.forEach(n => { if (!base.includes(n)) base.push(n); });
+                    // 2) Par desdobrado (garantir presença)
+                    (jogo.par_desdobrado || []).forEach(n => { if (!base.includes(n)) base.push(n); });
+                    // 3) Complemento até 7
+                    (jogo.complemento || []).forEach(n => { if (!base.includes(n) && base.length < 7) base.push(n); });
+                    // Garantir tamanho 7 e ordenar
+                    const finais = base.slice(0, 7).sort((a, b) => a - b);
+                    return { ...jogo, numeros_completos: finais };
+                });
+            }
+
+            exibirResultadosDesdobramento(data);
+            document.getElementById('resultados-container').style.display = 'block';
+            showAlert('✅ 21 jogos gerados por desdobramento!');
+        } catch (erro) {
+            showAlert('❌ Erro: ' + erro);
+        } finally {
+            esconderLoading();
+        }
+    }
+
+    function exibirResultadosDesdobramento(data) {
+        const tbody = document.getElementById('tbody-resultados');
+        tbody.innerHTML = '';
+        document.getElementById('total-resultados').textContent = String(data.total_jogos);
+
+        (data.jogos || []).forEach((jogo) => {
+            const nums = jogo.numeros_completos || [];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td><input type=\"checkbox\" class=\"form-check-input\"></td>
+            <td>${jogo.numero}</td>
+            ${nums.map(n => `<td><span class=\"numero-box\">${String(n).padStart(2, '0')}</span></td>`).join('')}
+            <td><span class=\"badge bg-info\">${jogo.mes || 'Jan'}</span></td>
+            <td><span class=\"badge bg-warning text-dark\">—</span></td>
+            <td><small class=\"text-muted\">Desdobramento</small></td>
+        `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ============================================================================
+    // EXIBIR RESULTADOS
+    // ============================================================================
+    function exibirResultados(data) {
+        const tbody = document.getElementById('tbody-resultados');
+        tbody.innerHTML = '';
+
+        document.getElementById('total-resultados').textContent =
+            data.paginacao.total_registros.toLocaleString('pt-BR');
+
+        data.resultados.forEach((item, index) => {
+            // CORRIGIDO: Respeitar ordem crescente ou original
+            const numeros = ordemCrescente ? item.numeros_crescente : item.numeros_original;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td><input type="checkbox" class="form-check-input" data-id="${item.id}"></td>
+            <td>${item.id}</td>
+            ${numeros.map(n => `<td><span class="numero-box">${String(n).padStart(2, '0')}</span></td>`).join('')}
+            <td><span class="badge bg-info">Jan</span></td>
+            <td><span class="badge bg-warning text-dark">${item.score}</span></td>
+            <td><small class="text-muted">${item.resumo_analises || 'Sem análise'}</small></td>
+        `;
+            tbody.appendChild(tr);
+        });
+
+        // Inicializar tooltips do Bootstrap
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+
+    // ============================================================================
+    // EXIBIR PAGINAÇÃO
+    // ============================================================================
+    function exibirPaginacao(paginacao) {
+        const paginacaoUl = document.getElementById('paginacao');
+        paginacaoUl.innerHTML = '';
+
+        const totalPaginas = paginacao.total_paginas;
+        const paginaAtualNum = paginacao.pagina_atual;
+
+        // Botão Anterior
+        const liAnterior = document.createElement('li');
+        liAnterior.className = `page-item ${!paginacao.tem_anterior ? 'disabled' : ''}`;
+        liAnterior.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+        if (paginacao.tem_anterior) {
+            liAnterior.addEventListener('click', (e) => {
+                e.preventDefault();
+                carregarResultados(paginaAtualNum - 1);
+            });
+        }
+        paginacaoUl.appendChild(liAnterior);
+
+        // Números de página (mostrar no máximo 10 páginas)
+        let inicio = Math.max(1, paginaAtualNum - 5);
+        let fim = Math.min(totalPaginas, inicio + 9);
+
+        if (fim - inicio < 9) {
+            inicio = Math.max(1, fim - 9);
+        }
+
+        for (let i = inicio; i <= fim; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === paginaAtualNum ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (i !== paginaAtualNum) {
+                    carregarResultados(i);
+                }
+            });
+            paginacaoUl.appendChild(li);
+        }
+
+        // Botão Próximo
+        const liProximo = document.createElement('li');
+        liProximo.className = `page-item ${!paginacao.tem_proximo ? 'disabled' : ''}`;
+        liProximo.innerHTML = `<a class="page-link" href="#">Próximo</a>`;
+        if (paginacao.tem_proximo) {
+            liProximo.addEventListener('click', (e) => {
+                e.preventDefault();
+                carregarResultados(paginaAtualNum + 1);
+            });
+        }
+        paginacaoUl.appendChild(liProximo);
+    }
+
+    // ============================================================================
+    // MUDAR QUANTIDADE POR PÁGINA
+    // ============================================================================
+    document.getElementById('sel-por-pagina').addEventListener('change', (e) => {
+        porPagina = parseInt(e.target.value);
+        if (resultadosCache.length > 0) {
+            carregarResultados(1);
+        }
+    });
+
+    // ============================================================================
+    // TOGGLE ORDEM - CORRIGIDO
+    // ============================================================================
+    document.getElementById('toggle-ordem').addEventListener('change', (e) => {
+        ordemCrescente = e.target.checked;
+
+        // Reexibir resultados com a nova ordem
+        if (resultadosCache.length > 0) {
+            exibirResultados({
+                resultados: resultadosCache,
+                paginacao: {
+                    total_registros: totalRegistros,
+                    pagina_atual: paginaAtual,
+                    total_paginas: Math.ceil(totalRegistros / porPagina),
+                    tem_anterior: paginaAtual > 1,
+                    tem_proximo: paginaAtual < Math.ceil(totalRegistros / porPagina)
+                }
+            });
+
+            showAlert(ordemCrescente ? '✅ Ordem alterada para CRESCENTE' : '✅ Ordem alterada para ORIGINAL');
+        }
+    });
+
+    // ============================================================================
+    // EXPORTAR TXT (PÁGINA ATUAL)
+    // ============================================================================
+    document.getElementById('btn-exportar-txt').addEventListener('click', () => {
+        if (resultadosCache.length === 0) {
+            showAlert('⚠️ Nenhum resultado para exportar!');
+            return;
+        }
+
+        let conteudo = '# Gerador Inteligente - Dia de Sorte\n';
+        conteudo += `# Total de combinações (Nesta página): ${resultadosCache.length}\n`;
+        conteudo += `# Data: ${new Date().toLocaleString('pt-BR')}\n\n`;
+
+        resultadosCache.forEach((item) => {
+            const numeros = ordemCrescente ? item.numeros_crescente : item.numeros_original;
+            const numerosFormatados = numeros.map(n => String(n).padStart(2, '0')).join(' ');
+            conteudo += `${numerosFormatados} Jan\n`;
+        });
+
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `combinacoes_pagina_atual_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showAlert(`✅ Arquivo TXT (Página Atual) exportado! ${resultadosCache.length} combinações`);
+    });
+
+    // ============================================================================
+    // EXPORTAR TXT COMPLETO (TODAS AS PÁGINAS) VIA STREAMING
+    // ============================================================================
+    document.getElementById('btn-exportar-txt-completo').addEventListener('click', () => {
+        if (totalRegistros === 0) {
+            showAlert('⚠️ Nenhuma combinação encontrada para exportar!');
+            return;
+        }
+
+        mostrarLoading('Preparando arquivo completo...', 'O download começará em breve (Pode pesar ~40MB)');
+
+        try {
+            const excluirSorteadas = document.getElementById('chk-excluir-sorteadas').checked;
+
+            // Criar um form invisível para fazer POST via browser
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/gerador-inteligente/api/exportar-completo';
+            // Para não trocar a página principal:
+            form.target = '_blank';
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'excluir_sorteadas';
+            input.value = excluirSorteadas ? 'true' : 'false';
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            setTimeout(() => {
+                esconderLoading();
+                showAlert(`✅ Download completo iniciado! Acompanhe no seu navegador.`);
+            }, 3000);
+
+        } catch (erro) {
+            esconderLoading();
+            showAlert('❌ Erro ao solicitar exportação: ' + erro);
+        }
+    });
+
+    // ============================================================================
+    // EXPORTAR JSON
+    // ============================================================================
+    document.getElementById('btn-exportar-json').addEventListener('click', () => {
+        if (resultadosCache.length === 0) {
+            showAlert('⚠️ Nenhum resultado para exportar!');
+            return;
+        }
+
+        const dadosExportacao = {
+            metadata: {
+                total: totalRegistros,
+                data_exportacao: new Date().toISOString(),
+                ordem: ordemCrescente ? 'crescente' : 'original'
+            },
+            combinacoes: resultadosCache.map(item => {
+                const numeros = ordemCrescente ? item.numeros_crescente : item.numeros_original;
+                return {
+                    id: item.id,
+                    numeros: numeros,
+                    mes: 'Jan',
+                    score: item.score,
+                    analises: item.resumo_analises || 'Sem análise'
+                };
+            })
+        };
+
+        const conteudo = JSON.stringify(dadosExportacao, null, 2);
+        const blob = new Blob([conteudo], { type: 'application/json;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `combinacoes_dia_de_sorte_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showAlert(`✅ Arquivo JSON exportado! ${resultadosCache.length} combinações`);
+    });
+
+    // ============================================================================
+    // EXPORTAR EXCEL (CSV)
+    // ============================================================================
+    document.getElementById('btn-exportar-excel').addEventListener('click', () => {
+        if (resultadosCache.length === 0) {
+            showAlert('⚠️ Nenhum resultado para exportar!');
+            return;
+        }
+
+        let conteudo = 'ID;N1;N2;N3;N4;N5;N6;N7;Mês;Score;Análises\n';
+
+        resultadosCache.forEach((item) => {
+            const numeros = ordemCrescente ? item.numeros_crescente : item.numeros_original;
+            const numerosFormatados = numeros.map(n => String(n).padStart(2, '0'));
+            conteudo += `${item.id};${numerosFormatados.join(';')};Jan;${item.score};${item.resumo_analises || 'Sem análise'}\n`;
+        });
+
+        const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `combinacoes_dia_de_sorte_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showAlert(`✅ Arquivo Excel (CSV) exportado! ${resultadosCache.length} combinações`);
+    });
+
+    // ============================================================================
+    // LIMPAR CACHE
+    // ============================================================================
+    document.getElementById('btn-limpar-cache').addEventListener('click', async () => {
+        showConfirm('⚠️ ATENÇÃO! Isso apagará TODAS as combinações. Tem certeza?', async () => {
+            mostrarLoading('Limpando cache...', 'Removendo todas as combinações');
+
+            try {
+                const response = await fetch('/gerador-inteligente/api/limpar-cache', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    showAlert('✅ ' + data.mensagem);
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showAlert('❌ Erro: ' + data.erro);
+                }
+            } catch (erro) {
+                showAlert('❌ Erro: ' + erro);
+            } finally {
+                esconderLoading();
+            }
+        });
+    });
+
+    // ============================================================================
+    // 🔢 FILTRO POR PADRÃO DÍGITO INICIAL - NOVO!
+    // ============================================================================
+
+    // Variável global para armazenar padrão selecionado
+    let padraoSelecionado = '';
+
+    // FUNÇÃO AUXILIAR: Converter padrão de "2-2-2-1" para "0 0 1 1 2 2 2"
+    function converterPadraoParaVisual(padrao) {
+        const partes = padrao.split('-'); // ["2", "2", "2", "1"]
+        let resultado = [];
+
+        for (let digito = 0; digito < partes.length; digito++) {
+            const quantidade = parseInt(partes[digito]);
+            for (let i = 0; i < quantidade; i++) {
+                resultado.push(digito);
+            }
+        }
+
+        return resultado.join(' '); // "0 0 1 1 2 2 2"
+    }
+
+    // CARREGAR TOP 3 PADRÕES AO INICIAR PÁGINA
+    (async function carregarPadroes() {
+        try {
+            const response = await fetch('/gerador-inteligente/api/obter-top-padroes-digito');
+            const data = await response.json();
+
+            if (data.sucesso && data.top_padroes.length > 0) {
+                const select = document.getElementById('sel-padrao-digito');
+                select.innerHTML = '<option value="">Selecione um padrão...</option>';
+
+                data.top_padroes.forEach((item, index) => {
+                    const option = document.createElement('option');
+                    option.value = item.padrao;
+
+                    // Converter para formato visual "0 0 1 1 2 2 2"
+                    const padraoVisual = converterPadraoParaVisual(item.padrao);
+                    option.textContent = `#${index + 1}: ${padraoVisual} (${item.frequencia}x - ${item.porcentagem}%)`;
+
+                    select.appendChild(option);
+                });
+            }
+        } catch (erro) {
+            console.error('Erro ao carregar padrões:', erro);
+        }
+
+        // Verificar núcleo estratégico no localStorage
+        verificarNucleoDisponivel();
+    })();
+
+    // ============================================================================
+    // 🎯 NÚCLEO ESTRATÉGICO - INTEGRAÇÃO
+    // ============================================================================
+    let nucleoAtivo = null;
+
+    function verificarNucleoDisponivel() {
+        const nucleoStorage = localStorage.getItem('nucleoEstrategico');
+        const checkbox = document.getElementById('chk-usar-nucleo');
+        const infoNucleo = document.getElementById('info-nucleo');
+        const numerosSpan = document.getElementById('nucleo-numeros');
+
+        if (nucleoStorage) {
+            try {
+                const nucleo = JSON.parse(nucleoStorage);
+                if (nucleo && nucleo.principal && nucleo.principal.length > 0) {
+                    nucleoAtivo = nucleo.principal;
+                    numerosSpan.textContent = nucleo.principal.map(n => String(n).padStart(2, '0')).join(' ');
+                    checkbox.disabled = false;
+
+                    checkbox.addEventListener('change', function () {
+                        infoNucleo.style.display = this.checked ? 'block' : 'none';
+                    });
+                }
+            } catch (e) {
+                console.error('Erro ao ler núcleo:', e);
+            }
+        } else {
+            checkbox.disabled = true;
+            checkbox.checked = false;
+            const labelNucleo = checkbox.nextElementSibling;
+            labelNucleo.innerHTML += ' <small class="text-muted">(configure no <a href="/gerador-padroes" target="_blank">Gerador de Padrões</a>)</small>';
+        }
+    }
+
+    // FILTRAR POR PADRÃO
+    document.getElementById('btn-filtrar-padrao').addEventListener('click', async () => {
+        padraoSelecionado = document.getElementById('sel-padrao-digito').value;
+
+        if (!padraoSelecionado) {
+            showAlert('⚠️ Selecione um padrão primeiro!');
+            return;
+        }
+
+        mostrarLoading('Filtrando por padrão...', `Buscando combinações com padrão ${padraoSelecionado}`);
+
+        try {
+            const response = await fetch('/gerador-inteligente/api/filtrar-por-padrao-digito', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    padrao: padraoSelecionado,
+                    excluir_sorteadas: document.getElementById('chk-excluir-sorteadas').checked,
+                    pagina: 1,
+                    por_pagina: porPagina
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                resultadosCache = data.resultados;
+                totalRegistros = data.total_encontradas;
+
+                // Atualizar info
+                document.getElementById('total-padrao').textContent = data.total_encontradas.toLocaleString('pt-BR');
+                document.getElementById('info-padrao').style.display = 'block';
+                document.getElementById('btn-baixar-padrao-txt').disabled = false;
+
+                // Exibir resultados
+                exibirResultados({
+                    resultados: data.resultados,
+                    paginacao: data.paginacao
+                });
+                exibirPaginacao(data.paginacao);
+                document.getElementById('resultados-container').style.display = 'block';
+
+                showAlert(`✅ ${data.total_encontradas.toLocaleString('pt-BR')} combinações encontradas com padrão ${padraoSelecionado}!`);
+            } else {
+                showAlert('❌ Erro: ' + data.erro);
+            }
+        } catch (erro) {
+            showAlert('❌ Erro: ' + erro);
+        } finally {
+            esconderLoading();
+        }
+    });
+
+    // BAIXAR TXT
+    document.getElementById('btn-baixar-padrao-txt').addEventListener('click', async () => {
+        if (!padraoSelecionado) {
+            showAlert('⚠️ Selecione e filtre um padrão primeiro!');
+            return;
+        }
+
+        mostrarLoading('Gerando arquivo TXT...', 'Incluindo mês atrasado');
+
+        try {
+            const response = await fetch('/gerador-inteligente/api/exportar-padrao-txt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    padrao: padraoSelecionado,
+                    excluir_sorteadas: document.getElementById('chk-excluir-sorteadas').checked
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                // Atualizar mês
+                document.getElementById('mes-atrasado').textContent = data.mes_atrasado;
+
+                // Criar arquivo para download
+                const blob = new Blob([data.arquivo_conteudo], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `combinacoes_padrao_${padraoSelecionado.replace(/-/g, '')}_${data.mes_atrasado}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                showAlert(`✅ Arquivo baixado! ${data.total_linhas.toLocaleString('pt-BR')} linhas | Mês: ${data.mes_atrasado}`);
+            } else {
+                showAlert('❌ Erro: ' + data.erro);
+            }
+        } catch (erro) {
+            showAlert('❌ Erro: ' + erro);
+        } finally {
+            esconderLoading();
+        }
+    });
+</script>
+{% endblock %}

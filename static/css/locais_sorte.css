@@ -1,0 +1,115 @@
+/* Relatório Locais da Sorte — tema Dia de Sorte */
+.ls-dia-theme {
+    --ls-gold: #D4B31A;
+    --ls-gold-dark: #b69816;
+    --ls-dark: #1a1a2e;
+    --ls-dark-2: #2c3e50;
+    --ls-ok: #198754;
+    --ls-danger: #dc3545;
+}
+
+.ls-dia-theme .card-header-ls {
+    background: linear-gradient(135deg, var(--ls-gold) 0%, var(--ls-gold-dark) 100%);
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+.ls-dia-theme .kpi-card {
+    border-left: 4px solid var(--ls-gold);
+    background: #fff;
+    border-radius: 10px;
+}
+
+.ls-dia-theme .kpi-card .valor {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--ls-dark);
+}
+
+.ls-dia-theme .filtros-ls {
+    background: linear-gradient(180deg, #fffdf5 0%, #f8f9fa 100%);
+    border: 1px solid #e8d98a;
+    border-radius: 12px;
+}
+
+.ls-dia-theme .filtros-ls label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ls-dark-2);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.ls-dia-theme .filtros-ls input,
+.ls-dia-theme .filtros-ls select {
+    font-size: 0.85rem;
+}
+
+.ls-dia-theme .table-ls thead {
+    background: var(--ls-dark);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.ls-dia-theme .table-ls tbody tr:hover {
+    background: #fff9e6;
+}
+
+.ls-dia-theme .badge-bolao {
+    background: var(--ls-dark);
+    color: var(--ls-gold);
+}
+
+.ls-dia-theme .badge-simples {
+    background: #e9ecef;
+    color: var(--ls-dark);
+}
+
+.ls-dia-theme .badge-acerto-alto {
+    background: var(--ls-ok);
+    color: #fff;
+}
+
+.ls-dia-theme .badge-acerto-baixo {
+    background: #f8d7da;
+    color: var(--ls-danger);
+}
+
+.ls-dia-theme .premio-valor {
+    font-weight: 600;
+    color: var(--ls-ok);
+}
+
+.ls-dia-theme .comparativo-card {
+    border-top: 3px solid var(--ls-gold);
+}
+
+.ls-dia-theme .scroll-tabela {
+    /* No max height or overflow to remove scrollbar */
+}
+
+.ls-dia-theme .btn-ls-primary {
+    background: var(--ls-dark);
+    color: var(--ls-gold);
+    font-weight: 600;
+    border: none;
+}
+
+.ls-dia-theme .btn-ls-primary:hover {
+    background: var(--ls-dark-2);
+    color: #fff;
+}
+
+.ls-dia-theme .btn-ls-gold {
+    background: var(--ls-gold);
+    color: var(--ls-dark);
+    font-weight: 600;
+    border: none;
+}
+
+.ls-dia-theme .btn-ls-gold:hover {
+    background: var(--ls-gold-dark);
+    color: #fff;
+}

@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Soma das Dezenas - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-dourado: #D4B31A;
+        --ds-dourado-light: #f9f2d2;
+        --ds-dourado-dark: #b69816;
+    }
+
+    body {
+        background: linear-gradient(135deg, #fcf9e8 0%, #ffffff 50%, #fcf9e8 100%);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .card-custom {
+        border: 2px solid var(--ds-dourado-light);
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        font-weight: bold;
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid #2196F3;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .recommendation-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4CAF50;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="page-header">
+        <h1>➕ Análise de Soma das Dezenas</h1>
+        <p class="mb-0">Análise estatística da soma dos 7 números sorteados em cada concurso do Dia de Sorte</p>
+    </div>
+
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted">Calculando somas...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                📊 Estatísticas Gerais
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h5 class="text-muted">Total de Concursos</h5>
+                        <h3 id="totalConcursos" style="color: var(--ds-dourado);">-</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="text-muted">Min / Max</h5>
+                        <h3 id="minMax" style="color: var(--ds-dourado);">-</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="text-muted">Média</h5>
+                        <h3 id="media" style="color: var(--ds-dourado);">-</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="text-muted">Mediana</h5>
+                        <h3 id="mediana" style="color: var(--ds-dourado);">-</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        ⚖️ Distribuição Par/Ímpar
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h3 id="somasPares" class="text-primary mb-0">-</h3>
+                                <small class="text-muted">Pares (<span id="percentualPares">-</span>%)</small>
+                            </div>
+                            <div class="col-6">
+                                <h3 id="somasImpares" class="text-warning mb-0">-</h3>
+                                <small class="text-muted">Ímpares (<span id="percentualImpares">-</span>%)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        📊 Estatísticas Adicionais
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Desvio Padrão:</strong> <span id="desvioPadrao">-</span></p>
+                        <p class="mb-2"><strong>Somas Nunca Saíram:</strong> <span id="nunca">-</span></p>
+                        <p class="mb-0"><strong>Últimos 10 Concursos:</strong></p>
+                        <div id="ultimos10" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-custom">
+            <div class="card-header-custom">
+                📊 Distribuição por Faixas
+            </div>
+            <div class="card-body" id="faixas"></div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        🏆 Top 10 Somas Mais Frequentes
+                    </div>
+                    <div class="card-body" id="topFrequentes"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        ⏰ Top 10 Somas Mais Atrasadas
+                    </div>
+                    <div class="card-body" id="topAtrasadas"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+            </div>
+            <div class="card-body" id="insightsContainer"></div>
+        </div>
+
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <i class="bi bi-stars"></i> Recomendações Estratégicas
+            </div>
+            <div class="card-body" id="recomendacoesContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    carregarAnalise();
+});
+
+function carregarAnalise() {
+    fetch('/api/analise/soma-dezenas')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('loading').innerHTML = '<div class="alert alert-danger"><strong>Erro:</strong> ' + data.error + '</div>';
+                return;
+            }
+            exibirDados(data);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            document.getElementById('loading').innerHTML = '<div class="alert alert-danger"><strong>Erro ao carregar análise.</strong> Tente novamente.</div>';
+        });
+}
+
+function exibirDados(data) {
+    document.getElementById('totalConcursos').textContent = data.total_concursos;
+    document.getElementById('minMax').textContent = data.soma_minima + ' / ' + data.soma_maxima;
+    document.getElementById('media').textContent = data.soma_media;
+    document.getElementById('mediana').textContent = data.soma_mediana;
+    document.getElementById('desvioPadrao').textContent = data.desvio_padrao;
+
+    document.getElementById('somasPares').textContent = data.somas_pares;
+    document.getElementById('percentualPares').textContent = data.percentual_pares;
+    document.getElementById('somasImpares').textContent = data.somas_impares;
+    document.getElementById('percentualImpares').textContent = data.percentual_impares;
+
+    document.getElementById('nunca').textContent = data.somas_nunca_saidas.length;
+
+    exibirUltimos10(data.ultimos_10_sorteios);
+    exibirFaixas(data.faixas, data.percentual_faixas);
+    exibirTopFrequentes(data.top_10_frequentes);
+    exibirTopAtrasadas(data.top_10_atrasadas);
+    gerarInsights(data);
+}
+
+function exibirUltimos10(ultimos) {
+    const container = document.getElementById('ultimos10');
+    let html = '<div class="d-flex flex-wrap gap-2">';
+    ultimos.forEach(function(item) {
+        const classe = item.par_impar === 'Par' ? 'primary' : 'warning';
+        html += '<span class="badge bg-' + classe + '">' + item.soma + '</span>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function exibirFaixas(faixas, percentuais) {
+    const container = document.getElementById('faixas');
+    let html = '';
+    const faixasOrdem = ['7-70', '71-90', '91-110', '111-130', '131-150', '151-170', '171-217'];
+    faixasOrdem.forEach(function(faixa) {
+        const valor = faixas[faixa];
+        const percentual = percentuais[faixa];
+        html += '<div class="mb-2">';
+        html += '<div class="d-flex justify-content-between mb-1">';
+        html += '<span><strong>Faixa ' + faixa + ':</strong></span>';
+        html += '<span>' + valor + ' (' + percentual + '%)</span>';
+        html += '</div>';
+        html += '<div class="progress">';
+        html += '<div class="progress-bar bg-info" style="width: ' + percentual + '%"></div>';
+        html += '</div></div>';
+    });
+    container.innerHTML = html;
+}
+
+function exibirTopFrequentes(top) {
+    const container = document.getElementById('topFrequentes');
+    let html = '<ol class="mb-0">';
+    top.forEach(function(item) {
+        const badgeClass = item.par_impar === 'Par' ? 'primary' : 'warning';
+        html += '<li class="mb-2">';
+        html += '<strong>Soma ' + item.soma + '</strong> ';
+        html += '<span class="badge bg-' + badgeClass + '">' + item.par_impar + '</span><br>';
+        html += '<small class="text-muted">Frequência: ' + item.frequencia + 'x (' + item.percentual + '%) | Atraso: ' + item.atraso + '</small>';
+        html += '</li>';
+    });
+    html += '</ol>';
+    container.innerHTML = html;
+}
+
+function exibirTopAtrasadas(top) {
+    const container = document.getElementById('topAtrasadas');
+    let html = '<ol class="mb-0">';
+    top.forEach(function(item) {
+        const badgeClass = item.par_impar === 'Par' ? 'primary' : 'warning';
+        html += '<li class="mb-2">';
+        html += '<strong>Soma ' + item.soma + '</strong> ';
+        html += '<span class="badge bg-' + badgeClass + '">' + item.par_impar + '</span><br>';
+        html += '<small class="text-muted">Atraso: ' + item.atraso + ' | Frequência: ' + item.frequencia + 'x (' + item.percentual + '%)</small>';
+        html += '</li>';
+    });
+    html += '</ol>';
+    container.innerHTML = html;
+}
+
+function gerarInsights(data) {
+    const insights = [];
+    const somaMedia = data.soma_media;
+    const topFrequente = data.top_10_frequentes[0];
+
+    insights.push({
+        titulo: '📊 Soma Mais Frequente: ' + topFrequente.soma,
+        texto: 'A soma ' + topFrequente.soma + ' (' + topFrequente.par_impar + ') é a mais frequente com ' + topFrequente.frequencia + ' aparições (' + topFrequente.percentual + '%)'
+    });
+
+    const diferencaPar = Math.abs(data.percentual_pares - 50);
+    if (diferencaPar < 3) {
+        insights.push({
+            titulo: '⚖️ Equilíbrio Perfeito entre Par e Ímpar',
+            texto: 'A distribuição está praticamente equilibrada: ' + data.percentual_pares + '% pares vs ' + data.percentual_impares + '% ímpares'
+        });
+    } else if (data.percentual_pares > 52) {
+        insights.push({
+            titulo: '📈 Leve Tendência para Somas Pares',
+            texto: 'Somas pares aparecem ' + data.percentual_pares + '% das vezes, ligeiramente acima do esperado (50%)'
+        });
+    } else {
+        insights.push({
+            titulo: '📈 Leve Tendência para Somas Ímpares',
+            texto: 'Somas ímpares aparecem ' + data.percentual_impares + '% das vezes, ligeiramente acima do esperado (50%)'
+        });
+    }
+
+    const faixaCentral = data.faixas['91-110'] + data.faixas['111-130'];
+    const percentualCentral = data.percentual_faixas['91-110'] + data.percentual_faixas['111-130'];
+
+    insights.push({
+        titulo: '🎯 Concentração na Faixa Central',
+        texto: 'As faixas 91-110 e 111-130 juntas representam ' + percentualCentral.toFixed(1) + '% dos sorteios (' + faixaCentral + ' ocorrências)'
+    });
+
+    exibirInsights(insights);
+    exibirRecomendacoes(data);
+}
+
+function exibirInsights(insights) {
+    const container = document.getElementById('insightsContainer');
+    let html = '';
+
+    insights.forEach(function(insight) {
+        html += `
+            <div class="insight-box">
+                <h6>${insight.titulo}</h6>
+                <p class="mb-0">${insight.texto}</p>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function exibirRecomendacoes(data) {
+    const container = document.getElementById('recomendacoesContainer');
+    let html = `
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Escolha combinações de números cuja soma fique na faixa central (91-130) para maior probabilidade
+        </div>
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Evite extremos (abaixo de 70 ou acima de 170)
+        </div>
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Considere o equilíbrio par/ímpar ao montar suas apostas
+        </div>
+    `;
+    container.innerHTML = html;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,1063 @@
+<!-- MODELO D: BLOCOS ROTATIVOS COM GARANTIA PROGRESSIVA -->
+<div class="alert alert-success">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Modelo D:</strong> Blocos rotativos com garantia progressiva (4 FIXAS + 3 BLOCOS)
+    <button type="button" class="btn btn-sm btn-dark float-end" data-bs-toggle="modal" data-bs-target="#modalExplicacaoD">
+        <i class="fas fa-question-circle me-1"></i>Como funciona?
+    </button>
+</div>
+
+<!-- Modal Explicativo -->
+<div class="modal fade" id="modalExplicacaoD" tabindex="-1" aria-labelledby="modalExplicacaoDLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalExplicacaoDLabel">
+                    <i class="fas fa-lightbulb me-2"></i>Como funciona o Modelo D?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="fw-bold text-primary">📘 Conceito:</h6>
+                <p>O Modelo D utiliza <strong>4 dezenas fixas</strong> + <strong>3 blocos de 5 dezenas</strong> cada, gerando combinações rotativas com <strong>garantia progressiva</strong> de acertos.</p>
+
+                <hr>
+
+                <h6 class="fw-bold text-primary">🎯 Exemplo Prático:</h6>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded mb-3">
+                            <strong>🔵 Fixas (4 dezenas):</strong><br>
+                            <code class="fs-5">03, 12, 18, 25</code>
+                            <small class="text-muted d-block mt-2">Aparecem em TODOS os jogos</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-danger bg-opacity-10 border border-danger rounded">
+                            <strong>🔴 Bloco A (5 dezenas):</strong><br>
+                            <code>01, 02, 05, 08, 09</code>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                            <strong>🟠 Bloco B (5 dezenas):</strong><br>
+                            <code>07, 11, 14, 19, 23</code>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-info bg-opacity-10 border border-info rounded">
+                            <strong>🔵 Bloco C (5 dezenas):</strong><br>
+                            <code>04, 06, 13, 20, 27</code>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-success mt-3">📊 Como funciona a geração:</h6>
+                <p>Para cada bloco, o sistema gera <strong>todas as combinações de 3 dezenas</strong> daquele bloco e combina com as 4 fixas.</p>
+                <p><strong>Fórmula por bloco:</strong> C(5, 3) = 5! ÷ (3! × 2!) = <strong>10 jogos</strong></p>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-danger">
+                            <tr>
+                                <th colspan="7" class="text-center">🔴 BLOCO A - 10 jogos</th>
+                            </tr>
+                            <tr>
+                                <th>Jogo</th>
+                                <th colspan="4">Fixas (sempre)</th>
+                                <th colspan="3">Trio do Bloco A</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 12px;">
+                            <tr><td>1</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>01 02 05</strong></td></tr>
+                            <tr><td>2</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>01 02 08</strong></td></tr>
+                            <tr><td>3</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>01 02 09</strong></td></tr>
+                            <tr><td>...</td><td colspan="7" class="text-center">e mais 7 jogos</td></tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered mt-3">
+                        <thead class="table-warning">
+                            <tr>
+                                <th colspan="7" class="text-center">🟠 BLOCO B - 10 jogos</th>
+                            </tr>
+                            <tr>
+                                <th>Jogo</th>
+                                <th colspan="4">Fixas (sempre)</th>
+                                <th colspan="3">Trio do Bloco B</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 12px;">
+                            <tr><td>11</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>07 11 14</strong></td></tr>
+                            <tr><td>12</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>07 11 19</strong></td></tr>
+                            <tr><td>...</td><td colspan="7" class="text-center">e mais 8 jogos</td></tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered mt-3">
+                        <thead class="table-info">
+                            <tr>
+                                <th colspan="7" class="text-center">🔵 BLOCO C - 10 jogos</th>
+                            </tr>
+                            <tr>
+                                <th>Jogo</th>
+                                <th colspan="4">Fixas (sempre)</th>
+                                <th colspan="3">Trio do Bloco C</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 12px;">
+                            <tr><td>21</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>04 06 13</strong></td></tr>
+                            <tr><td>22</td><td colspan="4">03 12 18 25</td><td colspan="3"><strong>04 06 20</strong></td></tr>
+                            <tr><td>...</td><td colspan="7" class="text-center">e mais 8 jogos</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-success mt-3">
+                    <strong>💰 Custo Total:</strong><br>
+                    30 jogos (10 + 10 + 10) × R$ 2,50 = <strong>R$ 75,00</strong>
+                </div>
+
+                <h6 class="fw-bold text-success mt-3">✅ Garantia Progressiva:</h6>
+                <ul class="mb-3">
+                    <li><strong>Se as 4 fixas saírem + qualquer dezena de um bloco:</strong> você tem <strong>5 acertos</strong> garantidos em pelo menos 1 jogo</li>
+                    <li><strong>Se 3 das fixas saírem + dezenas dos blocos:</strong> alta chance de <strong>4 acertos</strong> em vários jogos</li>
+                    <li><strong>Se 2 fixas saírem + dezenas dos blocos:</strong> ainda pode ter <strong>3 acertos</strong></li>
+                </ul>
+
+                <h6 class="fw-bold text-success mt-3">🎯 Vantagens do Modelo D:</h6>
+                <ul>
+                    <li><strong>Cobertura eficiente:</strong> Menos jogos que outros modelos, mas com boa cobertura</li>
+                    <li><strong>Flexível:</strong> Blocos podem ter sobreposição estratégica</li>
+                    <li><strong>Custo controlado:</strong> 30 jogos fixos (R$ 75,00)</li>
+                    <li><strong>Garantia progressiva:</strong> Quanto mais fixas acertar, maior a garantia</li>
+                </ul>
+
+                <h6 class="fw-bold text-danger mt-3">⚠️ Importante:</h6>
+                <ul>
+                    <li>Fixas: <strong>exatamente 4 dezenas</strong></li>
+                    <li>Cada bloco: <strong>exatamente 5 dezenas</strong></li>
+                    <li>Total de blocos: <strong>3 blocos</strong></li>
+                    <li>Blocos <strong>podem</strong> ter dezenas em comum (sobreposição estratégica)</li>
+                    <li>Fixas <strong>não podem</strong> aparecer nos blocos</li>
+                    <li>Cada jogo terá <strong>7 dezenas</strong> (4 fixas + 3 do bloco)</li>
+                </ul>
+
+                <h6 class="fw-bold text-info mt-3">💡 Quando usar:</h6>
+                <ul>
+                    <li>Quando você tem <strong>4 números muito fortes</strong></li>
+                    <li>Quer <strong>mais cobertura</strong> que o Modelo C sem explodir custos</li>
+                    <li>Prefere <strong>garantia progressiva</strong> a cobertura total</li>
+                    <li>Quer fazer <strong>testes A/B</strong> com blocos diferentes</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seletor de Modo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Modo de Seleção</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <button onclick="setModoD('automatico')" id="btn-modo-d-automatico" class="modo-btn btn btn-outline-success w-100 p-3 active">
+                    <div style="font-size: 2rem;">🤖</div>
+                    <div class="fw-bold">AUTOMÁTICO</div>
+                    <small class="text-muted">IA escolhe tudo</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoD('hibrido')" id="btn-modo-d-hibrido" class="modo-btn btn btn-outline-success w-100 p-3">
+                    <div style="font-size: 2rem;">🔀</div>
+                    <div class="fw-bold">HÍBRIDO</div>
+                    <small class="text-muted">IA sugere, você ajusta</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoD('manual')" id="btn-modo-d-manual" class="modo-btn btn btn-outline-success w-100 p-3">
+                    <div style="font-size: 2rem;">✋</div>
+                    <div class="fw-bold">MANUAL</div>
+                    <small class="text-muted">Você escolhe tudo</small>
+                </button>
+            </div>
+        </div>
+        <div id="modo-d-descricao" class="alert alert-light mt-3 mb-0">
+            <strong>💡 Modo Atual: AUTOMÁTICO</strong><br>
+            <small>Sistema vai sugerir as dezenas baseado na análise dos últimos concursos</small>
+        </div>
+    </div>
+</div>
+
+<!-- Painel de Configuração -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuração</h5>
+    </div>
+    <div class="card-body">
+        <!-- Botão Automático -->
+        <div id="painel-d-automatico">
+            <button onclick="gerarAutomaticoD()" class="btn btn-lg btn-success w-100 py-3 text-white">
+                <i class="fas fa-magic me-2"></i>GERAR AUTOMATICAMENTE
+            </button>
+        </div>
+
+        <!-- Painel Manual/Híbrido -->
+        <div id="painel-d-manual-hibrido" style="display: none;">
+            <!-- Fixas -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold">
+                        🔵 FIXAS - Dezenas Obrigatórias (<span id="fixas-d-count">0</span>/4)
+                    </label>
+                    <div>
+                        <button onclick="sugerirFixasD()" id="btn-sugerir-fixas-d" class="btn btn-sm btn-primary me-2" style="display:none;">
+                            💡 Sugerir
+                        </button>
+                        <button onclick="limparFixasD()" class="btn btn-sm btn-secondary">
+                            🔄 Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="fixas-d-grid"></div>
+            </div>
+
+            <!-- Bloco A -->
+            <div class="mb-4">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">🔴 BLOCO A (<span id="bloco-a-d-count">0</span>/5)</span>
+                            <div>
+                                <button onclick="sugerirBlocoAD()" id="btn-sugerir-bloco-a-d" class="btn btn-sm btn-light me-2" style="display:none;">
+                                    💡
+                                </button>
+                                <button onclick="limparBlocoAD()" class="btn btn-sm btn-light">
+                                    🔄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2" id="bloco-a-d-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco B -->
+            <div class="mb-4">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">🟠 BLOCO B (<span id="bloco-b-d-count">0</span>/5)</span>
+                            <div>
+                                <button onclick="sugerirBlocoBD()" id="btn-sugerir-bloco-b-d" class="btn btn-sm btn-dark me-2" style="display:none;">
+                                    💡
+                                </button>
+                                <button onclick="limparBlocoBD()" class="btn btn-sm btn-dark">
+                                    🔄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2" id="bloco-b-d-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco C -->
+            <div class="mb-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">🔵 BLOCO C (<span id="bloco-c-d-count">0</span>/5)</span>
+                            <div>
+                                <button onclick="sugerirBlocoCD()" id="btn-sugerir-bloco-c-d" class="btn btn-sm btn-light me-2" style="display:none;">
+                                    💡
+                                </button>
+                                <button onclick="limparBlocoCD()" class="btn btn-sm btn-light">
+                                    🔄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2" id="bloco-c-d-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div id="preview-jogos-d" class="alert alert-warning" style="display:none;">
+                <div class="fw-bold">📊 Preview</div>
+                <div id="preview-texto-d"></div>
+            </div>
+
+            <button onclick="gerarDesdobramentoD()" id="btn-gerar-d" class="btn btn-lg btn-success w-100 py-3 text-white" disabled>
+                <i class="fas fa-play me-2"></i>GERAR DESDOBRAMENTO
+            </button>
+        </div>
+
+        <!-- Mês da Sorte -->
+        <div class="mt-4">
+            <label class="form-label fw-bold">📅 Mês da Sorte:</label>
+            <select id="mes-select-d" class="form-select">
+                {% if stats_mes %}
+                <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][stats_mes.atrasado] }}">+ Atrasado ({{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][stats_mes.atrasado] }})</option>
+                <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][stats_mes.frequente] }}">+ Frequente ({{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][stats_mes.frequente] }})</option>
+                {% endif %}
+                {% for m_idx in range(1, 13) %}
+                    {% if not stats_mes or (m_idx != stats_mes.atrasado and m_idx != stats_mes.frequente) %}
+                    <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m_idx] }}">{{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][m_idx] }}</option>
+                    {% endif %}
+                {% endfor %}
+                <option value="aleatorio">+ Aleatório</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Explicação da IA -->
+<div id="explicacao-section-d" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Por que escolhi esses números?</h5>
+    </div>
+    <div class="card-body" id="explicacao-container-d"></div>
+</div>
+
+<!-- Resumo -->
+<div id="resumo-section-d" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resumo do Desdobramento</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <div class="p-3 bg-danger bg-opacity-10 border border-danger rounded">
+                    <small class="text-danger fw-bold">BLOCO A</small>
+                    <div class="fs-4 fw-bold text-danger" id="total-bloco-a-d">10</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                    <small class="text-warning fw-bold">BLOCO B</small>
+                    <div class="fs-4 fw-bold text-warning" id="total-bloco-b-d">10</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3 bg-info bg-opacity-10 border border-info rounded">
+                    <small class="text-info fw-bold">BLOCO C</small>
+                    <div class="fs-4 fw-bold text-info" id="total-bloco-c-d">10</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded">
+                    <small class="text-primary fw-bold">TOTAL</small>
+                    <div class="fs-4 fw-bold text-primary" id="total-jogos-d">30</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3 bg-success bg-opacity-10 border border-success rounded">
+                    <small class="text-success fw-bold">CUSTO</small>
+                    <div class="fs-5 fw-bold text-success" id="custo-total-d">R$ 75,00</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3 bg-secondary bg-opacity-10 border border-secondary rounded">
+                    <small class="text-secondary fw-bold">MÊS</small>
+                    <div class="fs-5 fw-bold text-secondary" id="mes-info-d">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Jogos -->
+<div id="jogos-section-d" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Jogos Gerados</h5>
+        <div>
+            <button onclick="salvarDiarioD()" id="btn-diario-d" class="btn btn-sm btn-success fw-bold shadow-sm me-2" title="Salvar no Diário de Estratégias">
+                <i class="fas fa-save me-1"></i>Carimbar e Guardar Apostas
+            </button>
+            <button onclick="exportarTXTD()" class="btn btn-sm btn-success me-2">
+                <i class="fas fa-file-download me-1"></i>Exportar TXT
+            </button>
+            <button onclick="exportarExcelD()" class="btn btn-sm btn-info me-2">
+                <i class="fas fa-file-excel me-1"></i>Exportar Excel
+            </button>
+            <button onclick="window.print()" class="btn btn-sm btn-primary">
+                <i class="fas fa-print me-1"></i>Imprimir
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Filtro de Blocos -->
+        <div class="btn-group mb-3" role="group">
+            <button type="button" class="btn btn-outline-secondary active" onclick="filtrarBlocoD('todos')">
+                📋 Todos (30)
+            </button>
+            <button type="button" class="btn btn-outline-danger" onclick="filtrarBlocoD('A')">
+                🔴 Bloco A (10)
+            </button>
+            <button type="button" class="btn btn-outline-warning" onclick="filtrarBlocoD('B')">
+                🟠 Bloco B (10)
+            </button>
+            <button type="button" class="btn btn-outline-info" onclick="filtrarBlocoD('C')">
+                🔵 Bloco C (10)
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="game-table table table-sm">
+                <thead>
+                    <tr>
+                        <th>Jogo</th>
+                        <th>Bloco</th>
+                        <th colspan="7">Dezenas</th>
+                        <th>Mês</th>
+                    </tr>
+                </thead>
+                <tbody id="jogos-tbody-d"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+// Estado Global Modelo D
+let modoAtualD = 'automatico';
+let fixasD = [];
+let blocoAD = [];
+let blocoBD = [];
+let blocoCD = [];
+let jogosGeradosD = [];
+let explicacoesD = {};
+let blocoFiltroD = 'todos';
+
+// Inicialização Modelo D
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('fixas-d-grid')) {
+        criarGridsDezenasD();
+        setModoD('automatico');
+    }
+});
+
+// Criar grids de dezenas
+function criarGridsDezenasD() {
+    const gridFixas = document.getElementById('fixas-d-grid');
+    const gridA = document.getElementById('bloco-a-d-grid');
+    const gridB = document.getElementById('bloco-b-d-grid');
+    const gridC = document.getElementById('bloco-c-d-grid');
+
+    for (let i = 1; i <= 31; i++) {
+        const num = String(i).padStart(2, '0');
+
+        // Botão Fixas
+        const btnFixas = document.createElement('button');
+        btnFixas.className = 'dezena-btn btn';
+        btnFixas.textContent = num;
+        btnFixas.onclick = () => toggleFixasD(i);
+        btnFixas.dataset.numero = i;
+        gridFixas.appendChild(btnFixas);
+
+        // Botão Bloco A
+        const btnA = document.createElement('button');
+        btnA.className = 'dezena-btn btn';
+        btnA.textContent = num;
+        btnA.onclick = () => toggleBlocoAD(i);
+        btnA.dataset.numero = i;
+        gridA.appendChild(btnA);
+
+        // Botão Bloco B
+        const btnB = document.createElement('button');
+        btnB.className = 'dezena-btn btn';
+        btnB.textContent = num;
+        btnB.onclick = () => toggleBlocoBD(i);
+        btnB.dataset.numero = i;
+        gridB.appendChild(btnB);
+
+        // Botão Bloco C
+        const btnC = document.createElement('button');
+        btnC.className = 'dezena-btn btn';
+        btnC.textContent = num;
+        btnC.onclick = () => toggleBlocoCD(i);
+        btnC.dataset.numero = i;
+        gridC.appendChild(btnC);
+    }
+}
+
+// Alternar modo
+function setModoD(modo) {
+    modoAtualD = modo;
+
+    document.querySelectorAll('[id^="btn-modo-d-"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-modo-d-${modo}`).classList.add('active');
+
+    const descricoes = {
+        automatico: {
+            titulo: 'AUTOMÁTICO',
+            texto: 'Sistema vai sugerir as dezenas baseado na análise dos últimos concursos'
+        },
+        hibrido: {
+            titulo: 'HÍBRIDO',
+            texto: 'Sistema sugere as dezenas, mas você pode ajustar clicando para adicionar/remover'
+        },
+        manual: {
+            titulo: 'MANUAL',
+            texto: 'Você tem controle total! Selecione manualmente as 4 fixas e os 3 blocos'
+        }
+    };
+
+    const desc = descricoes[modo];
+    document.getElementById('modo-d-descricao').innerHTML = `
+        <strong>💡 Modo Atual: ${desc.titulo}</strong><br>
+        <small>${desc.texto}</small>
+    `;
+
+    if (modo === 'automatico') {
+        document.getElementById('painel-d-automatico').style.display = 'block';
+        document.getElementById('painel-d-manual-hibrido').style.display = 'none';
+        document.getElementById('btn-sugerir-fixas-d').style.display = 'none';
+        document.getElementById('btn-sugerir-bloco-a-d').style.display = 'none';
+        document.getElementById('btn-sugerir-bloco-b-d').style.display = 'none';
+        document.getElementById('btn-sugerir-bloco-c-d').style.display = 'none';
+    } else {
+        document.getElementById('painel-d-automatico').style.display = 'none';
+        document.getElementById('painel-d-manual-hibrido').style.display = 'block';
+
+        if (modo === 'hibrido') {
+            document.getElementById('btn-sugerir-fixas-d').style.display = 'inline-block';
+            document.getElementById('btn-sugerir-bloco-a-d').style.display = 'inline-block';
+            document.getElementById('btn-sugerir-bloco-b-d').style.display = 'inline-block';
+            document.getElementById('btn-sugerir-bloco-c-d').style.display = 'inline-block';
+        }
+    }
+
+    limparTudoD();
+}
+
+// Gerar automaticamente
+async function gerarAutomaticoD() {
+    try {
+        const response = await fetch('/api/desdobramento/sugestao-modelo-d');
+        const data = await response.json();
+
+        if (data.erro) {
+            showError('Erro: ' + data.erro);
+            return;
+        }
+
+        fixasD = data.fixas;
+        blocoAD = data.blocoA;
+        blocoBD = data.blocoB;
+        blocoCD = data.blocoC;
+        explicacoesD = data.explicacoes || {};
+
+        gerarJogosD();
+        if (Object.keys(explicacoesD).length > 0) {
+            mostrarExplicacaoD();
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao gerar sugestão automática');
+    }
+}
+
+// Sugestões individuais
+async function sugerirFixasD() {
+    const response = await fetch('/api/desdobramento/sugestao-modelo-d');
+    const data = await response.json();
+    fixasD = data.fixas;
+    explicacoesD = data.explicacoes || {};
+    atualizarVisualizacaoFixasD();
+    if (Object.keys(explicacoesD).length > 0) {
+        mostrarExplicacaoD();
+    }
+    atualizarPreviewD();
+}
+
+async function sugerirBlocoAD() {
+    const response = await fetch('/api/desdobramento/sugestao-modelo-d');
+    const data = await response.json();
+    blocoAD = data.blocoA;
+    atualizarVisualizacaoBlocoAD();
+    atualizarPreviewD();
+}
+
+async function sugerirBlocoBD() {
+    const response = await fetch('/api/desdobramento/sugestao-modelo-d');
+    const data = await response.json();
+    blocoBD = data.blocoB;
+    atualizarVisualizacaoBlocoBD();
+    atualizarPreviewD();
+}
+
+async function sugerirBlocoCD() {
+    const response = await fetch('/api/desdobramento/sugestao-modelo-d');
+    const data = await response.json();
+    blocoCD = data.blocoC;
+    atualizarVisualizacaoBlocoCD();
+    atualizarPreviewD();
+}
+
+// Toggle dezenas
+function toggleFixasD(num) {
+    const btn = document.querySelector(`#fixas-d-grid button[data-numero="${num}"]`);
+
+    if (fixasD.includes(num)) {
+        fixasD = fixasD.filter(n => n !== num);
+        btn.classList.remove('grupo-a');
+    } else {
+        if (fixasD.length < 4) {
+            fixasD.push(num);
+            fixasD.sort((a, b) => a - b);
+            btn.classList.add('grupo-a');
+        }
+    }
+
+    atualizarContadoresD();
+    atualizarDisponibilidadeD();
+    atualizarPreviewD();
+}
+
+function toggleBlocoAD(num) {
+    const btn = document.querySelector(`#bloco-a-d-grid button[data-numero="${num}"]`);
+
+    if (blocoAD.includes(num)) {
+        blocoAD = blocoAD.filter(n => n !== num);
+        btn.classList.remove('grupo-fixo-a');
+    } else {
+        if (blocoAD.length < 5 && !fixasD.includes(num)) {
+            blocoAD.push(num);
+            blocoAD.sort((a, b) => a - b);
+            btn.classList.add('grupo-fixo-a');
+        } else if (fixasD.includes(num)) {
+            showError('Esta dezena está nas Fixas');
+        }
+    }
+
+    atualizarContadoresD();
+    atualizarPreviewD();
+}
+
+function toggleBlocoBD(num) {
+    const btn = document.querySelector(`#bloco-b-d-grid button[data-numero="${num}"]`);
+
+    if (blocoBD.includes(num)) {
+        blocoBD = blocoBD.filter(n => n !== num);
+        btn.classList.remove('grupo-fixo-b');
+    } else {
+        if (blocoBD.length < 5 && !fixasD.includes(num)) {
+            blocoBD.push(num);
+            blocoBD.sort((a, b) => a - b);
+            btn.classList.add('grupo-fixo-b');
+        } else if (fixasD.includes(num)) {
+            showError('Esta dezena está nas Fixas');
+        }
+    }
+
+    atualizarContadoresD();
+    atualizarPreviewD();
+}
+
+function toggleBlocoCD(num) {
+    const btn = document.querySelector(`#bloco-c-d-grid button[data-numero="${num}"]`);
+
+    if (blocoCD.includes(num)) {
+        blocoCD = blocoCD.filter(n => n !== num);
+        btn.classList.remove('grupo-b');
+    } else {
+        if (blocoCD.length < 5 && !fixasD.includes(num)) {
+            blocoCD.push(num);
+            blocoCD.sort((a, b) => a - b);
+            btn.classList.add('grupo-b');
+        } else if (fixasD.includes(num)) {
+            showError('Esta dezena está nas Fixas');
+        }
+    }
+
+    atualizarContadoresD();
+    atualizarPreviewD();
+}
+
+// Atualizar visualizações
+function atualizarVisualizacaoFixasD() {
+    document.querySelectorAll('#fixas-d-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (fixasD.includes(num)) {
+            btn.classList.add('grupo-a', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-a', 'sugerida');
+        }
+    });
+    atualizarContadoresD();
+    atualizarDisponibilidadeD();
+}
+
+function atualizarVisualizacaoBlocoAD() {
+    document.querySelectorAll('#bloco-a-d-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (blocoAD.includes(num)) {
+            btn.classList.add('grupo-fixo-a', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-fixo-a', 'sugerida');
+        }
+    });
+    atualizarContadoresD();
+}
+
+function atualizarVisualizacaoBlocoBD() {
+    document.querySelectorAll('#bloco-b-d-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (blocoBD.includes(num)) {
+            btn.classList.add('grupo-fixo-b', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-fixo-b', 'sugerida');
+        }
+    });
+    atualizarContadoresD();
+}
+
+function atualizarVisualizacaoBlocoCD() {
+    document.querySelectorAll('#bloco-c-d-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (blocoCD.includes(num)) {
+            btn.classList.add('grupo-b', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-b', 'sugerida');
+        }
+    });
+    atualizarContadoresD();
+}
+
+function atualizarContadoresD() {
+    document.getElementById('fixas-d-count').textContent = fixasD.length;
+    document.getElementById('bloco-a-d-count').textContent = blocoAD.length;
+    document.getElementById('bloco-b-d-count').textContent = blocoBD.length;
+    document.getElementById('bloco-c-d-count').textContent = blocoCD.length;
+
+    const btnGerar = document.getElementById('btn-gerar-d');
+    if (btnGerar) {
+        btnGerar.disabled = !(fixasD.length === 4 && blocoAD.length === 5 && blocoBD.length === 5 && blocoCD.length === 5);
+    }
+}
+
+function atualizarDisponibilidadeD() {
+    // Desabilitar nas grades de blocos as dezenas que estão nas fixas
+    ['bloco-a-d-grid', 'bloco-b-d-grid', 'bloco-c-d-grid'].forEach(gridId => {
+        document.querySelectorAll(`#${gridId} .dezena-btn`).forEach(btn => {
+            const num = parseInt(btn.dataset.numero);
+            btn.disabled = fixasD.includes(num);
+        });
+    });
+}
+
+function atualizarPreviewD() {
+    if (fixasD.length === 4 && blocoAD.length === 5 && blocoBD.length === 5 && blocoCD.length === 5) {
+        const jogosA = 10;
+        const jogosB = 10;
+        const jogosC = 10;
+        const total = jogosA + jogosB + jogosC;
+        const custo = (total * 2.50).toFixed(2);
+
+        document.getElementById('preview-jogos-d').style.display = 'block';
+        document.getElementById('preview-texto-d').innerHTML = `
+            <strong>🔵 Fixas:</strong> ${fixasD.join(', ')}<br>
+            <strong>🔴 Bloco A:</strong> ${blocoAD.join(', ')} → ${jogosA} jogos<br>
+            <strong>🟠 Bloco B:</strong> ${blocoBD.join(', ')} → ${jogosB} jogos<br>
+            <strong>🔵 Bloco C:</strong> ${blocoCD.join(', ')} → ${jogosC} jogos<br>
+            <hr>
+            <strong>Total de jogos:</strong> ${total} jogos<br>
+            <strong>Custo:</strong> R$ ${custo}
+        `;
+    } else {
+        document.getElementById('preview-jogos-d').style.display = 'none';
+    }
+}
+
+// Limpar
+function limparFixasD() {
+    fixasD = [];
+    atualizarVisualizacaoFixasD();
+    atualizarPreviewD();
+}
+
+function limparBlocoAD() {
+    blocoAD = [];
+    atualizarVisualizacaoBlocoAD();
+    atualizarPreviewD();
+}
+
+function limparBlocoBD() {
+    blocoBD = [];
+    atualizarVisualizacaoBlocoBD();
+    atualizarPreviewD();
+}
+
+function limparBlocoCD() {
+    blocoCD = [];
+    atualizarVisualizacaoBlocoCD();
+    atualizarPreviewD();
+}
+
+function limparTudoD() {
+    limparFixasD();
+    limparBlocoAD();
+    limparBlocoBD();
+    limparBlocoCD();
+    jogosGeradosD = [];
+    document.getElementById('resumo-section-d').style.display = 'none';
+    document.getElementById('jogos-section-d').style.display = 'none';
+    document.getElementById('explicacao-section-d').style.display = 'none';
+}
+
+// Gerar desdobramento
+async function gerarDesdobramentoD() {
+    if (fixasD.length !== 4) {
+        showError('❌ Selecione exatamente 4 dezenas fixas');
+        return;
+    }
+
+    if (blocoAD.length !== 5) {
+        showError('❌ Bloco A deve ter exatamente 5 dezenas');
+        return;
+    }
+
+    if (blocoBD.length !== 5) {
+        showError('❌ Bloco B deve ter exatamente 5 dezenas');
+        return;
+    }
+
+    if (blocoCD.length !== 5) {
+        showError('❌ Bloco C deve ter exatamente 5 dezenas');
+        return;
+    }
+
+    await gerarJogosD();
+}
+
+async function gerarJogosD() {
+    const mes = document.getElementById('mes-select-d').value;
+
+    try {
+        const response = await fetch('/api/desdobramento/gerar-jogos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fixas: fixasD,
+                blocoA: blocoAD,
+                blocoB: blocoBD,
+                blocoC: blocoCD,
+                mes,
+                modelo: 'D'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.erro) {
+            showError('Erro: ' + data.erro);
+            return;
+        }
+
+        jogosGeradosD = data.jogos;
+        mostrarJogosD(data);
+        mostrarResumoD(data);
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao gerar jogos');
+    }
+}
+
+function mostrarJogosD(data) {
+    const tbody = document.getElementById('jogos-tbody-d');
+    tbody.innerHTML = '';
+
+    data.jogos.forEach(jogo => {
+        const tr = document.createElement('tr');
+        tr.dataset.bloco = jogo.bloco;
+
+        let blocoBadge = '';
+        if (jogo.bloco === 'A') {
+            blocoBadge = '<span class="badge bg-danger">A</span>';
+        } else if (jogo.bloco === 'B') {
+            blocoBadge = '<span class="badge bg-warning text-dark">B</span>';
+        } else if (jogo.bloco === 'C') {
+            blocoBadge = '<span class="badge bg-info">C</span>';
+        }
+
+        let html = `<td class="fw-bold">${jogo.numero}</td>`;
+        html += `<td>${blocoBadge}</td>`;
+
+        jogo.numeros_completos.forEach(num => {
+            html += `<td class="variavel-cell">${String(num).padStart(2, '0')}</td>`;
+        });
+
+        html += `<td class="fw-bold">${jogo.mes}</td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('jogos-section-d').style.display = 'block';
+}
+
+function mostrarResumoD(data) {
+    document.getElementById('total-bloco-a-d').textContent = data.total_bloco_a || 10;
+    document.getElementById('total-bloco-b-d').textContent = data.total_bloco_b || 10;
+    document.getElementById('total-bloco-c-d').textContent = data.total_bloco_c || 10;
+    document.getElementById('total-jogos-d').textContent = data.total_jogos;
+    document.getElementById('custo-total-d').textContent = `R$ ${data.custo_total.toFixed(2)}`;
+    document.getElementById('mes-info-d').textContent = data.mes;
+    document.getElementById('resumo-section-d').style.display = 'block';
+}
+
+function mostrarExplicacaoD() {
+    const container = document.getElementById('explicacao-container-d');
+    container.innerHTML = '';
+
+    Object.keys(explicacoesD).forEach(num => {
+        const { emoji, motivo } = explicacoesD[num];
+        const div = document.createElement('div');
+        div.className = 'explicacao-item alert alert-success mb-2';
+        div.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div style="font-size: 2rem; margin-right: 1rem;">${emoji}</div>
+                <div>
+                    <div class="fw-bold">${String(num).padStart(2, '0')}</div>
+                    <small>${motivo}</small>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById('explicacao-section-d').style.display = 'block';
+}
+
+function filtrarBlocoD(bloco) {
+    blocoFiltroD = bloco;
+
+    document.querySelectorAll('#jogos-section-d .btn-group button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    document.querySelectorAll('#jogos-tbody-d tr').forEach(tr => {
+        if (bloco === 'todos') {
+            tr.style.display = '';
+        } else {
+            tr.style.display = tr.dataset.bloco === bloco ? '' : 'none';
+        }
+    });
+}
+
+
+    async function salvarDiarioD() {
+        if (!jogosGeradosD || jogosGeradosD.length === 0) {
+            if(window.showError) showError('Não há apostas para salvar.'); 
+            else alert('Não há apostas para salvar.');
+            return;
+        }
+        const btn = document.getElementById('btn-diario-d');
+        const oriText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
+        btn.disabled = true;
+
+        try {
+            const apostasLimpo = jogosGeradosD.map(j => j.numeros_completos || j.numeros);
+            const response = await fetch('/api/diario-estrategia/salvar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apostas: apostasLimpo,
+                    estrategia: `Desdobramento Modelo D - ${jogosGeradosD.length} Jogos`,
+                    rota_origem: '/desdobramentos'
+                })
+            });
+            
+            const data = await response.json();
+            if (data.sucesso) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Salvo!';
+                btn.className = 'btn btn-sm btn-success me-2';
+            } else {
+                if(window.showError) showError('Erro: ' + data.mensagem); 
+                else alert('Erro: ' + data.mensagem);
+                btn.innerHTML = oriText;
+            }
+        } catch (e) {
+            if(window.showError) showError('Falha ao salvar no Diário.'); 
+            else alert('Falha ao salvar no Diário.');
+            btn.innerHTML = oriText;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+        function exportarTXTD() {
+    let conteudo = '';
+
+    jogosGeradosD.forEach(jogo => {
+        const numeros = jogo.numeros_completos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${numeros} ${jogo.mes}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `desdobramento-modelo-d-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportarExcelD() {
+    let conteudo = 'JOGO;BLOCO;FIXAS;TRIO DO BLOCO;MES;NUMEROS COMPLETOS\n';
+
+    jogosGeradosD.forEach(jogo => {
+        const fixas = jogo.fixas.map(n => String(n).padStart(2, '0')).join(' ');
+        const variaveis = jogo.variaveis.map(n => String(n).padStart(2, '0')).join(' ');
+        const completos = jogo.numeros_completos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${jogo.numero};${jogo.bloco};${fixas};${variaveis};${jogo.mes};${completos}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `desdobramento-modelo-d-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Expor funções no escopo global para uso pelos botões HTML
+window.setModoD = setModoD;
+window.gerarAutomaticoD = gerarAutomaticoD;
+window.sugerirFixasD = sugerirFixasD;
+window.limparFixasD = limparFixasD;
+window.sugerirBlocoAD = sugerirBlocoAD;
+window.limparBlocoAD = limparBlocoAD;
+window.sugerirBlocoBD = sugerirBlocoBD;
+window.limparBlocoBD = limparBlocoBD;
+window.sugerirBlocoCD = sugerirBlocoCD;
+window.limparBlocoCD = limparBlocoCD;
+window.gerarDesdobramentoD = gerarDesdobramentoD;
+window.salvarDiarioD = salvarDiarioD;
+        window.exportarTXTD = exportarTXTD;
+window.exportarExcelD = exportarExcelD;
+window.filtrarBlocoD = filtrarBlocoD;
+
+})(); // Fim do IIFE - Isolamento do Modelo D
+</script>

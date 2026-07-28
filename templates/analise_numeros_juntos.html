@@ -1,0 +1,555 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-people-fill"></i> Análise de Números Juntos (Co-ocorrência)
+                </h2>
+                <div>
+                    <a href="/" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button class="btn btn-primary" onclick="carregarAnalise()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted">
+                <i class="bi bi-info-circle"></i> Descubra quais números aparecem juntos com mais frequência nos sorteios.
+                <strong>Pares</strong> e <strong>Trios</strong> mais frequentes podem revelar padrões interessantes!
+            </p>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 fw-bold">Analisando co-ocorrência de números...</p>
+    </div>
+
+    <!-- Resultado -->
+    <div id="resultado" style="display: none;">
+
+        <!-- Resumo Estatístico -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart-fill"></i> Resumo Estatístico
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="resumoEstatistico"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Busca de Par Específico -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-search"></i> Buscar Par Específico
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label">Número 1:</label>
+                                <input type="number" id="num1" class="form-control" min="1" max="31" placeholder="1-31">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Número 2:</label>
+                                <input type="number" id="num2" class="form-control" min="1" max="31" placeholder="1-31">
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-info" onclick="buscarPar()">
+                                    <i class="bi bi-search"></i> Buscar
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="limparBusca()">
+                                    <i class="bi bi-x-circle"></i> Limpar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="resultadoBusca" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Pares e Trios -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy-fill"></i> Top 20 Pares Mais Frequentes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="topPares" style="max-height: 500px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy-fill"></i> Top 20 Trios Mais Frequentes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="topTrios" style="max-height: 500px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Números Mais Sociáveis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-purple text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-hearts"></i> Top 10 Números Mais "Sociáveis"
+                        </h5>
+                        <small>Números que aparecem juntos com mais parceiros diferentes</small>
+                    </div>
+                    <div class="card-body">
+                        <div id="numerosSociaveis"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightbulb-fill"></i> Insights Estratégicos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="insights"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.numero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 12px;
+    margin: 2px;
+    border-radius: 8px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.par-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.trio-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.plus-sign {
+    font-size: 1.2em;
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.frequencia-badge {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.correlacao-badge {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.9em;
+}
+
+.bg-purple {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%) !important;
+}
+
+.medalha {
+    font-size: 1.5em;
+    margin-right: 5px;
+}
+
+.sociavel-card {
+    border-left: 4px solid #6f42c1;
+    margin-bottom: 8px;
+    padding: 10px;
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(111, 66, 193, 0.02) 100%);
+}
+</style>
+
+<script>
+let dadosCompletos = null;
+
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+
+    fetch('/api/analise/numeros-juntos')
+        .then(response => response.json())
+        .then(data => {
+            dadosCompletos = data;
+            exibirResultado(data);
+            loading.style.display = 'none';
+            resultado.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Erro ao Carregar Análise</h5>
+                    <p class="mb-0">${error.message}</p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function exibirResultado(data) {
+    exibirResumoEstatistico(data);
+    exibirTopPares(data);
+    exibirTopTrios(data);
+    exibirNumerosSociaveis(data);
+    exibirInsights(data);
+}
+
+function exibirResumoEstatistico(data) {
+    const html = `
+        <div class="row text-center">
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-primary mb-1">${data.total_concursos}</h3>
+                    <small class="text-muted">Concursos</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-success mb-1">${data.total_pares_unicos}</h3>
+                    <small class="text-muted">Pares Únicos</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-warning mb-1">${data.total_trios_unicos}</h3>
+                    <small class="text-muted">Trios Únicos</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-info mb-1">${data.media_freq_pares}</h3>
+                    <small class="text-muted">Média Freq. Pares</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-danger mb-1">${data.pares_raros}</h3>
+                    <small class="text-muted">Pares Raros (1x)</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-secondary mb-1">${data.trios_raros}</h3>
+                    <small class="text-muted">Trios Raros (1x)</small>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('resumoEstatistico').innerHTML = html;
+}
+
+function exibirTopPares(data) {
+    const medalhas = ['🥇', '🥈', '🥉'];
+    let html = '';
+
+    data.top_pares.slice(0, 20).forEach((item, idx) => {
+        const pos = idx < 3 ? `<span class="medalha">${medalhas[idx]}</span>` : `${idx + 1}º`;
+        const destaque = idx < 3 ? 'border border-warning bg-warning bg-opacity-10' : '';
+
+        html += `
+            <div class="par-container ${destaque} p-2 rounded">
+                <div style="min-width: 40px;">${pos}</div>
+                <span class="numero-badge">${String(item.numeros[0]).padStart(2, '0')}</span>
+                <span class="plus-sign">+</span>
+                <span class="numero-badge">${String(item.numeros[1]).padStart(2, '0')}</span>
+                <div class="ms-auto">
+                    <span class="frequencia-badge me-2" title="Frequência">${item.frequencia}x (${item.percentual}%)</span>
+                    <span class="correlacao-badge" title="Taxa de Correlação">${item.taxa_correlacao}%</span>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('topPares').innerHTML = html;
+}
+
+function exibirTopTrios(data) {
+    const medalhas = ['🥇', '🥈', '🥉'];
+    let html = '';
+
+    data.top_trios.slice(0, 20).forEach((item, idx) => {
+        const pos = idx < 3 ? `<span class="medalha">${medalhas[idx]}</span>` : `${idx + 1}º`;
+        const destaque = idx < 3 ? 'border border-success bg-success bg-opacity-10' : '';
+
+        html += `
+            <div class="trio-container ${destaque} p-2 rounded">
+                <div style="min-width: 40px;">${pos}</div>
+                <span class="numero-badge">${String(item.numeros[0]).padStart(2, '0')}</span>
+                <span class="plus-sign">+</span>
+                <span class="numero-badge">${String(item.numeros[1]).padStart(2, '0')}</span>
+                <span class="plus-sign">+</span>
+                <span class="numero-badge">${String(item.numeros[2]).padStart(2, '0')}</span>
+                <div class="ms-auto">
+                    <span class="frequencia-badge" title="Frequência">${item.frequencia}x (${item.percentual}%)</span>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('topTrios').innerHTML = html;
+}
+
+function exibirNumerosSociaveis(data) {
+    let html = '<div class="row">';
+
+    data.numeros_sociaveis.forEach((item, idx) => {
+        const medalha = idx < 3 ? ['🥇', '🥈', '🥉'][idx] : '';
+        html += `
+            <div class="col-md-6">
+                <div class="sociavel-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fs-4">${medalha}</span>
+                            <span class="numero-badge">${String(item.numero).padStart(2, '0')}</span>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-purple">${item.parceiros} parceiros diferentes</div>
+                            <small class="text-muted">Aparece em pares com ${item.parceiros} números distintos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    document.getElementById('numerosSociaveis').innerHTML = html;
+}
+
+function exibirInsights(data) {
+    const top3Pares = data.top_pares.slice(0, 3);
+    const top3Trios = data.top_trios.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    const html = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="alert alert-success">
+                    <h6 class="fw-bold"><i class="bi bi-trophy-fill"></i> Pares Mais Frequentes:</h6>
+                    <ul class="mb-0">
+                        ${top3Pares.map((p, i) => `
+                            <li>${medalhas[i]} <strong>${p.numeros[0]} + ${p.numeros[1]}</strong>: ${p.frequencia}x (${p.percentual}%) - Correlação: ${p.taxa_correlacao}%</li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-warning">
+                    <h6 class="fw-bold"><i class="bi bi-trophy-fill"></i> Trios Mais Frequentes:</h6>
+                    <ul class="mb-0">
+                        ${top3Trios.map((t, i) => `
+                            <li>${medalhas[i]} <strong>${t.numeros[0]} + ${t.numeros[1]} + ${t.numeros[2]}</strong>: ${t.frequencia}x (${t.percentual}%)</li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info">
+            <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas:</h6>
+            <ul class="mb-0">
+                <li>Considere incluir pelo menos 1 par do <strong>TOP 10</strong> em seus jogos</li>
+                <li>Os números mais sociáveis (${data.numeros_sociaveis.slice(0, 3).map(n => n.numero).join(', ')}) aparecem com muitos parceiros diferentes</li>
+                <li>Taxa de correlação acima de <strong>50%</strong> indica forte tendência de aparecerem juntos</li>
+                <li><strong>${data.pares_raros}</strong> pares apareceram apenas 1 vez - evite combinações muito raras</li>
+                <li>Use a busca de par específico para verificar se sua combinação já apareceu antes</li>
+            </ul>
+        </div>
+        <div class="alert alert-light border">
+            <h6 class="fw-bold"><i class="bi bi-info-circle-fill"></i> Como Interpretar:</h6>
+            <p class="mb-0">
+                <strong>Frequência:</strong> Quantas vezes o par/trio apareceu junto nos sorteios<br>
+                <strong>Percentual:</strong> Em quantos % dos concursos esse par/trio apareceu<br>
+                <strong>Taxa de Correlação:</strong> Quando um número aparece, qual % das vezes o outro aparece junto<br>
+                <strong>Sociabilidade:</strong> Com quantos números diferentes um número já apareceu em pares
+            </p>
+        </div>
+    `;
+
+    document.getElementById('insights').innerHTML = html;
+}
+
+function buscarPar() {
+    const num1 = parseInt(document.getElementById('num1').value);
+    const num2 = parseInt(document.getElementById('num2').value);
+    const resultadoBusca = document.getElementById('resultadoBusca');
+
+    if (!num1 || !num2) {
+        resultadoBusca.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i> Por favor, informe os dois números.
+            </div>
+        `;
+        return;
+    }
+
+    if (num1 === num2) {
+        resultadoBusca.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-x-circle-fill"></i> Os números devem ser diferentes.
+            </div>
+        `;
+        return;
+    }
+
+    if (num1 < 1 || num1 > 31 || num2 < 1 || num2 > 31) {
+        resultadoBusca.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-x-circle-fill"></i> Os números devem estar entre 1 e 31.
+            </div>
+        `;
+        return;
+    }
+
+    resultadoBusca.innerHTML = `
+        <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-info" role="status">
+                <span class="visually-hidden">Buscando...</span>
+            </div>
+            <span class="ms-2">Buscando par...</span>
+        </div>
+    `;
+
+    fetch(`/api/analise/numeros-juntos/par?numero1=${num1}&numero2=${num2}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                resultadoBusca.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle-fill"></i> ${data.error}
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="alert alert-${data.total_aparicoes > 0 ? 'success' : 'warning'}">
+                    <h6 class="fw-bold">
+                        <span class="numero-badge">${String(data.par[0]).padStart(2, '0')}</span>
+                        <span class="plus-sign">+</span>
+                        <span class="numero-badge">${String(data.par[1]).padStart(2, '0')}</span>
+                    </h6>
+                    <p class="mb-0">
+                        ${data.total_aparicoes > 0
+                            ? `<strong>Encontrados!</strong> Este par apareceu junto <strong>${data.total_aparicoes} vez(es)</strong>.`
+                            : `<strong>Nunca apareceram juntos!</strong> Este par nunca foi sorteado.`
+                        }
+                    </p>
+                </div>
+            `;
+
+            if (data.total_aparicoes > 0) {
+                html += `
+                    <h6 class="fw-bold mt-3">Concursos onde apareceram juntos:</h6>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-striped">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th>Concurso</th>
+                                    <th>Data</th>
+                                    <th>Números Sorteados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.concursos.map(c => `
+                                    <tr>
+                                        <td><strong>${c.concurso}</strong></td>
+                                        <td>${c.data}</td>
+                                        <td>${c.numeros.map(n => `<span class="badge bg-secondary">${String(n).padStart(2, '0')}</span>`).join(' ')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            resultadoBusca.innerHTML = html;
+        })
+        .catch(error => {
+            resultadoBusca.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-x-circle-fill"></i> Erro ao buscar: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function limparBusca() {
+    document.getElementById('num1').value = '';
+    document.getElementById('num2').value = '';
+    document.getElementById('resultadoBusca').innerHTML = '';
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+
+<style>
+.text-purple {
+    color: #6f42c1;
+}
+</style>
+{% endblock %}

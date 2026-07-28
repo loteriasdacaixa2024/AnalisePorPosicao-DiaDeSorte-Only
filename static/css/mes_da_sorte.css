@@ -1,0 +1,47 @@
+/**
+ * Padrão global — seletor "Mês da Sorte"
+ * Referência: label + select alinhados, tipografia consistente (Dia de Sorte / 5151)
+ */
+.mes-da-sorte-field {
+    margin-bottom: 0.75rem;
+}
+
+.mes-da-sorte-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #212529;
+    margin-bottom: 0.35rem;
+    letter-spacing: 0.01em;
+}
+
+.mes-da-sorte-select,
+select.mes-da-sorte-select {
+    border: 2px solid #0d6efd;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    color: #495057;
+    max-width: 100%;
+}
+
+.mes-da-sorte-select:focus {
+    border-color: #0a58ca;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+}
+
+@media (min-width: 768px) {
+    .mes-da-sorte-field.mes-da-sorte-field--inline {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .mes-da-sorte-field.mes-da-sorte-field--inline .mes-da-sorte-label {
+        margin-bottom: 0;
+        white-space: nowrap;
+        min-width: 8.5rem;
+    }
+    .mes-da-sorte-field.mes-da-sorte-field--inline .mes-da-sorte-select {
+        flex: 1;
+    }
+}

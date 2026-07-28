@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Padrões de Sequências - Análise Avançada{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    .card { margin-bottom: 20px; }
+    .numero-badge {
+        display: inline-block;
+        min-width: 35px;
+        padding: 6px 10px;
+        margin: 3px;
+        background-color: #D4B31A;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-project-diagram"></i> Padrões de Sequências</h1>
+    <p class="text-muted">Estruturas comuns nas combinações sorteadas</p>
+
+    <div id="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Carregando análise...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-arrows-alt-h"></i> Números Consecutivos</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Com consecutivos:</strong> <span id="comConsecutivos">-</span></p>
+                        <p><strong>% com consecutivos:</strong> <span id="percentConsecutivos">-</span></p>
+                        <table class="table table-sm">
+                            <thead><tr><th>Qtd</th><th>Freq</th><th>%</th></tr></thead>
+                            <tbody id="tabelaConsecutivos"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-calculator"></i> Progressões Aritméticas</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Jogos com PA:</strong> <span id="jogosComPA">-</span></p>
+                        <p><strong>% com PA:</strong> <span id="percentPA">-</span></p>
+                        <div id="pasComuns"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="fas fa-clone"></i> Duplicatas e Triplas</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Jogos com duplicatas:</strong> <span id="duplicatas">-</span></p>
+                        <p><strong>% duplicatas:</strong> <span id="percentDuplicatas">-</span></p>
+                        <p><strong>Jogos com triplas:</strong> <span id="triplas">-</span></p>
+                        <p><strong>% triplas:</strong> <span id="percentTriplas">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-expand-arrows-alt"></i> Padrões de Extremos</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Amplitude Média:</strong> <span id="amplitudeMedia">-</span></p>
+                        <p><strong>Amplitude Mínima:</strong> <span id="amplitudeMin">-</span></p>
+                        <p><strong>Amplitude Máxima:</strong> <span id="amplitudeMax">-</span></p>
+                        <div id="numerosInicio"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/analise/padroes-sequencias');
+        const data = await response.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            return;
+        }
+
+        // Consecutivos
+        const consec = data.numeros_consecutivos || {};
+        document.getElementById('comConsecutivos').textContent = consec.total_com_consecutivos || 0;
+        document.getElementById('percentConsecutivos').textContent = (consec.percentual_com_consecutivos || 0) + '%';
+
+        const tabelaConsec = document.getElementById('tabelaConsecutivos');
+        tabelaConsec.innerHTML = '';
+        (consec.distribuicao || []).forEach(item => {
+            tabelaConsec.innerHTML += `<tr><td>${item.quantidade_consecutivos}</td><td>${item.frequencia}</td><td>${item.percentual}%</td></tr>`;
+        });
+
+        // PAs
+        const pa = data.sequencias_aritmeticas || {};
+        document.getElementById('jogosComPA').textContent = pa.total_jogos_com_pa || 0;
+        document.getElementById('percentPA').textContent = (pa.percentual_jogos_com_pa || 0) + '%';
+
+        const divPAs = document.getElementById('pasComuns');
+        divPAs.innerHTML = '';
+        (pa.pas_mais_comuns || []).slice(0, 5).forEach(item => {
+            divPAs.innerHTML += `<p><strong>${item.progressao.join(', ')}</strong> (Razão: ${item.razao}) - ${item.frequencia}x</p>`;
+        });
+
+        // Duplicatas
+        const dup = data.duplicatas_triplas || {};
+        document.getElementById('duplicatas').textContent = dup.total_jogos_com_duplicatas || 0;
+        document.getElementById('percentDuplicatas').textContent = (dup.percentual_duplicatas || 0) + '%';
+        document.getElementById('triplas').textContent = dup.total_jogos_com_triplas || 0;
+        document.getElementById('percentTriplas').textContent = (dup.percentual_triplas || 0) + '%';
+
+        // Extremos
+        const ext = data.padroes_inicio_fim || {};
+        document.getElementById('amplitudeMedia').textContent = ext.amplitude_media || '-';
+        document.getElementById('amplitudeMin').textContent = ext.amplitude_minima || '-';
+        document.getElementById('amplitudeMax').textContent = ext.amplitude_maxima || '-';
+
+        const divInicio = document.getElementById('numerosInicio');
+        divInicio.innerHTML = '<p><strong>Números início mais comuns:</strong></p>';
+        (ext.numeros_inicio_mais_comuns || []).slice(0, 5).forEach(item => {
+            divInicio.innerHTML += `<span class="numero-badge">${item.numero}</span>`;
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+carregarAnalise();
+</script>
+{% endblock %}

@@ -1,0 +1,284 @@
+<!-- Sistema: Análise por Posição - Dia de Sorte -->
+<!-- Template: Formulário de Evento -->
+<!-- ESTE ARQUIVO VAI EM: templates/eventos_intuitivos/form.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Novo Evento Intuitivo{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-primary: #D4B31A;
+        --ds-primary-dark: #b69816;
+        --ds-primary-darker: #9f8514;
+        --ds-primary-light: #e6c533;
+        --ds-primary-lighter: #f1df8e;
+        --ds-primary-pale: #fcf9e8;
+        --ds-accent: #2d2606;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .page-header h2 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .page-header p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card.shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--ds-accent);
+        margin-bottom: 8px;
+    }
+
+    .form-label i {
+        color: var(--ds-primary);
+        margin-right: 5px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        font-size: 16px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ds-primary);
+        box-shadow: 0 0 0 3px rgba(212, 179, 26, 0.2);
+    }
+
+    .btn-ds-primary {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 12px 25px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ds-primary:hover {
+        background: linear-gradient(135deg, var(--ds-primary-dark) 0%, var(--ds-primary-darker) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.4);
+    }
+
+    .btn-ds-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 12px 25px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ds-secondary:hover {
+        background: #5a6268;
+        color: white;
+    }
+
+    .sidebar-card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .sidebar-card .card-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+        font-weight: 600;
+        padding: 15px 20px;
+    }
+
+    .sidebar-card .card-body {
+        background: var(--ds-primary-pale);
+    }
+
+    .sidebar-card h6 {
+        color: var(--ds-primary-darker);
+        font-weight: 700;
+    }
+
+    .sidebar-card ul, .sidebar-card ol {
+        color: #444;
+    }
+
+    .alert-info-ds {
+        background: var(--ds-primary-pale);
+        border: 1px solid var(--ds-primary-lighter);
+        color: var(--ds-primary-darker);
+        border-radius: 10px;
+        padding: 15px 20px;
+    }
+
+    .alert-info-ds i {
+        color: var(--ds-primary);
+    }
+
+    /* Select estilizado */
+    .form-select option {
+        padding: 10px;
+    }
+
+    /* Tipos de evento com ícones coloridos */
+    .tipo-sonho { color: #6c5ce7; }
+    .tipo-fato { color: #00b894; }
+    .tipo-sinal { color: #fdcb6e; }
+    .tipo-outro { color: #e17055; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-plus-circle"></i> Novo Evento Intuitivo
+                </h2>
+                <p>Registre um sonho, fato ou sinal para gerar apostas baseadas na sua intuição</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formulário Principal -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('eventos.criar') }}">
+
+                        <!-- Tipo -->
+                        <div class="mb-4">
+                            <label for="tipo" class="form-label">
+                                <i class="fas fa-tag"></i> Tipo de Evento
+                            </label>
+                            <select class="form-select" id="tipo" name="tipo" required>
+                                <option value="">Selecione o tipo...</option>
+                                <option value="sonho">🌙 Sonho</option>
+                                <option value="fato">📅 Fato</option>
+                                <option value="sinal">💡 Sinal</option>
+                                <option value="outro">⭐ Outro</option>
+                            </select>
+                        </div>
+
+                        <!-- Título -->
+                        <div class="mb-4">
+                            <label for="titulo" class="form-label">
+                                <i class="fas fa-heading"></i> Título
+                            </label>
+                            <input type="text" class="form-control" id="titulo" name="titulo"
+                                   placeholder="Ex: Sonho com arco-íris duplo" required>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="mb-4">
+                            <label for="descricao" class="form-label">
+                                <i class="fas fa-align-left"></i> Descrição Completa
+                            </label>
+                            <textarea class="form-control" id="descricao" name="descricao"
+                                      rows="5" required
+                                      placeholder="Descreva em detalhes o evento, incluindo cores, números, pessoas, objetos que apareceram..."></textarea>
+                        </div>
+
+                        <!-- Data/Hora do Evento -->
+                        <div class="mb-4">
+                            <label for="data_evento" class="form-label">
+                                 Data/Hora do Evento
+                            </label>
+                            <input type="datetime-local" class="form-control"
+                                   id="data_evento" name="data_evento" required>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('eventos.listar') }}" class="btn btn-ds-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-ds-primary">
+                                <i class="fas fa-save"></i> Criar Evento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info-ds mt-4">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Dica:</strong> Depois de criar o evento, você poderá adicionar apostas
+                para diferentes loterias baseadas neste evento.
+            </div>
+        </div>
+
+        <!-- Sidebar com orientações -->
+        <div class="col-md-4">
+            <div class="card sidebar-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Como usar
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6><i class="fas fa-list"></i> Tipos de Evento:</h6>
+                    <ul class="small mb-4">
+                        <li><strong class="tipo-sonho">🌙 Sonho:</strong> Sonhos com números, cores, objetos</li>
+                        <li><strong class="tipo-fato">📅 Fato:</strong> Acontecimentos marcantes</li>
+                        <li><strong class="tipo-sinal">💡 Sinal:</strong> Coincidências, sincronicidades</li>
+                        <li><strong class="tipo-outro">⭐ Outro:</strong> Qualquer outra intuição</li>
+                    </ul>
+
+                    <h6><i class="fas fa-route"></i> Próximos passos:</h6>
+                    <ol class="small mb-0">
+                        <li>Crie o evento com todos os detalhes</li>
+                        <li>Adicione apostas (pode ser para várias loterias)</li>
+                        <li>Confira os resultados quando sair o sorteio</li>
+                        <li>Adicione sua análise retrospectiva</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Preencher data/hora atual por padrão
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('data_evento');
+    if (!input.value) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        input.value = now.toISOString().slice(0, 16);
+    }
+});
+</script>
+{% endblock %}

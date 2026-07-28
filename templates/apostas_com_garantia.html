@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+{% block title %}Apostas com Garantia - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    .card { margin-bottom: 20px; }
+    .table-garantias { font-size: 0.9rem; }
+    .btn-action { margin: 2px; }
+    .modal-body label { font-weight: 600; margin-top: 10px; }
+    .stats-card {
+        background: linear-gradient(135deg, #F7931E 0%, #E6B800 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .custo-display {
+        background: #f8f9fa;
+        border: 2px solid #F7931E;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    /* Cores Dia de Sorte */
+    .bg-primary-ds {
+        background: linear-gradient(135deg, #F7931E 0%, #E6B800 100%) !important;
+        color: white !important;
+    }
+    .bg-success-ds {
+        background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%) !important;
+        color: white !important;
+    }
+
+    /* Tabela com cabeçalho fixo */
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        position: relative;
+    }
+    .table-garantias {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .table-garantias thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .table-garantias thead th {
+        background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+        color: white;
+        border: none;
+        padding: 12px 8px;
+        font-weight: 600;
+    }
+    .table-garantias thead th:first-child {
+        border-radius: 0;
+    }
+    .table-garantias thead th:last-child {
+        border-radius: 0;
+    }
+    .table-garantias tbody tr:nth-child(odd) {
+        background-color: #f8f9fa;
+    }
+    .table-garantias tbody tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+    .table-garantias tbody tr:hover {
+        background-color: #fff8e1;
+    }
+    .table-garantias tbody td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e0e0e0;
+        vertical-align: middle;
+    }
+
+    /* Badge de garantia com cor Dia de Sorte */
+    .badge-garantia {
+        background: linear-gradient(135deg, #F7931E 0%, #E6B800 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    /* Botão calcular */
+    .btn-calcular {
+        background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+        border: none;
+        color: white;
+    }
+    .btn-calcular:hover {
+        background: linear-gradient(135deg, #1B5E20 0%, #388E3C 100%);
+        color: white;
+    }
+
+    /* Botão Nova Garantia */
+    .btn-nova {
+        background: white;
+        color: #2E7D32;
+        border: none;
+        font-weight: 500;
+    }
+    .btn-nova:hover {
+        background: #f5f5f5;
+        color: #1B5E20;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-shield-alt" style="color: #F7931E;"></i> Apostas com Garantia</h1>
+    <p class="text-muted">Gerencie garantias de apostas baseadas em desdobramentos matemáticos</p>
+
+    <!-- Calculadora de Custo -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary-ds">
+                    <h5 class="mb-0"><i class="fas fa-calculator"></i> Calculadora de Custo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Número de Dezenas:</label>
+                            <input type="number" id="calcDezenas" class="form-control" min="8" max="31" value="9">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Valor da Aposta (R$):</label>
+                            <input type="number" id="calcValorAposta" class="form-control" step="0.01" placeholder="Carregando...">
+                            <small class="text-muted">Valor carregado das configurações do sistema</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-calcular w-100" onclick="calcularCusto()">
+                                <i class="fas fa-search"></i> Calcular
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="resultadoCusto" class="custo-display d-none">
+                        <h5>Resultado:</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Dezenas:</strong> <span id="resDezbenas">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Nº Apostas:</strong> <span id="resApostas">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Garantia:</strong> <span id="resGarantia">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong class="text-success">Custo Total:</strong>
+                                <span class="fs-5 text-success" id="resCusto">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 mb-0"><strong>Obs:</strong> <span id="resObs">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Garantias -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success-ds d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-table"></i> Tabela de Garantias</h5>
+                    <button class="btn btn-nova btn-sm" onclick="abrirModalAdicionar()">
+                        <i class="fas fa-plus"></i> Nova Garantia
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="loading" class="text-center my-3">
+                        <div class="spinner-border" style="color: #F7931E;" role="status"></div>
+                        <p>Carregando garantias...</p>
+                    </div>
+
+                    <div id="tabelaContainer" style="display: none;">
+                        <div class="table-container">
+                            <table class="table table-garantias">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>🔢 Dezenas</th>
+                                        <th>🎟️ Nº Apostas</th>
+                                        <th>🧩 Garantia</th>
+                                        <th>💬 Observação</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaGarantias"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar/Editar -->
+<div class="modal fade" id="modalGarantia" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #F7931E 0%, #E6B800 100%); color: white;">
+                <h5 class="modal-title" id="modalTitulo">Nova Garantia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editandoId">
+
+                <label>Número de Dezenas:</label>
+                <input type="number" id="inputDezenas" class="form-control" min="1" max="31" required>
+
+                <label>Número de Apostas:</label>
+                <input type="number" id="inputApostas" class="form-control" min="1" required>
+
+                <label>Garantia:</label>
+                <input type="text" id="inputGarantia" class="form-control" placeholder="Ex: 6 pontos" required>
+
+                <label>Observação:</label>
+                <textarea id="inputObservacao" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn" style="background: linear-gradient(135deg, #F7931E 0%, #E6B800 100%); color: white;" onclick="salvarGarantia()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let modal;
+
+document.addEventListener('DOMContentLoaded', () => {
+    modal = new bootstrap.Modal(document.getElementById('modalGarantia'));
+    carregarValorAposta();  // Carrega o valor da aposta das configurações
+    carregarGarantias();
+});
+
+// ========== CARREGA VALOR DA APOSTA DAS CONFIGURAÇÕES ==========
+async function carregarValorAposta() {
+    try {
+        const response = await fetch('/api/configuracoes/valor-aposta');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            const valor = data.valor_aposta;
+            document.getElementById('calcValorAposta').value = valor.toFixed(2);
+        } else {
+            // Fallback caso a API falhe
+            document.getElementById('calcValorAposta').value = '2.50';
+            console.warn('Usando valor padrão: 2.50');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar valor da aposta:', error);
+        // Fallback caso a API falhe
+        document.getElementById('calcValorAposta').value = '2.50';
+    }
+}
+
+async function carregarGarantias() {
+    try {
+        const response = await fetch('/api/garantias');
+        const garantias = await response.json();
+
+        const tbody = document.getElementById('tabelaGarantias');
+        tbody.innerHTML = '';
+
+        garantias.forEach(g => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${g.id}</td>
+                    <td><strong>${g.dezenas}</strong></td>
+                    <td>${g.apostas}</td>
+                    <td><span class="badge-garantia">${g.garantia}</span></td>
+                    <td>${g.observacao || '-'}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-warning btn-action" onclick="editarGarantia(${g.id})" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="excluirGarantia(${g.id})" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('tabelaContainer').style.display = 'block';
+    } catch (error) {
+        console.error('Erro ao carregar garantias:', error);
+        document.getElementById('loading').innerHTML = '<div class="alert alert-danger">Erro ao carregar garantias</div>';
+    }
+}
+
+function abrirModalAdicionar() {
+    document.getElementById('modalTitulo').textContent = 'Nova Garantia';
+    document.getElementById('editandoId').value = '';
+    document.getElementById('inputDezenas').value = '';
+    document.getElementById('inputApostas').value = '';
+    document.getElementById('inputGarantia').value = '';
+    document.getElementById('inputObservacao').value = '';
+    modal.show();
+}
+
+async function editarGarantia(id) {
+    try {
+        const response = await fetch(`/api/garantias/${id}`);
+        const garantia = await response.json();
+
+        document.getElementById('modalTitulo').textContent = 'Editar Garantia';
+        document.getElementById('editandoId').value = garantia.id;
+        document.getElementById('inputDezenas').value = garantia.dezenas;
+        document.getElementById('inputApostas').value = garantia.apostas;
+        document.getElementById('inputGarantia').value = garantia.garantia;
+        document.getElementById('inputObservacao').value = garantia.observacao || '';
+
+        modal.show();
+    } catch (error) {
+        console.error('Erro ao buscar garantia:', error);
+    }
+}
+
+async function salvarGarantia() {
+    const id = document.getElementById('editandoId').value;
+    const dados = {
+        dezenas: parseInt(document.getElementById('inputDezenas').value),
+        apostas: parseInt(document.getElementById('inputApostas').value),
+        garantia: document.getElementById('inputGarantia').value,
+        observacao: document.getElementById('inputObservacao').value
+    };
+
+    try {
+        const url = id ? `/api/garantias/${id}` : '/api/garantias';
+        const method = id ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        });
+
+        if (response.ok) {
+            modal.hide();
+            carregarGarantias();
+        } else {
+            const error = await response.json();
+            console.error('Erro:', error);
+        }
+    } catch (error) {
+        console.error('Erro ao salvar:', error);
+    }
+}
+
+function excluirGarantia(id) {
+    const modalConfirm = document.createElement('div');
+    modalConfirm.className = 'modal fade';
+    modalConfirm.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Deseja realmente excluir esta garantia?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarExclusao(${id})">Excluir</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalConfirm);
+    const bsModal = new bootstrap.Modal(modalConfirm);
+    bsModal.show();
+    modalConfirm.addEventListener('hidden.bs.modal', () => modalConfirm.remove());
+}
+
+async function confirmarExclusao(id) {
+    try {
+        const response = await fetch(`/api/garantias/${id}`, {method: 'DELETE'});
+        if (response.ok) {
+            document.querySelector('.modal.show').querySelectorAll('[data-bs-dismiss="modal"]')[0].click();
+            carregarGarantias();
+        }
+    } catch (error) {
+        console.error('Erro ao excluir:', error);
+    }
+}
+
+async function calcularCusto() {
+    const dezenas = parseInt(document.getElementById('calcDezenas').value);
+    const valorAposta = parseFloat(document.getElementById('calcValorAposta').value);
+
+    try {
+        const response = await fetch('/api/garantias/calcular-custo', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({dezenas, valor_aposta: valorAposta})
+        });
+
+        const resultado = await response.json();
+
+        if (resultado.erro) {
+            document.getElementById('resultadoCusto').innerHTML =
+                `<div class="alert alert-warning">${resultado.erro}</div>`;
+            document.getElementById('resultadoCusto').classList.remove('d-none');
+            return;
+        }
+
+        document.getElementById('resDezbenas').textContent = resultado.dezenas;
+        document.getElementById('resApostas').textContent = resultado.apostas;
+        document.getElementById('resGarantia').textContent = resultado.garantia;
+        document.getElementById('resCusto').textContent =
+            `R$ ${resultado.custo_total.toFixed(2).replace('.', ',')}`;
+        document.getElementById('resObs').textContent = resultado.observacao || '-';
+
+        document.getElementById('resultadoCusto').classList.remove('d-none');
+    } catch (error) {
+        console.error('Erro ao calcular custo:', error);
+    }
+}
+</script>
+{% endblock %}

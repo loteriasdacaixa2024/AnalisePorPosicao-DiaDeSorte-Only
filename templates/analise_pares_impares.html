@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Pares e Ímpares - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-dourado: #D4B31A;
+        --ds-dourado-light: #f9f2d2;
+        --ds-dourado-dark: #b69816;
+    }
+
+    body {
+        background: linear-gradient(135deg, #fcf9e8 0%, #ffffff 50%, #fcf9e8 100%);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .card-custom {
+        border: 2px solid var(--ds-dourado-light);
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        font-weight: bold;
+    }
+
+    .top3-item {
+        background: white;
+        border-left: 5px solid var(--ds-dourado);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .top3-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(212, 179, 26, 0.2);
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid #2196F3;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .recommendation-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4CAF50;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .badge-padrao {
+        background: var(--ds-dourado);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+
+    /* Seção Padrões Extremos */
+    .extremos-section {
+        margin-top: 30px;
+    }
+
+    .extremo-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border: 2px solid var(--ds-dourado);
+        border-radius: 15px;
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+
+    .extremo-header {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: #1a1a2e;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .extremo-header h5 {
+        margin: 0;
+        font-weight: bold;
+    }
+
+    .extremo-stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .extremo-stat {
+        text-align: center;
+    }
+
+    .extremo-stat .valor {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .extremo-stat .rotulo {
+        font-size: 0.8em;
+        opacity: 0.9;
+    }
+
+    .extremo-body {
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .concurso-item {
+        background: rgba(212, 179, 26, 0.1);
+        border: 1px solid rgba(212, 179, 26, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .concurso-item:hover {
+        background: rgba(212, 179, 26, 0.2);
+    }
+
+    .concurso-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .concurso-numero {
+        background: var(--ds-dourado);
+        color: #1a1a2e;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    .concurso-data {
+        color: #b8b8b8;
+        font-size: 0.9em;
+    }
+
+    .numeros-sorteados {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .numero-bola {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+
+    .numero-par {
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+    }
+
+    .numero-impar {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        color: white;
+    }
+
+    .atraso-destaque {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .sem-ocorrencias {
+        text-align: center;
+        padding: 30px;
+        color: #b8b8b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="page-header">
+        <h1><i class="bi bi-calculator"></i> Análise de Pares e Ímpares</h1>
+        <p class="mb-0">Distribuição de números pares e ímpares nos sorteios do Dia de Sorte</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3">Carregando análise...</p>
+    </div>
+
+    <!-- Resultado -->
+    <div id="resultado" style="display: none;"></div>
+
+    <!-- Insights -->
+    <div class="card-custom" id="insightsCard" style="display: none;">
+        <div class="card-header-custom">
+            <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+        </div>
+        <div class="card-body" id="insightsContent"></div>
+    </div>
+
+    <!-- Recomendações -->
+    <div class="card-custom" id="recomendacoesCard" style="display: none;">
+        <div class="card-header-custom">
+            <i class="bi bi-stars"></i> Recomendações Estratégicas
+        </div>
+        <div class="card-body" id="recomendacoesContent"></div>
+    </div>
+
+    <!-- SEÇÃO: Padrões Extremos -->
+    <div class="extremos-section" id="extremosSection" style="display: none;">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <i class="bi bi-fire"></i> Padrões Extremos - Detalhamento Completo
+                <small class="ms-2">(1P+6I, 6P+1I, 7P+0I, 0P+7I)</small>
+            </div>
+            <div class="card-body">
+                <div id="extremosContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+    document.getElementById('insightsCard').style.display = 'none';
+    document.getElementById('extremosSection').style.display = 'none';
+
+    // Carregar análise principal
+    fetch('/api/analise/pares-impares')
+        .then(response => response.json())
+        .then(data => {
+            exibirResultado(data);
+            gerarInsights(data);
+            loading.style.display = 'none';
+
+            // Carregar padrões extremos após análise principal
+            carregarPadroesExtremos();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Erro ao carregar análise: ${error.message}
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function carregarPadroesExtremos() {
+    fetch('/api/analise/pares-impares/extremos')
+        .then(response => response.json())
+        .then(data => {
+            exibirPadroesExtremos(data);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar padrões extremos:', error);
+        });
+}
+
+function exibirPadroesExtremos(data) {
+    const extremosSection = document.getElementById('extremosSection');
+    const extremosContent = document.getElementById('extremosContent');
+
+    if (!data.padroes_extremos) {
+        extremosSection.style.display = 'none';
+        return;
+    }
+
+    // Ordem de exibição: 1P+6I, 6P+1I, 7P+0I (com atraso), 0P+7I
+    const ordemExibicao = ['1P_6I', '6P_1I', '7P_0I', '0P_7I'];
+    const icones = {
+        '1P_6I': '1️⃣',
+        '6P_1I': '6️⃣',
+        '7P_0I': '🎱',
+        '0P_7I': '0️⃣'
+    };
+
+    let html = '<div class="row">';
+
+    ordemExibicao.forEach(chave => {
+        const padrao = data.padroes_extremos[chave];
+        if (!padrao) return;
+
+        const mostrarAtraso = chave === '7P_0I';
+
+        html += `
+            <div class="col-lg-6 mb-4">
+                <div class="extremo-card">
+                    <div class="extremo-header">
+                        <h5>${icones[chave]} ${padrao.descricao}</h5>
+                        <div class="extremo-stats">
+                            <div class="extremo-stat">
+                                <div class="valor">${padrao.frequencia}</div>
+                                <div class="rotulo">Ocorrências</div>
+                            </div>
+                            <div class="extremo-stat">
+                                <div class="valor">${padrao.ultimo_concurso || '-'}</div>
+                                <div class="rotulo">Último Conc.</div>
+                            </div>
+                            ${mostrarAtraso ? `
+                                <div class="extremo-stat atraso-destaque">
+                                    <div class="valor">${padrao.atraso}</div>
+                                    <div class="rotulo">ATRASO</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="extremo-body">
+        `;
+
+        if (padrao.concursos && padrao.concursos.length > 0) {
+            padrao.concursos.forEach(conc => {
+                html += `
+                    <div class="concurso-item">
+                        <div class="concurso-info">
+                            <span class="concurso-numero">#${conc.concurso}</span>
+                            <span class="concurso-data">${conc.data}</span>
+                        </div>
+                        <div class="numeros-sorteados">
+                `;
+
+                // Exibir números com cores (par = azul, ímpar = laranja)
+                conc.numeros.forEach(num => {
+                    const classe = num % 2 === 0 ? 'numero-par' : 'numero-impar';
+                    html += `<span class="numero-bola ${classe}">${String(num).padStart(2, '0')}</span>`;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            html += `
+                <div class="sem-ocorrencias">
+                    <i class="bi bi-inbox" style="font-size: 2em;"></i>
+                    <p>Nenhuma ocorrência encontrada</p>
+                </div>
+            `;
+        }
+
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+
+    extremosContent.innerHTML = html;
+    extremosSection.style.display = 'block';
+}
+
+function exibirResultado(data) {
+    const resultado = document.getElementById('resultado');
+
+    let html = `
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <i class="bi bi-pie-chart-fill"></i> Distribuição de Padrões (${data.total_concursos} concursos)
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <strong>Média de PARES por sorteio:</strong> ${data.media_pares_por_sorteio}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-secondary">
+                            <strong>Média de ÍMPARES por sorteio:</strong> ${data.media_impares_por_sorteio}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Posição</th>
+                                <th>Padrão</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                                <th>Atraso</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    data.padroes.forEach((padrao, index) => {
+        const posicao = index < 3 ? medalhas[index] : `${index + 1}º`;
+        const destaque = index < 3 ? 'table-success' : '';
+        const badgeColor = padrao.atraso > 50 ? 'danger' : padrao.atraso > 20 ? 'warning' : 'success';
+
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${posicao}</strong></td>
+                <td><span class="badge bg-primary">${padrao.descricao}</span></td>
+                <td><strong>${padrao.frequencia}x</strong></td>
+                <td>${padrao.percentual}%</td>
+                <td>${padrao.ultimo_concurso}</td>
+                <td><span class="badge bg-${badgeColor}">${padrao.atraso}</span></td>
+                <td>
+                    ${index < 3 ? '<span class="badge bg-success">Muito Frequente</span>' : ''}
+                    ${padrao.atraso > 50 ? '<span class="badge bg-danger">Atraso Alto</span>' : ''}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    resultado.innerHTML = html;
+    resultado.style.display = 'block';
+}
+
+function gerarInsights(data) {
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+    const recomendacoesCard = document.getElementById('recomendacoesCard');
+    const recomendacoesContent = document.getElementById('recomendacoesContent');
+
+    const padroes = data.padroes;
+    const top3 = padroes.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    const equilibrados = padroes.filter(p => p.pares === 3 || p.pares === 4);
+    const totalEquilibrados = equilibrados.reduce((sum, p) => sum + p.frequencia, 0);
+    const percEquilibrados = ((totalEquilibrados / data.total_concursos) * 100).toFixed(2);
+
+    const extremos = padroes.filter(p => p.pares === 0 || p.pares === 7);
+    const totalExtremos = extremos.reduce((sum, p) => sum + p.frequencia, 0);
+    const percExtremos = ((totalExtremos / data.total_concursos) * 100).toFixed(2);
+
+    let tendencia = '';
+    if (data.media_pares_por_sorteio > 3.5) {
+        tendencia = 'Ligeiramente mais PARES do que ímpares';
+    } else if (data.media_pares_por_sorteio < 3.5) {
+        tendencia = 'Ligeiramente mais ÍMPARES do que pares';
+    } else {
+        tendencia = 'Perfeitamente equilibrado!';
+    }
+
+    let htmlInsights = '';
+
+    // Top 3
+    htmlInsights += '<div class="insight-box"><h6><i class="bi bi-trophy-fill text-warning"></i> Top 3 Padrões Mais Frequentes</h6><ul class="mb-0">';
+    top3.forEach((padrao, index) => {
+        htmlInsights += `<li>${medalhas[index]} <strong>${padrao.descricao}</strong> - ${padrao.frequencia}x (${padrao.percentual}%)</li>`;
+    });
+    htmlInsights += '</ul></div>';
+
+    // Equilibrados
+    htmlInsights += `
+        <div class="insight-box">
+            <h6><i class="bi bi-check-circle-fill"></i> Padrões Equilibrados (3P+4I e 4P+3I)</h6>
+            <p class="mb-0">Juntos representam <strong>${percEquilibrados}%</strong> dos sorteios (${totalEquilibrados} concursos)</p>
+        </div>
+    `;
+
+    // Extremos
+    htmlInsights += `
+        <div class="insight-box">
+            <h6><i class="bi bi-fire"></i> Padrões Extremos (0P+7I e 7P+0I)</h6>
+            <p class="mb-0">Representam apenas <strong>${percExtremos}%</strong> dos sorteios (${totalExtremos} concursos)</p>
+        </div>
+    `;
+
+    // Tendência
+    htmlInsights += `
+        <div class="insight-box">
+            <h6><i class="bi bi-graph-up-arrow"></i> Tendência Geral</h6>
+            <p class="mb-0">${tendencia}<br><small>Média: ${data.media_pares_por_sorteio} pares e ${data.media_impares_por_sorteio} ímpares</small></p>
+        </div>
+    `;
+
+    insightsContent.innerHTML = htmlInsights;
+    insightsCard.style.display = 'block';
+
+    // Recomendações
+    let htmlRecomendacoes = `
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Priorize padrões <strong>3P+4I</strong> e <strong>4P+3I</strong> (quase 50% dos casos)
+        </div>
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Considere também <strong>2P+5I</strong> e <strong>5P+2I</strong> como alternativas fortes
+        </div>
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Evite padrões extremos (0P+7I e 7P+0I) - ocorrem em menos de 2% dos casos
+        </div>
+        <div class="recommendation-box">
+            <i class="bi bi-check-circle-fill"></i> Aposte em jogos com <strong>${Math.round(data.media_pares_por_sorteio)}</strong> números pares para seguir a tendência
+        </div>
+    `;
+
+    recomendacoesContent.innerHTML = htmlRecomendacoes;
+    recomendacoesCard.style.display = 'block';
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+{% endblock %}

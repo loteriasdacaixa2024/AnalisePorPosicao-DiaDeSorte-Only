@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Meses Atrasados - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+        <i class="bi bi-calendar-month"></i> Meses Atrasados
+    </h2>
+        <a href="/" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">📅 Análise do Mês da Sorte</h5>
+            <p class="card-text">
+                Identifique quais meses estão mais atrasados nos sorteios.
+                <br><strong>Útil para:</strong> Escolher o mês da sorte com base em probabilidades de saída.
+            </p>
+        </div>
+    </div>
+
+    <div id="resultado"></div>
+
+    <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="insightsContent"></div>
+        </div>
+    </div>
+
+    <div id="loading" class="text-center d-none mt-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="planoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+const emojisMeses = ['', '📅', '💗', '🌸', '🌧️', '🌺', '☀️', '🌞', '🍂', '🍁', '🎃', '🍃', '🎄'];
+
+let ultimosDados = null;
+
+// Helper function para obter índice da cor do mês (0-11)
+function obterIndiceMes(numeroMes) {
+    // numeroMes vem como 1-12, precisamos converter para 0-11
+    return numeroMes - 1;
+}
+
+function buscarMeses() {
+    document.getElementById('loading').classList.remove('d-none');
+    document.getElementById('resultado').innerHTML = '';
+
+    fetch('/api/analise/meses')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').classList.add('d-none');
+            ultimosDados = data;
+            mostrarResultado(data);
+            gerarInsights(data);
+        })
+        .catch(error => {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('resultado').innerHTML = '<div class="alert alert-danger">Erro ao carregar dados.</div>';
+        });
+}
+
+function getMesEmoji(mes) {
+    return emojisMeses[mes] || '📅';
+}
+
+function getMesNome(mes) {
+    return nomesMeses[mes] || 'Desconhecido';
+}
+
+function mostrarResultado(data) {
+    let html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Estatísticas de Todos os Meses</h5>
+                <small>Análise completa dos 12 meses da sorte</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th>Atraso</th>
+                                <th>Frequência</th>
+                                <th>%</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.meses.forEach(item => {
+        let badgeClass = 'bg-success';
+        if (item.atraso > 20) badgeClass = 'bg-danger';
+        else if (item.atraso > 10) badgeClass = 'bg-warning';
+
+        const mesIndex = obterIndiceMes(item.mes);
+
+        html += `
+            <tr>
+                <td><span class="badge mes-cor-${mesIndex} fs-6">${getMesEmoji(item.mes)} ${getMesNome(item.mes)}</span></td>
+                <td><span class="badge ${badgeClass}">${item.atraso} concursos</span></td>
+                <td>${item.frequencia}x</td>
+                <td>${item.percentual}%</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary"
+                            onclick="mostrarPlano(${item.mes}, '${getMesNome(item.mes)}', ${JSON.stringify(item.plano_apostas).replace(/"/g, '&quot;')}, ${item.atraso})">
+                        📊 Ver Plano
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('resultado').innerHTML = html;
+}
+
+function mostrarPlano(mes, nomeMes, plano, atraso) {
+    const mesIndex = obterIndiceMes(mes);
+    document.getElementById('modalTitle').textContent = `Plano de Apostas - ${getMesEmoji(mes)} ${nomeMes} (Atraso: ${atraso})`;
+
+    let html = `
+        <p class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            Probabilidades do mês <span class="badge mes-cor-${mesIndex}">${nomeMes}</span> sair nos próximos sorteios:
+        </p>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-header bg-success text-white">
+                        <strong>Plano Curto</strong>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-success">35.28%</h3>
+                        <p class="mb-2">Apostar por <strong>5 concursos</strong></p>
+                        <hr>
+                        <small class="text-muted">
+                            Do concurso <strong>${plano.proximo_concurso}</strong><br>
+                            até o <strong>${plano.ate_5}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-header bg-warning text-dark">
+                        <strong>Plano Médio</strong>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-warning">58.11%</h3>
+                        <p class="mb-2">Apostar por <strong>10 concursos</strong></p>
+                        <hr>
+                        <small class="text-muted">
+                            Do concurso <strong>${plano.proximo_concurso}</strong><br>
+                            até o <strong>${plano.ate_10}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <strong>Plano Longo</strong>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-danger">82.45%</h3>
+                        <p class="mb-2">Apostar por <strong>20 concursos</strong></p>
+                        <hr>
+                        <small class="text-muted">
+                            Do concurso <strong>${plano.proximo_concurso}</strong><br>
+                            até o <strong>${plano.ate_20}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="text-muted small mt-3">
+            <i class="bi bi-calculator"></i>
+            Probabilidade calculada pela fórmula: P = 1 - ((12-1)/12)^N
+        </p>
+    `;
+
+    document.getElementById('modalBody').innerHTML = html;
+    new bootstrap.Modal(document.getElementById('planoModal')).show();
+}
+
+function gerarInsights(data) {
+    if (!data || !data.meses || data.meses.length === 0) {
+        return;
+    }
+
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+
+    const mesesOrdenados = [...data.meses].sort((a, b) => b.atraso - a.atraso);
+    const top3 = mesesOrdenados.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    let htmlTop3 = '<div class="mb-4">';
+    htmlTop3 += '<h6 class="fw-bold text-primary mb-3">🏆 Top 3 Meses Mais Atrasados:</h6>';
+
+    top3.forEach((mes, index) => {
+        const destaque = index === 0 ? 'text-danger fw-bold' : '';
+        const comentario = index === 0 ? ' - O mais atrasado!' : '';
+        const mesIndex = obterIndiceMes(mes.mes);
+
+        htmlTop3 += `<div class="${destaque} mb-2">
+            ${medalhas[index]} <span class="badge mes-cor-${mesIndex}">${getMesEmoji(mes.mes)} ${getMesNome(mes.mes)}</span>:
+            ${mes.atraso} concursos de atraso${comentario}
+        </div>`;
+    });
+
+    htmlTop3 += '</div>';
+
+    const muitoAtrasados = mesesOrdenados.filter(m => m.atraso > 20);
+    let htmlAtrasados = '';
+
+    if (muitoAtrasados.length > 0) {
+        htmlAtrasados = '<div class="mb-4">';
+        htmlAtrasados += '<h6 class="fw-bold text-primary mb-3">⚠️ Meses Muito Atrasados (>20 concursos):</h6>';
+        htmlAtrasados += '<div class="alert alert-danger py-2">';
+        htmlAtrasados += `<i class="bi bi-exclamation-triangle-fill"></i>
+            ${muitoAtrasados.length} mês(es) com atraso crítico:<br>`;
+        const nomesAtrasados = muitoAtrasados.map(m => {
+            const mesIndex = obterIndiceMes(m.mes);
+            return `<span class="badge mes-cor-${mesIndex}">${getMesEmoji(m.mes)} ${getMesNome(m.mes)} (${m.atraso})</span>`;
+        }).join(' ');
+        htmlAtrasados += `<strong>${nomesAtrasados}</strong>`;
+        htmlAtrasados += '</div></div>';
+    }
+
+    const mesesFrequentes = [...data.meses].sort((a, b) => b.frequencia - a.frequencia).slice(0, 3);
+    let htmlFrequentes = '<div class="mb-4">';
+    htmlFrequentes += '<h6 class="fw-bold text-primary mb-3">🔥 Meses Mais Frequentes Historicamente:</h6>';
+    htmlFrequentes += '<div class="text-muted">';
+    mesesFrequentes.forEach(m => {
+        const mesIndex = obterIndiceMes(m.mes);
+        htmlFrequentes += `<div class="mb-1">✓ <span class="badge mes-cor-${mesIndex}">${getMesEmoji(m.mes)} ${getMesNome(m.mes)}</span>: ${m.frequencia}x (${m.percentual}%)</div>`;
+    });
+    htmlFrequentes += '</div></div>';
+
+    let htmlEstrategico = '<div class="mb-2">';
+    htmlEstrategico += '<h6 class="fw-bold text-primary mb-3">💡 Insights Estratégicos:</h6>';
+
+    const top1 = mesesOrdenados[0];
+    const top1MesIndex = obterIndiceMes(top1.mes);
+    if (top1.atraso > 30) {
+        htmlEstrategico += `<div class="alert alert-danger py-2 mb-2">
+            <i class="bi bi-fire"></i>
+            <span class="badge mes-cor-${top1MesIndex}">${getMesEmoji(top1.mes)} ${getMesNome(top1.mes)}</span> está com atraso EXTREMO de ${top1.atraso} concursos!
+        </div>`;
+    } else if (top1.atraso > 15) {
+        htmlEstrategico += `<div class="alert alert-warning py-2 mb-2">
+            <i class="bi bi-clock-history"></i>
+            <span class="badge mes-cor-${top1MesIndex}">${getMesEmoji(top1.mes)} ${getMesNome(top1.mes)}</span> não sai há ${top1.atraso} concursos
+        </div>`;
+    }
+
+    const mediaAtraso = data.meses.reduce((acc, m) => acc + m.atraso, 0) / data.meses.length;
+    htmlEstrategico += `<div class="alert alert-info py-2 mb-2">
+        <i class="bi bi-graph-up-arrow"></i>
+        Média de atraso entre todos os meses: ${Math.round(mediaAtraso)} concursos
+    </div>`;
+
+    const candidatos = mesesOrdenados.filter(m => m.atraso > 10 && m.atraso <= 25 && m.frequencia >= 90);
+    if (candidatos.length > 0) {
+        const nomes = candidatos.slice(0, 3).map(m => {
+            const mesIndex = obterIndiceMes(m.mes);
+            return `<span class="badge mes-cor-${mesIndex}">${getMesEmoji(m.mes)} ${getMesNome(m.mes)}</span>`;
+        }).join(' ');
+        htmlEstrategico += `<div class="alert alert-success py-2">
+            <i class="bi bi-check-circle-fill"></i>
+            Meses com bom equilíbrio (atraso moderado + boa frequência): ${nomes}
+        </div>`;
+    }
+
+    htmlEstrategico += '</div>';
+
+    insightsContent.innerHTML = htmlTop3 + htmlAtrasados + htmlFrequentes + htmlEstrategico;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    buscarMeses();
+};
+</script>
+{% endblock %}

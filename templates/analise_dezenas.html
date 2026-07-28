@@ -1,0 +1,714 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Distribuição por Faixas - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-dourado: #D4B31A;
+        --ds-dourado-light: #f9f2d2;
+        --ds-dourado-dark: #b69816;
+    }
+
+    body {
+        background: linear-gradient(135deg, #fcf9e8 0%, #ffffff 50%, #fcf9e8 100%);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .card-custom {
+        border: 2px solid var(--ds-dourado-light);
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        font-weight: bold;
+    }
+
+    .top3-item {
+        background: white;
+        border-left: 5px solid var(--ds-dourado);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .top3-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(212, 179, 26, 0.2);
+    }
+
+    .badge-padrao {
+        background: var(--ds-dourado);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid #2196F3;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .recommendation-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4CAF50;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    /* 🆕 Widget Comparativo */
+    .widget-comparativo {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border: 2px solid #ff9800;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .comparacao-item {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+
+    .comparacao-item:hover {
+        border-color: var(--ds-dourado);
+        box-shadow: 0 3px 10px rgba(212, 179, 26, 0.2);
+    }
+
+    /* 🆕 Cards de Dígitos Visuais */
+    .digito-visual-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin: 8px 0;
+        border-left: 5px solid;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .digito-visual-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .digito-visual-card.digito-0 {
+        border-left-color: #2196F3;
+        background: linear-gradient(to right, #e3f2fd 0%, white 100%);
+    }
+
+    .digito-visual-card.digito-1 {
+        border-left-color: #4CAF50;
+        background: linear-gradient(to right, #e8f5e9 0%, white 100%);
+    }
+
+    .digito-visual-card.digito-2 {
+        border-left-color: #FF9800;
+        background: linear-gradient(to right, #fff3e0 0%, white 100%);
+    }
+
+    .digito-visual-card.digito-3 {
+        border-left-color: #E91E63;
+        background: linear-gradient(to right, #fce4ec 0%, white 100%);
+    }
+
+    .digito-numero-visual {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .digito-numero-visual.digito-0 {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+    }
+
+    .digito-numero-visual.digito-1 {
+        background: linear-gradient(135deg, #4CAF50, #388E3C);
+    }
+
+    .digito-numero-visual.digito-2 {
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+    }
+
+    .digito-numero-visual.digito-3 {
+        background: linear-gradient(135deg, #E91E63, #C2185B);
+    }
+
+    .digito-info-visual {
+        flex-grow: 1;
+    }
+
+    .digito-faixa-visual {
+        font-weight: bold;
+        color: #424242;
+        font-size: 1em;
+        margin-bottom: 3px;
+    }
+
+    .digito-quantidade-visual {
+        font-size: 2em;
+        font-weight: bold;
+        margin-left: auto;
+        padding: 5px 20px;
+        border-radius: 25px;
+        color: white;
+    }
+
+    .digito-quantidade-visual.digito-0 {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+    }
+
+    .digito-quantidade-visual.digito-1 {
+        background: linear-gradient(135deg, #4CAF50, #388E3C);
+    }
+
+    .digito-quantidade-visual.digito-2 {
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+    }
+
+    .digito-quantidade-visual.digito-3 {
+        background: linear-gradient(135deg, #E91E63, #C2185B);
+    }
+
+    .padrao-resultado {
+        background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+        border: 2px solid #bdbdbd;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .padrao-resultado strong {
+        font-size: 1.3em;
+        color: #424242;
+    }
+
+    /* 🆕 Toggle Switch */
+    .view-toggle {
+        background: white;
+        border-radius: 25px;
+        padding: 5px;
+        display: inline-flex;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .view-toggle button {
+        padding: 10px 25px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+
+    .view-toggle button.active {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+    }
+
+    /* Link cruzado */
+    .cross-link {
+        background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+        border-left: 5px solid #03a9f4;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-decoration: none;
+        display: block;
+        transition: all 0.3s;
+    }
+
+    .cross-link:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(3, 169, 244, 0.3);
+    }
+
+    .faixa-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin: 5px;
+    }
+
+    .faixa-baixa {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 2px solid #1976d2;
+    }
+
+    .faixa-media {
+        background: #fff3e0;
+        color: #f57c00;
+        border: 2px solid #f57c00;
+    }
+
+    .faixa-alta {
+        background: #fce4ec;
+        color: #c2185b;
+        border: 2px solid #c2185b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="page-header">
+        <h1><i class="bi bi-bar-chart-line"></i> Análise de Distribuição por Faixas</h1>
+        <p class="mb-0">Analisa como os números estão distribuídos nas três faixas: Baixa (1-10), Média (11-20) e Alta (21-31)</p>
+    </div>
+
+    <!-- 🆕 Link Cruzado para Análise de Dígitos -->
+    <a href="/analise/digito-padrao-inicial-final" class="cross-link">
+        <i class="bi bi-arrow-left-right"></i> <strong>Quer uma análise mais técnica?</strong>
+        <br>
+        <small>Ver Análise por Dígitos Iniciais/Finais (perspectiva matemática) →</small>
+    </a>
+
+    <!-- 🆕 Widget Comparativo -->
+    <div class="widget-comparativo">
+        <h5><i class="bi bi-diagram-3"></i> Como este jogo seria analisado nas duas perspectivas?</h5>
+        <p class="mb-3"><small>Exemplo: Jogo [08, 10, 15, 20, 25, 30, 31]</small></p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="comparacao-item">
+                    <h6><i class="mt-3 pt-2 "></i> Por Faixas Numéricas</h6>
+                    <div class="mt-2 border-top "><br />
+                        <span class="faixa-baixa">Baixa (1-10): 2</span>
+                        <span class="faixa-media">Média (11-20): 2</span>
+                        <span class="faixa-alta">Alta (21-31): 3</span>
+                    </div><br />
+                    <p class="mt-2 mb-0"><strong>Padrão: 2B+2M+3A</strong></p><br />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="comparacao-item">
+                    <h6><i class="mt-3 pt-2"></i> Por Dígitos Iniciais</h6>
+
+                    <!-- Top 3 Padrões de Dígitos (DINÂMICO) -->
+                    <div class="mt-3 pt-2 border-top">
+                        <small class="text-muted"><i class="bi bi-trophy"></i> Top 3 Padrões mais frequentes:</small>
+                        <div id="top3-digitos-container" class="mt-2" style="font-size: 0.85em;">
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm text-warning" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info mt-3 mb-0">
+            <i class="bi bi-info-circle-fill"></i> <strong>Importante:</strong> As duas análises são complementares!
+            Os números <strong>10 e 20</strong> estão em grupos diferentes em cada perspectiva.
+        </div>
+    </div>
+
+    <!-- 🆕 Toggle de Visualização -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-eye-fill"></i> Visualização</span>
+            <div class="view-toggle">
+                <button id="btn-simples" class="active" onclick="alternarVisualizacao('simples')">
+                    <i class="bi bi-layout-text-sidebar"></i> Simplificada
+                </button>
+                <button id="btn-detalhada" onclick="alternarVisualizacao('detalhada')">
+                    <i class="bi bi-table"></i> Detalhada
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Visualização Simplificada -->
+            <div id="visualizacao-simples">
+                <div class="row text-center" id="medias-faixas-container">
+                    <div class="col-md-4">
+                        <div class="faixa-badge faixa-baixa" style="font-size: 1.1em; padding: 20px;">
+                            <div style="font-size: 2em;"><i class="bi bi-arrow-down-circle"></i></div>
+                            <strong>Baixa (1-10)</strong>
+                            <div id="media-baixa" style="font-size: 1.5em; margin-top: 10px;">-</div>
+                            <small>números/jogo</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="faixa-badge faixa-media" style="font-size: 1.1em; padding: 20px;">
+                            <div style="font-size: 2em;"><i class="bi bi-dash-circle"></i></div>
+                            <strong>Média (11-20)</strong>
+                            <div id="media-media" style="font-size: 1.5em; margin-top: 10px;">-</div>
+                            <small>números/jogo</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="faixa-badge faixa-alta" style="font-size: 1.1em; padding: 20px;">
+                            <div style="font-size: 2em;"><i class="bi bi-arrow-up-circle"></i></div>
+                            <strong>Alta (21-31)</strong>
+                            <div id="media-alta" style="font-size: 1.5em; margin-top: 10px;">-</div>
+                            <small>números/jogo</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualização Detalhada -->
+            <div id="visualizacao-detalhada" style="display:none;">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Faixa</th>
+                                <th>Média/Jogo</th>
+                                <th>Percentual</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-detalhada-body">
+                            <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 3 Padrões -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <i class="bi bi-trophy-fill"></i> Top 3 Padrões Mais Frequentes
+        </div>
+        <div class="card-body" id="top3-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+        </div>
+        <div class="card-body" id="insights-container">
+            <!-- Será preenchido via JS -->
+        </div>
+    </div>
+
+    <!-- Recomendações -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <i class="bi bi-stars"></i> Recomendações Estratégicas
+        </div>
+        <div class="card-body" id="recomendacoes-container">
+            <!-- Será preenchido via JS -->
+        </div>
+    </div>
+
+    <!-- Teste de API -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <i class="bi bi-code-slash"></i> Testar API
+        </div>
+        <div class="card-body">
+            <button class="btn btn-primary" onclick="testarAPI()">
+                <i class="bi bi-play-fill"></i> Executar Teste da API
+            </button>
+            <div id="json-output" class="mt-3" style="display:none; background: #2d2d2d; color: #a9b7c6; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto; font-family: 'Courier New', monospace;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Carregar dados ao abrir a página
+window.onload = function() {
+    carregarDados();
+    carregarTop3Digitos();
+};
+
+function carregarDados() {
+    fetch('/api/analise/dezenas-faixas')
+        .then(response => response.json())
+        .then(data => {
+            if (data.erro) {
+                mostrarErro('Erro: ' + data.erro);
+                return;
+            }
+            renderizarMedias(data);
+            renderizarTop3(data.padroes);
+            renderizarInsights(data);
+            renderizarRecomendacoes(data);
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            mostrarErro('Erro ao carregar dados');
+        });
+}
+
+function mostrarErro(mensagem) {
+    const container = document.getElementById('top3-container');
+    container.innerHTML = `
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> ${mensagem}
+        </div>
+    `;
+}
+
+function renderizarMedias(data) {
+    // Visualização Simplificada
+    document.getElementById('media-baixa').textContent = data.media_baixa;
+    document.getElementById('media-media').textContent = data.media_media;
+    document.getElementById('media-alta').textContent = data.media_alta;
+
+    // Visualização Detalhada
+    const tbody = document.getElementById('tabela-detalhada-body');
+    tbody.innerHTML = `
+        <tr>
+            <td><span class="faixa-badge faixa-baixa">Baixa (1-10)</span></td>
+            <td><strong>${data.media_baixa}</strong></td>
+            <td>${data.perc_baixa}%</td>
+            <td><span class="badge bg-info">Normal</span></td>
+        </tr>
+        <tr>
+            <td><span class="faixa-badge faixa-media">Média (11-20)</span></td>
+            <td><strong>${data.media_media}</strong></td>
+            <td>${data.perc_media}%</td>
+            <td><span class="badge bg-info">Normal</span></td>
+        </tr>
+        <tr>
+            <td><span class="faixa-badge faixa-alta">Alta (21-31)</span></td>
+            <td><strong>${data.media_alta}</strong></td>
+            <td>${data.perc_alta}%</td>
+            <td><span class="badge bg-info">Normal</span></td>
+        </tr>
+    `;
+}
+
+function renderizarTop3(padroes) {
+    const container = document.getElementById('top3-container');
+    let html = '';
+
+    padroes.slice(0, 3).forEach((padrao, index) => {
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+        html += `
+            <div class="top3-item">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <span style="font-size: 2em;">${medal}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="badge-padrao">${padrao.descricao}</span>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="mb-0">${padrao.frequencia}</h4>
+                        <small class="text-muted">Ocorrências</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="mb-0" style="color: var(--ds-dourado);">${padrao.percentual}%</h4>
+                        <small class="text-muted">Frequência</small>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar3"></i> Último: Concurso #${padrao.ultimo_concurso || 'N/A'}
+                            | <i class="bi bi-clock-history"></i> Atraso: ${padrao.atraso || 0} concursos
+                        </small>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function renderizarInsights(data) {
+    const container = document.getElementById('insights-container');
+
+    const insights = [
+        {
+            title: "Distribuição Geral",
+            detail: `Em média, os jogos têm ${data.media_baixa} números da faixa baixa, ${data.media_media} da média e ${data.media_alta} da alta.`
+        },
+        {
+            title: "Padrão Mais Comum",
+            detail: `O padrão ${data.padroes[0].descricao} apareceu ${data.padroes[0].frequencia} vezes (${data.padroes[0].percentual}%).`
+        },
+        {
+            title: "Balanceamento",
+            detail: `A distribuição está relativamente equilibrada: Baixa ${data.perc_baixa}%, Média ${data.perc_media}%, Alta ${data.perc_alta}%.`
+        }
+    ];
+
+    let html = '';
+    insights.forEach(insight => {
+        html += `
+            <div class="insight-box">
+                <h6><i class="bi bi-info-circle-fill"></i> ${insight.title}</h6>
+                <p class="mb-0">${insight.detail}</p>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function renderizarRecomendacoes(data) {
+    const container = document.getElementById('recomendacoes-container');
+
+    const recomendacoes = [
+        `Considere usar o padrão ${data.padroes[0].descricao} que é o mais frequente`,
+        "Evite concentrar todos os números em uma única faixa",
+        "Jogos balanceados (2-2-3 ou 2-3-2) são mais comuns",
+        "Combine esta análise com outras (Sequências, Finais Iguais) para melhores resultados"
+    ];
+
+    let html = '';
+    recomendacoes.forEach(rec => {
+        html += `
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> ${rec}
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function testarAPI() {
+    const output = document.getElementById('json-output');
+    output.style.display = 'block';
+    output.innerHTML = '<div class="spinner-border text-light spinner-border-sm" role="status"></div> Carregando...';
+
+    fetch('/api/analise/dezenas-faixas')
+        .then(response => response.json())
+        .then(data => {
+            output.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        })
+        .catch(error => {
+            output.innerHTML = '<span style="color: #ff6b6b;">Erro: ' + error.message + '</span>';
+        });
+}
+
+function alternarVisualizacao(tipo) {
+    const simples = document.getElementById('visualizacao-simples');
+    const detalhada = document.getElementById('visualizacao-detalhada');
+    const btnSimples = document.getElementById('btn-simples');
+    const btnDetalhada = document.getElementById('btn-detalhada');
+
+    if (tipo === 'simples') {
+        simples.style.display = 'block';
+        detalhada.style.display = 'none';
+        btnSimples.classList.add('active');
+        btnDetalhada.classList.remove('active');
+    } else {
+        simples.style.display = 'none';
+        detalhada.style.display = 'block';
+        btnSimples.classList.remove('active');
+        btnDetalhada.classList.add('active');
+    }
+}
+
+// 🆕 Carregar Top 3 Padrões de Dígitos Iniciais (DINÂMICO)
+function carregarTop3Digitos() {
+    fetch('/api/analise/digito-padrao-inicial-final')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('top3-digitos-container').innerHTML =
+                    '<small class="text-danger">Erro ao carregar</small>';
+                return;
+            }
+            renderizarTop3Digitos(data.top_padroes_iniciais);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar Top 3 Dígitos:', error);
+            document.getElementById('top3-digitos-container').innerHTML =
+                '<small class="text-muted">Dados indisponíveis</small>';
+        });
+}
+
+function renderizarTop3Digitos(ranking) {
+    const container = document.getElementById('top3-digitos-container');
+
+    if (!ranking || ranking.length === 0) {
+        container.innerHTML = '<small class="text-muted">Sem dados</small>';
+        return;
+    }
+
+    const medals = ['🥇', '🥈', '🥉'];
+    const backgrounds = ['#fff9e6', '#f0f0f0', '#fff3e0'];
+
+    let html = '';
+    ranking.slice(0, 3).forEach((item, index) => {
+        // Converter "0:1 | 1:2 | 2:2 | 3:2" para "0 1 1 2 2 3 3"
+        const padraoExpandido = converterPadraoExpandido(item.padrao);
+
+        html += `
+            <div class="d-flex align-items-center mb-1">
+                <span style="margin-right: 5px;">${medals[index]}</span>
+                <code style="background: ${backgrounds[index]}; padding: 2px 8px; border-radius: 4px; margin-right: 8px;">${padraoExpandido}</code>
+                <small class="text-muted">${item.frequencia}x (${item.porcentagem}%)</small>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// Função para converter "0:1 | 1:2 | 2:2 | 3:2" em "0 1 1 2 2 3 3"
+function converterPadraoExpandido(padrao) {
+    // Exemplo: "0:1 | 1:2 | 2:2 | 3:2"
+    const partes = padrao.split(' | '); // ["0:1", "1:2", "2:2", "3:2"]
+    let resultado = [];
+
+    partes.forEach(parte => {
+        const [digito, quantidade] = parte.split(':'); // ["0", "1"]
+        const qtd = parseInt(quantidade);
+
+        // Adicionar o dígito 'qtd' vezes
+        for (let i = 0; i < qtd; i++) {
+            resultado.push(digito);
+        }
+    });
+
+    return resultado.join(' '); // "0 1 1 2 2 3 3"
+}
+</script>
+{% endblock %}

@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}Conceitos - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================================
+       VARIÁVEIS - IDENTIDADE VISUAL DIA DE SORTE
+       ============================================================ */
+    :root {
+        --primary: #D4B31A;
+        --primary-dark: #a8900f;
+        --primary-light: #f5e6a3;
+        --primary-rgb: 212, 179, 26;
+        --bg-light: #fdfcf7;
+        --bg-card: #ffffff;
+        --text-dark: #2c2400;
+        --text-muted: #666;
+        --success: #2e7d32;
+        --danger: #c62828;
+        --info: #1565c0;
+        --shadow: rgba(212, 179, 26, 0.15);
+    }
+
+    /* ============================================================
+       CONTAINER PRINCIPAL
+       ============================================================ */
+    .conceitos-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Header */
+    .page-header {
+        text-align: center;
+        padding: 30px 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 16px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* ============================================================
+       SEÇÕES
+       ============================================================ */
+    .section {
+        background: var(--bg-card);
+        border-radius: 14px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 3px 15px var(--shadow);
+        border-left: 4px solid var(--primary);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .section-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+
+    .section-number {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .section p {
+        margin-bottom: 12px;
+        color: var(--text-dark);
+    }
+
+    .section strong {
+        color: var(--primary-dark);
+    }
+
+    /* ============================================================
+       CAIXAS ESPECIAIS
+       ============================================================ */
+    .example-box {
+        background: linear-gradient(135deg, #f8f4e8 0%, #fdf9ed 100%);
+        border: 1px solid var(--primary-light);
+        border-radius: 10px;
+        padding: 18px;
+        margin: 15px 0;
+    }
+
+    .example-box h4 {
+        color: var(--primary-dark);
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .example-box ul {
+        list-style: none;
+        padding-left: 5px;
+        margin: 0;
+    }
+
+    .example-box li {
+        padding: 4px 0;
+        color: var(--text-dark);
+    }
+
+    .example-box li::before {
+        content: "•";
+        color: var(--primary);
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+    .highlight-box {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin: 15px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .highlight-box i {
+        font-size: 1.4rem;
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid var(--info);
+        padding: 15px 18px;
+        border-radius: 0 10px 10px 0;
+        margin: 15px 0;
+        color: #0d47a1;
+    }
+
+    .info-box strong {
+        color: var(--info);
+    }
+
+    /* ============================================================
+       TABELA COMPARATIVA
+       ============================================================ */
+    .table-container {
+        overflow-x: auto;
+        margin: 20px 0;
+        border-radius: 12px;
+        box-shadow: 0 3px 15px var(--shadow);
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-card);
+        font-size: 0.95rem;
+    }
+
+    .comparison-table th {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .comparison-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+
+    .comparison-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .comparison-table tr:hover td {
+        background: rgba(212, 179, 26, 0.08);
+    }
+
+    .check-yes {
+        color: var(--success);
+        font-weight: bold;
+    }
+
+    .check-no {
+        color: var(--danger);
+        font-weight: bold;
+    }
+
+    /* ============================================================
+       CARDS DE RESUMO
+       ============================================================ */
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .summary-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 3px 15px var(--shadow);
+        border-top: 4px solid var(--primary);
+        transition: transform 0.2s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .summary-card h4 {
+        color: var(--primary-dark);
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .summary-card p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    /* ============================================================
+       CAIXA DE DICA
+       ============================================================ */
+    .tip-box {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border: 2px solid #ff9800;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 25px;
+    }
+
+    .tip-box h4 {
+        color: #e65100;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .tip-box .tip-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .tip-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tip-list li {
+        padding: 5px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tip-list .icon-no {
+        color: var(--danger);
+    }
+
+    .tip-list .icon-yes {
+        color: var(--success);
+    }
+
+    /* ============================================================
+       RODAPÉ
+       ============================================================ */
+    .page-footer {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 20px;
+    }
+
+    /* ============================================================
+       RESPONSIVO
+       ============================================================ */
+    @media (max-width: 600px) {
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .section {
+            padding: 18px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+        }
+
+        .tip-box .tip-content {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ============================================================
+       MODO ESCURO
+       ============================================================ */
+    @media (prefers-color-scheme: dark) {
+        .section, .summary-card {
+            background: #2a2a2a;
+        }
+
+        .section p, .example-box li {
+            color: #ddd;
+        }
+
+        .section-title, .section strong, .example-box h4, .summary-card h4 {
+            color: var(--primary);
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #333 0%, #2a2a2a 100%);
+            border-color: #444;
+        }
+
+        .info-box {
+            background: #1a2a3a;
+            color: #90caf9;
+        }
+
+        .comparison-table td {
+            border-bottom-color: #444;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, #3d2e1f 0%, #4a3520 100%);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="conceitos-container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-book-open"></i> Conceitos Importantes</h1>
+        <p>Entenda as diferenças entre Garantias, Desdobramentos e Fechamentos</p>
+    </div>
+
+    <!-- 1. Garantia -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon"><i class="fas fa-shield-halved"></i></div>
+            <div>
+                <div class="section-number">1.</div>
+                <div class="section-title">O que é Garantia?</div>
+            </div>
+        </div>
+
+        <p><strong>Garantia</strong> é uma <strong>promessa matemática</strong> do sistema de apostas.</p>
+
+        <p>Ela diz algo do tipo:</p>
+
+        <div class="highlight-box">
+            <i class="fas fa-quote-left"></i>
+            <span>"Se X dezenas sorteadas estiverem dentro do seu conjunto jogado, você garante pelo menos Y acertos."</span>
+        </div>
+
+        <div class="example-box">
+            <h4><i class="fas fa-lightbulb"></i> Exemplo (Dia de Sorte)</h4>
+            <ul>
+                <li>Você joga <strong>12 dezenas</strong></li>
+                <li>O sistema tem <strong>garantia de 6 pontos</strong></li>
+                <li>👉 Se os 7 números sorteados estiverem dentro dessas 12 dezenas, você <strong>garante pelo menos um jogo com 6 pontos</strong></li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <strong><i class="fas fa-search"></i> Importante:</strong><br>
+            • Garantia <strong>não aumenta</strong> suas chances<br>
+            • Ela <strong>organiza melhor</strong> as combinações<br>
+            • É uma <strong>condição mínima assegurada</strong>, não promessa de prêmio máximo
+        </div>
+    </div>
+
+    <!-- 2. Desdobramentos -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon"><i class="fas fa-layer-group"></i></div>
+            <div>
+                <div class="section-number">2.</div>
+                <div class="section-title">O que são Desdobramentos?</div>
+            </div>
+        </div>
+
+        <p><strong>Desdobramento</strong> é <strong>quebrar um jogo grande em vários jogos menores</strong>.</p>
+
+        <p>Você escolhe um conjunto grande de dezenas e o sistema gera várias apostas simples.</p>
+
+        <div class="example-box">
+            <h4><i class="fas fa-lightbulb"></i> Exemplo (Dia de Sorte)</h4>
+            <ul>
+                <li>Você escolhe <strong>15 dezenas</strong> (de 1 a 31)</li>
+                <li>O sistema gera <strong>vários jogos de 7 dezenas</strong></li>
+                <li>Cada jogo é uma <strong>aposta válida</strong></li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <strong><i class="fas fa-bullseye"></i> O foco do desdobramento é:</strong><br>
+            • <strong>Cobrir mais combinações</strong><br>
+            • <strong>Distribuir os números</strong><br>
+            • Aumentar a cobertura, mas <strong>sem garantia matemática formal</strong>
+        </div>
+    </div>
+
+    <!-- 3. Fechamentos -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon"><i class="fas fa-lock"></i></div>
+            <div>
+                <div class="section-number">3.</div>
+                <div class="section-title">O que são Fechamentos (Garantidos)?</div>
+            </div>
+        </div>
+
+        <p>Aqui está o ponto que mais causa confusão 👇</p>
+
+        <div class="highlight-box">
+            <i class="fas fa-key"></i>
+            <span>Fechamento é um desdobramento COM garantia matemática.</span>
+        </div>
+
+        <p>Ou seja: <strong>Todo fechamento é um desdobramento, mas nem todo desdobramento é um fechamento.</strong></p>
+
+        <div class="example-box">
+            <h4><i class="fas fa-lightbulb"></i> Exemplo (Dia de Sorte)</h4>
+            <ul>
+                <li>Fechamento: <strong>12 dezenas → 8 jogos</strong></li>
+                <li>Garantia: <strong>6 pontos</strong></li>
+                <li>Se os 7 números sorteados estiverem nas 12 dezenas:</li>
+                <li>👉 <strong>Você garante pelo menos 1 jogo com 6 pontos</strong></li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <strong><i class="fas fa-calculator"></i> Isso é matemática combinatória, não sorte.</strong>
+        </div>
+    </div>
+
+    <!-- 4. Tabela Comparativa -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon"><i class="fas fa-table"></i></div>
+            <div>
+                <div class="section-number">4.</div>
+                <div class="section-title">Comparação Direta</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Conceito</th>
+                        <th>Tem garantia matemática?</th>
+                        <th>Objetivo principal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong><i class="fas fa-shield-halved"></i> Garantia</strong></td>
+                        <td><span class="check-yes"><i class="fas fa-check-circle"></i> Sim</span></td>
+                        <td>Assegurar um mínimo de acertos</td>
+                    </tr>
+                    <tr>
+                        <td><strong><i class="fas fa-layer-group"></i> Desdobramento</strong></td>
+                        <td><span class="check-no"><i class="fas fa-times-circle"></i> Não necessariamente</span></td>
+                        <td>Dividir apostas e ampliar cobertura</td>
+                    </tr>
+                    <tr>
+                        <td><strong><i class="fas fa-lock"></i> Fechamento</strong></td>
+                        <td><span class="check-yes"><i class="fas fa-check-circle"></i> Sim</span></td>
+                        <td>Desdobrar + garantir acertos mínimos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. Resumo -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div>
+                <div class="section-number">5.</div>
+                <div class="section-title">Resumo em Uma Frase</div>
+            </div>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h4><i class="fas fa-layer-group"></i> Desdobramento</h4>
+                <p>Espalha os números</p>
+            </div>
+            <div class="summary-card">
+                <h4><i class="fas fa-shield-halved"></i> Garantia</h4>
+                <p>Assegura um resultado mínimo</p>
+            </div>
+            <div class="summary-card">
+                <h4><i class="fas fa-lock"></i> Fechamento</h4>
+                <p>Espalha os números <strong>com garantia</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Qual Escolher? -->
+    <div class="section" style="border-left-color: #2e7d32;">
+        <div class="section-header">
+            <div class="section-icon" style="background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);"><i class="fas fa-trophy"></i></div>
+            <div>
+                <div class="section-number">6.</div>
+                <div class="section-title" style="color: #2e7d32;">Qual é a Melhor Escolha?</div>
+            </div>
+        </div>
+
+        <div class="highlight-box" style="background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);">
+            <i class="fas fa-crown"></i>
+            <span>Para quem aposta ocasionalmente: <strong>FECHAMENTO</strong> é a melhor opção!</span>
+        </div>
+
+        <p><strong>Por quê?</strong> Se você não aposta sempre, precisa <strong>maximizar cada aposta</strong>. O Fechamento faz exatamente isso:</p>
+
+        <div class="example-box">
+            <h4><i class="fas fa-check-double"></i> Como funciona na prática</h4>
+            <ul>
+                <li>Você escolhe <strong>mais dezenas</strong> (ex: 12 de 31)</li>
+                <li>O sistema gera <strong>poucos jogos otimizados</strong> (ex: 8 jogos)</li>
+                <li>Se acertar as 7 dentro das 12 → <strong>garante pelo menos 6 pontos</strong></li>
+            </ul>
+        </div>
+
+        <div class="table-container">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Se você...</th>
+                        <th>Use...</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Aposta todo sorteio (frequente)</td>
+                        <td>Desdobramento simples (mais barato)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Aposta de vez em quando</strong></td>
+                        <td><strong style="color: #2e7d32;"><i class="fas fa-star"></i> Fechamento com garantia 6 ou 7</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Quer arriscar pouco</td>
+                        <td>Jogo simples de 7 dezenas (sorte pura)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box" style="background: #e8f5e9; border-left-color: #2e7d32; color: #1b5e20;">
+            <strong><i class="fas fa-lightbulb"></i> Lembre-se:</strong><br>
+            Fechamento <strong>não garante prêmio máximo</strong>, mas <strong>organiza sua aposta</strong> para que, se você tiver sorte de acertar a maioria, <strong>não perca por má distribuição</strong>.
+        </div>
+    </div>
+
+    <!-- 7. Dica Importante -->
+    <div class="tip-box">
+        <h4><i class="fas fa-exclamation-triangle"></i> Aviso Importante (Realista)</h4>
+
+        <div class="tip-content">
+            <div>
+                <p><strong>Nenhum desses sistemas:</strong></p>
+                <ul class="tip-list">
+                    <li><i class="fas fa-times-circle icon-no"></i> Garante prêmio máximo</li>
+                    <li><i class="fas fa-times-circle icon-no"></i> Vence a aleatoriedade do sorteio</li>
+                </ul>
+            </div>
+            <div>
+                <p><strong>Eles servem para:</strong></p>
+                <ul class="tip-list">
+                    <li><i class="fas fa-check-circle icon-yes"></i> Organização estratégica</li>
+                    <li><i class="fas fa-check-circle icon-yes"></i> Redução de risco</li>
+                    <li><i class="fas fa-check-circle icon-yes"></i> Melhor aproveitamento de apostas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="page-footer">
+        <i class="fas fa-info-circle"></i> Material informativo para entendimento dos conceitos de apostas em loterias.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Detectar modo escuro
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        document.documentElement.classList.toggle('dark', event.matches);
+    });
+</script>
+{% endblock %}

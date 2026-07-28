@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-calculator-fill"></i> Calculadora de Probabilidade Acumulada
+        </h2>
+        <div>
+            <a href="/" class="btn btn-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">🎲 Calculadora Interativa de Probabilidades</h5>
+            <p class="card-text">
+                Calcule a probabilidade acumulada de um número específico aparecer em uma posição específica ao longo de N concursos.
+                <br><strong>Fórmula:</strong> P = 1 - (1 - 1/217)^N
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-sliders"></i> Parâmetros da Calculadora
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="formCalculadora" onsubmit="event.preventDefault(); calcular();">
+                        <div class="mb-3">
+                            <label for="numero" class="form-label fw-bold">Número (1-31):</label>
+                            <input type="number" class="form-control" id="numero" min="1" max="31" value="15" required>
+                            <small class="text-muted">Escolha o número que deseja analisar</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="posicao" class="form-label fw-bold">Posição (1-7):</label>
+                            <select class="form-select" id="posicao" required>
+                                <option value="1">Posição 1</option>
+                                <option value="2">Posição 2</option>
+                                <option value="3" selected>Posição 3</option>
+                                <option value="4">Posição 4</option>
+                                <option value="5">Posição 5</option>
+                                <option value="6">Posição 6</option>
+                                <option value="7">Posição 7</option>
+                            </select>
+                            <small class="text-muted">Escolha a posição específica</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="concursos" class="form-label fw-bold">
+                                Número de Concursos: <span id="concursosLabel">100</span>
+                            </label>
+                            <input type="range" class="form-range" id="concursos" min="1" max="500" value="100">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">1</small>
+                                <small class="text-muted">500</small>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-calculator-fill"></i> Calcular Probabilidade
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div id="resultadoCard" class="card shadow-sm" style="display: none;">
+                <div class="card-header text-white" id="resultadoHeader">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up-arrow"></i> Resultado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="resultadoContent"></div>
+                </div>
+            </div>
+            
+            <div id="avisoInicial" class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-calculator display-1 text-muted"></i>
+                    <p class="mt-3 text-muted">Preencha os parâmetros e clique em "Calcular"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mt-4" id="graficoCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart-line-fill"></i> Evolução da Probabilidade
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="graficoContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill"></i> Insights e Recomendações
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="insightsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const concursosSlider = document.getElementById('concursos');
+const concursosLabel = document.getElementById('concursosLabel');
+
+concursosSlider.addEventListener('input', function() {
+    concursosLabel.textContent = this.value;
+});
+function calcular() {
+    const numero = parseInt(document.getElementById('numero').value);
+    const posicao = parseInt(document.getElementById('posicao').value);
+    const concursos = parseInt(document.getElementById('concursos').value);
+    
+    fetch('/api/analise/calculadora-probabilidade', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            numero: numero,
+            posicao: posicao,
+            concursos: concursos
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Erro: ' + data.error);
+            return;
+        }
+        exibirResultado(data);
+        exibirGrafico(data);
+        gerarInsights(data);
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao calcular: ' + error.message);
+    });
+}
+
+function exibirResultado(data) {
+    const avisoInicial = document.getElementById('avisoInicial');
+    const resultadoCard = document.getElementById('resultadoCard');
+    const resultadoHeader = document.getElementById('resultadoHeader');
+    const resultadoContent = document.getElementById('resultadoContent');
+    
+    avisoInicial.style.display = 'none';
+    resultadoCard.style.display = 'block';
+    
+    resultadoHeader.className = `card-header bg-${data.cor} text-white`;
+    
+    const prob = parseFloat(data.probabilidade_acumulada);
+    
+    let html = `
+        <div class="text-center mb-3">
+            <h3>Número <span class="badge bg-primary fs-3">${data.numero}</span> na Posição <span class="badge bg-secondary fs-3">${data.posicao}</span></h3>
+        </div>
+        
+        <hr>
+        
+        <div class="alert alert-${data.cor}">
+            <h4 class="text-center mb-3">
+                <i class="bi bi-bullseye"></i> Probabilidade em ${data.num_concursos} concursos:
+            </h4>
+            <h1 class="text-center display-3 fw-bold">${data.probabilidade_acumulada}%</h1>
+            <p class="text-center mb-0">
+                <span class="badge bg-${data.cor} fs-5">${data.classificacao}</span>
+            </p>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-6">
+                <div class="alert alert-info">
+                    <small>Probabilidade por concurso:</small>
+                    <h6>${data.probabilidade_por_concurso}%</h6>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="alert alert-warning">
+                    <small>Último apareceu:</small>
+                    <h6>Concurso ${data.ultimo_apareceu}</h6>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-6">
+                <div class="alert alert-secondary">
+                    <small>Atraso atual:</small>
+                    <h6>${data.atraso_atual} concursos</h6>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="alert alert-success">
+                    <small>Para 50% de chance:</small>
+                    <h6>${data.concursos_para_50} concursos</h6>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    resultadoContent.innerHTML = html;
+}
+
+function exibirGrafico(data) {
+    const graficoCard = document.getElementById('graficoCard');
+    const graficoContent = document.getElementById('graficoContent');
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Concursos</th>
+                        <th>Probabilidade</th>
+                        <th>Visualização</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    data.pontos_grafico.forEach(ponto => {
+        const prob = parseFloat(ponto.probabilidade);
+        const barWidth = Math.min(prob * 2, 100);
+        const barColor = prob >= 70 ? 'success' : prob >= 50 ? 'info' : prob >= 30 ? 'warning' : 'secondary';
+        
+        html += `
+            <tr>
+                <td><strong>${ponto.concursos}</strong></td>
+                <td>${ponto.probabilidade}%</td>
+                <td>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-${barColor}" role="progressbar" style="width: ${barWidth}%" aria-valuenow="${prob}" aria-valuemin="0" aria-valuemax="100">
+                            ${ponto.probabilidade}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    graficoContent.innerHTML = html;
+    graficoCard.style.display = 'block';
+}
+
+function gerarInsights(data) {
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+    
+    const prob = parseFloat(data.probabilidade_acumulada);
+    const atraso = parseInt(data.atraso_atual);
+    
+    let html = `
+        <div class="alert alert-info">
+            <h6 class="fw-bold"><i class="bi bi-info-circle-fill"></i> Interpretação do Resultado:</h6>
+            <p class="mb-0">
+    `;
+    
+    if (prob >= 90) {
+        html += `Com <strong>${data.probabilidade_acumulada}%</strong> de probabilidade, é <strong>muito provável</strong> que o número ${data.numero} apareça na posição ${data.posicao} nos próximos ${data.num_concursos} concursos. Esta é uma chance excelente!`;
+    } else if (prob >= 70) {
+        html += `Com <strong>${data.probabilidade_acumulada}%</strong> de probabilidade, há <strong>boas chances</strong> de o número ${data.numero} aparecer na posição ${data.posicao} nos próximos ${data.num_concursos} concursos.`;
+    } else if (prob >= 50) {
+        html += `Com <strong>${data.probabilidade_acumulada}%</strong> de probabilidade, as chances são <strong>moderadas</strong>. É como jogar uma moeda - pode ou não acontecer.`;
+    } else if (prob >= 30) {
+        html += `Com <strong>${data.probabilidade_acumulada}%</strong> de probabilidade, as chances são <strong>baixas</strong>. Considere aumentar o número de concursos ou combinar com outras estratégias.`;
+    } else {
+        html += `Com apenas <strong>${data.probabilidade_acumulada}%</strong> de probabilidade, as chances são <strong>muito baixas</strong>. Você precisaria jogar muito mais concursos para ter chances razoáveis.`;
+    }
+    
+    html += `
+            </p>
+        </div>
+    `;
+    
+    if (atraso > 217) {
+        html += `
+            <div class="alert alert-danger">
+                <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Número em Atraso Crítico!</h6>
+                <p class="mb-0">
+                    Este número está atrasado há <strong>${atraso} concursos</strong>, 
+                    ultrapassando o ciclo esperado de 217 concursos. Estatisticamente, ele já "deveria" ter aparecido!
+                </p>
+            </div>
+        `;
+    } else if (atraso > 150) {
+        html += `
+            <div class="alert alert-warning">
+                <h6 class="fw-bold"><i class="bi bi-exclamation-circle-fill"></i> Número com Atraso Alto</h6>
+                <p class="mb-0">
+                    Este número está atrasado há <strong>${atraso} concursos</strong>, 
+                    próximo do ciclo esperado de 217 concursos.
+                </p>
+            </div>
+        `;
+    }
+    
+    html += `
+        <div class="alert alert-success">
+            <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações:</h6>
+            <ul class="mb-0">
+                <li>Para ter <strong>50%</strong> de chance, você precisa jogar cerca de <strong>${data.concursos_para_50} concursos</strong></li>
+                <li>Para ter <strong>90%</strong> de chance, você precisa jogar cerca de <strong>${data.concursos_para_90} concursos</strong></li>
+    `;
+    
+    if (prob < 50) {
+        html += `<li>💡 Dica: Aumente o número de concursos para melhorar suas chances!</li>`;
+    }
+    
+    if (atraso > 100) {
+        html += `<li>🎯 Este número tem alto atraso - pode ser uma boa aposta estratégica!</li>`;
+    }
+    
+    html += `
+                <li>⚠️ Lembre-se: cada concurso é independente, a probabilidade acumulada apenas aumenta suas chances ao longo do tempo</li>
+            </ul>
+        </div>
+    `;
+    
+    insightsContent.innerHTML = html;
+    insightsCard.style.display = 'block';
+}
+</script>
+{% endblock %}

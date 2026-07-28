@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-arrow-left-right"></i> Análise de Números Espelhados
+                </h2>
+                <div>
+                    <a href="/" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button class="btn btn-primary" onclick="carregarAnalise()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted">
+                Analisa pares de números espelhados (12↔21, 13↔31, etc.) que aparecem juntos nos sorteios
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3">Carregando análise...</p>
+            </div>
+
+            <div id="resultado" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="insightsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+    document.getElementById('insightsCard').style.display = 'none';
+
+    fetch('/api/analise/numeros-espelhados')
+        .then(response => response.json())
+        .then(data => {
+            exibirResultado(data);
+            gerarInsights(data);
+            loading.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Erro ao carregar análise: ${error.message}
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function exibirResultado(data) {
+    const resultado = document.getElementById('resultado');
+
+    let html = `
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-fill"></i> Resumo Geral (${data.total_concursos} concursos)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <strong>Sorteios COM espelhados:</strong><br>
+                            ${data.sorteios_com_espelhados} (${data.percentual_com_espelhados}%)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger">
+                            <strong>Sorteios SEM espelhados:</strong><br>
+                            ${data.sorteios_sem_espelhados} (${data.percentual_sem_espelhados}%)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-info">
+                            <strong>Pares diferentes encontrados:</strong><br>
+                            ${data.total_pares_encontrados}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trophy-fill"></i> Pares Espelhados Encontrados
+                </h5>
+            </div>
+            <div class="card-body">
+    `;
+
+    if (data.top_pares.length > 0) {
+        html += `
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Posição</th>
+                                <th>Par Espelhado</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                                <th>Atraso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+        const medalhas = ['🥇', '🥈', '🥉'];
+
+        data.top_pares.forEach((par, index) => {
+            const posicao = index < 3 ? medalhas[index] : `${index + 1}º`;
+            const destaque = index < 3 ? 'table-success' : '';
+            const badgeColor = par.atraso > 50 ? 'danger' : par.atraso > 20 ? 'warning' : 'success';
+
+            html += `
+                <tr class="${destaque}">
+                    <td><strong>${posicao}</strong></td>
+                    <td><span class="badge bg-primary fs-6">${par.par}</span></td>
+                    <td><strong>${par.frequencia}x</strong></td>
+                    <td>${par.porcentagem}%</td>
+                    <td>${par.ultimo_concurso}</td>
+                    <td><span class="badge bg-${badgeColor}">${par.atraso}</span></td>
+                </tr>
+            `;
+        });
+
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+        `;
+    } else {
+        html += `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Nenhum par espelhado foi encontrado nos sorteios analisados.
+                </div>
+        `;
+    }
+
+    html += `
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ol"></i> Todos os Pares Espelhados Possíveis (10-31)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-sm table-striped">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Par</th>
+                                <th>Frequência</th>
+                                <th>%</th>
+                                <th>Último</th>
+                                <th>Atraso</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.todos_pares.forEach(par => {
+        const badgeColor = par.atraso > 50 ? 'danger' : par.atraso > 20 ? 'warning' : 'success';
+        const rowClass = par.frequencia === 0 ? 'table-secondary' : '';
+
+        html += `
+            <tr class="${rowClass}">
+                <td><strong>${par.par}</strong></td>
+                <td>${par.frequencia}x</td>
+                <td>${par.porcentagem}%</td>
+                <td>${par.ultimo_concurso || '-'}</td>
+                <td><span class="badge bg-${badgeColor}">${par.atraso}</span></td>
+                <td>
+                    ${par.frequencia > 0 ? '<span class="badge bg-success">Já saiu</span>' : '<span class="badge bg-secondary">Nunca saiu</span>'}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    resultado.innerHTML = html;
+    resultado.style.display = 'block';
+}
+
+function gerarInsights(data) {
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+
+    let html = '';
+
+    if (data.top_pares.length > 0) {
+        const top3 = data.top_pares.slice(0, Math.min(3, data.top_pares.length));
+        const medalhas = ['🥇', '🥈', '🥉'];
+
+        html += `
+            <div class="mb-4">
+                <h6 class="fw-bold"><i class="bi bi-trophy-fill text-warning"></i> Top ${top3.length} Pares Espelhados Mais Frequentes:</h6>
+                <ul class="list-group">
+        `;
+
+        top3.forEach((par, index) => {
+            html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${medalhas[index]} <strong>${par.par}</strong></span>
+                    <span>
+                        <span class="badge bg-primary rounded-pill">${par.frequencia}x</span>
+                        <span class="badge bg-info rounded-pill">${par.porcentagem}%</span>
+                    </span>
+                </li>
+            `;
+        });
+
+        html += `
+                </ul>
+            </div>
+        `;
+    }
+
+    html += `
+        <div class="alert alert-${data.percentual_com_espelhados > 20 ? 'success' : 'warning'}">
+            <h6 class="fw-bold"><i class="bi bi-check-circle-fill"></i> Frequência de Espelhados:</h6>
+            <p class="mb-0">
+                <strong>${data.percentual_com_espelhados}%</strong> dos sorteios (${data.sorteios_com_espelhados} concursos)
+                contêm pelo menos 1 par de números espelhados juntos!
+            </p>
+        </div>
+
+        <div class="alert alert-info">
+            <h6 class="fw-bold"><i class="bi bi-star-fill"></i> Variedade de Pares:</h6>
+            <p class="mb-0">
+                Foram encontrados <strong>${data.total_pares_encontrados}</strong> pares espelhados diferentes
+                ao longo dos ${data.total_concursos} concursos analisados.
+            </p>
+        </div>
+    `;
+
+    if (data.top_pares.length > 0) {
+        html += `
+            <div class="alert alert-primary">
+                <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas:</h6>
+                <ul class="mb-0">
+                    <li>Números espelhados aparecem em <strong>${data.percentual_com_espelhados}%</strong> dos sorteios</li>
+                    <li>O par mais frequente é <strong>${data.top_pares[0].par}</strong> (${data.top_pares[0].porcentagem}%)</li>
+                    ${data.top_pares.length > 1 ? `<li>Considere também o par <strong>${data.top_pares[1].par}</strong></li>` : ''}
+                    <li>Não é obrigatório ter espelhados, mas ${data.percentual_com_espelhados}% dos jogos têm</li>
+                </ul>
+            </div>
+        `;
+    } else {
+        html += `
+            <div class="alert alert-warning">
+                <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Observação:</h6>
+                <p class="mb-0">
+                    Nenhum par espelhado foi encontrado nos sorteios analisados até o momento.
+                    Isso indica que números espelhados raramente aparecem juntos no Dia de Sorte.
+                </p>
+            </div>
+        `;
+    }
+
+    html += `
+        <div class="alert alert-light border">
+            <h6 class="fw-bold"><i class="bi bi-info-circle-fill"></i> O que são Números Espelhados?</h6>
+            <p class="mb-0">
+                <strong>Números espelhados</strong> são aqueles que invertem dezena e unidade.<br>
+                Exemplos: <strong>12↔21</strong>, <strong>13↔31</strong>, <strong>14↔41</strong> (não válido), <strong>23↔32</strong> (não válido - 32 > 31)<br>
+                No Dia de Sorte (01-31), os pares possíveis são limitados:<br>
+                <strong>12-21, 13-31, 23-32 (inválido)</strong>, etc.<br>
+                Esta análise mostra quando esses pares aparecem <strong>juntos</strong> em um mesmo sorteio.
+            </p>
+        </div>
+    `;
+
+    insightsContent.innerHTML = html;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+{% endblock %}

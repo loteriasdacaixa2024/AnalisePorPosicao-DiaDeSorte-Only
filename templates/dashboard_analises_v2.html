@@ -1,0 +1,1459 @@
+{% extends "base.html" %}
+{% block title %}Dashboard de Análises - Dia de Sorte{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/analise_linhas.css">
+<style>
+    :root {
+        --cor-primary: #D4B31A;
+        --cor-primary-dark: #B89615;
+        --cor-primary-light: #E5C942;
+    }
+
+    .dashboard-container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--cor-primary) 0%, var(--cor-primary-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .btn-sincronizar {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-sincronizar:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-sincronizar:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .stats-resumo {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--cor-primary);
+    }
+
+    .dark .stat-card {
+        background: #2d2d2d;
+    }
+
+    .stat-card h3 {
+        font-size: 2.5rem;
+        color: var(--cor-primary);
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .stat-card p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .dark .stat-card p {
+        color: #aaa;
+    }
+
+    .categoria-section {
+        margin-bottom: 40px;
+    }
+
+    .categoria-titulo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cor-primary);
+        margin: 30px 0 20px 0;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, rgba(212, 179, 26, 0.1) 0%, rgba(212, 179, 26, 0.05) 100%);
+        border-left: 5px solid var(--cor-primary);
+        border-radius: 8px;
+    }
+
+    .analises-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .analise-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .dark .analise-card {
+        background: #2d2d2d;
+    }
+
+    .analise-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(212, 179, 26, 0.3);
+    }
+
+    .analise-header {
+        background: linear-gradient(135deg, var(--cor-primary-light) 0%, var(--cor-primary) 100%);
+        color: #333;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+    }
+
+    .analise-titulo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .analise-header i {
+        font-size: 1.3rem;
+    }
+
+    .analise-body {
+        padding: 20px;
+    }
+
+    .analise-descricao {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .dark .analise-descricao {
+        color: #aaa;
+    }
+
+    .top3-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 3px solid var(--cor-primary);
+    }
+
+    .dark .top3-section {
+        background: #1e1e1e;
+    }
+
+    .top3-titulo {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .dark .top3-titulo {
+        color: #999;
+    }
+
+    .top3-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        margin: 5px 0;
+        background: white;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .dark .top3-item {
+        background: #2d2d2d;
+    }
+
+    .top3-item .medalha {
+        font-size: 1.3rem;
+        margin-right: 10px;
+        min-width: 30px;
+    }
+
+    .top3-item .descricao {
+        flex: 1;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .dark .top3-item .descricao {
+        color: #ccc;
+    }
+
+    .top3-item .percentual {
+        background: var(--cor-primary);
+        color: white;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .insight-section {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+    }
+
+    .dark .insight-section {
+        background: #3d3418;
+    }
+
+    .insight-titulo {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #856404;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .dark .insight-titulo {
+        color: #f0d18a;
+    }
+
+    .insight-texto {
+        font-size: 0.9rem;
+        color: #856404;
+        line-height: 1.5;
+    }
+
+    .dark .insight-texto {
+        color: #f0d18a;
+    }
+
+    .btn-visualizar {
+        width: 100%;
+        background: var(--cor-primary);
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .btn-visualizar:hover {
+        background: var(--cor-primary-dark);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .loading-card {
+        text-align: center;
+        padding: 20px;
+        color: #999;
+    }
+
+    .loading-spinner-small {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--cor-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .error-card {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+        padding: 15px;
+        border-radius: 6px;
+        color: #721c24;
+        font-size: 0.85rem;
+    }
+
+    .dark .error-card {
+        background: #3d1e20;
+        color: #f5c6cb;
+    }
+
+    @media (max-width: 768px) {
+        .analises-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-tachometer-alt"></i> Dashboard de Análises v4</h1>
+            <p>Resumo consolidado com TOP 3 e insights inteligentes - Corrigido baseado nos Services reais</p>
+        </div>
+        <button class="btn-sincronizar" onclick="sincronizarTodas()">
+            <i class="fas fa-sync-alt me-1"></i>Sincronizar API
+        </button>
+    </div>
+
+    <div class="stats-resumo">
+        <div class="stat-card">
+            <h3 id="totalAnalises">27</h3>
+            <p>Análises Disponíveis</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="analisesCarregadas">0</h3>
+            <p>Carregadas com Sucesso</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="analisesFalharam">0</h3>
+            <p>Falhas de Carregamento</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="ultimaAtualizacao">--:--</h3>
+            <p>Última Atualização</p>
+        </div>
+    </div>
+
+    <!-- Panorama Geral: Análise de Linhas -->
+    <div id="panoramaAnaliseLinhasContainer" class="mb-4"></div>
+
+    <div id="analisesContainer"></div>
+</div>
+
+<script>
+// ==========================================
+// CONFIGURAÇÃO DAS ANÁLISES - BASEADO NOS SERVICES REAIS v4
+// ==========================================
+const NOMES_MESES = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+
+const ANALISES_CONFIG = {
+    // ========== ANÁLISES ESTATÍSTICAS BÁSICAS ==========
+    'meses': {
+        titulo: 'Meses da Sorte',
+        descricao: 'Estatísticas completas dos meses sorteados com frequência e atraso',
+        icone: 'fa-calendar-alt',
+        rota: '/api/analise/meses/estatisticas',
+        paginaCompleta: '/analise/meses-atrasados',
+        processar: (data) => {
+            let meses = data.meses || data || [];
+            if (!Array.isArray(meses)) meses = [];
+
+            const ordenados = [...meses].sort((a, b) => (b.frequencia || b.contagem || 0) - (a.frequencia || a.contagem || 0));
+            const total = ordenados.reduce((s, m) => s + (m.frequencia || m.contagem || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(m => ({
+                descricao: m.nome || NOMES_MESES[m.mes] || `Mês ${m.mes}`,
+                percentual: total > 0 ? ((m.frequencia || m.contagem || 0) / total * 100).toFixed(1) : '0.0'
+            }));
+
+            const maisAtrasado = [...meses].sort((a, b) => (b.atraso || 0) - (a.atraso || 0))[0];
+            const nomeMaisAtrasado = maisAtrasado ? (maisAtrasado.nome || NOMES_MESES[maisAtrasado.mes]) : 'N/A';
+
+            return {
+                top3,
+                insight: `${top3[0]?.descricao || 'N/A'} é o mês mais frequente. ${nomeMaisAtrasado} está mais atrasado com ${maisAtrasado?.atraso || 0} concursos.`
+            };
+        }
+    },
+
+    'numeros-juntos': {
+        titulo: 'Números Juntos',
+        descricao: 'Duplas de números que mais saem juntas nos sorteios',
+        icone: 'fa-link',
+        rota: '/api/analise/numeros-juntos',
+        paginaCompleta: '/analise/numeros-juntos',
+        processar: (data) => {
+            // Service retorna: { top_pares: [{numeros: [n1, n2], frequencia, percentual, ...}], ... }
+            let pares = data.top_pares || data.pares || [];
+            if (!Array.isArray(pares)) pares = [];
+
+            const total = pares.reduce((s, p) => s + (p.frequencia || 0), 0);
+            const top3 = pares.slice(0, 3).map(p => {
+                // numeros é um array [n1, n2]
+                const nums = p.numeros || [];
+                const n1 = nums[0] || p.numero1 || p.n1 || '?';
+                const n2 = nums[1] || p.numero2 || p.n2 || '?';
+                return {
+                    descricao: `${n1} - ${n2}`,
+                    percentual: p.percentual?.toFixed(1) || (total > 0 ? ((p.frequencia || 0) / total * 100).toFixed(1) : '0.0')
+                };
+            });
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `A dupla ${top3[0].descricao} é a mais frequente (${pares[0]?.frequencia || 0}x).` : 'Dados insuficientes para análise.'
+            };
+        }
+    },
+
+    'quentes-frios': {
+        titulo: 'Quentes e Frios',
+        descricao: 'Números mais e menos frequentes nos sorteios',
+        icone: 'fa-thermometer-half',
+        rota: '/api/analise/quentes-frios',
+        paginaCompleta: '/analise/quentes-frios',
+        processar: (data) => {
+            // Service retorna: { quentes: [...], frios: [...], total_concursos }
+            // ATENÇÃO: percentual já vem como STRING do service (ex: "23.45")
+            let quentes = data.quentes || [];
+            if (!Array.isArray(quentes)) quentes = [];
+
+            const top3 = quentes.slice(0, 3).map(q => ({
+                descricao: `Número ${q.numero} (${q.frequencia}x)`,
+                percentual: q.percentual || '0.0' // já é string, não usar toFixed
+            }));
+
+            const frios = data.frios || [];
+            const maisFrio = frios[0];
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Número ${quentes[0]?.numero} está muito quente! ${maisFrio ? `Número ${maisFrio.numero} é o mais frio (${maisFrio.atraso} conc. atrasado).` : ''}` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'defasagem': {
+        titulo: 'Defasagem',
+        descricao: 'Análise de números atrasados e sua probabilidade de aparecer',
+        icone: 'fa-clock',
+        rota: '/api/analise/defasagem',
+        paginaCompleta: '/analise/defasagem',
+        processar: (data) => {
+            // Service retorna: { analise_defasagem: [...], total_concursos }
+            let numeros = data.analise_defasagem || data.numeros || [];
+            if (!Array.isArray(numeros)) numeros = [];
+
+            const ordenados = [...numeros].sort((a, b) => (b.atraso_atual || b.defasagem_atual || 0) - (a.atraso_atual || a.defasagem_atual || 0));
+
+            const top3 = ordenados.slice(0, 3).map(n => ({
+                descricao: `Nº ${n.numero} (${n.atraso_atual || n.defasagem_atual || 0} conc. atraso)`,
+                percentual: n.status_defasagem || n.status || 'Atrasado'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Número ${ordenados[0]?.numero} está ${ordenados[0]?.status_defasagem || 'atrasado'} há ${ordenados[0]?.atraso_atual || 0} concursos.` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'numeros-devidos': {
+        titulo: 'Números Devidos',
+        descricao: 'Números que estatisticamente deveriam aparecer em breve',
+        icone: 'fa-exclamation-circle',
+        rota: '/api/analise/numeros-devidos',
+        paginaCompleta: '/analise/numeros-devidos',
+        processar: (data) => {
+            // Service retorna: { analise_devidos: [...], top_devedores: [...], maior_devedor, ... }
+            let devidos = data.top_devedores || data.analise_devidos || [];
+            if (!Array.isArray(devidos)) devidos = [];
+
+            const top3 = devidos.slice(0, 3).map(d => ({
+                descricao: `Nº ${d.numero} (${d.status || 'Devedor'})`,
+                percentual: `${Math.abs(d.percentual_diferenca || 0).toFixed(1)}%`
+            }));
+
+            const maiorDevedor = data.maior_devedor;
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: maiorDevedor ? `Número ${maiorDevedor.numero} é o maior devedor com ${Math.abs(maiorDevedor.diferenca || 0).toFixed(0)} aparições abaixo do esperado.` : 'Nenhum número devido identificado.'
+            };
+        }
+    },
+
+    // ========== ANÁLISES DE PADRÕES NUMÉRICOS ==========
+    'pares-impares': {
+        titulo: 'Pares e Ímpares',
+        descricao: 'Distribuição de números pares e ímpares nos sorteios',
+        icone: 'fa-balance-scale',
+        rota: '/api/analise/pares-impares',
+        paginaCompleta: '/analise/pares-impares',
+        processar: (data) => {
+            let padroes = data.padroes || data.distribuicao || [];
+            if (!Array.isArray(padroes)) {
+                padroes = Object.entries(data).filter(([k]) => k.includes('P') || k.includes('I')).map(([k, v]) => ({
+                    padrao: k,
+                    frequencia: typeof v === 'object' ? (v.frequencia || v.contagem || 0) : v
+                }));
+            }
+
+            const ordenados = [...padroes].sort((a, b) => (b.frequencia || b.contagem || 0) - (a.frequencia || a.contagem || 0));
+            const total = ordenados.reduce((s, p) => s + (p.frequencia || p.contagem || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(p => ({
+                descricao: p.padrao || `${p.pares || 0}P/${p.impares || 0}I`,
+                percentual: total > 0 ? ((p.frequencia || p.contagem || 0) / total * 100).toFixed(1) : '0.0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `O padrão ${top3[0].descricao} é o mais comum (${top3[0].percentual}%).` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'primos-compostos': {
+        titulo: 'Primos e Compostos',
+        descricao: 'Análise de números primos vs compostos sorteados',
+        icone: 'fa-hashtag',
+        rota: '/api/analise/primos-compostos',
+        paginaCompleta: '/analise/primos-compostos',
+        processar: (data) => {
+            let padroes = data.padroes || data.distribuicao || [];
+            if (!Array.isArray(padroes)) {
+                padroes = Object.entries(data).map(([k, v]) => ({
+                    padrao: k,
+                    frequencia: typeof v === 'object' ? (v.frequencia || v.contagem || 0) : v
+                }));
+            }
+
+            const ordenados = [...padroes].sort((a, b) => (b.frequencia || b.contagem || 0) - (a.frequencia || a.contagem || 0));
+            const total = ordenados.reduce((s, p) => s + (p.frequencia || p.contagem || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(p => ({
+                descricao: p.padrao || `${p.primos || 0} primos`,
+                percentual: total > 0 ? ((p.frequencia || p.contagem || 0) / total * 100).toFixed(1) : '0.0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Padrão "${top3[0].descricao}" aparece em ${top3[0].percentual}% dos sorteios.` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'multiplos': {
+        titulo: 'Múltiplos',
+        descricao: 'Análise de múltiplos de 3, 5 e 7 nos sorteios',
+        icone: 'fa-times',
+        rota: '/api/analise/multiplos',
+        paginaCompleta: '/analise/multiplos',
+        processar: (data) => {
+            let multiplos = data.multiplos || data.analise || data || {};
+            const items = [];
+
+            if (multiplos.mult_3 || multiplos.multiplos_3 !== undefined) {
+                items.push({ tipo: 'Múltiplos de 3', freq: multiplos.mult_3?.frequencia || multiplos.multiplos_3 || 0 });
+            }
+            if (multiplos.mult_5 || multiplos.multiplos_5 !== undefined) {
+                items.push({ tipo: 'Múltiplos de 5', freq: multiplos.mult_5?.frequencia || multiplos.multiplos_5 || 0 });
+            }
+            if (multiplos.mult_7 || multiplos.multiplos_7 !== undefined) {
+                items.push({ tipo: 'Múltiplos de 7', freq: multiplos.mult_7?.frequencia || multiplos.multiplos_7 || 0 });
+            }
+
+            if (items.length === 0 && data.padroes) {
+                data.padroes.forEach(p => items.push({ tipo: p.tipo || p.padrao, freq: p.frequencia || 0 }));
+            }
+
+            items.sort((a, b) => b.freq - a.freq);
+            const total = items.reduce((s, i) => s + i.freq, 0);
+
+            const top3 = items.slice(0, 3).map(i => ({
+                descricao: i.tipo,
+                percentual: total > 0 ? (i.freq / total * 100).toFixed(1) : '0.0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: items.length > 0 ? `${items[0].tipo} são os mais frequentes nos sorteios.` : 'Dados de múltiplos indisponíveis.'
+            };
+        }
+    },
+
+    'fibonacci': {
+        titulo: 'Fibonacci',
+        descricao: 'Números da sequência Fibonacci nos sorteios (1,2,3,5,8,13,21)',
+        icone: 'fa-infinity',
+        rota: '/api/analise/fibonacci',
+        paginaCompleta: '/analise/fibonacci',
+        processar: (data) => {
+            // Service retorna: { lista_fibonacci: [...], distribuicao_quantidade: [...], ... }
+            let fib = data.lista_fibonacci || data.fibonacci || data.numeros || [];
+            if (!Array.isArray(fib)) fib = [];
+
+            const total = fib.reduce((s, f) => s + (f.frequencia || 0), 0);
+            const ordenados = [...fib].sort((a, b) => (b.frequencia || 0) - (a.frequencia || 0));
+
+            const top3 = ordenados.slice(0, 3).map(f => ({
+                descricao: `Número ${f.numero}`,
+                percentual: f.porcentagem?.toFixed(1) || (total > 0 ? ((f.frequencia || 0) / total * 100).toFixed(1) : '0.0')
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `${top3[0].descricao} (Fibonacci) é o mais frequente (${ordenados[0]?.frequencia}x).` : 'Dados de Fibonacci indisponíveis.'
+            };
+        }
+    },
+
+    'raiz-digital': {
+        titulo: 'Raiz Digital',
+        descricao: 'Soma dos dígitos de cada número (1-9)',
+        icone: 'fa-square-root-alt',
+        rota: '/api/analise/raiz-digital',
+        paginaCompleta: '/analise/raiz-digital',
+        processar: (data) => {
+            // Service retorna: { distribuicao_raizes: [...], padroes: [...], mapa_raizes: [...] }
+            let raizes = data.distribuicao_raizes || data.raizes || data.distribuicao || [];
+            if (!Array.isArray(raizes)) raizes = [];
+
+            const ordenados = [...raizes].sort((a, b) => (b.frequencia || 0) - (a.frequencia || 0));
+            const total = ordenados.reduce((s, r) => s + (r.frequencia || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(r => ({
+                descricao: `Raiz ${r.raiz}`,
+                percentual: r.porcentagem?.toFixed(1) || (total > 0 ? ((r.frequencia || 0) / total * 100).toFixed(1) : '0.0')
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Raiz digital ${ordenados[0]?.raiz} é a mais frequente (${ordenados[0]?.frequencia}x).` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'digitos-unicos': {
+        titulo: 'Dígitos Únicos',
+        descricao: 'Quantidade de dígitos únicos por sorteio',
+        icone: 'fa-fingerprint',
+        rota: '/api/analise/digitos-unicos',
+        paginaCompleta: '/analise/digitos-unicos',
+        processar: (data) => {
+            // Service retorna: { analise_por_quantidade: [...], top_combinacoes: [...], ... }
+            let padroes = data.analise_por_quantidade || data.padroes || data.distribuicao || [];
+            if (!Array.isArray(padroes)) padroes = [];
+
+            const ordenados = [...padroes].sort((a, b) => (b.frequencia || 0) - (a.frequencia || 0));
+            const total = ordenados.reduce((s, p) => s + (p.frequencia || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(p => ({
+                descricao: `${p.quantidade} dígitos únicos`,
+                percentual: p.porcentagem?.toFixed(1) || (total > 0 ? ((p.frequencia || 0) / total * 100).toFixed(1) : '0.0')
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Sorteios com ${ordenados[0]?.quantidade} dígitos únicos são mais comuns (${ordenados[0]?.frequencia}x).` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'digito-inicial-final': {
+        titulo: 'Dígito Inicial e Final',
+        descricao: 'Padrões de dígitos iniciais e finais das dezenas',
+        icone: 'fa-text-width',
+        rota: '/api/analise/digito-padrao-inicial-final',
+        paginaCompleta: '/analise/digito-padrao-inicial-final',
+        processar: (data) => {
+            // Service retorna: { top_padroes_digitos_iniciais_simples: [...], top_padroes_iniciais: [...], ... }
+            let padroes = data.top_padroes_digitos_iniciais_simples || data.top_padroes_iniciais || [];
+            if (!Array.isArray(padroes)) padroes = [];
+
+            const top3 = padroes.slice(0, 3).map(p => ({
+                descricao: p.padrao || 'Padrão',
+                percentual: p.porcentagem?.toString() || '0.0' // já é número
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Padrão "${top3[0].descricao}" é o mais frequente (${padroes[0]?.frequencia}x).` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    // ========== ANÁLISES DE DISTRIBUIÇÃO E SEQUÊNCIAS ==========
+    'soma-dezenas': {
+        titulo: 'Soma das Dezenas',
+        descricao: 'Faixas de soma mais frequentes nos sorteios',
+        icone: 'fa-plus-circle',
+        rota: '/api/analise/soma-dezenas',
+        paginaCompleta: '/analise/soma-dezenas',
+        processar: (data) => {
+            // Service retorna: { top_10_frequentes: [...], faixas: {...}, soma_media, ... }
+            let faixas = data.top_10_frequentes || data.ranking_somas || [];
+            if (!Array.isArray(faixas)) faixas = [];
+
+            const top3 = faixas.slice(0, 3).map(f => ({
+                descricao: `Soma ${f.soma} (${f.par_impar || ''})`,
+                percentual: f.percentual?.toFixed(1) || '0.0'
+            }));
+
+            const somaMedia = data.soma_media;
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Soma ${faixas[0]?.soma} é a mais comum (${faixas[0]?.frequencia}x). Média: ${somaMedia || 'N/A'}.` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'sequencias': {
+        titulo: 'Sequências',
+        descricao: 'Números consecutivos nos sorteios',
+        icone: 'fa-sort-numeric-down',
+        rota: '/api/analise/sequencias',
+        paginaCompleta: '/analises/sequencias-dezenas',
+        processar: (data) => {
+            // Service retorna: { distribuicao: [...], concursos_com_sequencia, percentual_com_sequencia, ... }
+            let seqs = data.distribuicao || data.sequencias || [];
+            if (!Array.isArray(seqs)) seqs = [];
+
+            const ordenados = [...seqs].sort((a, b) => (b.quantidade || 0) - (a.quantidade || 0));
+
+            const top3 = ordenados.slice(0, 3).map(s => ({
+                descricao: s.tipo || `${s.quantidade} concursos`,
+                percentual: s.percentual || '0.0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: data.percentual_com_sequencia ? `${data.percentual_com_sequencia}% dos concursos têm sequências.` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+    'padroes-sequencias': {
+        titulo: 'Padrões de Sequências',
+        descricao: 'Padrões detalhados de números consecutivos',
+        icone: 'fa-stream',
+        rota: '/api/analise/padroes-sequencias',
+        paginaCompleta: '/analise/padroes-sequencias',
+        processar: (data) => {
+            // Service retorna: { numeros_consecutivos: {distribuicao: [...]}, padroes_espacamento: {...}, ... }
+            let padroes = data.numeros_consecutivos?.distribuicao || data.padroes || [];
+            if (!Array.isArray(padroes)) padroes = [];
+
+            const ordenados = [...padroes].sort((a, b) => (b.frequencia || 0) - (a.frequencia || 0));
+            const total = ordenados.reduce((s, p) => s + (p.frequencia || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(p => ({
+                descricao: `${p.quantidade_consecutivos} consecutivos`,
+                percentual: p.percentual?.toFixed(1) || (total > 0 ? ((p.frequencia || 0) / total * 100).toFixed(1) : '0.0')
+            }));
+
+            const percComConse = data.numeros_consecutivos?.percentual_com_consecutivos;
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: percComConse ? `${percComConse}% dos jogos têm números consecutivos.` : 'Dados insuficientes.'
+            };
+        }
+    },
+
+
+
+    // ========== ANÁLISES TEMPORAIS - MESES ==========
+    'evolucao-meses': {
+        titulo: 'Evolução dos Meses',
+        descricao: 'Evolução temporal da frequência dos meses',
+        icone: 'fa-chart-line',
+        rota: '/api/analise/evolucao-meses',
+        paginaCompleta: '/analise/evolucao-meses',
+        processar: (data) => {
+            let tendencias = data.tendencias || [];
+            let mesesQuentes = data.meses_quentes || data.distribuicao_geral?.slice(0, 3) || [];
+
+            const top3 = mesesQuentes.slice(0, 3).map(m => ({
+                descricao: `${m.nome || m.mes}: ${m.tendencia || 'Estável'}`,
+                percentual: m.porcentagem?.toFixed(1) || m.percentual?.toFixed(1) || '0'
+            }));
+
+            const crescentes = tendencias.filter(t => t.tendencia === 'Crescente');
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: crescentes.length > 0 ? `${crescentes[0]?.nome} apresenta tendência crescente.` : 'Análise temporal sem tendências claras.'
+            };
+        }
+    },
+
+    'ciclos-meses': {
+        titulo: 'Ciclos de Meses',
+        descricao: 'Padrões cíclicos de aparição dos meses',
+        icone: 'fa-redo',
+        rota: '/api/analise/ciclos-intervalos',
+        paginaCompleta: '/analise/ciclos-intervalos',
+        processar: (data) => {
+            // Service retorna: { ciclos_meses: [...], ... }
+            let ciclos = data.ciclos_meses || [];
+            if (!Array.isArray(ciclos)) ciclos = [];
+
+            const ordenados = [...ciclos].sort((a, b) => (b.atraso_atual || 0) - (a.atraso_atual || 0));
+
+            const top3 = ordenados.slice(0, 3).map(c => ({
+                descricao: `${c.mes_nome || NOMES_MESES[c.mes]} (${c.atraso_atual} conc.)`,
+                percentual: c.intervalo_medio?.toFixed(1) || '0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `${ordenados[0]?.mes_nome || NOMES_MESES[ordenados[0]?.mes]} está atrasado há ${ordenados[0]?.atraso_atual} concursos.` : 'Ciclos não identificados.'
+            };
+        }
+    },
+
+    'transicao-meses': {
+        titulo: 'Transição de Meses',
+        descricao: 'Probabilidade de um mês seguir outro',
+        icone: 'fa-exchange-alt',
+        rota: '/api/analise/transicao-meses',
+        paginaCompleta: '/analise/transicao-meses',
+        processar: (data) => {
+            // Service retorna: { sequencias_comuns: {duplas: [...], triplas: [...]}, probabilidades_proxima: {...}, ... }
+            let transicoes = data.sequencias_comuns?.duplas || data.transicoes || [];
+            if (!Array.isArray(transicoes)) transicoes = [];
+
+            const top3 = transicoes.slice(0, 3).map(t => ({
+                descricao: t.sequencia || `${t.de || t.origem} → ${t.para || t.destino}`,
+                percentual: (t.frequencia || 0).toString()
+            }));
+
+            const proximaMes = data.probabilidades_proxima;
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: proximaMes ? `Último mês: ${proximaMes.ultimo_mes_nome}. Próximo mais provável baseado em transições históricas.` : 'Transições não disponíveis.'
+            };
+        }
+    },
+
+    'correlacao-mes-dezenas': {
+        titulo: 'Correlação Mês × Dezenas',
+        descricao: 'Quais dezenas mais aparecem com cada mês',
+        icone: 'fa-project-diagram',
+        rota: '/api/analise/correlacao-mes-dezenas',
+        paginaCompleta: '/analise/correlacao-mes-dezenas',
+        processar: (data) => {
+            // Service retorna: { combinacoes_fortes: [...], indices_correlacao: [...], ... }
+            let correlacoes = data.combinacoes_fortes || data.correlacoes || [];
+            if (!Array.isArray(correlacoes)) correlacoes = [];
+
+            const top3 = correlacoes.slice(0, 3).map(c => ({
+                descricao: `${c.mes_nome || NOMES_MESES[c.mes]}: nº ${c.dezena}`,
+                percentual: c.percentual_no_mes?.toFixed(1) || c.frequencia?.toString() || '0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Dezena ${correlacoes[0]?.dezena} tem forte correlação com ${correlacoes[0]?.mes_nome} (${correlacoes[0]?.frequencia}x).` : 'Correlações não disponíveis.'
+            };
+        }
+    },
+
+    'acumulos-mes': {
+        titulo: 'Acúmulos por Mês',
+        descricao: 'Meses com maior frequência de acúmulos',
+        icone: 'fa-piggy-bank',
+        rota: '/api/analise/acumulos-mes',
+        paginaCompleta: '/analise/acumulos-mes',
+        processar: (data) => {
+            // Service retorna: { acumulos_por_mes: [...], meses_com_maior_acumulo: {...}, ... }
+            let meses = data.acumulos_por_mes || data.meses || [];
+            if (!Array.isArray(meses)) meses = [];
+
+            // Já vem ordenado por percentual_acumulo, mas garantir
+            const ordenados = [...meses].sort((a, b) => (b.percentual_acumulo || 0) - (a.percentual_acumulo || 0));
+
+            const top3 = ordenados.slice(0, 3).map(m => ({
+                descricao: `${m.mes_nome || NOMES_MESES[m.mes]} (${m.total_acumulos} acúm.)`,
+                percentual: m.percentual_acumulo?.toString() || '0.0' // já é número
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `${ordenados[0]?.mes_nome} tem maior taxa de acúmulo (${ordenados[0]?.percentual_acumulo}%).` : 'Dados de acúmulos indisponíveis.'
+            };
+        }
+    },
+
+    // ========== ANÁLISES PREDITIVAS ==========
+    'previsao-atrasados': {
+        titulo: 'Previsão de Atrasados',
+        descricao: 'Números com maior probabilidade de sair baseado no atraso',
+        icone: 'fa-crystal-ball',
+        rota: '/api/analise/previsao-atrasados',
+        paginaCompleta: '/analise/previsao-atrasados',
+        processar: (data) => {
+            // Service retorna: { ranking_geral: [{posicao, numero, atraso, urgencia, prob_50}, ...], previsoes_por_posicao: {...}, ... }
+            let previsoes = data.ranking_geral || [];
+            if (!Array.isArray(previsoes)) previsoes = [];
+
+            // Já vem ordenado por atraso desc do service
+            const top3 = previsoes.slice(0, 3).map(p => ({
+                descricao: `Pos ${p.posicao}: Nº ${p.numero} (${p.urgencia})`,
+                percentual: p.atraso?.toString() || '0' // atraso em concursos
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Número ${previsoes[0]?.numero} na Posição ${previsoes[0]?.posicao} está atrasado há ${previsoes[0]?.atraso} concursos - Urgência ${previsoes[0]?.urgencia}.` : 'Previsões não disponíveis.'
+            };
+        }
+    },
+
+    'matriz-probabilidade': {
+        titulo: 'Matriz de Probabilidade',
+        descricao: 'Matriz completa de probabilidades por número e posição',
+        icone: 'fa-th',
+        rota: '/api/analise/matriz-probabilidade',
+        paginaCompleta: '/analise/matriz-probabilidade',
+        processar: (data) => {
+            // Service retorna: { matriz: {...}, numeros_favoritos_por_posicao: {...}, ... }
+            let favoritos = data.numeros_favoritos_por_posicao || {};
+
+            const items = [];
+            for (let pos = 1; pos <= 7; pos++) {
+                const favs = favoritos[pos] || [];
+                if (favs.length > 0) {
+                    items.push({
+                        posicao: pos,
+                        numero: favs[0].numero,
+                        percentual: favs[0].percentual
+                    });
+                }
+            }
+
+            const top3 = items.slice(0, 3).map(i => ({
+                descricao: `Pos ${i.posicao}: Nº ${i.numero}`,
+                percentual: i.percentual?.toFixed(1) || '0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Número ${items[0]?.numero} é favorito na posição ${items[0]?.posicao} (${items[0]?.percentual?.toFixed(1)}%).` : 'Matriz não disponível.'
+            };
+        }
+    },
+
+    // ========== ANÁLISES AVANÇADAS ==========
+    'frequencia-premios': {
+        titulo: 'Frequência de Prêmios',
+        descricao: 'Análise da frequência de ganhadores por faixa',
+        icone: 'fa-trophy',
+        rota: '/api/analise/frequencia-premios',
+        paginaCompleta: '/analise/frequencia-premios',
+        processar: (data) => {
+            // Service retorna: { top_dezenas: [...], insights: [...], total_premios, ... }
+            let dezenas = data.top_dezenas || data.dezenas_completas || [];
+            if (!Array.isArray(dezenas)) dezenas = [];
+
+            const top3 = dezenas.slice(0, 3).map(d => ({
+                descricao: `Dezena ${d.dezena}`,
+                percentual: d.percentual?.toFixed(1) || '0'
+            }));
+
+            const insight = data.insights?.[0];
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: insight ? `${insight.titulo}: ${insight.descricao}` : (top3.length > 0 ? `Dezena ${dezenas[0]?.dezena} é a mais frequente em prêmios (${dezenas[0]?.frequencia}x).` : 'Dados de prêmios indisponíveis.')
+            };
+        }
+    },
+
+    'ciclos-intervalos': {
+        titulo: 'Ciclos e Intervalos',
+        descricao: 'Intervalos entre aparições dos números',
+        icone: 'fa-stopwatch',
+        rota: '/api/analise/ciclos-intervalos',
+        paginaCompleta: '/analise/ciclos-intervalos',
+        processar: (data) => {
+            // Service retorna: { ciclos_dezenas: [...], previsao_proxima_aparicao: {...}, ... }
+            let ciclos = data.ciclos_dezenas || [];
+            if (!Array.isArray(ciclos)) ciclos = [];
+
+            const ordenados = [...ciclos].sort((a, b) => (b.atraso_atual || 0) - (a.atraso_atual || 0));
+
+            const top3 = ordenados.slice(0, 3).map(c => ({
+                descricao: `Nº ${c.dezena} (${c.atraso_atual} conc. atraso)`,
+                percentual: c.intervalo_medio?.toFixed(1) || '0'
+            }));
+
+            const previsoes = data.previsao_proxima_aparicao?.dezenas_com_maior_probabilidade || [];
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: previsoes.length > 0 ? `Número ${previsoes[0]?.dezena} tem alta probabilidade de aparecer (score: ${previsoes[0]?.score}).` : (top3.length > 0 ? `Número ${ordenados[0]?.dezena} está atrasado há ${ordenados[0]?.atraso_atual} concursos.` : 'Ciclos não disponíveis.')
+            };
+        }
+    },
+
+    'repeticao-persistencia': {
+        titulo: 'Repetição e Persistência',
+        descricao: 'Números que se repetem entre sorteios consecutivos',
+        icone: 'fa-redo-alt',
+        rota: '/api/repeticao/analise-completa',
+        paginaCompleta: '/repeticao',
+        processar: (data) => {
+            // Service retorna: { ranking_origem: [...], ranking_destino: [...], estatisticas: {...}, ... }
+            const estatisticas = data.estatisticas || {};
+
+            if (estatisticas.media_repeticoes !== undefined) {
+                return {
+                    top3: [
+                        { descricao: `${estatisticas.media_repeticoes?.toFixed(1) || 0} repetições/sorteio`, percentual: estatisticas.percentual_com_repeticao?.toFixed(0) || '100' },
+                        { descricao: `${estatisticas.concursos_com_1_repeticao || 0} com 1 repetição`, percentual: '75' },
+                        { descricao: `${estatisticas.concursos_com_2_repeticoes || 0} com 2 repetições`, percentual: '50' }
+                    ],
+                    insight: `${estatisticas.percentual_com_repeticao?.toFixed(1) || 0}% dos concursos têm ao menos 1 número repetido do anterior.`
+                };
+            }
+
+            let ranking = data.ranking_origem || [];
+            const top3 = ranking.slice(0, 3).map(r => ({
+                descricao: `Posição ${r.posicao} (${r.total_repeticoes}x)`,
+                percentual: r.percentual?.toFixed(1) || '0'
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: 'Dados de repetição indisponíveis.'
+            };
+        }
+    },
+
+    'distribuicao-numerica': {
+        titulo: 'Distribuição Numérica',
+        descricao: 'Distribuição dos números por faixas (baixos, médios, altos)',
+        icone: 'fa-chart-bar',
+        rota: '/api/analise/distribuicao-numerica',
+        paginaCompleta: '/analise/distribuicao-numerica',
+        processar: (data) => {
+            // Service retorna: { distribuicao_pares_impares: {distribuicao_completa: [...]}, ... }
+            let dist = data.distribuicao_pares_impares?.distribuicao_completa || data.distribuicao_por_faixas?.padroes_mais_comuns || [];
+            if (!Array.isArray(dist)) dist = [];
+
+            const ordenados = [...dist].sort((a, b) => (b.frequencia || 0) - (a.frequencia || 0));
+            const total = ordenados.reduce((s, d) => s + (d.frequencia || 0), 0);
+
+            const top3 = ordenados.slice(0, 3).map(d => ({
+                descricao: d.padrao || d.faixa || d.nome,
+                percentual: d.percentual?.toFixed(1) || (total > 0 ? ((d.frequencia || 0) / total * 100).toFixed(1) : '0.0')
+            }));
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `Distribuição "${top3[0].descricao}" é a mais frequente.` : 'Dados de distribuição indisponíveis.'
+            };
+        }
+    },
+
+    'sazonal': {
+        titulo: 'Análise Sazonal',
+        descricao: 'Padrões sazonais nos sorteios ao longo do ano',
+        icone: 'fa-sun',
+        rota: '/api/analise/sazonal',
+        paginaCompleta: '/analise/sazonal',
+        processar: (data) => {
+            // Service retorna: { analise_por_estacao: [...], tendencias_sazonais: [...], ... }
+            let estacoes = data.analise_por_estacao || [];
+            if (!Array.isArray(estacoes)) estacoes = [];
+
+            const ordenadas = [...estacoes].sort((a, b) => (b.total_sorteios || 0) - (a.total_sorteios || 0));
+            const total = ordenadas.reduce((s, e) => s + (e.total_sorteios || 0), 0);
+
+            const top3 = ordenadas.slice(0, 3).map(e => ({
+                descricao: e.estacao || e.nome,
+                percentual: total > 0 ? ((e.total_sorteios || 0) / total * 100).toFixed(1) : '0.0'
+            }));
+
+            const tendencias = data.tendencias_sazonais || [];
+
+            return {
+                top3: top3.length > 0 ? top3 : [{descricao: 'Sem dados', percentual: '0'}],
+                insight: top3.length > 0 ? `${top3[0].descricao} apresenta mais sorteios (${ordenadas[0]?.total_sorteios}).` : 'Dados sazonais indisponíveis.'
+            };
+        }
+    },
+
+    'probabilidade-condicional': {
+        titulo: 'Probabilidade Condicional',
+        descricao: 'Probabilidade de um número sair dado que outro saiu',
+        icone: 'fa-code-branch',
+        rota: '/api/analise/probabilidade-condicional',
+        paginaCompleta: '/analise/probabilidade-condicional',
+        processar: (data) => {
+            // Service retorna: { probabilidade_proxima_dezena: {dezenas_por_score: [...]}, probabilidade_proximo_mes: {...}, ... }
+            let previsoes = data.probabilidade_proxima_dezena?.dezenas_por_score || [];
+            let proximoMes = data.probabilidade_proximo_mes?.meses_mais_provaveis || [];
+
+            if (previsoes.length > 0) {
+                const top3 = previsoes.slice(0, 3).map(p => ({
+                    descricao: `Nº ${p.dezena} (score: ${p.score})`,
+                    percentual: p.frequencia_recente?.toString() || '0'
+                }));
+
+                return {
+                    top3,
+                    insight: `Número ${previsoes[0]?.dezena} tem maior probabilidade condicional de sair (score: ${previsoes[0]?.score}).`
+                };
+            }
+
+            if (proximoMes.length > 0) {
+                const top3 = proximoMes.slice(0, 3).map(m => ({
+                    descricao: `${m.mes_nome}`,
+                    percentual: m.probabilidade?.toFixed(1) || '0'
+                }));
+
+                return {
+                    top3,
+                    insight: `Próximo mês mais provável: ${proximoMes[0]?.mes_nome} (${proximoMes[0]?.probabilidade?.toFixed(1)}%).`
+                };
+            }
+
+            return {
+                top3: [{descricao: 'Sem dados', percentual: '0'}],
+                insight: 'Probabilidades condicionais indisponíveis.'
+            };
+        }
+    },
+
+    'tubular': {
+        titulo: 'Análise Tubular',
+        descricao: 'Visualização tubular dos resultados',
+        icone: 'fa-grip-lines',
+        rota: '/api/analise/tubular',
+        paginaCompleta: '/analise-tubular',
+        processar: (data) => {
+            let sequencias = data.sequencias?.padroes || [];
+            let paresImpares = data.pares_impares?.padroes || [];
+
+            if (sequencias.length > 0) {
+                const top3 = sequencias.slice(0, 3).map(s => ({
+                    descricao: s.descricao || s.tipo,
+                    percentual: s.percentual?.toFixed(1) || '0'
+                }));
+
+                return {
+                    top3,
+                    insight: `${sequencias[0]?.descricao} é o padrão de sequência mais comum (${sequencias[0]?.percentual?.toFixed(1)}%).`
+                };
+            }
+
+            return {
+                top3: [{descricao: 'Sem dados', percentual: '0'}],
+                insight: 'Análise tubular carregando...'
+            };
+        }
+    }
+};
+
+// ==========================================
+// CÓDIGO PRINCIPAL DO DASHBOARD
+// ==========================================
+// INICIALIZAÇÃO
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Renderizar cards iniciais (estado carregando)
+    renderizarCardsIniciais();
+    
+    // Iniciar sincronização
+    sincronizarTodas();
+    
+    // Carregar Análise de Linhas
+    carregarDadosLinhas();
+});
+
+let totalCarregadas = 0;
+let totalFalharam = 0;
+
+// ==========================================
+// RENDERIZAÇÃO DA NOVA ANÁLISE DE LINHAS
+// ==========================================
+async function carregarDadosLinhas() {
+    try {
+        const response = await fetch('/api/sorteios/todos');
+        const data = await response.json();
+        
+        if (data.sorteios && data.sorteios.length > 0) {
+            const concursosCarregados = data.sorteios.map(sorteio => {
+                return {
+                    concurso: sorteio.concurso,
+                    numeros: [
+                        sorteio.posicoes.posicao_1,
+                        sorteio.posicoes.posicao_2,
+                        sorteio.posicoes.posicao_3,
+                        sorteio.posicoes.posicao_4,
+                        sorteio.posicoes.posicao_5,
+                        sorteio.posicoes.posicao_6,
+                        sorteio.posicoes.posicao_7
+                    ]
+                };
+            });
+            concursosCarregados.sort((a, b) => b.concurso - a.concurso);
+            
+            if (typeof analiseLinhasEngine !== 'undefined') {
+                analiseLinhasEngine.renderizar('panoramaAnaliseLinhasContainer', concursosCarregados);
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dados para análise de linhas:', error);
+    }
+}
+
+async function carregarTodasAnalises() {
+    const container = document.getElementById('analisesContainer');
+    container.innerHTML = '';
+    totalCarregadas = 0;
+    totalFalharam = 0;
+
+    document.getElementById('analisesCarregadas').textContent = '0';
+    document.getElementById('analisesFalharam').textContent = '0';
+
+    const categorias = {
+        'Análises Estatísticas Básicas': [
+            'meses', 'numeros-juntos', 'quentes-frios',
+            'defasagem', 'numeros-devidos'
+        ],
+        'Análises de Padrões Numéricos': [
+            'pares-impares', 'primos-compostos', 'multiplos', 'fibonacci',
+            'raiz-digital', 'digitos-unicos', 'digito-inicial-final'
+        ],
+        'Análises de Distribuição e Sequências': [
+            'soma-dezenas', 'sequencias', 'padroes-sequencias'
+        ],
+        'Análises Temporais - Meses': [
+            'evolucao-meses', 'ciclos-meses', 'transicao-meses',
+            'correlacao-mes-dezenas', 'acumulos-mes'
+        ],
+        'Análises Preditivas': [
+            'previsao-atrasados', 'matriz-probabilidade'
+        ],
+        'Análises Avançadas': [
+            'frequencia-premios', 'ciclos-intervalos', 'repeticao-persistencia',
+            'distribuicao-numerica', 'sazonal', 'probabilidade-condicional', 'tubular'
+        ]
+    };
+
+    for (const [nomeCategoria, analises] of Object.entries(categorias)) {
+        container.innerHTML += `
+            <div class="categoria-section">
+                <h2 class="categoria-titulo">
+                    <i class="fas fa-folder-open"></i> ${nomeCategoria}
+                </h2>
+                <div class="analises-grid" id="grid-${nomeCategoria.replace(/\s+/g, '-')}"></div>
+            </div>
+        `;
+
+        const gridId = `grid-${nomeCategoria.replace(/\s+/g, '-')}`;
+
+        for (const key of analises) {
+            const config = ANALISES_CONFIG[key];
+            if (!config) {
+                console.warn(`Configuração não encontrada para: ${key}`);
+                continue;
+            }
+
+            const cardId = `analise-${key}`;
+            document.getElementById(gridId).innerHTML += `
+                <div class="analise-card" id="${cardId}">
+                    <div class="analise-header">
+                        <div class="analise-titulo">
+                            <i class="fas ${config.icone}"></i>
+                            <span>${config.titulo}</span>
+                        </div>
+                        <i class="loading-spinner-small"></i>
+                    </div>
+                    <div class="analise-body">
+                        <p class="analise-descricao">${config.descricao}</p>
+                        <div class="loading-card">
+                            <div class="loading-spinner-small"></div>
+                            Carregando dados...
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            carregarAnalise(key, config, cardId);
+        }
+    }
+
+    atualizarHorario();
+}
+
+async function carregarAnalise(key, config, cardId) {
+    try {
+        console.log(`Carregando ${config.titulo} via ${config.rota}...`);
+        const response = await fetch(config.rota);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.erro || data.error) {
+            throw new Error(data.erro || data.error);
+        }
+
+        const { top3, insight } = config.processar(data);
+        renderizarAnalise(cardId, key, config, top3, insight);
+
+        totalCarregadas++;
+        document.getElementById('analisesCarregadas').textContent = totalCarregadas;
+
+    } catch (error) {
+        console.error(`Erro em ${config.titulo}:`, error.message);
+        renderizarErro(cardId, config, error.message);
+        totalFalharam++;
+        document.getElementById('analisesFalharam').textContent = totalFalharam;
+    }
+}
+
+function renderizarAnalise(cardId, key, config, top3, insight) {
+    const card = document.getElementById(cardId);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    const top3HTML = top3.map((item, idx) => `
+        <div class="top3-item">
+            <span class="medalha">${medalhas[idx]}</span>
+            <span class="descricao">${item.descricao}</span>
+            <span class="percentual">${item.percentual}%</span>
+        </div>
+    `).join('');
+
+    const linkPagina = config.paginaCompleta || `/analise/${key}`;
+
+    card.innerHTML = `
+        <div class="analise-header">
+            <div class="analise-titulo">
+                <i class="fas ${config.icone}"></i>
+                <span>${config.titulo}</span>
+            </div>
+            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+        </div>
+        <div class="analise-body">
+            <p class="analise-descricao">${config.descricao}</p>
+            <div class="top3-section">
+                <div class="top3-titulo">📊 TOP 3</div>
+                ${top3HTML}
+            </div>
+            <div class="insight-section">
+                <div class="insight-titulo">
+                    <i class="fas fa-lightbulb"></i>
+                    Insight Inteligente
+                </div>
+                <div class="insight-texto">${insight}</div>
+            </div>
+            <a href="${linkPagina}" class="btn-visualizar">
+                <i class="fas fa-chart-line"></i>
+                Ver Análise Completa
+            </a>
+        </div>
+    `;
+}
+
+function renderizarErro(cardId, config, mensagem) {
+    const card = document.getElementById(cardId);
+    const linkPagina = config.paginaCompleta || `/analise/${config.titulo.toLowerCase().replace(/\s+/g, '-')}`;
+
+    card.innerHTML = `
+        <div class="analise-header">
+            <div class="analise-titulo">
+                <i class="fas ${config.icone}"></i>
+                <span>${config.titulo}</span>
+            </div>
+            <i class="fas fa-times-circle" style="color:#dc3545;"></i>
+        </div>
+        <div class="analise-body">
+            <p class="analise-descricao">${config.descricao}</p>
+            <div class="error-card">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Erro ao carregar</strong>
+                <div style="margin-top:10px;font-size:0.75rem;">
+                    API: ${config.rota}<br>
+                    Erro: ${mensagem}
+                </div>
+            </div>
+            <a href="${linkPagina}" class="btn-visualizar" style="margin-top:15px; background:#6c757d;">
+                <i class="fas fa-external-link-alt"></i>
+                Tentar Página Direta
+            </a>
+        </div>
+    `;
+}
+
+function atualizarHorario() {
+    const agora = new Date();
+    const horario = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('ultimaAtualizacao').textContent = horario;
+}
+
+async function sincronizarTodas() {
+    const btn = document.querySelector('.btn-sincronizar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sincronizando...';
+
+    await carregarTodasAnalises();
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Sincronizar API';
+}
+</script>
+<script src="/static/js/components/analise_linhas.js"></script>
+{% endblock %}

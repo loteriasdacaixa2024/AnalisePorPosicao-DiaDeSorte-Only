@@ -1,0 +1,839 @@
+<!-- MODELO F: BAIXA CONECTIVIDADE + MAX 2 REPETIDAS -->
+<div class="alert alert-custom-gold">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Modelo F:</strong> Baixa Conectividade + Máximo 2 Repetidas do último sorteio.
+    <button type="button" class="btn btn-sm btn-dark float-end" data-bs-toggle="modal"
+        data-bs-target="#modalExplicacaoF">
+        <i class="fas fa-question-circle me-1"></i>Como funciona?
+    </button>
+</div>
+
+<!-- Modal Explicativo -->
+<div class="modal fade" id="modalExplicacaoF" tabindex="-1" aria-labelledby="modalExplicacaoFLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-custom-gold text-white">
+                <h5 class="modal-title" id="modalExplicacaoFLabel">
+                    <i class="fas fa-lightbulb me-2"></i>Como funciona o Modelo F?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="fw-bold text-custom-gold">📘 Conceito:</h6>
+                <p>O <strong>Modelo F</strong> foca em gerar jogos com <strong>Baixa Conectividade</strong> (média ~3.0)
+                    e garante no máximo <strong>2 números repetidos</strong> do sorteio anterior.</p>
+
+                <hr>
+
+                <h6 class="fw-bold text-custom-gold">🎯 Estratégia:</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i><strong>Cobertura de
+                            Pares:</strong> Garante 100% dos pares do sorteio anterior (21 jogos).</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i><strong>Rotação
+                            Inteligente:</strong> Utiliza uma "Base Preferida" de 5 dezenas + 5 extras para completar os
+                        jogos sem criar vícios.</li>
+                    <li class="list-group-item"><i
+                            class="fas fa-check text-success me-2"></i><strong>Anti-Repetição:</strong> Evita carregar
+                        muitos números do concurso passado, ideal para quebrar tendências.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Último Sorteio -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-dice me-2"></i>Último Sorteio</h5>
+            <button onclick="carregarDadosIniciaisF()" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-sync-alt me-1"></i>Atualizar
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="loading-sorteio-f" class="text-center py-3" style="display: none;">
+            <div class="spinner-border text-custom-gold" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 text-muted">Carregando sugestão...</p>
+        </div>
+        <div id="info-sorteio-f">
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-secondary me-2">Concurso</span>
+                        <span class="fw-bold fs-5" id="numero-concurso-f">-</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" id="container-ultimo-f">
+                        <!-- Preenchido via JS -->
+                        <span class="text-muted small">Aguardando dados...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seletor de Modo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-custom-gold text-white">
+        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Modo de Seleção</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <button onclick="setModoF('automatico')" id="btn-modo-f-automatico"
+                    class="modo-btn-f btn btn-outline-custom-gold w-100 p-3 active">
+                    <div style="font-size: 2rem;">🤖</div>
+                    <div class="fw-bold">AUTOMÁTICO</div>
+                    <small class="text-muted">IA sugere a Base Preferida</small>
+                </button>
+            </div>
+            <div class="col-md-6">
+                <button onclick="setModoF('manual')" id="btn-modo-f-manual"
+                    class="modo-btn-f btn btn-outline-custom-gold w-100 p-3">
+                    <div style="font-size: 2rem;">✋</div>
+                    <div class="fw-bold">MANUAL</div>
+                    <small class="text-muted">Você escolhe a Base (5 dezenas)</small>
+                </button>
+            </div>
+        </div>
+        <div id="modo-f-descricao" class="alert alert-light mt-3 mb-0 border-custom-gold">
+            <strong>💡 Modo Atual: AUTOMÁTICO</strong><br>
+            <small>Sistema sugere 5 dezenas quentes/médias que não saíram no último sorteio.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Configuração -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-custom-gold text-white">
+        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuração da Estratégia</h5>
+    </div>
+    <div class="card-body">
+
+        <!-- Base Preferida (Visível apenas em Manual ou como display em Auto) -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold mb-0">
+                    🏆 Base Preferida (5 dezenas)
+                </label>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-custom-gold me-2" id="count-base-f">0/5</span>
+                    <button onclick="limparBaseF()" id="btn-limpar-base-f" class="btn btn-sm btn-outline-secondary"
+                        disabled>
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input readonly para visualização -->
+            <input type="text" id="input-base-f"
+                class="form-control mb-3 text-center fw-bold text-custom-gold border-custom-gold" readonly
+                style="font-size: 1.2rem; background-color: #fcf9e8;">
+
+            <!-- Teclado para seleção manual -->
+            <div id="painel-teclado-f" class="p-3 bg-light rounded border" style="display: none;">
+                <!-- Oculto por padrão no auto -->
+                <div class="d-flex flex-wrap gap-2 justify-content-center" id="teclado-base-f">
+                    <!-- Gerado via JS -->
+                </div>
+                <div class="mt-2 text-center text-muted small">
+                    <i class="fas fa-info-circle"></i> Escolha exatamente 5 números para serem a base rotativa.
+                </div>
+            </div>
+        </div>
+
+        <!-- Mês da Sorte -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">📅 Mês da Sorte:</label>
+            <div class="row g-2">
+                <div class="col-md-12">
+                    <select class="form-select border-custom-gold" id="mes-f">
+                        <option value="Jan">Janeiro</option>
+                        <option value="Fev">Fevereiro</option>
+                        <option value="Mar">Março</option>
+                        <option value="Abr">Abril</option>
+                        <option value="Mai">Maio</option>
+                        <option value="Jun">Junho</option>
+                        <option value="Jul">Julho</option>
+                        <option value="Ago">Agosto</option>
+                        <option value="Set">Setembro</option>
+                        <option value="Out">Outubro</option>
+                        <option value="Nov" selected>Novembro</option>
+                        <option value="Dez">Dezembro</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="alert alert-custom-gold-light border-custom-gold">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>📊 Preview do Jogo:</strong><br>
+                    <small>2 do Sorteio Anterior + 3 da Base + 2 Extras (Rotação)</small>
+                </div>
+                <div class="text-end">
+                    <span class="h5 fw-bold text-custom-gold">21 Jogos</span><br>
+                    <small>R$ 52,50</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão Gerar -->
+        <button onclick="gerarJogosModeloF()" id="btn-gerar-f"
+            class="btn btn-lg btn-custom-gold w-100 py-3 text-white fw-bold shadow-sm">
+            <i class="fas fa-magic me-2"></i>GERAR JOGOS OTIMIZADOS
+        </button>
+    </div>
+</div>
+
+<!-- Jogos Gerados -->
+<div class="card shadow-sm mb-4" id="section-jogos-f" style="display: none;">
+    <div class="card-header bg-secondary text-white">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0">
+                <i class="fas fa-list-ol me-2"></i>Jogos Gerados
+                <span class="badge bg-light text-dark ms-2" id="total-jogos-f">-</span>
+            </h5>
+            <div class="btn-group flex-wrap">
+                <button onclick="salvarDiarioF()" id="btn-diario-f" class="btn btn-sm btn-success fw-bold shadow-sm me-2" title="Salvar no Diário de Estratégias">
+                <i class="fas fa-save me-1"></i>Carimbar e Guardar Apostas
+            </button>
+            <button onclick="exportarTXTF()" class="btn btn-sm btn-success">
+                    <i class="fas fa-file-alt me-1"></i>TXT
+                </button>
+                <button onclick="exportarCSVF()" class="btn btn-sm btn-info">
+                    <i class="fas fa-file-csv me-1"></i>CSV
+                </button>
+                <button onclick="exportarHTMLF()" class="btn btn-sm btn-warning">
+                    <i class="fas fa-file-code me-1"></i>HTML
+                </button>
+                <div class="vr mx-2 bg-light"></div>
+                <button onclick="imprimirJogosF()" class="btn btn-sm btn-primary">
+                    <i class="fas fa-print me-1"></i>Imprimir
+                </button>
+                <button class="btn btn-sm btn-light text-dark fw-bold" onclick="copiarJogosF()" id="btn-copiar-f">
+                    <i class="fas fa-copy me-1"></i>Copiar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 game-table" id="tabela-jogos-f">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">Dezenas (7)</th>
+                        <th class="text-center">Mês</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-light text-center">
+        <strong>Custo Total:</strong> <span id="custo-total-f" class="text-success fw-bold">R$ 0,00</span>
+    </div>
+</div>
+
+
+<style>
+    /* Golden Theme - #D4B31A */
+    :root {
+        --gold-main: #D4B31A;
+        --gold-hover: #b69816;
+        --gold-light: #f9f2d2;
+        --gold-border: #e3be1c;
+    }
+
+    .text-custom-gold {
+        color: var(--gold-main) !important;
+    }
+
+    .bg-custom-gold {
+        background-color: var(--gold-main) !important;
+    }
+
+    .bg-custom-gold-light {
+        background-color: var(--gold-light) !important;
+    }
+
+    .border-custom-gold {
+        border-color: var(--gold-border) !important;
+    }
+
+    .btn-custom-gold {
+        background-color: var(--gold-main);
+        border-color: var(--gold-main);
+        color: white;
+    }
+
+    .btn-custom-gold:hover {
+        background-color: var(--gold-hover);
+        border-color: var(--gold-hover);
+        color: white;
+    }
+
+    .btn-outline-custom-gold {
+        color: var(--gold-main);
+        border-color: var(--gold-main);
+    }
+
+    .btn-outline-custom-gold:hover,
+    .btn-outline-custom-gold.active {
+        background-color: var(--gold-main);
+        color: white;
+    }
+
+    .alert-custom-gold {
+        background-color: #f7ecbb;
+        border-color: #e3be1c;
+        color: #5b4c0b;
+    }
+
+    /* Teclado Style */
+    #teclado-base-f .dezena-btn {
+        width: 45px;
+        height: 45px;
+        font-weight: bold;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        background-color: white;
+        transition: all 0.2s;
+    }
+
+    #teclado-base-f .dezena-btn.ultimo-sorteio {
+        opacity: 1;
+        background-color: #007bff !important;
+        /* Blue - Bloqueadas */
+        color: white;
+        border-color: #0056b3;
+        cursor: not-allowed;
+    }
+
+    #teclado-base-f .dezena-btn:hover {
+        transform: scale(1.1);
+        background-color: #e0e0e0 !important;
+        /* Gray - Hover */
+        border-color: #ccc;
+        color: #333;
+    }
+
+    #teclado-base-f .dezena-btn.selected {
+        background-color: #28a745 !important;
+        /* Green - Selected */
+        color: white;
+        border-color: #28a745 !important;
+        box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+    }
+
+    /* Game Table */
+    #tabela-jogos-f .num-cell {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border-radius: 50%;
+        margin: 0 2px;
+        font-weight: bold;
+        font-family: monospace;
+    }
+
+    #tabela-jogos-f .num-base {
+        background-color: var(--gold-light);
+        color: #887211;
+        border: 1px solid var(--gold-border);
+    }
+
+    #tabela-jogos-f .num-repetida {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+
+    #tabela-jogos-f .num-normal {
+        background-color: #f8f9fa;
+        color: #212529;
+        border: 1px solid #dee2e6;
+    }
+
+    /* Selection Mode Buttons */
+    .modo-btn-f {
+        transition: all 0.3s;
+    }
+
+    .modo-btn-f.active {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    @media print {
+
+        .card-header,
+        .btn,
+        .alert,
+        .card-footer {
+            display: none !important;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+
+<script>
+    let ultimoSorteioF = [];
+    let basePreferidaF = [];
+    let modoAtualF = 'automatico'; // 'automatico', 'manual'
+    let baseSugeridaAuto = []; // Store suggested base for auto mode restoration
+    let jogosGeradosF = []; // Armazena os jogos gerados para exportação
+    let coresMesesF = {}; // Armazena as cores vindas da API
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarDadosIniciaisF();
+        carregarCoresMesesF();
+        gerarTecladoF();
+
+        // Listener para mudança de mês
+        const mesSelect = document.getElementById('mes-f');
+        if (mesSelect) {
+            mesSelect.addEventListener('change', () => atualizarEstiloMesF());
+        }
+    });
+
+    function setModoF(modo) {
+        modoAtualF = modo;
+
+        // Update Buttons
+        document.querySelectorAll('.modo-btn-f').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-modo-f-${modo}`).classList.add('active');
+
+        // Update Description
+        const descDiv = document.getElementById('modo-f-descricao');
+        const painelTeclado = document.getElementById('painel-teclado-f');
+        const btnLimpar = document.getElementById('btn-limpar-base-f');
+
+        if (modo === 'automatico') {
+            descDiv.innerHTML = '<strong>💡 Modo Atual: AUTOMÁTICO</strong><br><small>Sistema escolhe a melhor base (Números Quentes/Médios não repetidos).</small>';
+            painelTeclado.style.display = 'none';
+            btnLimpar.disabled = true;
+
+            // Restore suggested base
+            if (baseSugeridaAuto.length > 0) {
+                basePreferidaF = [...baseSugeridaAuto];
+                atualizarInputBaseF();
+            }
+        } else {
+            descDiv.innerHTML = '<strong>✋ Modo Atual: MANUAL</strong><br><small>Você seleciona os 5 números da Base Preferida.</small>';
+            painelTeclado.style.display = 'block';
+            btnLimpar.disabled = false;
+
+            // Clear or keep? Let's keep current, user can clear.
+            atualizarTecladoVisivel();
+        }
+    }
+
+    async function carregarDadosIniciaisF() {
+        const loading = document.getElementById('loading-sorteio-f');
+        loading.style.display = 'block';
+
+        try {
+            const res = await fetch('/api/desdobramento/sugestao-modelo-f');
+            const data = await res.json();
+
+            if (data.ultimo_sorteio) {
+                ultimoSorteioF = data.ultimo_sorteio;
+                renderUltimoSorteioF();
+            }
+
+            if (data.base_sugerida) {
+                baseSugeridaAuto = data.base_sugerida; // Save for auto mode
+
+                // If initializing or in auto mode, set current base
+                if (modoAtualF === 'automatico') {
+                    basePreferidaF = [...baseSugeridaAuto];
+                }
+
+                atualizarInputBaseF();
+
+                if (data.concurso) {
+                    document.getElementById('numero-concurso-f').textContent = data.concurso;
+                }
+            }
+
+        } catch (err) {
+            console.error('Erro ao carregar dados iniciais F:', err);
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    function renderUltimoSorteioF() {
+        const container = document.getElementById('container-ultimo-f');
+        container.innerHTML = ultimoSorteioF.map(n =>
+            `<span class="badge bg-secondary fs-6">${n}</span>`
+        ).join('');
+
+        // Update keyboard to show disabled/marked numbers from last draw
+        gerarTecladoF();
+    }
+
+    function gerarTecladoF() {
+        const teclado = document.getElementById('teclado-base-f');
+        teclado.innerHTML = '';
+        for (let i = 1; i <= 31; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'dezena-btn';
+            btn.textContent = i;
+            btn.onclick = () => toggleDezenaF(i);
+            btn.dataset.num = i;
+
+            if (ultimoSorteioF.includes(i)) {
+                btn.classList.add('ultimo-sorteio');
+                btn.title = 'Presente no último sorteio (não recomendado para base)';
+            }
+
+            teclado.appendChild(btn);
+        }
+        atualizarTecladoVisivel();
+    }
+
+    function atualizarTecladoVisivel() {
+        const btns = document.querySelectorAll('#teclado-base-f .dezena-btn');
+        btns.forEach(btn => {
+            const num = parseInt(btn.dataset.num);
+            if (basePreferidaF.includes(num)) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+    }
+
+    function toggleDezenaF(num) {
+        if (modoAtualF !== 'manual') return; // Cannot edit in auto mode
+
+        if (basePreferidaF.includes(num)) {
+            basePreferidaF = basePreferidaF.filter(n => n !== num);
+        } else {
+            if (basePreferidaF.length >= 5) {
+                // Flash alert or something?
+                return;
+            }
+            basePreferidaF.push(num);
+        }
+        basePreferidaF.sort((a, b) => a - b);
+        atualizarInputBaseF();
+        atualizarTecladoVisivel();
+        document.getElementById('count-base-f').textContent = `${basePreferidaF.length}/5`;
+    }
+
+    function atualizarInputBaseF() {
+        document.getElementById('input-base-f').value = basePreferidaF.join('  ');
+        document.getElementById('count-base-f').textContent = `${basePreferidaF.length}/5`;
+        atualizarTecladoVisivel(); // Sync keyboard state
+    }
+
+    function limparBaseF() {
+        basePreferidaF = [];
+        atualizarInputBaseF();
+    }
+
+    async function gerarJogosModeloF() {
+        if (basePreferidaF.length !== 5) {
+            alert('A Base Preferida deve ter exatamente 5 números.');
+            return;
+        }
+
+        const btn = document.getElementById('btn-gerar-f');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gerando...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/desdobramento/gerar-jogos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    modelo: 'F',
+                    ultimo_sorteio: ultimoSorteioF,
+                    base_preferida: basePreferidaF,
+                    mes: document.getElementById('mes-f').value
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.erro || 'Erro ao gerar jogos');
+
+            jogosGeradosF = data.jogos; // Armazena globalmente
+            renderizarJogosF(data.jogos);
+
+            const section = document.getElementById('section-jogos-f');
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('total-jogos-f').textContent = `${data.total_jogos} jogos`;
+            document.getElementById('custo-total-f').textContent = data.custo_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function renderizarJogosF(jogos) {
+        const tbody = document.querySelector('#tabela-jogos-f tbody');
+        tbody.innerHTML = '';
+
+        jogos.forEach(jogo => {
+            const tr = document.createElement('tr');
+
+            const numsHtml = jogo.numeros_completos.map(n => {
+                let cssClass = 'num-normal';
+                if (ultimoSorteioF.includes(n)) cssClass = 'num-repetida';
+                else if (basePreferidaF.includes(n)) cssClass = 'num-base';
+
+                return `<span class="num-cell ${cssClass}">${n.toString().padStart(2, '0')}</span>`;
+            }).join('');
+
+            tr.innerHTML = `
+                <td class="align-middle fw-bold text-muted">${jogo.numero}</td>
+                <td class="align-middle">${numsHtml}</td>
+                <td class="align-middle fw-bold text-primary">${jogo.mes}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function copiarJogosF() {
+        const linhas = document.querySelectorAll('#tabela-jogos-f tbody tr');
+        if (!linhas.length) return;
+
+        let texto = '';
+        linhas.forEach(tr => {
+            // Get raw numbers from spans
+            const spans = tr.querySelectorAll('.num-cell');
+            const nums = Array.from(spans).map(s => s.textContent).join(' ');
+            texto += nums + '\n';
+        });
+
+        navigator.clipboard.writeText(texto).then(() => {
+            const btn = document.getElementById('btn-copiar-f');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Copiado!';
+            btn.classList.replace('btn-light', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.replace('btn-success', 'btn-light');
+            }, 2000);
+        });
+    }
+
+    // ==========================================
+    // EXPORTAÇÃO
+    // ==========================================
+
+    
+    async function salvarDiarioF() {
+        if (!jogosGeradosF || jogosGeradosF.length === 0) {
+            if(window.showError) showError('Não há apostas para salvar.'); 
+            else alert('Não há apostas para salvar.');
+            return;
+        }
+        const btn = document.getElementById('btn-diario-f');
+        const oriText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
+        btn.disabled = true;
+
+        try {
+            const apostasLimpo = jogosGeradosF.map(j => j.numeros_completos || j.numeros);
+            const response = await fetch('/api/diario-estrategia/salvar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apostas: apostasLimpo,
+                    estrategia: `Desdobramento Modelo F - ${jogosGeradosF.length} Jogos`,
+                    rota_origem: '/desdobramentos'
+                })
+            });
+            
+            const data = await response.json();
+            if (data.sucesso) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Salvo!';
+                btn.className = 'btn btn-sm btn-success me-2';
+            } else {
+                if(window.showError) showError('Erro: ' + data.mensagem); 
+                else alert('Erro: ' + data.mensagem);
+                btn.innerHTML = oriText;
+            }
+        } catch (e) {
+            if(window.showError) showError('Falha ao salvar no Diário.'); 
+            else alert('Falha ao salvar no Diário.');
+            btn.innerHTML = oriText;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+        function exportarTXTF() {
+        if (!jogosGeradosF || !jogosGeradosF.length) {
+            alert('Nenhum jogo gerado para exportar.');
+            return;
+        }
+
+        let conteudo = "";
+
+        jogosGeradosF.forEach(jogo => {
+            // Apenas números, formatados com 2 dígitos
+            const numsArr = jogo.numeros_completos || jogo.numeros || [];
+            const nums = numsArr.map(n => n.toString().padStart(2, '0')).join(' ');
+            conteudo += `${nums} ${jogo.mes}\n`;
+        });
+
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `modelo-f-jogos-${Date.now()}.txt`;
+        link.click();
+    }
+
+    async function carregarCoresMesesF() {
+        try {
+            const res = await fetch('/api/configuracoes/cores-meses');
+            const data = await res.json();
+            if (data.sucesso && data.cores_meses) {
+                coresMesesF = data.cores_meses;
+                atualizarEstiloMesF();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar cores dos meses:', error);
+        }
+    }
+
+    function atualizarEstiloMesF() {
+        const select = document.getElementById('mes-f');
+        if (!select) return;
+
+        const mesAbrev = select.value; // Jan, Fev...
+        // Mapear Jan -> 1, Fev -> 2...
+        const mesesMap = { 'Jan': 1, 'Fev': 2, 'Mar': 3, 'Abr': 4, 'Mai': 5, 'Jun': 6, 'Jul': 7, 'Ago': 8, 'Set': 9, 'Out': 10, 'Nov': 11, 'Dez': 12 };
+        const mesIndex = mesesMap[mesAbrev];
+
+        const cor = coresMesesF[mesIndex] || '#fff'; // Default white
+
+        // Aplicar estilo
+        select.style.backgroundColor = cor;
+        select.style.color = '#fff'; // Texto branco para contraste
+        select.style.fontWeight = 'bold';
+        select.style.borderColor = '#D4B31A';
+        select.style.textShadow = '0px 0px 2px rgba(0,0,0,0.5)';
+    }
+
+    function exportarCSVF() {
+        if (!jogosGeradosF.length) {
+            alert('Nenhum jogo gerado para exportar.');
+            return;
+        }
+
+        let conteudo = "JOGO;D1;D2;D3;D4;D5;D6;D7;MES\n";
+
+        jogosGeradosF.forEach(jogo => {
+            const nums = jogo.numeros_completos.map(n => n.toString().padStart(2, '0')).join(';');
+            conteudo += `${jogo.numero};${nums};${jogo.mes}\n`;
+        });
+
+        const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `modelo-f-jogos-${Date.now()}.csv`;
+        link.click();
+    }
+
+    function exportarHTMLF() {
+        if (!jogosGeradosF.length) {
+            alert('Nenhum jogo gerado para exportar.');
+            return;
+        }
+
+        let html = `
+            <!DOCTYPE html>
+            <html lang='pt-BR'>
+            <head>
+                <meta charset='UTF-8'>
+                <title>Jogos Modelo F</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+                    th { background-color: #D4B31A; color: white; }
+                    .num-cell {
+                        display: inline-block;
+                        width: 30px;
+                        height: 30px;
+                        line-height: 30px;
+                        text-align: center;
+                        border-radius: 50%;
+                        margin: 0 2px;
+                        font-weight: bold;
+                        font-family: monospace;
+                    }
+                    .num-base { background-color: #f9f2d2; color: #887211; border: 1px solid #e3be1c; }
+                    .num-repetida { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+                    .num-normal { background-color: #f8f9fa; color: #212529; border: 1px solid #dee2e6; }
+                </style>
+            </head>
+            <body>
+                <h1>Modelo F - Jogos Gerados</h1>
+                <p>Gerado em: ${new Date().toLocaleString()}</p>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th colspan="7">Dezenas</th><th>Mês</th></tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        jogosGeradosF.forEach(jogo => {
+            html += `<tr><td>${jogo.numero}</td>`;
+            jogo.numeros_completos.forEach(n => {
+                let cssClass = 'num-normal';
+                if (ultimoSorteioF.includes(n)) cssClass = 'num-repetida';
+                else if (basePreferidaF.includes(n)) cssClass = 'num-base';
+                html += `<td><span class="num-cell ${cssClass}">${n.toString().padStart(2, '0')}</span></td>`;
+            });
+            html += `<td>${jogo.mes}</td></tr>`;
+        });
+
+        html += `</tbody></table></body></html>`;
+
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `modelo-f-jogos-${Date.now()}.html`;
+        link.click();
+    }
+
+    function imprimirJogosF() {
+        if (!jogosGeradosF.length) {
+            alert('Nenhum jogo gerado para imprimir.');
+            return;
+        }
+        window.print();
+    }
+</script>

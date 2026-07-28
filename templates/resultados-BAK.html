@@ -1,0 +1,1718 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================================
+       VARIÁVEIS - IDENTIDADE VISUAL DIA DE SORTE
+       Cor base: #D4B31A com variações de 0% a 100%
+       ============================================================ */
+    :root {
+        /* Cor base */
+        --ds-primary: #D4B31A;
+        --ds-primary-rgb: 212, 179, 26;
+
+        /* Variações de intensidade */
+        --ds-100: #D4B31A;
+        --ds-90: #DABA31;
+        --ds-80: #E0C148;
+        --ds-70: #E6C85F;
+        --ds-60: #ECCF76;
+        --ds-50: #F2D68D;
+        --ds-40: #F5DDA4;
+        --ds-30: #F8E4BB;
+        --ds-20: #FBF1D2;
+        --ds-10: #FDF8E9;
+
+        /* Variações escuras */
+        --ds-dark-90: #BFA117;
+        --ds-dark-80: #AA8F14;
+        --ds-dark-70: #957D12;
+        --ds-dark-60: #806B0F;
+
+        /* Cores de contraste */
+        --ds-text-on-primary: #2C2400;
+        --ds-text-light: #FFFFFF;
+
+        /* Cores de status */
+        --ds-acumulou: #d32f2f;
+        --ds-ganhou: #2e7d32;
+        --ds-repetida: #ff6b6b;
+        --ds-repetida-bg: #ffe6e6;
+
+        /* Backgrounds */
+        --ds-bg-light: #FDF8E9;
+        --ds-bg-card: #FFFFFF;
+        --ds-bg-dark: #1a1a1a;
+        --ds-bg-card-dark: #2a2a2a;
+    }
+
+    /* ============================================================
+       LAYOUT PRINCIPAL
+       ============================================================ */
+    .resultados-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .resultados-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        border-radius: 15px;
+        color: var(--ds-text-light);
+        box-shadow: 0 4px 15px rgba(var(--ds-primary-rgb), 0.3);
+    }
+
+    .resultados-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .resultados-header p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* ============================================================
+       SISTEMA DE ABAS
+       ============================================================ */
+    .tabs-container {
+        margin-bottom: 25px;
+    }
+
+    .tabs-nav {
+        display: flex;
+        gap: 5px;
+        background: var(--ds-20);
+        padding: 8px;
+        border-radius: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        padding: 12px 30px;
+        background: transparent;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ds-dark-70);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tab-btn:hover {
+        background: var(--ds-40);
+        color: var(--ds-dark-80);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: var(--ds-text-light);
+        box-shadow: 0 4px 12px rgba(var(--ds-primary-rgb), 0.4);
+    }
+
+    .tab-btn i {
+        font-size: 1.1rem;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       ABA 1 - GRID DE CARDS (Últimos Resultados)
+       ============================================================ */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 20px;
+        margin: 0 auto;
+    }
+
+    .concurso-card {
+        background: var(--ds-bg-card);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-top: 4px solid var(--ds-100);
+    }
+
+    .concurso-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(var(--ds-primary-rgb), 0.25);
+    }
+
+    .card-header {
+        text-align: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px dashed var(--ds-30);
+    }
+
+    .card-header h3 {
+        color: var(--ds-dark-80);
+        font-size: 1.4em;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .concurso-numero {
+        color: var(--ds-100);
+        font-weight: 800;
+    }
+
+    .data {
+        color: #666;
+        font-size: 0.95em;
+        margin-top: 8px;
+    }
+
+    .data i {
+        color: var(--ds-100);
+        margin-right: 5px;
+    }
+
+    .numeros {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+
+    .numero {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: var(--ds-text-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1em;
+        box-shadow: 0 3px 8px rgba(var(--ds-primary-rgb), 0.4);
+        transition: transform 0.2s ease;
+    }
+
+    .numero:hover {
+        transform: scale(1.1);
+    }
+
+    .mes-sorte-container {
+        display: flex;
+        justify-content: center;
+        margin: 15px 0;
+    }
+
+    .mes-sorte {
+        padding: 8px 20px;
+        background: linear-gradient(135deg, var(--ds-50) 0%, var(--ds-60) 100%);
+        color: var(--ds-dark-70);
+        border-radius: 25px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 1em;
+        border: 2px dashed var(--ds-100);
+        box-shadow: 0 2px 8px rgba(var(--ds-primary-rgb), 0.2);
+    }
+
+    .mes-sorte i {
+        color: var(--ds-dark-80);
+    }
+
+    .status-premio {
+        text-align: center;
+        margin: 15px 0;
+        padding: 15px;
+        background: var(--ds-10);
+        border-radius: 10px;
+        border-left: 4px solid var(--ds-100);
+    }
+
+    .acumulou-text {
+        font-size: 1.15em;
+        font-weight: 700;
+        color: var(--ds-ganhou);
+    }
+
+    .acumulou-text.acumulado {
+        color: var(--ds-acumulou);
+    }
+
+    .premio-principal {
+        font-size: 1em;
+        color: #555;
+        margin-top: 8px;
+    }
+
+    .proximo-sorteio {
+        margin-top: 15px;
+        padding: 15px;
+        background: linear-gradient(135deg, var(--ds-20) 0%, var(--ds-10) 100%);
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid var(--ds-40);
+    }
+
+    .proximo-sorteio p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    .proximo-sorteio .titulo {
+        font-weight: 700;
+        color: var(--ds-dark-80);
+    }
+
+    .estimativa {
+        color: var(--ds-dark-80);
+        font-weight: 700;
+        font-size: 1.2em;
+        margin-top: 8px;
+    }
+
+    /* ============================================================
+       ABA 2 - TABELA (Resultados Alterados)
+       ============================================================ */
+    .controls-section {
+        background: linear-gradient(135deg, var(--ds-10), var(--ds-20));
+        border: 2px solid var(--ds-100);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(var(--ds-primary-rgb), 0.2);
+    }
+
+    .controls-title {
+        color: var(--ds-dark-80);
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .control-item {
+        background: white;
+        border: 2px solid var(--ds-40);
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .control-item label {
+        display: block;
+        color: var(--ds-dark-70);
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .control-item select {
+        width: 100%;
+        padding: 8px;
+        border: 2px solid var(--ds-40);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: bold;
+        text-align: center;
+        background: var(--ds-10);
+        color: var(--ds-dark-70);
+        cursor: pointer;
+    }
+
+    .control-item select:focus {
+        outline: none;
+        border-color: var(--ds-100);
+        box-shadow: 0 0 0 3px rgba(var(--ds-primary-rgb), 0.2);
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin: 20px 0;
+        box-shadow: 0 4px 15px rgba(var(--ds-primary-rgb), 0.15);
+        border-radius: 12px;
+    }
+
+    .resultados-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .resultados-table th,
+    .resultados-table td {
+        padding: 12px 15px;
+        text-align: center;
+        border: 1px solid var(--ds-30);
+    }
+
+    .resultados-table th {
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .resultados-table tr:nth-child(even) {
+        background-color: var(--ds-10);
+    }
+
+    .resultados-table tr:nth-child(odd) {
+        background-color: white;
+    }
+
+    .resultados-table tr:hover {
+        background-color: var(--ds-20);
+    }
+
+    .resultados-table tr.combinacao-repetida {
+        background-color: var(--ds-repetida-bg) !important;
+        border: 2px solid var(--ds-repetida);
+    }
+
+    .dezena {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: white;
+        border-radius: 50%;
+        margin: 0 2px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(var(--ds-primary-rgb), 0.3);
+    }
+
+    .dezena.ajustada {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+
+    .dezena.repetida {
+        background: linear-gradient(135deg, var(--ds-repetida) 0%, #c62828 100%);
+        animation: pulse-dezena 2s infinite;
+    }
+
+    @keyframes pulse-dezena {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .mes-badge {
+        font-weight: bold;
+        color: white;
+        padding: 5px 12px;
+        background: var(--ds-100);
+        border-radius: 15px;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .info-concursos {
+        background: var(--ds-10);
+        border: 1px solid var(--ds-100);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        color: var(--ds-dark-80);
+    }
+
+    .info-concursos strong {
+        color: var(--ds-100);
+    }
+
+    .progresso-container {
+        background: var(--ds-10);
+        border: 2px solid var(--ds-60);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: none;
+    }
+
+    .progresso-barra {
+        width: 100%;
+        height: 20px;
+        background: var(--ds-30);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+
+    .progresso-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--ds-100), var(--ds-70));
+        border-radius: 10px;
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+
+    .progresso-texto {
+        text-align: center;
+        color: var(--ds-dark-80);
+        font-weight: 600;
+    }
+
+    /* ============================================================
+       PAGINAÇÃO
+       ============================================================ */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin: 30px 0;
+        flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: var(--ds-text-light);
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 3px 10px rgba(var(--ds-primary-rgb), 0.3);
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(var(--ds-primary-rgb), 0.4);
+    }
+
+    .pagination-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .pagination-info {
+        font-weight: 600;
+        color: var(--ds-dark-80);
+        padding: 8px 16px;
+        background: var(--ds-20);
+        border-radius: 20px;
+    }
+
+    /* ============================================================
+       LOADING E NOTIFICAÇÕES
+       ============================================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .loading-overlay.show {
+        display: flex;
+    }
+
+    .loader {
+        width: 60px;
+        height: 60px;
+        border: 5px solid var(--ds-30);
+        border-top: 5px solid var(--ds-100);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        color: var(--ds-dark-80);
+        font-weight: 600;
+        font-size: 1.1em;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--ds-10);
+        border-radius: 15px;
+        margin: 20px 0;
+    }
+
+    .empty-state i {
+        font-size: 4em;
+        color: var(--ds-50);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: var(--ds-dark-80);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #777;
+    }
+
+    /* ============================================================
+       SEÇÃO DE DOWNLOAD
+       ============================================================ */
+    .download-section {
+        background: var(--ds-card-bg);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 25px;
+        box-shadow: 0 4px 15px rgba(var(--ds-primary-rgb), 0.15);
+        border: 2px solid var(--ds-60);
+    }
+
+    .download-title {
+        font-size: 1.2em;
+        font-weight: 700;
+        color: var(--ds-dark-80);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px dashed var(--ds-50);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .download-title i {
+        color: var(--ds-100);
+        font-size: 1.3em;
+    }
+
+    .download-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .download-control-item {
+        background: linear-gradient(135deg, var(--ds-10) 0%, var(--ds-20) 100%);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid var(--ds-40);
+    }
+
+    .download-control-item label {
+        display: block;
+        font-weight: 600;
+        color: var(--ds-dark-70);
+        margin-bottom: 8px;
+        font-size: 0.9em;
+    }
+
+    .download-control-item select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid var(--ds-60);
+        border-radius: 8px;
+        font-size: 1em;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .download-control-item select:hover {
+        border-color: var(--ds-100);
+    }
+
+    .download-control-item select:focus {
+        outline: none;
+        border-color: var(--ds-100);
+        box-shadow: 0 0 0 3px rgba(var(--ds-primary-rgb), 0.2);
+    }
+
+    .download-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .download-btn {
+        padding: 14px 30px;
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(var(--ds-primary-rgb), 0.4);
+    }
+
+    .download-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--ds-primary-rgb), 0.5);
+    }
+
+    .download-btn:active {
+        transform: translateY(0);
+    }
+
+    .download-btn i {
+        font-size: 1.2em;
+    }
+
+    /* ============================================================
+       MODAIS
+       ============================================================ */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 15px;
+        min-width: 320px;
+        max-width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        overflow: hidden;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.2em;
+        font-weight: 700;
+    }
+
+    .modal-header.alerta {
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        color: white;
+    }
+
+    .modal-header.sucesso {
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+        color: white;
+    }
+
+    .modal-header i {
+        font-size: 1.4em;
+    }
+
+    .modal-body {
+        padding: 25px 20px;
+        font-size: 1em;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+        display: flex;
+        justify-content: flex-end;
+        background: #f5f5f5;
+        border-top: 1px solid #eee;
+    }
+
+    .modal-btn {
+        padding: 10px 25px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #666;
+        color: white;
+    }
+
+    .modal-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-btn.sucesso {
+        background: linear-gradient(135deg, var(--ds-100) 0%, var(--ds-dark-80) 100%);
+    }
+
+    /* ============================================================
+       RESPONSIVIDADE
+       ============================================================ */
+    @media (max-width: 1200px) {
+        .grid-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 800px) {
+        .grid-container {
+            grid-template-columns: 1fr;
+        }
+
+        .resultados-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .tabs-nav {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .tab-btn {
+            justify-content: center;
+        }
+
+        .numero, .dezena {
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            font-size: 0.85em;
+        }
+
+        .controls-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .pagination-container {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .controls-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ============================================================
+       MODO ESCURO
+       ============================================================ */
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: var(--ds-bg-dark);
+            color: #f0f0f0;
+        }
+
+        .concurso-card, .controls-section, .table-container {
+            background: var(--ds-bg-card-dark);
+        }
+
+        .resultados-table {
+            background: var(--ds-bg-card-dark);
+        }
+
+        .resultados-table tr:nth-child(even) {
+            background-color: #333;
+        }
+
+        .resultados-table tr:nth-child(odd) {
+            background-color: var(--ds-bg-card-dark);
+        }
+
+        .card-header, .data, .premio-principal, .proximo-sorteio p {
+            color: #bbb;
+        }
+
+        .status-premio, .info-concursos, .progresso-container {
+            background: #333;
+        }
+
+        .control-item {
+            background: #333;
+        }
+
+        .control-item select {
+            background: #444;
+            color: #eee;
+        }
+
+        .tabs-nav {
+            background: #333;
+        }
+
+        .tab-btn {
+            color: #bbb;
+        }
+
+        .tab-btn:hover {
+            background: #444;
+        }
+
+        .loading-overlay {
+            background-color: rgba(26, 26, 26, 0.95);
+        }
+
+        .empty-state {
+            background: #333;
+        }
+
+        .download-section {
+            background: var(--ds-bg-card-dark);
+        }
+
+        .download-control-item {
+            background: #333;
+        }
+
+        .download-control-item label {
+            color: #bbb;
+        }
+
+        .download-control-item select {
+            background: #444;
+            color: #eee;
+            border-color: #555;
+        }
+
+        .download-title {
+            color: #eee;
+            border-bottom-color: #555;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+        }
+
+        .modal-body {
+            color: #ddd;
+        }
+
+        .modal-footer {
+            background: #333;
+            border-top-color: #444;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resultados-container">
+    <!-- Header -->
+    <div class="resultados-header">
+        <h1><i class="fas fa-trophy me-2"></i>Resultados - Dia de Sorte</h1>
+        <p>Consulte os últimos concursos e utilize ferramentas de análise</p>
+    </div>
+
+    <!-- Sistema de Abas -->
+    <div class="tabs-container">
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="ultimos" onclick="trocarAba('ultimos')">
+                <i class="fas fa-star"></i> Últimos Resultados
+            </button>
+            <button class="tab-btn" data-tab="alterados" onclick="trocarAba('alterados')">
+                <i class="fas fa-sliders-h"></i> Resultados Alterados
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         ABA 1: ÚLTIMOS RESULTADOS
+         ============================================================ -->
+    <div id="tab-ultimos" class="tab-content active">
+        <div class="grid-container" id="resultados-container">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>Carregando resultados...</h3>
+                <p>Aguarde enquanto buscamos os últimos concursos</p>
+            </div>
+        </div>
+
+        <div class="pagination-container">
+            <button id="anterior-btn" class="pagination-btn" disabled onclick="carregarConcursosAnteriores()">
+                <i class="fas fa-chevron-left"></i> Anteriores
+            </button>
+            <span id="pagination-info" class="pagination-info">Página 1</span>
+            <button id="proximo-btn" class="pagination-btn" disabled onclick="carregarConcursosProximos()">
+                Próximos <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         ABA 2: RESULTADOS ALTERADOS
+         ============================================================ -->
+    <div id="tab-alterados" class="tab-content">
+        <!-- Controles de Ajuste -->
+        <div class="controls-section">
+            <div class="controls-title">
+                <i class="fas fa-cogs"></i> Configurações de Ajustes das Dezenas
+            </div>
+
+            <div class="controls-grid">
+                <div class="control-item">
+                    <label>Qtd. Ajustes</label>
+                    <select id="quantidadeAjustes" onchange="atualizarControlesAjustes()">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div class="control-item" id="ajuste1-container">
+                    <label>Ajuste 1</label>
+                    <select id="ajuste1" onchange="aplicarAjustes()">
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3">-3</option>
+                        <option value="-2">-2</option>
+                        <option value="-1" selected>-1</option>
+                        <option value="0">0</option>
+                        <option value="+1">+1</option>
+                        <option value="+2">+2</option>
+                        <option value="+3">+3</option>
+                        <option value="+4">+4</option>
+                        <option value="+5">+5</option>
+                    </select>
+                </div>
+                <div class="control-item" id="ajuste2-container">
+                    <label>Ajuste 2</label>
+                    <select id="ajuste2" onchange="aplicarAjustes()">
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3">-3</option>
+                        <option value="-2">-2</option>
+                        <option value="-1">-1</option>
+                        <option value="0">0</option>
+                        <option value="+1" selected>+1</option>
+                        <option value="+2">+2</option>
+                        <option value="+3">+3</option>
+                        <option value="+4">+4</option>
+                        <option value="+5">+5</option>
+                    </select>
+                </div>
+                <div class="control-item" id="ajuste3-container">
+                    <label>Ajuste 3</label>
+                    <select id="ajuste3" onchange="aplicarAjustes()">
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3">-3</option>
+                        <option value="-2" selected>-2</option>
+                        <option value="-1">-1</option>
+                        <option value="0">0</option>
+                        <option value="+1">+1</option>
+                        <option value="+2">+2</option>
+                        <option value="+3">+3</option>
+                        <option value="+4">+4</option>
+                        <option value="+5">+5</option>
+                    </select>
+                </div>
+                <div class="control-item" id="ajuste4-container">
+                    <label>Ajuste 4</label>
+                    <select id="ajuste4" onchange="aplicarAjustes()">
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3">-3</option>
+                        <option value="-2">-2</option>
+                        <option value="-1">-1</option>
+                        <option value="0">0</option>
+                        <option value="+1">+1</option>
+                        <option value="+2" selected>+2</option>
+                        <option value="+3">+3</option>
+                        <option value="+4">+4</option>
+                        <option value="+5">+5</option>
+                    </select>
+                </div>
+                <div class="control-item" id="ajuste5-container" style="display:none;">
+                    <label>Ajuste 5</label>
+                    <select id="ajuste5" onchange="aplicarAjustes()">
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3" selected>-3</option>
+                        <option value="-2">-2</option>
+                        <option value="-1">-1</option>
+                        <option value="0">0</option>
+                        <option value="+1">+1</option>
+                        <option value="+2">+2</option>
+                        <option value="+3">+3</option>
+                        <option value="+4">+4</option>
+                        <option value="+5">+5</option>
+                    </select>
+                </div>
+                <div class="control-item" id="ajuste6-container" style="display:none;">
+                    <label>Ajuste 6</label>
+                    <select id="ajuste6" onchange="aplicarAjustes()">
+                        <option value="-5">-5</option>
+                        <option value="-4">-4</option>
+                        <option value="-3">-3</option>
+                        <option value="-2">-2</option>
+                        <option value="-1">-1</option>
+                        <option value="0">0</option>
+                        <option value="+1">+1</option>
+                        <option value="+2">+2</option>
+                        <option value="+3" selected>+3</option>
+                        <option value="+4">+4</option>
+                        <option value="+5">+5</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="pagination-btn" onclick="carregarTodosResultados()">
+                    <i class="fas fa-sync-alt"></i> Carregar Resultados
+                </button>
+            </div>
+        </div>
+
+        <!-- Informações -->
+        <div class="info-concursos" id="info-alterados">
+            <p>Clique em <strong>"Carregar Resultados"</strong> para buscar todos os concursos</p>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="progresso-container" id="progresso-container">
+            <div class="progresso-texto" id="progresso-texto">Carregando...</div>
+            <div class="progresso-barra">
+                <div class="progresso-fill" id="progresso-fill"></div>
+            </div>
+        </div>
+
+        <!-- Tabela de Resultados -->
+        <div class="table-container" id="tabela-container" style="display: none;">
+            <table class="resultados-table" id="tabela-alterados">
+                <thead>
+                    <tr>
+                        <th>Concurso</th>
+                        <th>Data</th>
+                        <th>Dezenas Originais</th>
+                        <th>Mês</th>
+                        <th id="th-ajustes">Ajustes Aplicados</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-alterados">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação da Tabela -->
+        <div class="pagination-container" id="paginacao-alterados" style="display: none;">
+            <button class="pagination-btn" onclick="paginaAnteriorAlterados()" id="btn-anterior-alt">
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span id="pagination-info-alt" class="pagination-info">Página 1</span>
+            <button class="pagination-btn" onclick="proximaPaginaAlterados()" id="btn-proximo-alt">
+                Próxima <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Seção de Download -->
+        <div class="download-section" id="download-section" style="display: none;">
+            <div class="download-title">
+                <i class="fas fa-download"></i> Exportar Resultados Alterados
+            </div>
+            <div class="download-controls">
+                <div class="download-control-item">
+                    <label>Quantidade de Registros</label>
+                    <select id="downloadQuantidade">
+                        <option value="50">50 registros</option>
+                        <option value="100">100 registros</option>
+                        <option value="200">200 registros</option>
+                        <option value="500">500 registros</option>
+                        <option value="1000">1.000 registros</option>
+                        <option value="all" selected>Todos</option>
+                    </select>
+                </div>
+                <div class="download-control-item">
+                    <label>Formato</label>
+                    <select id="downloadFormato">
+                        <option value="csv" selected>CSV</option>
+                        <option value="txt">TXT</option>
+                    </select>
+                </div>
+                <div class="download-control-item">
+                    <label>Incluir</label>
+                    <select id="downloadConteudo">
+                        <option value="ajustados" selected>Apenas Ajustados</option>
+                        <option value="originais">Apenas Originais</option>
+                        <option value="ambos">Originais + Ajustados</option>
+                    </select>
+                </div>
+            </div>
+            <div class="download-buttons">
+                <button class="download-btn" onclick="exportarResultados()">
+                    <i class="fas fa-file-download"></i> Baixar Arquivo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loader"></div>
+    <span class="loading-text">Carregando...</span>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ============================================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================================
+
+    // Aba 1 - Últimos Resultados
+    let concursosExibidos = [];
+    let concursosPorPagina = 6;
+    let paginaAtual = 1;
+    let totalPaginas = 1;
+
+    // Aba 2 - Resultados Alterados
+    let todosResultados = [];
+    let resultadosOriginais = [];
+    let paginaAtualAlt = 1;
+    let itensPorPaginaAlt = 50;
+    let totalPaginasAlt = 1;
+
+    // ============================================================
+    // INICIALIZAÇÃO
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarResultados();
+        atualizarControlesAjustes();
+    });
+
+    // Detectar modo escuro
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        document.documentElement.classList.toggle('dark', event.matches);
+    });
+
+    // ============================================================
+    // SISTEMA DE ABAS
+    // ============================================================
+    function trocarAba(aba) {
+        // Atualizar botões
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === aba) btn.classList.add('active');
+        });
+
+        // Atualizar conteúdo
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById('tab-' + aba).classList.add('active');
+    }
+
+    // ============================================================
+    // ABA 1: ÚLTIMOS RESULTADOS
+    // ============================================================
+    function formatarMoeda(valor) {
+        if (!valor) return 'R$ 0,00';
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    }
+
+    function padZero(num) {
+        return num.toString().padStart(2, '0');
+    }
+
+    async function carregarResultados() {
+        showLoading();
+        try {
+            const response = await fetch(`/api/resultados/paginados?pagina=${paginaAtual}&por_pagina=${concursosPorPagina}`);
+            const data = await response.json();
+
+            if (data.sucesso) {
+                concursosExibidos = data.concursos;
+                totalPaginas = data.total_paginas;
+                exibirConcursos(concursosExibidos);
+                atualizarPaginacao();
+            } else {
+                mostrarEstadoVazio('Não foi possível carregar os resultados.');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            mostrarEstadoVazio('Erro ao carregar resultados.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function carregarConcursosAnteriores() {
+        if (paginaAtual < totalPaginas) {
+            paginaAtual++;
+            await carregarResultados();
+        }
+    }
+
+    async function carregarConcursosProximos() {
+        if (paginaAtual > 1) {
+            paginaAtual--;
+            await carregarResultados();
+        }
+    }
+
+    function exibirConcursos(concursos) {
+        const container = document.getElementById('resultados-container');
+
+        if (!concursos || concursos.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Sem resultados</h3>
+                    <p>Nenhum concurso encontrado.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = concursos.map(c => `
+            <div class="concurso-card">
+                <div class="card-header">
+                    <h3>Concurso <span class="concurso-numero">${c.numero}</span></h3>
+                    <p class="data"> ${c.data} (${c.diaSemana})</p>
+                </div>
+                <div class="numeros">
+                    ${c.numeros.map(n => `<div class="numero">${padZero(n)}</div>`).join('')}
+                </div>
+                <div class="mes-sorte-container">
+                    <div class="mes-sorte mes-cor-${c.mesSorteNumero - 1}">
+                         ${c.mesSorte}
+                    </div>
+                </div>
+                <div class="status-premio">
+                    <p class="acumulou-text ${c.acumulou ? 'acumulado' : ''}">${c.acumulou ? 'ACUMULOU!' : `${c.ganhadores.seteAcertos} GANHADOR${c.ganhadores.seteAcertos !== 1 ? 'ES' : ''}`}</p>
+                    <p class="premio-principal">${c.acumulou ? 'Ninguém acertou os 7 números' : `Prêmio: ${c.premiosFormatados.seteAcertos}`}</p>
+                </div>
+                ${c.proximoConcurso.data ? `
+                <div class="proximo-sorteio">
+                    <p class="titulo">Próximo: Concurso ${c.proximoConcurso.numero}</p>
+                    <p>${c.proximoConcurso.data} (${c.proximoConcurso.diaSemana})</p>
+                    <p class="estimativa">Estimado: ${c.premiosFormatados.estimativaProximo}</p>
+                </div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function mostrarEstadoVazio(msg) {
+        document.getElementById('resultados-container').innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-inbox"></i>
+                <h3>Sem resultados</h3>
+                <p>${msg}</p>
+            </div>`;
+    }
+
+    function atualizarPaginacao() {
+        document.getElementById('anterior-btn').disabled = paginaAtual >= totalPaginas;
+        document.getElementById('proximo-btn').disabled = paginaAtual <= 1;
+        document.getElementById('pagination-info').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    }
+
+    // ============================================================
+    // ABA 2: RESULTADOS ALTERADOS
+    // ============================================================
+    function atualizarControlesAjustes() {
+        const qtd = parseInt(document.getElementById('quantidadeAjustes').value);
+
+        for (let i = 1; i <= 6; i++) {
+            const container = document.getElementById(`ajuste${i}-container`);
+            if (container) {
+                container.style.display = i <= qtd ? 'block' : 'none';
+            }
+        }
+
+        if (todosResultados.length > 0) {
+            aplicarAjustes();
+        }
+    }
+
+    function obterAjustes() {
+        const qtd = parseInt(document.getElementById('quantidadeAjustes').value);
+        const ajustes = [];
+
+        for (let i = 1; i <= qtd; i++) {
+            const valor = parseInt(document.getElementById(`ajuste${i}`).value);
+            ajustes.push(valor);
+        }
+
+        return ajustes;
+    }
+
+    async function carregarTodosResultados() {
+        const progressoContainer = document.getElementById('progresso-container');
+        const progressoFill = document.getElementById('progresso-fill');
+        const progressoTexto = document.getElementById('progresso-texto');
+        const tabelaContainer = document.getElementById('tabela-container');
+        const paginacaoAlt = document.getElementById('paginacao-alterados');
+        const infoAlt = document.getElementById('info-alterados');
+
+        progressoContainer.style.display = 'block';
+        tabelaContainer.style.display = 'none';
+        paginacaoAlt.style.display = 'none';
+        progressoFill.style.width = '0%';
+        progressoTexto.textContent = 'Iniciando carregamento...';
+
+        try {
+            progressoFill.style.width = '30%';
+            progressoTexto.textContent = 'Buscando concursos do banco de dados...';
+
+            const response = await fetch('/api/sorteios/todos');
+            const data = await response.json();
+
+            progressoFill.style.width = '70%';
+            progressoTexto.textContent = 'Processando dados...';
+
+            if (data.sorteios && data.sorteios.length > 0) {
+                resultadosOriginais = data.sorteios.map(s => ({
+                    concurso: s.concurso,
+                    data: s.data_sorteio,
+                    mes: s.mes_sorte_nome,
+                    mesNumero: s.mes_sorte,
+                    dezenas: [
+                        s.posicoes.posicao_1,
+                        s.posicoes.posicao_2,
+                        s.posicoes.posicao_3,
+                        s.posicoes.posicao_4,
+                        s.posicoes.posicao_5,
+                        s.posicoes.posicao_6,
+                        s.posicoes.posicao_7
+                    ]
+                }));
+
+                // Ordenar do mais recente para o mais antigo
+                resultadosOriginais.sort((a, b) => b.concurso - a.concurso);
+
+                infoAlt.innerHTML = `<p><strong>${resultadosOriginais.length}</strong> concursos carregados | Último: <strong>${resultadosOriginais[0].concurso}</strong></p>`;
+
+                progressoFill.style.width = '100%';
+                progressoTexto.textContent = 'Concluído!';
+
+                setTimeout(() => {
+                    progressoContainer.style.display = 'none';
+                    aplicarAjustes();
+                }, 500);
+            } else {
+                throw new Error('Nenhum resultado encontrado');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            progressoTexto.textContent = 'Erro ao carregar. Tente novamente.';
+            progressoFill.style.background = '#f44336';
+        }
+    }
+
+    function aplicarAjustes() {
+        if (resultadosOriginais.length === 0) return;
+
+        const ajustes = obterAjustes();
+
+        // Aplicar ajustes
+        todosResultados = resultadosOriginais.map(r => {
+            const dezenasAjustadas = ajustes.map(ajuste => {
+                return r.dezenas.map(d => {
+                    let novoValor = d + ajuste;
+                    // Manter entre 1 e 31
+                    if (novoValor < 1) novoValor = 31 + novoValor;
+                    if (novoValor > 31) novoValor = novoValor - 31;
+                    return novoValor;
+                }).sort((a, b) => a - b); // Ordenar em ordem crescente após ajuste
+            });
+
+            return {
+                ...r,
+                dezenasAjustadas
+            };
+        });
+
+        // Atualizar cabeçalho da tabela
+        const thAjustes = document.getElementById('th-ajustes');
+        thAjustes.innerHTML = ajustes.map((a, i) => `Ajuste ${i+1} (${a >= 0 ? '+' : ''}${a})`).join(' | ');
+
+        paginaAtualAlt = 1;
+        totalPaginasAlt = Math.ceil(todosResultados.length / itensPorPaginaAlt);
+        renderizarTabelaAlterados();
+    }
+
+    function renderizarTabelaAlterados() {
+        const tbody = document.getElementById('tbody-alterados');
+        const tabelaContainer = document.getElementById('tabela-container');
+        const paginacaoAlt = document.getElementById('paginacao-alterados');
+
+        const inicio = (paginaAtualAlt - 1) * itensPorPaginaAlt;
+        const fim = inicio + itensPorPaginaAlt;
+        const paginaAtualData = todosResultados.slice(inicio, fim);
+
+        tbody.innerHTML = paginaAtualData.map(r => `
+            <tr>
+                <td><strong>${r.concurso}</strong></td>
+                <td>${r.data}</td>
+                <td>
+                    ${r.dezenas.map(d => `<span class="dezena">${padZero(d)}</span>`).join('')}
+                </td>
+                <td><span class="mes-badge mes-cor-${r.mesNumero - 1}">${r.mes}</span></td>
+                <td>
+                    ${r.dezenasAjustadas.map((ajuste, idx) =>
+                        `<div style="margin: 3px 0;">${ajuste.map(d => `<span class="dezena ajustada">${padZero(d)}</span>`).join('')}</div>`
+                    ).join('')}
+                </td>
+            </tr>
+        `).join('');
+
+        tabelaContainer.style.display = 'block';
+        paginacaoAlt.style.display = 'flex';
+        document.getElementById('download-section').style.display = 'block';
+
+        document.getElementById('pagination-info-alt').textContent = `Página ${paginaAtualAlt} de ${totalPaginasAlt}`;
+        document.getElementById('btn-anterior-alt').disabled = paginaAtualAlt <= 1;
+        document.getElementById('btn-proximo-alt').disabled = paginaAtualAlt >= totalPaginasAlt;
+    }
+
+    function paginaAnteriorAlterados() {
+        if (paginaAtualAlt > 1) {
+            paginaAtualAlt--;
+            renderizarTabelaAlterados();
+        }
+    }
+
+    function proximaPaginaAlterados() {
+        if (paginaAtualAlt < totalPaginasAlt) {
+            paginaAtualAlt++;
+            renderizarTabelaAlterados();
+        }
+    }
+
+    // ============================================================
+    // UTILITÁRIOS
+    // ============================================================
+    function showLoading() {
+        document.getElementById('loading-overlay').classList.add('show');
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-overlay').classList.remove('show');
+    }
+
+    // ============================================================
+    // EXPORTAÇÃO / DOWNLOAD
+    // ============================================================
+    function exportarResultados() {
+        if (todosResultados.length === 0) {
+            mostrarModalAlerta('Nenhum resultado para exportar. Carregue os resultados primeiro.');
+            return;
+        }
+
+        const quantidade = document.getElementById('downloadQuantidade').value;
+        const formato = document.getElementById('downloadFormato').value;
+        const conteudo = document.getElementById('downloadConteudo').value;
+        const ajustes = obterAjustes();
+
+        // Determinar quantos registros exportar
+        let registrosExportar;
+        if (quantidade === 'all') {
+            registrosExportar = todosResultados;
+        } else {
+            registrosExportar = todosResultados.slice(0, parseInt(quantidade));
+        }
+
+        let dados = '';
+        let nomeArquivo = '';
+        const dataAtual = new Date().toISOString().split('T')[0];
+
+        if (formato === 'csv') {
+            // Cabeçalho CSV
+            let cabecalho = [];
+
+            if (conteudo === 'originais' || conteudo === 'ambos') {
+                cabecalho.push('Concurso', 'Data', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'Mes');
+            }
+
+            if (conteudo === 'ajustados' || conteudo === 'ambos') {
+                if (conteudo === 'ajustados') {
+                    cabecalho.push('Concurso', 'Data', 'Mes');
+                }
+                ajustes.forEach((a, idx) => {
+                    cabecalho.push(`Aj${idx+1}_D1`, `Aj${idx+1}_D2`, `Aj${idx+1}_D3`, `Aj${idx+1}_D4`, `Aj${idx+1}_D5`, `Aj${idx+1}_D6`, `Aj${idx+1}_D7`);
+                });
+            }
+
+            dados = cabecalho.join(';') + '\n';
+
+            // Dados CSV
+            registrosExportar.forEach(r => {
+                let linha = [];
+
+                if (conteudo === 'originais' || conteudo === 'ambos') {
+                    linha.push(r.concurso, r.data);
+                    r.dezenas.forEach(d => linha.push(padZero(d)));
+                    linha.push(r.mes);
+                }
+
+                if (conteudo === 'ajustados' || conteudo === 'ambos') {
+                    if (conteudo === 'ajustados') {
+                        linha.push(r.concurso, r.data, r.mes);
+                    }
+                    r.dezenasAjustadas.forEach(ajuste => {
+                        ajuste.forEach(d => linha.push(padZero(d)));
+                    });
+                }
+
+                dados += linha.join(';') + '\n';
+            });
+
+            nomeArquivo = `dia_sorte_resultados_${conteudo}_${dataAtual}.csv`;
+        } else {
+            // Formato TXT
+            dados = '='.repeat(80) + '\n';
+            dados += '  DIA DE SORTE - RESULTADOS EXPORTADOS\n';
+            dados += '  Data de exportação: ' + new Date().toLocaleString('pt-BR') + '\n';
+            dados += '  Total de registros: ' + registrosExportar.length + '\n';
+            if (conteudo !== 'originais') {
+                dados += '  Ajustes aplicados: ' + ajustes.map(a => (a >= 0 ? '+' : '') + a).join(', ') + '\n';
+            }
+            dados += '='.repeat(80) + '\n\n';
+
+            registrosExportar.forEach(r => {
+                dados += '-'.repeat(60) + '\n';
+                dados += `Concurso: ${r.concurso} | Data: ${r.data} | Mês: ${r.mes}\n`;
+                dados += '-'.repeat(60) + '\n';
+
+                if (conteudo === 'originais' || conteudo === 'ambos') {
+                    dados += `Dezenas Originais: ${r.dezenas.map(d => padZero(d)).join(' - ')}\n`;
+                }
+
+                if (conteudo === 'ajustados' || conteudo === 'ambos') {
+                    r.dezenasAjustadas.forEach((ajuste, idx) => {
+                        const ajusteVal = ajustes[idx];
+                        dados += `Ajuste ${idx+1} (${ajusteVal >= 0 ? '+' : ''}${ajusteVal}): ${ajuste.map(d => padZero(d)).join(' - ')}\n`;
+                    });
+                }
+                dados += '\n';
+            });
+
+            nomeArquivo = `dia_sorte_resultados_${conteudo}_${dataAtual}.txt`;
+        }
+
+        // Criar e baixar arquivo
+        const blob = new Blob([dados], { type: formato === 'csv' ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nomeArquivo;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        mostrarModalSucesso(`Arquivo exportado com sucesso!\n${registrosExportar.length} registros salvos em ${nomeArquivo}`);
+    }
+
+    // Modal de Alerta (substituindo alert())
+    function mostrarModalAlerta(mensagem) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header alerta">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Atenção</span>
+                </div>
+                <div class="modal-body">${mensagem}</div>
+                <div class="modal-footer">
+                    <button class="modal-btn" onclick="this.closest('.modal-overlay').remove()">OK</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Modal de Sucesso
+    function mostrarModalSucesso(mensagem) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header sucesso">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Sucesso</span>
+                </div>
+                <div class="modal-body">${mensagem.replace(/\n/g, '<br>')}</div>
+                <div class="modal-footer">
+                    <button class="modal-btn sucesso" onclick="this.closest('.modal-overlay').remove()">Fechar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+</script>
+{% endblock %}

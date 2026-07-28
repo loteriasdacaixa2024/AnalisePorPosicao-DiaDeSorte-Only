@@ -1,0 +1,1434 @@
+{% extends "base.html" %}
+
+{% block title %}Gerador de Palpites - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-dice me-2"></i>Gerador de Palpites Inteligente</h2>
+                    <p class="text-muted">Sistema de fechamento otimizado</p>
+                </div>
+                <button class="btn btn-outline-primary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left me-1"></i>Voltar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Próximo Sorteio (Discreto) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body py-2">
+                    <div id="info-proximo-sorteio" class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <span class="text-muted">Carregando informações do próximo sorteio...</span> 
+                    </div>
+                    <span>
+						<small>
+							🛈 Se a informação acima não aparecer clique em |
+							<a href="/sistema/configuracoes" target="_blank"><i class="fas fa-download me-1"></i>Atualizar</a>
+						</small>
+					</span>
+
+                    </div>
+				</div>
+            </div>
+        </div>				
+    </div>
+
+    <!-- Números Minimalistas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-star me-2 text-warning"></i>Seus Números Minimalistas
+                    </h5>
+
+                    <!-- Abas -->
+                    <ul class="nav nav-tabs mb-3" id="input-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual-input" type="button">
+                                <i class="fas fa-keyboard me-1"></i>Digite seus números
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-input" type="button">
+                                <i class="fas fa-file-upload me-1"></i>Arrastar arquivo
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Conteúdo das Abas -->
+                    <div class="tab-content" id="input-tabs-content">
+                        <!-- Entrada Manual -->
+                        <div class="tab-pane fade show active" id="manual-input">
+                            <div class="mb-3">
+                                <label for="numeros-minimalistas" class="form-label">Digite seus números (um por linha ou separados por espaço):</label>
+                                <textarea
+                                    id="numeros-minimalistas"
+                                    class="form-control font-monospace"
+                                    rows="6"
+                                    placeholder="Exemplos válidos:&#10;01 05 07 10 12 15 18 20 23 25 28 31&#10;1 5 7 10 12 15 18 20 23 25 28&#10;01&#10;05&#10;07&#10;10"
+                                    style="font-size: 16px;"
+                                ></textarea>
+                                <div class="form-text">
+                                    <strong>Formato:</strong> Digite os números separados por espaço ou um por linha.
+                                    <br><strong>Aceita:</strong> Números com ou sem zero à esquerda (1 ou 01)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload de Arquivo -->
+                        <div class="tab-pane fade" id="upload-input">
+                            <div
+                                id="drop-zone"
+                                class="border border-2 border-dashed rounded p-5 text-center bg-light"
+                                style="min-height: 250px; cursor: pointer;"
+                            >
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <h5>Arraste um arquivo aqui</h5>
+                                <p class="text-muted mb-3">ou clique para selecionar</p>
+                                <input type="file" id="file-input" class="d-none" accept=".txt,.csv">
+                                <button class="btn btn-outline-primary" onclick="document.getElementById('file-input').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Escolher Arquivo
+                                </button>
+                                <div class="mt-3">
+                                    <small class="text-muted">Arquivos aceitos: .txt, .csv</small>
+                                </div>
+                            </div>
+                            <div id="file-info" class="mt-3 d-none">
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="fas fa-file-alt fa-2x me-3"></i>
+                                    <div>
+                                        <strong id="file-name"></strong>
+                                        <br><small id="file-size"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distribuição dos Números -->
+                    <div id="distribuicao-numeros" class="d-none mt-3">
+                        <div class="alert alert-info mb-0">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <strong><span id="total-numeros">0</span></strong>
+                                    <br><small>Total Selecionados</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><span id="total-baixas">0</span></strong>
+                                    <br><small>Baixas (01-10)</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><span id="total-medias">0</span></strong>
+                                    <br><small>Médias (11-20)</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong><span id="total-altas">0</span></strong>
+                                    <br><small>Altas (21-31)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configurações de Geração -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="fas fa-cog me-2 text-primary"></i>Configurações</h5>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label for="quantidade-jogos" class="form-label fw-bold">
+                                <i class="fas fa-hashtag me-1"></i>Quantos jogos gerar?
+                            </label>
+                            <input type="number" class="form-control" id="quantidade-jogos"
+                                   value="15" min="1" max="100" style="font-size: 16px;">
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="dezenas-por-jogo" class="form-label fw-bold">
+                                <i class="fas fa-list-ol me-1"></i>Dezenas por jogo (máx: 15)
+                            </label>
+                            <input type="number" class="form-control" id="dezenas-por-jogo"
+                                   value="7" min="7" max="15" style="font-size: 16px;"
+                                   onchange="calcularCombinacoes()">
+                            <small class="text-muted" id="info-combinacoes"></small>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="selecao-mes" class="form-label fw-bold">
+                                Mês da Sorte
+                            </label>
+                            <select class="form-select" id="selecao-mes" style="font-size: 16px;">
+                                <option value="atrasado" selected>🎯 Mês mais atrasado (Automático)</option>
+                                <option value="aleatorio">🎲 Mês aleatório</option>
+                                <option value="Janeiro">Janeiro</option>
+                                <option value="Fevereiro">Fevereiro</option>
+                                <option value="Março">Março</option>
+                                <option value="Abril">Abril</option>
+                                <option value="Maio">Maio</option>
+                                <option value="Junho">Junho</option>
+                                <option value="Julho">Julho</option>
+                                <option value="Agosto">Agosto</option>
+                                <option value="Setembro">Setembro</option>
+                                <option value="Outubro">Outubro</option>
+                                <option value="Novembro">Novembro</option>
+                                <option value="Dezembro">Dezembro</option>
+                            </select>
+                            <small class="form-text text-muted" id="info-mes-atrasado">
+                                Carregando...
+                            </small>
+                        </div>
+
+                        <!-- NOVO CAMPO: Select de Padrões de Análise -->
+                        <div class="col-12 col-md-4">
+                            <label for="selecao-analise" class="form-label fw-bold">
+                                <i class="fas fa-chart-bar me-1"></i>Select de Análises
+                            </label>
+                            <select class="form-select" id="selecao-analise" style="font-size: 16px;">
+                                <option value="">Selecione um padrão de análise...</option>
+                                <!-- Padrões serão carregados dinamicamente via JavaScript -->
+                            </select>
+                            <small class="form-text text-muted">
+                                Top 3 Padrões Iniciais Mais Frequentes
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button class="btn btn-lg btn-success" onclick="gerarPalpites()">
+                            <i class="fas fa-magic me-2"></i>Gerar Palpites com Fechamento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-geracao" class="text-center py-5 d-none">
+        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Gerando...</span>
+        </div>
+        <p class="mt-3 text-muted">Gerando palpites otimizados...</p>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultados-container" class="d-none">
+        <!-- Informações do Padrão -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div id="info-padrao-usado"></div>
+            </div>
+        </div>
+        
+        <!-- Resumo Financeiro -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-success">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-money-bill-wave me-2 text-success"></i>Resumo Financeiro
+                        </h5>
+                        <div id="resumo-financeiro" class="row text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Exportação -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-download me-2 text-primary"></i>Exportar Palpites
+                        </h5>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <button class="btn btn-primary" onclick="exportarTXT()">
+                                <i class="fas fa-file-alt me-2"></i>Baixar TXT
+                            </button>
+                            <button class="btn btn-success" onclick="exportarEXCEL()">
+                                <i class="fas fa-file-excel me-2"></i>Baixar XLSX
+                            </button>
+                            <button class="btn btn-info" onclick="exportarHTML()">
+                                <i class="fas fa-file-code me-2"></i>Baixar HTML
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Jogos -->
+        <div id="lista-jogos"></div>
+    </div>
+</div>
+
+<!-- Modal de Edição -->
+<div class="modal fade" id="modal-editar-jogo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Jogo <span id="modal-numero-jogo"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="modal-numeros" class="form-label">Números (7 a 15 dezenas):</label>
+                    <input type="text" class="form-control" id="modal-numeros"
+                           placeholder="Ex: 01 05 10 15 20 25 30" style="font-size: 16px;">
+                </div>
+                <div class="mb-3">
+                    <label for="modal-mes" class="form-label">Mês da Sorte:</label>
+                    <select class="form-select" id="modal-mes" style="font-size: 16px;">
+                        <option value="Janeiro">Janeiro</option>
+                        <option value="Fevereiro">Fevereiro</option>
+                        <option value="Março">Março</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Maio">Maio</option>
+                        <option value="Junho">Junho</option>
+                        <option value="Julho">Julho</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Setembro">Setembro</option>
+                        <option value="Outubro">Outubro</option>
+                        <option value="Novembro">Novembro</option>
+                        <option value="Dezembro">Dezembro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarEdicaoJogo()">
+                    <i class="fas fa-save me-2"></i>Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Cores para Meses */
+    .mes-cor-0  { background-color: #f0e9ee !important; }
+    .mes-cor-1  { background-color: #f0c282 !important; }
+    .mes-cor-2  { background-color: #686b69 !important; color: white !important; }
+    .mes-cor-3  { background-color: #ce3500 !important; color: white !important; }
+    .mes-cor-4  { background-color: #457725 !important; color: white !important; }
+    .mes-cor-5  { background-color: #a2a7ad !important; }
+    .mes-cor-6  { background-color: #98ddde !important; }
+    .mes-cor-7  { background-color: #2c8587 !important; color: white !important; }
+    .mes-cor-8  { background-color: #0d00f2 !important; color: white !important; }
+    .mes-cor-9  { background-color: #ffff66 !important; }
+    .mes-cor-10 { background-color: #cc99ff !important; }
+    .mes-cor-11 { background-color: #99ff33 !important; }
+
+    /* Card do Jogo */
+    .jogo-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .jogo-card {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    }
+
+    /* Círculo de Número */
+    .numero-badge {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin: 4px;
+        background: white;
+        color: #333;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    }
+
+    .dark .numero-badge {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+
+    /* Badge de Distribuição */
+    .badge-baixa { background-color: #3b82f6 !important; }
+    .badge-media { background-color: #eab308 !important; }
+    .badge-alta { background-color: #ef4444 !important; }
+
+    /* Badge de Mês */
+    .mes-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Botões de Ação */
+    .btn-acoes {
+        display: inline-flex;
+        gap: 5px;
+    }
+
+    /* Drag and Drop */
+    #drop-zone.drag-over {
+        background-color: #e3f2fd !important;
+        border-color: #2196f3 !important;
+    }
+
+    .dark #drop-zone {
+        background-color: #2d3748 !important;
+    }
+
+    .dark #drop-zone.drag-over {
+        background-color: #1e3a8a !important;
+        border-color: #3b82f6 !important;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .numero-badge {
+            width: 38px;
+            height: 38px;
+            font-size: 14px;
+            margin: 3px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let proximoSorteio = null;
+let jogosGerados = [];
+let jogoEmEdicao = null;
+let mesAtrasado = null;
+let valorAposta = 2.50; // 🆕 Valor padrão, será atualizado ao carregar
+
+// 🎯 FUNÇÃO PARA CARREGAR PADRÕES DE ANÁLISE (NOVA FUNÇÃO ADICIONADA)
+async function carregarPadroesParaSelect() {
+    try {
+        const select = document.getElementById('selecao-analise');
+        if (!select) {
+            console.log('⚠️ Select com ID "selecao-analise" não encontrado');
+            return;
+        }
+
+        console.log('🔍 Carregando padrões de análise...');
+        const response = await fetch('/api/analise/opcoes-padroes-simples');
+        
+        if (!response.ok) {
+            console.error('❌ Erro ao buscar padrões:', response.status);
+            return;
+        }
+
+        const data = await response.json();
+        
+        if (data.opcoes && Array.isArray(data.opcoes)) {
+            // Limpar opções existentes (exceto a primeira)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Adicionar novas opções
+            data.opcoes.forEach((opcao, index) => {
+                const option = document.createElement('option');
+                option.value = opcao.value;
+                option.textContent = opcao.label || opcao.descricao || 'Padrão sem nome';
+                select.appendChild(option);
+                console.log(`✅ Padrão ${index + 1} adicionado: ${opcao.label || opcao.value}`);
+            });
+            
+            console.log(`🎯 Total de padrões carregados: ${data.opcoes.length}`);
+            if (data.total_padroes) {
+                console.log(`📈 Total de padrões disponíveis: ${data.total_padroes}`);
+            }
+        } else {
+            console.log('⚠️ Nenhuma opção de padrão encontrada na resposta');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar padrões:', error);
+    }
+}
+
+// ===== INICIALIZAÇÃO =====
+document.addEventListener('DOMContentLoaded', function() {
+    carregarProximoSorteio();
+    carregarMesAtrasado();
+    carregarValorAposta(); // 🆕 NOVA FUNÇÃO
+    carregarPadroesParaSelect(); // 🎯 NOVA FUNÇÃO ADICIONADA
+    configurarDragAndDrop();
+
+    // Monitora mudanças nos números minimalistas
+    document.getElementById('numeros-minimalistas').addEventListener('input', analisarNumerosMinimalistas);
+
+    // Calcula combinações ao carregar
+    calcularCombinacoes();
+});
+
+// ===== CARREGAR PRÓXIMO SORTEIO =====
+async function carregarProximoSorteio() {
+    const divInfo = document.getElementById('info-proximo-sorteio');
+
+    if (!divInfo) {
+        console.error('Elemento #info-proximo-sorteio não encontrado');
+        return;
+    }
+
+    try {
+        // Busca do banco via API
+        const response = await fetch('/api/proximo-sorteio');
+        const data = await response.json();
+
+        if (!data.disponivel) {
+            divInfo.innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${data.erro || 'Informações do próximo sorteio não disponíveis'}
+                </div>
+            `;
+            return;
+        }
+
+        // Formata o valor estimado
+        const valorEstimado = data.valor_estimado
+            ? formatarValor(data.valor_estimado)
+            : 'Não informado';
+
+        // Formata a data completa
+        const dataCompleta = data.data_concurso && data.dia_semana
+            ? `${data.data_concurso} (${data.dia_semana})`
+            : data.data_concurso || 'Data não disponível';
+
+        // Atualiza o HTML
+		divInfo.innerHTML = `
+			<div class="d-flex justify-content-between align-items-center flex-wrap py-2 px-3 border rounded bg-white shadow-sm">
+				<div class="d-flex align-items-center flex-wrap text-nowrap">
+					<strong class="text-primary me-1">
+						Próximo Sorteio:
+					</strong>
+					<span class="me-2">Concurso <strong>${data.numero_concurso || '?'}</strong></span>
+					
+					<span class="text-secondary mx-2">|</span>
+					
+					<span class="text-muted">
+						<i class="fas fa-clock me-1"></i>${dataCompleta}
+					</span>
+					
+					<span class="text-secondary mx-2">|</span>
+					
+					<span class="text-success fw-bold">
+						<i class="fas fa-trophy me-1"></i>Prêmio Estimado:
+						<span class="fs-6">${valorEstimado}</span>
+					</span>
+				</div>
+			</div>
+		`;
+
+        // Se acumulou, adiciona indicador
+        if (data.ultimo_concurso && data.ultimo_concurso.acumulou) {
+            const badgeAcumulou = document.createElement('span');
+            badgeAcumulou.className = 'badge bg-warning text-dark ms-2';
+            badgeAcumulou.innerHTML = '<i class="fas fa-arrow-up me-1"></i>ACUMULOU!';
+            divInfo.querySelector('div:last-child').appendChild(badgeAcumulou);
+        }
+
+    } catch (error) {
+        console.error('Erro ao carregar próximo sorteio:', error);
+        divInfo.innerHTML = `
+            <div class="text-center text-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Erro ao carregar informações do próximo sorteio
+            </div>
+        `;
+    }
+}
+
+// Função auxiliar para formatar valores em reais
+function formatarValor(valor) {
+    if (!valor) return 'R$ 0,00';
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valor);
+}
+
+// Carrega automaticamente quando a página carrega
+document.addEventListener('DOMContentLoaded', carregarProximoSorteio);
+
+// OU se preferir chamar manualmente, use:
+// carregarProximoSorteio();
+
+
+
+
+// ===== CARREGAR MÊS MAIS ATRASADO =====
+async function carregarMesAtrasado() {
+    try {
+        // Usa a API da página de Meses Atrasados que já traz tudo pronto!
+        const response = await fetch('/api/analise/meses');
+        const data = await response.json();
+
+        console.log('📊 Dados da API /api/analise/meses:', data);
+
+        if (data && data.meses && data.meses.length > 0) {
+            // Ordena por atraso (maior primeiro)
+            const mesesOrdenados = [...data.meses].sort((a, b) => b.atraso - a.atraso);
+
+            console.log('📊 Meses ordenados por atraso:', mesesOrdenados);
+
+            // Pega o primeiro (mais atrasado)
+            const maisAtrasado = mesesOrdenados[0];
+
+            mesAtrasado = maisAtrasado.nome;
+            const atraso = maisAtrasado.atraso;
+
+            console.log(`🎯 Mês mais atrasado: ${mesAtrasado} (${atraso} concursos)`);
+
+            document.getElementById('info-mes-atrasado').innerHTML = `
+                <strong>${mesAtrasado}</strong> está há <strong>${atraso}</strong> concurso${atraso !== 1 ? 's' : ''} sem sair
+            `;
+        } else {
+            console.warn('⚠️ API não retornou dados válidos');
+            mesAtrasado = 'Setembro';
+            document.getElementById('info-mes-atrasado').textContent = 'Setembro (padrão)';
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar mês atrasado:', error);
+        mesAtrasado = 'Setembro';
+        document.getElementById('info-mes-atrasado').textContent = 'Setembro (padrão)';
+    }
+}
+
+// 🆕 NOVA FUNÇÃO: Carregar valor da aposta do banco de dados
+async function carregarValorAposta() {
+    try {
+        const response = await fetch('/api/gerar-fechamento/valor-aposta');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            valorAposta = data.valor_aposta;
+            console.log(`💰 Valor da aposta carregado: R$ ${valorAposta.toFixed(2)}`);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar valor da aposta:', error);
+        console.warn('⚠️ Usando valor padrão: R$ 2.50');
+        valorAposta = 2.50;
+    }
+}
+
+// 🆕 CALCULAR COMBINAÇÕES E CUSTO
+function calcularCombinacoes() {
+    const dezenas = parseInt(document.getElementById('dezenas-por-jogo').value);
+    const infoCombinacoes = document.getElementById('info-combinacoes');
+
+    // Tabela de combinações C(n, 7)
+    const tabelaCombinacoes = {
+        7: 1,
+        8: 8,
+        9: 36,
+        10: 120,
+        11: 330,
+        12: 792,
+        13: 1716,
+        14: 3432,
+        15: 6435
+    };
+
+    const numCombinacoes = tabelaCombinacoes[dezenas] || 1;
+    const custoUnitario = valorAposta * numCombinacoes;
+
+    if (dezenas === 7) {
+        infoCombinacoes.innerHTML = '';
+    } else {
+        infoCombinacoes.innerHTML = `
+            <strong class="text-primary">${numCombinacoes} combinações</strong> =
+            <strong class="text-success">R$ ${custoUnitario.toFixed(2)}</strong> por jogo
+        `;
+    }
+}
+
+// ===== DRAG AND DROP =====
+function configurarDragAndDrop() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            processarArquivo(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            processarArquivo(e.target.files[0]);
+        }
+    });
+}
+
+function processarArquivo(file) {
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+
+    fileName.textContent = file.name;
+    fileSize.textContent = `Tamanho: ${(file.size / 1024).toFixed(2)} KB`;
+    fileInfo.classList.remove('d-none');
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const conteudo = e.target.result;
+        document.getElementById('numeros-minimalistas').value = conteudo;
+
+        // Muda para a aba manual e analisa os números
+        const manualTab = new bootstrap.Tab(document.getElementById('manual-tab'));
+        manualTab.show();
+
+        analisarNumerosMinimalistas();
+    };
+    reader.readAsText(file);
+}
+
+// ===== ANALISAR NÚMEROS MINIMALISTAS =====
+function analisarNumerosMinimalistas() {
+    const texto = document.getElementById('numeros-minimalistas').value;
+    const numeros = texto.match(/\d+/g);
+
+    if (!numeros || numeros.length === 0) {
+        document.getElementById('distribuicao-numeros').classList.add('d-none');
+        return;
+    }
+
+    // Converte para números únicos entre 1 e 31
+    const numerosValidos = [...new Set(numeros.map(Number))]
+        .filter(n => n >= 1 && n <= 31)
+        .sort((a, b) => a - b);
+
+    // Distribui em baixas, médias e altas
+    const baixas = numerosValidos.filter(n => n >= 1 && n <= 10);
+    const medias = numerosValidos.filter(n => n >= 11 && n <= 20);
+    const altas = numerosValidos.filter(n => n >= 21 && n <= 31);
+
+    // Atualiza a interface
+    document.getElementById('total-numeros').textContent = numerosValidos.length;
+    document.getElementById('total-baixas').textContent = baixas.length;
+    document.getElementById('total-medias').textContent = medias.length;
+    document.getElementById('total-altas').textContent = altas.length;
+
+    document.getElementById('distribuicao-numeros').classList.remove('d-none');
+}
+
+// ===== FUNÇÃO PARA GERAR NÚMEROS COM PADRÃO =====
+function gerarNumerosComPadrao(pool, dezenasPorJogo, padrao) {
+    try {
+        // Interpretar o padrão (ex: "0 0 1 1 2 2 2")
+        const padraoDigitos = padrao.split(' ').map(Number);
+        
+        if (padraoDigitos.length !== dezenasPorJogo) {
+            console.warn('⚠️ Padrão não compatível com quantidade de dezenas, usando geração aleatória');
+            const poolEmbaralhado = [...pool].sort(() => Math.random() - 0.5);
+            return poolEmbaralhado.slice(0, dezenasPorJogo).sort((a, b) => a - b);
+        }
+
+        // Definir faixas de números por dígito
+        const faixas = {
+            0: pool.filter(n => n >= 1 && n <= 9),    // 1-9
+            1: pool.filter(n => n >= 10 && n <= 19),  // 10-19  
+            2: pool.filter(n => n >= 20 && n <= 31),  // 20-31
+            3: pool.filter(n => n >= 30 && n <= 31),  // 30-31 (casos especiais)
+        };
+
+        const numerosSelecionados = [];
+        const numerosUsados = new Set();
+
+        // Para cada posição no padrão, selecionar um número da faixa correspondente
+        for (const digito of padraoDigitos) {
+            const faixaAtual = faixas[digito];
+            if (!faixaAtual || faixaAtual.length === 0) {
+                // Se não há números disponíveis na faixa, pegar qualquer número disponível
+                const numerosDisponiveis = pool.filter(n => !numerosUsados.has(n));
+                if (numerosDisponiveis.length === 0) break;
+                
+                const numeroEscolhido = numerosDisponiveis[Math.floor(Math.random() * numerosDisponiveis.length)];
+                numerosSelecionados.push(numeroEscolhido);
+                numerosUsados.add(numeroEscolhido);
+            } else {
+                // Pegar número da faixa específica
+                const numerosDaFaixa = faixaAtual.filter(n => !numerosUsados.has(n));
+                if (numerosDaFaixa.length === 0) {
+                    // Se não há números não usados na faixa, pegar qualquer número
+                    const numerosDisponiveis = pool.filter(n => !numerosUsados.has(n));
+                    if (numerosDisponiveis.length === 0) break;
+                    
+                    const numeroEscolhido = numerosDisponiveis[Math.floor(Math.random() * numerosDisponiveis.length)];
+                    numerosSelecionados.push(numeroEscolhido);
+                    numerosUsados.add(numeroEscolhido);
+                } else {
+                    const numeroEscolhido = numerosDaFaixa[Math.floor(Math.random() * numerosDaFaixa.length)];
+                    numerosSelecionados.push(numeroEscolhido);
+                    numerosUsados.add(numeroEscolhido);
+                }
+            }
+        }
+
+        // Verificar se conseguimos selecionar todos os números
+        if (numerosSelecionados.length === dezenasPorJogo) {
+            console.log(`✅ Números gerados com padrão ${padrao}:`, numerosSelecionados);
+            return numerosSelecionados.sort((a, b) => a - b);
+        } else {
+            // Fallback para geração aleatória se não conseguir aplicar o padrão
+            console.log(`⚠️ Não foi possível aplicar padrão ${padrao} completamente, usando geração aleatória`);
+            const poolEmbaralhado = [...pool].sort(() => Math.random() - 0.5);
+            return poolEmbaralhado.slice(0, dezenasPorJogo).sort((a, b) => a - b);
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao gerar números com padrão:', error);
+        // Fallback para geração aleatória
+        const poolEmbaralhado = [...pool].sort(() => Math.random() - 0.5);
+        return poolEmbaralhado.slice(0, dezenasPorJogo).sort((a, b) => a - b);
+    }
+}
+
+// ===== GERAR PALPITES =====
+async function gerarPalpites() {
+    const texto = document.getElementById('numeros-minimalistas').value;
+    const numeros = texto.match(/\d+/g);
+
+    if (!numeros || numeros.length === 0) {
+        mostrarAlerta('Por favor, insira seus números minimalistas!');
+        return;
+    }
+
+    const numerosMinimalistas = [...new Set(numeros.map(Number))]
+        .filter(n => n >= 1 && n <= 31)
+        .sort((a, b) => a - b);
+
+    const quantidade = parseInt(document.getElementById('quantidade-jogos').value);
+    const dezenasPorJogo = parseInt(document.getElementById('dezenas-por-jogo').value);
+
+    if (numerosMinimalistas.length < dezenasPorJogo) {
+        mostrarAlerta(`Você precisa de pelo menos ${dezenasPorJogo} números minimalistas!`);
+        return;
+    }
+
+    // Mostra loading
+    document.getElementById('loading-geracao').classList.remove('d-none');
+    document.getElementById('resultados-container').classList.add('d-none');
+
+    // 🎯 CAPTURAR PADRÃO SELECIONADO
+    const padraoSelecionado = document.getElementById('selecao-analise').value;
+    const selectAnalise = document.getElementById('selecao-analise');
+    const nomePadrao = selectAnalise.options[selectAnalise.selectedIndex]?.textContent || 'Sem padrão';
+    
+    console.log('🎯 Padrão selecionado:', padraoSelecionado);
+    console.log('📝 Nome do padrão:', nomePadrao);
+
+    // Mostra loading
+    document.getElementById('loading-geracao').classList.remove('d-none');
+    document.getElementById('resultados-container').classList.add('d-none');
+
+    // Gera os jogos com fechamento
+    setTimeout(() => {
+        jogosGerados = gerarJogosComFechamento(
+            numerosMinimalistas, 
+            quantidade, 
+            dezenasPorJogo,
+            padraoSelecionado,
+            nomePadrao
+        );
+        exibirResultados();
+        document.getElementById('loading-geracao').classList.add('d-none');
+    }, 500);
+}
+
+function gerarJogosComFechamento(pool, quantidade, dezenasPorJogo, padraoSelecionado = '', nomePadrao = 'Sem padrão') {
+    const jogos = [];
+    const jogosUnicos = new Set(); // Para verificar duplicatas
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    // Determina qual mês usar
+    const selecaoMes = document.getElementById('selecao-mes').value;
+    let mesEscolhido = null;
+
+    if (selecaoMes === 'atrasado') {
+        // Usa o mês mais atrasado para TODOS os jogos
+        mesEscolhido = mesAtrasado || 'Janeiro';
+    } else if (selecaoMes === 'aleatorio') {
+        // Mês aleatório (será escolhido para cada jogo)
+        mesEscolhido = null;
+    } else {
+        // Mês específico escolhido pelo usuário
+        mesEscolhido = selecaoMes;
+    }
+
+    let tentativas = 0;
+    const maxTentativas = quantidade * 100; // Evita loop infinito
+
+    while (jogos.length < quantidade && tentativas < maxTentativas) {
+        tentativas++;
+
+        // 🎯 SELEÇÃO DOS NÚMEROS COM BASE NO PADRÃO
+        let numeros;
+        if (padraoSelecionado && padraoSelecionado !== '' && padraoSelecionado !== 'todos_padroes') {
+            // Usar padrão específico selecionado
+            numeros = gerarNumerosComPadrao(pool, dezenasPorJogo, padraoSelecionado);
+        } else if (padraoSelecionado === 'todos_padroes') {
+            // Usar todos os padrões alternadamente
+            const padroes = ['0 0 1 1 2 2 2', '0 0 1 1 1 2 2', '0 0 0 1 1 2 2', '0 0 1 1 2 2 3', '0 1 1 1 2 2 2'];
+            const indicePadrao = jogos.length % padroes.length;
+            const padraoAtual = padroes[indicePadrao];
+            console.log(`🎯 Usando padrão ${indicePadrao + 1}/${padroes.length}: ${padraoAtual}`);
+            numeros = gerarNumerosComPadrao(pool, dezenasPorJogo, padraoAtual);
+        } else {
+            // Geração aleatória tradicional (sem padrão específico)
+            const poolEmbaralhado = [...pool].sort(() => Math.random() - 0.5);
+            numeros = poolEmbaralhado.slice(0, dezenasPorJogo).sort((a, b) => a - b);
+        }
+
+        // Cria chave única para verificar duplicatas
+        const chave = numeros.join('-');
+
+        // Verifica se este jogo já foi gerado
+        if (jogosUnicos.has(chave)) {
+            continue; // Pula e tenta gerar outro
+        }
+
+        // Adiciona à lista de jogos únicos
+        jogosUnicos.add(chave);
+
+        // Define o mês
+        let mes;
+        if (mesEscolhido) {
+            // Usa o mês escolhido (atrasado ou específico)
+            mes = mesEscolhido;
+        } else {
+            // Mês aleatório
+            mes = meses[Math.floor(Math.random() * meses.length)];
+        }
+
+        // Calcula distribuição
+        const baixas = numeros.filter(n => n >= 1 && n <= 10).length;
+        const medias = numeros.filter(n => n >= 11 && n <= 20).length;
+        const altas = numeros.filter(n => n >= 21 && n <= 31).length;
+
+        jogos.push({
+            numero: jogos.length + 1,
+            numeros,
+            mes,
+            distribuicao: { baixas, medias, altas }
+        });
+    }
+
+    if (jogos.length < quantidade) {
+        mostrarAlerta(`Só foi possível gerar ${jogos.length} jogos únicos de ${quantidade} solicitados. Tente adicionar mais números minimalistas ou reduzir a quantidade de jogos.`);
+    }
+
+    return jogos;
+}
+
+// ===== EXIBIR RESULTADOS =====
+function exibirResultados() {
+    const container = document.getElementById('resultados-container');
+    container.classList.remove('d-none');
+
+    // 🎯 EXIBIR INFORMAÇÕES DO PADRÃO SELECIONADO
+    const padraoSelecionado = document.getElementById('selecao-analise').value;
+    const selectAnalise = document.getElementById('selecao-analise');
+    const nomePadrao = selectAnalise.options[selectAnalise.selectedIndex]?.textContent || 'Sem padrão';
+    
+    if (padraoSelecionado && padraoSelecionado !== '') {
+        console.log(`🎯 Resultados gerados usando padrão: ${nomePadrao}`);
+        
+        // Adicionar informação do padrão na interface
+        const infoPadrao = document.getElementById('info-padrao-usado');
+        if (infoPadrao) {
+            infoPadrao.innerHTML = `
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Padrão aplicado:</strong> ${nomePadrao}
+                </div>
+            `;
+        }
+    }
+
+    exibirResumoFinanceiro();
+    exibirListaJogos();
+
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function exibirResumoFinanceiro() {
+    const container = document.getElementById('resumo-financeiro');
+
+    const totalJogos = jogosGerados.length;
+    const dezenasPorJogo = jogosGerados[0]?.numeros.length || 7;
+
+    // 🆕 CALCULA CUSTO BASEADO NAS COMBINAÇÕES
+    const tabelaCombinacoes = {
+        7: 1, 8: 8, 9: 36, 10: 120, 11: 330,
+        12: 792, 13: 1716, 14: 3432, 15: 6435
+    };
+
+    const numCombinacoes = tabelaCombinacoes[dezenasPorJogo] || 1;
+    const custoUnitario = valorAposta * numCombinacoes;
+    const custoTotal = totalJogos * custoUnitario;
+
+    container.innerHTML = `
+        <div class="col-6 col-md-3">
+            <h3 class="mb-0 text-success">${totalJogos}</h3>
+            <small class="text-muted">Jogos Gerados</small>
+        </div>
+        <div class="col-6 col-md-3">
+            <h3 class="mb-0">R$ ${custoUnitario.toFixed(2)}</h3>
+            <small class="text-muted">Custo Unitário${dezenasPorJogo > 7 ? ` (${numCombinacoes}x)` : ''}</small>
+        </div>
+        <div class="col-6 col-md-3">
+            <h3 class="mb-0 text-primary">R$ ${custoTotal.toFixed(2)}</h3>
+            <small class="text-muted">CUSTO TOTAL</small>
+        </div>
+        <div class="col-6 col-md-3">
+            <h3 class="mb-0">${dezenasPorJogo}</h3>
+            <small class="text-muted">Dezenas/Jogo</small>
+        </div>
+    `;
+}
+
+function exibirListaJogos() {
+    const container = document.getElementById('lista-jogos');
+
+    container.innerHTML = jogosGerados.map(jogo => gerarCardJogo(jogo)).join('');
+}
+
+function gerarCardJogo(jogo) {
+    const mesIndex = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+                      .indexOf(jogo.mes);
+
+    const numerosHtml = jogo.numeros.map(num => {
+        return `<div class="numero-badge">${String(num).padStart(2, '0')}</div>`;
+    }).join('');
+
+    const mesAbreviado = jogo.mes.substring(0, 3);
+
+    return `
+        <div class="card shadow-sm mb-3" id="jogo-${jogo.numero}">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-ticket-alt me-2"></i>Jogo ${jogo.numero}</span>
+                <div class="btn-acoes">
+                    <button class="btn btn-sm btn-light" onclick="editarJogo(${jogo.numero})" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="excluirJogo(${jogo.numero})" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="jogo-card">
+                    <!-- Números -->
+                    <div class="text-center mb-3">
+                        ${numerosHtml}
+                    </div>
+
+                    <!-- Mês -->
+                    <div class="text-center mb-3">
+                        <span class="mes-badge mes-cor-${mesIndex}">${jogo.mes}</span>
+                    </div>
+
+                    <!-- Distribuição -->
+                    <div class="text-center">
+                        <span class="badge badge-baixa me-1">B: ${jogo.distribuicao.baixas}</span>
+                        <span class="badge badge-media me-1">M: ${jogo.distribuicao.medias}</span>
+                        <span class="badge badge-alta">A: ${jogo.distribuicao.altas}</span>
+                    </div>
+
+                    <!-- Formato para TXT -->
+                    <div class="mt-3 text-center">
+                        <small class="text-muted font-monospace">
+                            ${jogo.numeros.map(n => String(n).padStart(2, '0')).join(' ')} ${mesAbreviado}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ===== EDITAR JOGO =====
+function editarJogo(numeroJogo) {
+    const jogo = jogosGerados.find(j => j.numero === numeroJogo);
+    if (!jogo) return;
+
+    jogoEmEdicao = numeroJogo;
+
+    document.getElementById('modal-numero-jogo').textContent = numeroJogo;
+    document.getElementById('modal-numeros').value = jogo.numeros.map(n => String(n).padStart(2, '0')).join(' ');
+    document.getElementById('modal-mes').value = jogo.mes;
+
+    const modal = new bootstrap.Modal(document.getElementById('modal-editar-jogo'));
+    modal.show();
+}
+
+function salvarEdicaoJogo() {
+    if (!jogoEmEdicao) return;
+
+    const texto = document.getElementById('modal-numeros').value;
+    const numeros = texto.match(/\d+/g);
+
+    if (!numeros || numeros.length < 7 || numeros.length > 15) {
+        mostrarAlerta('Por favor, insira entre 7 e 15 números!');
+        return;
+    }
+
+    const numerosValidos = [...new Set(numeros.map(Number))]
+        .filter(n => n >= 1 && n <= 31)
+        .sort((a, b) => a - b);
+
+    if (numerosValidos.length < 7 || numerosValidos.length > 15) {
+        mostrarAlerta('Números devem estar entre 01 e 31, e ter entre 7 e 15 dezenas únicas!');
+        return;
+    }
+
+    const mes = document.getElementById('modal-mes').value;
+
+    // Atualiza o jogo
+    const jogo = jogosGerados.find(j => j.numero === jogoEmEdicao);
+    if (jogo) {
+        jogo.numeros = numerosValidos;
+        jogo.mes = mes;
+
+        // Recalcula distribuição
+        const baixas = numerosValidos.filter(n => n >= 1 && n <= 10).length;
+        const medias = numerosValidos.filter(n => n >= 11 && n <= 20).length;
+        const altas = numerosValidos.filter(n => n >= 21 && n <= 31).length;
+        jogo.distribuicao = { baixas, medias, altas };
+    }
+
+    // Fecha modal e atualiza interface
+    bootstrap.Modal.getInstance(document.getElementById('modal-editar-jogo')).hide();
+    exibirListaJogos();
+}
+
+// ===== EXCLUIR JOGO =====
+function excluirJogo(numeroJogo) {
+    mostrarConfirmacao(
+        `Deseja realmente excluir o Jogo ${numeroJogo}?`,
+        () => {
+            jogosGerados = jogosGerados.filter(j => j.numero !== numeroJogo);
+
+            // Renumera os jogos
+            jogosGerados.forEach((jogo, index) => {
+                jogo.numero = index + 1;
+            });
+
+            exibirResumoFinanceiro();
+            exibirListaJogos();
+        }
+    );
+}
+
+// ===== EXPORTAR TXT =====
+function exportarTXT() {
+    if (jogosGerados.length === 0) {
+        mostrarAlerta('Nenhum jogo para exportar');
+        return;
+    }
+
+    let texto = '';
+    jogosGerados.forEach(jogo => {
+        const mesAbreviado = jogo.mes.substring(0, 3);
+        const numerosStr = jogo.numeros.map(n => String(n).padStart(2, '0')).join(' ');
+        texto += `${numerosStr} ${mesAbreviado}\n`;
+    });
+
+    baixarArquivo(texto, 'palpites_dia_de_sorte.txt', 'text/plain');
+}
+
+// ===== EXPORTAR EXCEL =====
+function exportarEXCEL() {
+    if (jogosGerados.length === 0) {
+        mostrarAlerta('Nenhum jogo para exportar');
+        return;
+    }
+
+    // 🆕 Calcula custo baseado nas combinações
+    const dezenasPorJogo = jogosGerados[0]?.numeros.length || 7;
+    const tabelaCombinacoes = {
+        7: 1, 8: 8, 9: 36, 10: 120, 11: 330,
+        12: 792, 13: 1716, 14: 3432, 15: 6435
+    };
+    const numCombinacoes = tabelaCombinacoes[dezenasPorJogo] || 1;
+    const custoUnitario = valorAposta * numCombinacoes;
+
+    // Prepara os dados
+    const dados = [
+        ['Jogo', 'Números', 'Mês', 'Baixas', 'Médias', 'Altas', 'Total', 'Custo']
+    ];
+
+    jogosGerados.forEach(jogo => {
+        const numerosStr = jogo.numeros.map(n => String(n).padStart(2, '0')).join(' ');
+        dados.push([
+            jogo.numero,
+            numerosStr,
+            jogo.mes,
+            jogo.distribuicao.baixas,
+            jogo.distribuicao.medias,
+            jogo.distribuicao.altas,
+            jogo.numeros.length,
+            `R$ ${custoUnitario.toFixed(2)}`
+        ]);
+    });
+
+    // Adiciona resumo
+    dados.push([]);
+    dados.push(['RESUMO']);
+    dados.push(['Total de Jogos', jogosGerados.length]);
+    dados.push(['Dezenas por Jogo', dezenasPorJogo]);
+    dados.push(['Combinações por Jogo', numCombinacoes]);
+    dados.push(['Custo Unitário', `R$ ${custoUnitario.toFixed(2)}`]);
+    dados.push(['Custo Total', `R$ ${(jogosGerados.length * custoUnitario).toFixed(2)}`]);
+
+    // Cria a planilha
+    const ws = XLSX.utils.aoa_to_sheet(dados);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Palpites');
+
+    // Baixa o arquivo
+    XLSX.writeFile(wb, 'palpites_dia_de_sorte.xlsx');
+}
+
+// ===== EXPORTAR HTML =====
+function exportarHTML() {
+    if (jogosGerados.length === 0) {
+        mostrarAlerta('Nenhum jogo para exportar');
+        return;
+    }
+
+    let html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palpites - Dia de Sorte</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #28a745; text-align: center; }
+        .info { background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .jogo { background: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #28a745; }
+        .jogo h3 { margin-top: 0; color: #333; }
+        .numeros { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+        .numero { width: 45px; height: 45px; border-radius: 50%; background: white; border: 2px solid #28a745; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; color: #28a745; }
+        .mes { display: inline-block; padding: 8px 20px; background: #ffc107; border-radius: 20px; font-weight: bold; margin: 10px 0; }
+        .distribuicao { margin-top: 10px; }
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 5px; margin-right: 5px; color: white; font-size: 14px; }
+        .badge-baixa { background: #3b82f6; }
+        .badge-media { background: #eab308; }
+        .badge-alta { background: #ef4444; }
+        .resumo { background: #d4edda; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        .resumo h2 { color: #155724; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #28a745; color: white; }
+        .total { font-size: 20px; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Palpites - Dia de Sorte</h1>
+
+        <div class="info">
+            <strong>Próximo Sorteio:</strong> Concurso ${proximoSorteio?.numeroConcursoProximo || '---'}<br>
+            <strong>Data:</strong> ${proximoSorteio?.dataProximoConcurso || '---'}<br>
+            <strong>Prêmio Estimado:</strong> R$ ${(proximoSorteio?.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+        </div>
+
+        <h2>Jogos Gerados</h2>
+`;
+
+    jogosGerados.forEach(jogo => {
+        const numerosHtml = jogo.numeros.map(n =>
+            `<div class="numero">${String(n).padStart(2, '0')}</div>`
+        ).join('');
+
+        html += `
+        <div class="jogo">
+            <h3>Jogo ${jogo.numero}</h3>
+            <div class="numeros">${numerosHtml}</div>
+            <div class="mes">${jogo.mes}</div>
+            <div class="distribuicao">
+                <span class="badge badge-baixa">Baixas: ${jogo.distribuicao.baixas}</span>
+                <span class="badge badge-media">Médias: ${jogo.distribuicao.medias}</span>
+                <span class="badge badge-alta">Altas: ${jogo.distribuicao.altas}</span>
+            </div>
+            <div style="margin-top: 10px;">
+                <small><strong>Formato TXT:</strong> ${jogo.numeros.map(n => String(n).padStart(2, '0')).join(' ')} ${jogo.mes.substring(0, 3)}</small>
+            </div>
+        </div>
+`;
+    });
+
+    // 🆕 Calcula custo baseado nas combinações
+    const dezenasPorJogo = jogosGerados[0]?.numeros.length || 7;
+    const tabelaCombinacoes = {
+        7: 1, 8: 8, 9: 36, 10: 120, 11: 330,
+        12: 792, 13: 1716, 14: 3432, 15: 6435
+    };
+    const numCombinacoes = tabelaCombinacoes[dezenasPorJogo] || 1;
+    const custoUnitario = valorAposta * numCombinacoes;
+
+    html += `
+        <div class="resumo">
+            <h2>💰 Resumo Financeiro</h2>
+            <table>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                </tr>
+                <tr>
+                    <td>Total de Jogos</td>
+                    <td><strong>${jogosGerados.length}</strong></td>
+                </tr>
+                <tr>
+                    <td>Dezenas por Jogo</td>
+                    <td>${dezenasPorJogo}</td>
+                </tr>
+                <tr>
+                    <td>Combinações por Jogo</td>
+                    <td>${numCombinacoes}</td>
+                </tr>
+                <tr>
+                    <td>Custo Unitário</td>
+                    <td>R$ ${custoUnitario.toFixed(2)}</td>
+                </tr>
+                <tr>
+                    <td><strong>CUSTO TOTAL</strong></td>
+                    <td class="total">R$ ${(jogosGerados.length * custoUnitario).toFixed(2)}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #999;">
+            <p>Gerado em ${new Date().toLocaleString('pt-BR')}</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+    baixarArquivo(html, 'palpites_dia_de_sorte.html', 'text/html');
+}
+
+// ===== UTILITÁRIOS =====
+function baixarArquivo(conteudo, nomeArquivo, tipo) {
+    const blob = new Blob([conteudo], { type: tipo + ';charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function mostrarAlerta(mensagem) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Atenção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function mostrarConfirmacao(mensagem, callback) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Confirmação</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btn-confirmar">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    document.getElementById('btn-confirmar').addEventListener('click', () => {
+        bsModal.hide();
+        callback();
+    });
+
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+</script>
+{% endblock %}

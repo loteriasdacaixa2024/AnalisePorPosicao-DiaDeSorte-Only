@@ -1,0 +1,792 @@
+<!-- MODELO C: 5 FIXAS + TRIOS VARIÁVEIS -->
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Modelo C:</strong> Sistema de 5 dezenas fixas + combinações de 3 variáveis (5 FIXAS + TRIOS)
+    <button type="button" class="btn btn-sm btn-warning float-end" data-bs-toggle="modal" data-bs-target="#modalExplicacaoC">
+        <i class="fas fa-question-circle me-1"></i>Como funciona?
+    </button>
+</div>
+
+<!-- Modal Explicativo -->
+<div class="modal fade" id="modalExplicacaoC" tabindex="-1" aria-labelledby="modalExplicacaoCLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalExplicacaoCLabel">
+                    <i class="fas fa-lightbulb me-2"></i>Como funciona o Modelo C?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="fw-bold text-primary">📘 Conceito:</h6>
+                <p>O Modelo C utiliza <strong>5 dezenas fixas</strong> + um <strong>pool de 6 a 15 dezenas variáveis</strong>, combinando <strong>3 por vez</strong>.</p>
+
+                <hr>
+
+                <h6 class="fw-bold text-primary">🎯 Exemplo Prático:</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-success bg-opacity-10 border border-success rounded">
+                            <strong>🔵 Fixas (Grupo A):</strong><br>
+                            <code>03, 07, 11, 18, 25</code>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-info bg-opacity-10 border border-info rounded">
+                            <strong>🟢 Pool Variável (Grupo C):</strong><br>
+                            <code>02, 04, 06, 15, 17, 19, 23, 31</code>
+                            <small class="text-muted d-block">(8 dezenas)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-success mt-3">📊 Como funciona a geração:</h6>
+                <p>O sistema gera <strong>todas as combinações de 3 dezenas</strong> do Pool Variável e combina com as 5 Fixas.</p>
+                <p><strong>Fórmula:</strong> C(8, 3) = 8! ÷ (3! × 5!) = <strong>56 jogos</strong></p>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Jogo</th>
+                                <th>Fixas (sempre presentes)</th>
+                                <th>+</th>
+                                <th>Trio Variável</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 12px;">
+                            <tr><td>1</td><td>03 07 11 18 25</td><td>+</td><td><strong>02 04 06</strong></td><td>7 números</td></tr>
+                            <tr><td>2</td><td>03 07 11 18 25</td><td>+</td><td><strong>02 04 15</strong></td><td>7 números</td></tr>
+                            <tr><td>3</td><td>03 07 11 18 25</td><td>+</td><td><strong>02 04 17</strong></td><td>7 números</td></tr>
+                            <tr><td>4</td><td>03 07 11 18 25</td><td>+</td><td><strong>02 04 19</strong></td><td>7 números</td></tr>
+                            <tr><td>...</td><td colspan="4" class="text-center">e mais 52 jogos com diferentes trios</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-success mt-3">
+                    <strong>💰 Custo Total:</strong><br>
+                    56 jogos × R$ 2,50 = <strong>R$ 140,00</strong>
+                </div>
+
+                <h6 class="fw-bold text-success mt-3">📈 Tabela de Referência:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Pool (Grupo C)</th>
+                                <th>C(n,3)</th>
+                                <th>Total de Jogos</th>
+                                <th>Custo</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 12px;">
+                            <tr><td>6 dezenas</td><td>C(6,3)</td><td>20 jogos</td><td>R$ 50,00</td></tr>
+                            <tr><td>7 dezenas</td><td>C(7,3)</td><td>35 jogos</td><td>R$ 87,50</td></tr>
+                            <tr class="table-info"><td><strong>8 dezenas</strong></td><td><strong>C(8,3)</strong></td><td><strong>56 jogos</strong></td><td><strong>R$ 140,00</strong></td></tr>
+                            <tr><td>10 dezenas</td><td>C(10,3)</td><td>120 jogos</td><td>R$ 300,00</td></tr>
+                            <tr><td>12 dezenas</td><td>C(12,3)</td><td>220 jogos</td><td>R$ 550,00</td></tr>
+                            <tr><td>15 dezenas</td><td>C(15,3)</td><td>455 jogos</td><td>R$ 1.137,50</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h6 class="fw-bold text-danger mt-3">⚠️ Importante:</h6>
+                <ul>
+                    <li>Grupo A (Fixas): <strong>exatamente 5 dezenas</strong></li>
+                    <li>Grupo C (Pool): <strong>mínimo 6, máximo 15 dezenas</strong></li>
+                    <li>Os grupos <strong>não podem ter dezenas em comum</strong></li>
+                    <li>Cada jogo terá <strong>7 dezenas totais</strong> (5 fixas + 3 variáveis)</li>
+                </ul>
+
+                <h6 class="fw-bold text-success mt-3">✅ Vantagens do Modelo C:</h6>
+                <ul>
+                    <li><strong>Mais forte que o Modelo A:</strong> Trios cobrem mais possibilidades que duplas</li>
+                    <li><strong>Flexível:</strong> Pool pode ter de 6 a 15 dezenas</li>
+                    <li><strong>Garantia de acertos:</strong> Se acertar as 5 fixas + 3 do pool = alta chance de prêmio</li>
+                    <li><strong>Crescimento controlado:</strong> Quantidade de jogos cresce de forma previsível</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seletor de Modo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Modo de Seleção</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <button onclick="setModoC('automatico')" id="btn-modo-c-automatico" class="modo-btn btn btn-outline-info w-100 p-3 active">
+                    <div style="font-size: 2rem;">🤖</div>
+                    <div class="fw-bold">AUTOMÁTICO</div>
+                    <small class="text-muted">IA escolhe tudo</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoC('hibrido')" id="btn-modo-c-hibrido" class="modo-btn btn btn-outline-info w-100 p-3">
+                    <div style="font-size: 2rem;">🔀</div>
+                    <div class="fw-bold">HÍBRIDO</div>
+                    <small class="text-muted">IA sugere, você ajusta</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoC('manual')" id="btn-modo-c-manual" class="modo-btn btn btn-outline-info w-100 p-3">
+                    <div style="font-size: 2rem;">✋</div>
+                    <div class="fw-bold">MANUAL</div>
+                    <small class="text-muted">Você escolhe tudo</small>
+                </button>
+            </div>
+        </div>
+        <div id="modo-c-descricao" class="alert alert-light mt-3 mb-0">
+            <strong>💡 Modo Atual: AUTOMÁTICO</strong><br>
+            <small>Sistema vai sugerir as dezenas baseado na análise dos últimos concursos</small>
+        </div>
+    </div>
+</div>
+
+<!-- Painel de Configuração -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuração</h5>
+    </div>
+    <div class="card-body">
+        <!-- Botão Automático -->
+        <div id="painel-c-automatico">
+            <button onclick="gerarAutomaticoC()" class="btn btn-lg btn-info w-100 py-3 text-white">
+                <i class="fas fa-magic me-2"></i>GERAR AUTOMATICAMENTE
+            </button>
+        </div>
+
+        <!-- Painel Manual/Híbrido -->
+        <div id="painel-c-manual-hibrido" style="display: none;">
+            <!-- Grupo A - Fixas -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold">
+                        🔵 GRUPO A - Dezenas Fixas (<span id="grupo-a-c-count">0</span>/5)
+                    </label>
+                    <div>
+                        <button onclick="sugerirGrupoAC()" id="btn-sugerir-a-c" class="btn btn-sm btn-success me-2" style="display:none;">
+                            💡 Sugerir
+                        </button>
+                        <button onclick="limparGrupoAC()" class="btn btn-sm btn-secondary">
+                            🔄 Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="grupo-a-c-grid"></div>
+            </div>
+
+            <!-- Grupo C - Pool Variável -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold">
+                        🟢 GRUPO C - Pool de Variáveis (<span id="grupo-c-count">0</span>)
+                    </label>
+                    <div>
+                        <button onclick="sugerirGrupoCC()" id="btn-sugerir-c-c" class="btn btn-sm btn-info me-2" style="display:none;">
+                            💡 Sugerir
+                        </button>
+                        <button onclick="limparGrupoCC()" class="btn btn-sm btn-secondary">
+                            🔄 Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="grupo-c-grid"></div>
+                <small class="text-muted">💡 Recomendado: 6-10 dezenas. Mínimo: 6, Máximo: 15</small>
+            </div>
+
+            <!-- Preview -->
+            <div id="preview-jogos-c" class="alert alert-warning" style="display:none;">
+                <div class="fw-bold">📊 Preview</div>
+                <div id="preview-texto-c"></div>
+            </div>
+
+            <button onclick="gerarDesdobramentoC()" id="btn-gerar-c" class="btn btn-lg btn-info w-100 py-3 text-white" disabled>
+                <i class="fas fa-play me-2"></i>GERAR DESDOBRAMENTO
+            </button>
+        </div>
+
+        <!-- Mês da Sorte -->
+        <div class="mt-4">
+            <label class="form-label fw-bold">📅 Mês da Sorte:</label>
+            <select id="mes-select-c" class="form-select">
+                {% if stats_mes %}
+                <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][stats_mes.atrasado] }}">+ Atrasado ({{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][stats_mes.atrasado] }})</option>
+                <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][stats_mes.frequente] }}">+ Frequente ({{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][stats_mes.frequente] }})</option>
+                {% endif %}
+                {% for m_idx in range(1, 13) %}
+                    {% if not stats_mes or (m_idx != stats_mes.atrasado and m_idx != stats_mes.frequente) %}
+                    <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m_idx] }}">{{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][m_idx] }}</option>
+                    {% endif %}
+                {% endfor %}
+                <option value="aleatorio">+ Aleatório</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Explicação da IA -->
+<div id="explicacao-section-c" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Por que escolhi esses números?</h5>
+    </div>
+    <div class="card-body" id="explicacao-container-c"></div>
+</div>
+
+<!-- Resumo -->
+<div id="resumo-section-c" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resumo do Desdobramento</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded">
+                    <small class="text-primary fw-bold">TOTAL DE JOGOS</small>
+                    <div class="fs-3 fw-bold text-primary" id="total-jogos-c">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-success bg-opacity-10 border border-success rounded">
+                    <small class="text-success fw-bold">CUSTO TOTAL</small>
+                    <div class="fs-3 fw-bold text-success" id="custo-total-c">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-info bg-opacity-10 border border-info rounded">
+                    <small class="text-info fw-bold">MODELO</small>
+                    <div class="fs-3 fw-bold text-info">5+3</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                    <small class="text-warning fw-bold">MÊS DA SORTE</small>
+                    <div class="fs-3 fw-bold text-warning" id="mes-info-c">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Jogos -->
+<div id="jogos-section-c" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Jogos Gerados</h5>
+        <div>
+            <button onclick="salvarDiarioC()" id="btn-diario-c" class="btn btn-sm btn-success fw-bold shadow-sm me-2" title="Salvar no Diário de Estratégias">
+                <i class="fas fa-save me-1"></i>Carimbar e Guardar Apostas
+            </button>
+            <button onclick="exportarTXTC()" class="btn btn-sm btn-success me-2">
+                <i class="fas fa-file-download me-1"></i>Exportar TXT
+            </button>
+            <button onclick="exportarExcelC()" class="btn btn-sm btn-info me-2">
+                <i class="fas fa-file-excel me-1"></i>Exportar Excel
+            </button>
+            <button onclick="window.print()" class="btn btn-sm btn-primary">
+                <i class="fas fa-print me-1"></i>Imprimir
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="game-table table table-sm">
+                <thead>
+                    <tr>
+                        <th>Jogo</th>
+                        <th colspan="5">Fixas</th>
+                        <th colspan="3">Trio Variável</th>
+                        <th>Mês</th>
+                    </tr>
+                </thead>
+                <tbody id="jogos-tbody-c"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+// Estado Global Modelo C
+let modoAtualC = 'automatico';
+let grupoAC = [];
+let grupoCC = [];
+let jogosGeradosC = [];
+let explicacoesC = {};
+
+// Inicialização Modelo C
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('grupo-a-c-grid')) {
+        criarGridsDezenasC();
+        setModoC('automatico');
+    }
+});
+
+// Criar grids de dezenas
+function criarGridsDezenasC() {
+    const gridA = document.getElementById('grupo-a-c-grid');
+    const gridC = document.getElementById('grupo-c-grid');
+
+    for (let i = 1; i <= 31; i++) {
+        const num = String(i).padStart(2, '0');
+
+        // Botão Grupo A
+        const btnA = document.createElement('button');
+        btnA.className = 'dezena-btn btn';
+        btnA.textContent = num;
+        btnA.onclick = () => toggleGrupoAC(i);
+        btnA.dataset.numero = i;
+        gridA.appendChild(btnA);
+
+        // Botão Grupo C
+        const btnC = document.createElement('button');
+        btnC.className = 'dezena-btn btn';
+        btnC.textContent = num;
+        btnC.onclick = () => toggleGrupoCC(i);
+        btnC.dataset.numero = i;
+        gridC.appendChild(btnC);
+    }
+}
+
+// Alternar modo
+function setModoC(modo) {
+    modoAtualC = modo;
+
+    // Atualizar botões
+    document.querySelectorAll('[id^="btn-modo-c-"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-modo-c-${modo}`).classList.add('active');
+
+    // Atualizar descrição
+    const descricoes = {
+        automatico: {
+            titulo: 'AUTOMÁTICO',
+            texto: 'Sistema vai sugerir as dezenas baseado na análise dos últimos concursos'
+        },
+        hibrido: {
+            titulo: 'HÍBRIDO',
+            texto: 'Sistema sugere as dezenas, mas você pode ajustar clicando para adicionar/remover'
+        },
+        manual: {
+            titulo: 'MANUAL',
+            texto: 'Você tem controle total! Selecione manualmente as dezenas dos Grupos A e C'
+        }
+    };
+
+    const desc = descricoes[modo];
+    document.getElementById('modo-c-descricao').innerHTML = `
+        <strong>💡 Modo Atual: ${desc.titulo}</strong><br>
+        <small>${desc.texto}</small>
+    `;
+
+    // Mostrar/ocultar painéis
+    if (modo === 'automatico') {
+        document.getElementById('painel-c-automatico').style.display = 'block';
+        document.getElementById('painel-c-manual-hibrido').style.display = 'none';
+        document.getElementById('btn-sugerir-a-c').style.display = 'none';
+        document.getElementById('btn-sugerir-c-c').style.display = 'none';
+    } else {
+        document.getElementById('painel-c-automatico').style.display = 'none';
+        document.getElementById('painel-c-manual-hibrido').style.display = 'block';
+
+        if (modo === 'hibrido') {
+            document.getElementById('btn-sugerir-a-c').style.display = 'inline-block';
+            document.getElementById('btn-sugerir-c-c').style.display = 'inline-block';
+        } else {
+            document.getElementById('btn-sugerir-a-c').style.display = 'none';
+            document.getElementById('btn-sugerir-c-c').style.display = 'none';
+        }
+    }
+
+    limparTudoC();
+}
+
+// Gerar automaticamente
+async function gerarAutomaticoC() {
+    try {
+        const response = await fetch('/api/desdobramento/sugestao-modelo-c');
+        const data = await response.json();
+
+        if (data.erro) {
+            showError('Erro: ' + data.erro);
+            return;
+        }
+
+        grupoAC = data.grupoA;
+        grupoCC = data.grupoC;
+        explicacoesC = data.explicacoes || {};
+
+        gerarJogosC();
+        if (Object.keys(explicacoesC).length > 0) {
+            mostrarExplicacaoC();
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao gerar sugestão automática');
+    }
+}
+
+// Sugerir Grupo A
+async function sugerirGrupoAC() {
+    const response = await fetch('/api/desdobramento/sugestao-modelo-c');
+    const data = await response.json();
+    grupoAC = data.grupoA;
+    explicacoesC = data.explicacoes || {};
+    atualizarVisualizacaoGrupoAC();
+    if (Object.keys(explicacoesC).length > 0) {
+        mostrarExplicacaoC();
+    }
+    atualizarPreviewC();
+}
+
+// Sugerir Grupo C
+async function sugerirGrupoCC() {
+    const response = await fetch('/api/desdobramento/sugestao-modelo-c');
+    const data = await response.json();
+    grupoCC = data.grupoC;
+    atualizarVisualizacaoGrupoCC();
+    atualizarPreviewC();
+}
+
+// Toggle grupos
+function toggleGrupoAC(num) {
+    const btn = document.querySelector(`#grupo-a-c-grid button[data-numero="${num}"]`);
+
+    if (grupoAC.includes(num)) {
+        grupoAC = grupoAC.filter(n => n !== num);
+        btn.classList.remove('grupo-a');
+    } else {
+        if (grupoAC.length < 5) {
+            grupoAC.push(num);
+            grupoAC.sort((a, b) => a - b);
+            btn.classList.add('grupo-a');
+        }
+    }
+
+    atualizarContadoresC();
+    atualizarDisponibilidadeC();
+    atualizarPreviewC();
+}
+
+function toggleGrupoCC(num) {
+    const btn = document.querySelector(`#grupo-c-grid button[data-numero="${num}"]`);
+
+    if (grupoCC.includes(num)) {
+        grupoCC = grupoCC.filter(n => n !== num);
+        btn.classList.remove('grupo-b');
+    } else {
+        if (grupoCC.length < 15) {
+            grupoCC.push(num);
+            grupoCC.sort((a, b) => a - b);
+            btn.classList.add('grupo-b');
+        } else {
+            showError('Grupo C pode ter no máximo 15 dezenas');
+        }
+    }
+
+    atualizarContadoresC();
+    atualizarPreviewC();
+}
+
+// Atualizar visualizações
+function atualizarVisualizacaoGrupoAC() {
+    document.querySelectorAll('#grupo-a-c-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (grupoAC.includes(num)) {
+            btn.classList.add('grupo-a', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-a', 'sugerida');
+        }
+    });
+    atualizarContadoresC();
+    atualizarDisponibilidadeC();
+}
+
+function atualizarVisualizacaoGrupoCC() {
+    document.querySelectorAll('#grupo-c-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (grupoCC.includes(num)) {
+            btn.classList.add('grupo-b', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-b', 'sugerida');
+        }
+    });
+    atualizarContadoresC();
+}
+
+function atualizarContadoresC() {
+    document.getElementById('grupo-a-c-count').textContent = grupoAC.length;
+    document.getElementById('grupo-c-count').textContent = grupoCC.length;
+
+    const btnGerar = document.getElementById('btn-gerar-c');
+    if (btnGerar) {
+        btnGerar.disabled = !(grupoAC.length === 5 && grupoCC.length >= 6);
+    }
+}
+
+function atualizarDisponibilidadeC() {
+    document.querySelectorAll('#grupo-c-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        btn.disabled = grupoAC.includes(num);
+    });
+}
+
+function atualizarPreviewC() {
+    if (grupoAC.length === 5 && grupoCC.length >= 6) {
+        const total = calcularCombinacao(grupoCC.length, 3);
+        const custo = (total * 2.50).toFixed(2);
+
+        document.getElementById('preview-jogos-c').style.display = 'block';
+        document.getElementById('preview-texto-c').innerHTML = `
+            <strong>Fixas:</strong> ${grupoAC.join(', ')}<br>
+            <strong>Pool C:</strong> ${grupoCC.join(', ')}<br>
+            <strong>Total de jogos:</strong> C(${grupoCC.length}, 3) = ${total} jogos<br>
+            <strong>Custo:</strong> R$ ${custo}
+        `;
+    } else {
+        document.getElementById('preview-jogos-c').style.display = 'none';
+    }
+}
+
+function calcularCombinacao(n, k) {
+    if (k > n) return 0;
+    if (k === 0 || k === n) return 1;
+    let result = 1;
+    for (let i = 1; i <= k; i++) {
+        result *= (n - k + i) / i;
+    }
+    return Math.round(result);
+}
+
+// Limpar
+function limparGrupoAC() {
+    grupoAC = [];
+    atualizarVisualizacaoGrupoAC();
+    atualizarPreviewC();
+}
+
+function limparGrupoCC() {
+    grupoCC = [];
+    atualizarVisualizacaoGrupoCC();
+    atualizarPreviewC();
+}
+
+function limparTudoC() {
+    grupoAC = [];
+    grupoCC = [];
+    jogosGeradosC = [];
+    atualizarVisualizacaoGrupoAC();
+    atualizarVisualizacaoGrupoCC();
+    atualizarPreviewC();
+    document.getElementById('resumo-section-c').style.display = 'none';
+    document.getElementById('jogos-section-c').style.display = 'none';
+    document.getElementById('explicacao-section-c').style.display = 'none';
+}
+
+// Gerar desdobramento
+async function gerarDesdobramentoC() {
+    if (grupoAC.length !== 5) {
+        showError('❌ Selecione exatamente 5 dezenas para o Grupo A');
+        return;
+    }
+
+    if (grupoCC.length < 6) {
+        showError('❌ Selecione pelo menos 6 dezenas para o Grupo C');
+        return;
+    }
+
+    if (grupoCC.length > 15) {
+        showError('❌ Grupo C pode ter no máximo 15 dezenas');
+        return;
+    }
+
+    await gerarJogosC();
+}
+
+async function gerarJogosC() {
+    const mes = document.getElementById('mes-select-c').value;
+
+    try {
+        const response = await fetch('/api/desdobramento/gerar-jogos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                grupoA: grupoAC,
+                grupoC: grupoCC,
+                mes,
+                modelo: 'C'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.erro) {
+            showError('Erro: ' + data.erro);
+            return;
+        }
+
+        jogosGeradosC = data.jogos;
+        mostrarJogosC(data);
+        mostrarResumoC(data);
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao gerar jogos');
+    }
+}
+
+function mostrarJogosC(data) {
+    const tbody = document.getElementById('jogos-tbody-c');
+    tbody.innerHTML = '';
+
+    data.jogos.forEach(jogo => {
+        const tr = document.createElement('tr');
+        let html = `<td class="fw-bold">${jogo.numero}</td>`;
+
+        jogo.fixas.forEach(num => {
+            html += `<td class="fixa-cell">${String(num).padStart(2, '0')}</td>`;
+        });
+
+        jogo.variaveis.forEach(num => {
+            html += `<td class="variavel-cell">${String(num).padStart(2, '0')}</td>`;
+        });
+
+        html += `<td class="fw-bold">${jogo.mes}</td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('jogos-section-c').style.display = 'block';
+}
+
+function mostrarResumoC(data) {
+    document.getElementById('total-jogos-c').textContent = data.total_jogos;
+    document.getElementById('custo-total-c').textContent = `R$ ${data.custo_total.toFixed(2)}`;
+    document.getElementById('mes-info-c').textContent = data.mes;
+    document.getElementById('resumo-section-c').style.display = 'block';
+}
+
+function mostrarExplicacaoC() {
+    const container = document.getElementById('explicacao-container-c');
+    container.innerHTML = '';
+
+    Object.keys(explicacoesC).forEach(num => {
+        const { emoji, motivo } = explicacoesC[num];
+        const div = document.createElement('div');
+        div.className = 'explicacao-item alert alert-info mb-2';
+        div.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div style="font-size: 2rem; margin-right: 1rem;">${emoji}</div>
+                <div>
+                    <div class="fw-bold">${String(num).padStart(2, '0')}</div>
+                    <small>${motivo}</small>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById('explicacao-section-c').style.display = 'block';
+}
+
+
+    async function salvarDiarioC() {
+        if (!jogosGeradosC || jogosGeradosC.length === 0) {
+            if(window.showError) showError('Não há apostas para salvar.'); 
+            else alert('Não há apostas para salvar.');
+            return;
+        }
+        const btn = document.getElementById('btn-diario-c');
+        const oriText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
+        btn.disabled = true;
+
+        try {
+            const apostasLimpo = jogosGeradosC.map(j => j.numeros_completos || j.numeros);
+            const response = await fetch('/api/diario-estrategia/salvar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apostas: apostasLimpo,
+                    estrategia: `Desdobramento Modelo C - ${jogosGeradosC.length} Jogos`,
+                    rota_origem: '/desdobramentos'
+                })
+            });
+            
+            const data = await response.json();
+            if (data.sucesso) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Salvo!';
+                btn.className = 'btn btn-sm btn-success me-2';
+            } else {
+                if(window.showError) showError('Erro: ' + data.mensagem); 
+                else alert('Erro: ' + data.mensagem);
+                btn.innerHTML = oriText;
+            }
+        } catch (e) {
+            if(window.showError) showError('Falha ao salvar no Diário.'); 
+            else alert('Falha ao salvar no Diário.');
+            btn.innerHTML = oriText;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+        function exportarTXTC() {
+    let conteudo = '';
+
+    jogosGeradosC.forEach(jogo => {
+        const numeros = jogo.numeros_completos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${numeros} ${jogo.mes}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `desdobramento-modelo-c-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportarExcelC() {
+    let conteudo = 'JOGO;FIXAS;TRIO VARIAVEL;MES;NUMEROS COMPLETOS\n';
+
+    jogosGeradosC.forEach(jogo => {
+        const fixas = jogo.fixas.map(n => String(n).padStart(2, '0')).join(' ');
+        const variaveis = jogo.variaveis.map(n => String(n).padStart(2, '0')).join(' ');
+        const completos = jogo.numeros_completos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${jogo.numero};${fixas};${variaveis};${jogo.mes};${completos}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `desdobramento-modelo-c-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Expor funções no escopo global para uso pelos botões HTML
+window.setModoC = setModoC;
+window.gerarAutomaticoC = gerarAutomaticoC;
+window.sugerirGrupoAC = sugerirGrupoAC;
+window.limparGrupoAC = limparGrupoAC;
+window.sugerirGrupoCC = sugerirGrupoCC;
+window.limparGrupoCC = limparGrupoCC;
+window.gerarDesdobramentoC = gerarDesdobramentoC;
+window.salvarDiarioC = salvarDiarioC;
+        window.exportarTXTC = exportarTXTC;
+window.exportarExcelC = exportarExcelC;
+
+})(); // Fim do IIFE - Isolamento do Modelo C
+</script>

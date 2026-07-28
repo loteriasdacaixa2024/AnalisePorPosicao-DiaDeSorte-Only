@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Repetição e Persistência - Análise Avançada{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    .card { margin-bottom: 20px; }
+    .numero-badge {
+        display: inline-block;
+        min-width: 35px;
+        padding: 6px 10px;
+        margin: 3px;
+        background-color: #D4B31A;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-redo"></i> Repetição e Persistência</h1>
+    <p class="text-muted">Análise de repetições entre sorteios consecutivos</p>
+
+    <div id="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Carregando análise...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-hashtag"></i> Repetições de Dezenas</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Total:</strong> <span id="totalRepeticoesDezenas">-</span></p>
+                        <p><strong>Percentual:</strong> <span id="percentualRepeticoesDezenas">-</span></p>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>Qtd Repetidas</th><th>Frequência</th><th>%</th></tr>
+                            </thead>
+                            <tbody id="tabelaDistRepeticoes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5> Repetições de Meses</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Total:</strong> <span id="totalRepeticoesMeses">-</span></p>
+                        <p><strong>Percentual:</strong> <span id="percentualRepeticoesMeses">-</span></p>
+                        <div id="sequenciasMeses"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="fas fa-layer-group"></i> Persistência de Dezenas</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr><th>Dezena</th><th>Máx. Sequência</th><th>Média</th></tr>
+                            </thead>
+                            <tbody id="tabelaPersistenciaDezenas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-chart-pie"></i> Persistência de Meses</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr><th>Mês</th><th>Máx. Sequência</th><th>Média</th></tr>
+                            </thead>
+                            <tbody id="tabelaPersistenciaMeses"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/analise/repeticao-persistencia');
+        const data = await response.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            return;
+        }
+
+        // Repetições Dezenas
+        const repDez = data.repeticoes_consecutivas_dezenas || {};
+        document.getElementById('totalRepeticoesDezenas').textContent = repDez.total_repeticoes || 0;
+        document.getElementById('percentualRepeticoesDezenas').textContent = (repDez.percentual_sorteios_com_repeticao || 0) + '%';
+
+        const tabelaDist = document.getElementById('tabelaDistRepeticoes');
+        tabelaDist.innerHTML = '';
+        (repDez.distribuicao || []).forEach(item => {
+            tabelaDist.innerHTML += `<tr><td>${item.quantidade_repetidas}</td><td>${item.frequencia}</td><td>${item.percentual}%</td></tr>`;
+        });
+
+        // Repetições Meses
+        const repMes = data.repeticoes_consecutivas_meses || {};
+        document.getElementById('totalRepeticoesMeses').textContent = repMes.total_repeticoes || 0;
+        document.getElementById('percentualRepeticoesMeses').textContent = (repMes.percentual || 0) + '%';
+
+        const divSeqMes = document.getElementById('sequenciasMeses');
+        divSeqMes.innerHTML = '';
+        // Garantir meses únicos nas sequências
+        const sequenciasUnicas = {};
+        (repMes.sequencias_identificadas || []).forEach(item => {
+            if (!sequenciasUnicas[item.mes] || sequenciasUnicas[item.mes].tamanho_sequencia < item.tamanho_sequencia) {
+                sequenciasUnicas[item.mes] = item;
+            }
+        });
+        // Mostrar top 5
+        Object.values(sequenciasUnicas).slice(0, 5).forEach(item => {
+            divSeqMes.innerHTML += `<p><span class="badge mes-cor-${item.mes - 1}">${item.mes_nome}</span> - ${item.tamanho_sequencia}x consecutivas</p>`;
+        });
+
+        // Persistência Dezenas
+        const tabelaPersDez = document.getElementById('tabelaPersistenciaDezenas');
+        tabelaPersDez.innerHTML = '';
+        (data.persistencia_dezenas || []).slice(0, 15).forEach(item => {
+            tabelaPersDez.innerHTML += `<tr><td><span class="numero-badge">${item.dezena}</span></td><td>${item.max_sequencia}</td><td>${item.media_sequencia}</td></tr>`;
+        });
+
+        // Persistência Meses - garantir que não há duplicados
+        const tabelaPersMes = document.getElementById('tabelaPersistenciaMeses');
+        tabelaPersMes.innerHTML = '';
+        const mesesUnicos = {};
+        (data.persistencia_meses || []).forEach(item => {
+            // Usar mês como chave única
+            if (!mesesUnicos[item.mes]) {
+                mesesUnicos[item.mes] = item;
+            }
+        });
+        // Renderizar apenas meses únicos
+        Object.values(mesesUnicos).forEach(item => {
+            tabelaPersMes.innerHTML += `<tr><td><span class="badge mes-cor-${item.mes - 1}">${item.mes_nome}</span></td><td>${item.max_sequencia}</td><td>${item.media_sequencia}</td></tr>`;
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+carregarAnalise();
+</script>
+{% endblock %}

@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}Dígitos Únicos - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-dourado: #D4B31A;
+        --ds-dourado-light: #f9f2d2;
+        --ds-dourado-dark: #b69816;
+    }
+
+    body {
+        background: linear-gradient(135deg, #fcf9e8 0%, #ffffff 50%, #fcf9e8 100%);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .card-custom {
+        border: 2px solid var(--ds-dourado-light);
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        font-weight: bold;
+    }
+
+    .top3-item {
+        background: white;
+        border-left: 5px solid var(--ds-dourado);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .top3-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(212, 179, 26, 0.2);
+    }
+
+    .digits-visual-box {
+        font-family: 'Courier New', monospace;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--ds-dourado);
+        background: var(--ds-dourado-light);
+        padding: 15px;
+        border-radius: 10px;
+        letter-spacing: 8px;
+        text-align: center;
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid #2196F3;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .recommendation-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4CAF50;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--ds-dourado);
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateX(5px);
+    }
+
+    .sortable-header {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .sortable-header:hover {
+        background-color: #e9ecef !important;
+    }
+
+    .sortable-header::after {
+        content: ' ⇅';
+        color: #999;
+        font-size: 0.8em;
+    }
+
+    .asc::after {
+        content: ' ↑';
+        color: #000;
+        font-weight: bold;
+    }
+
+    .desc::after {
+        content: ' ↓';
+        color: #000;
+        font-weight: bold;
+    }
+
+    .concursos-details {
+        display: none;
+        background-color: #fcfcfc;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .ball-number {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        text-align: center;
+        border-radius: 50%;
+        background-color: var(--ds-dourado);
+        color: #fff;
+        font-weight: bold;
+        font-size: 11px;
+        margin: 0 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="page-header">
+        <h1>🎲 Dígitos Únicos Usados em Cada Sorteio</h1>
+        <p class="mb-0">Análise dos dígitos únicos (0-9) que aparecem nas dezenas e unidades de cada sorteio do Dia de
+            Sorte</p>
+    </div>
+
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3">Analisando dígitos únicos...</p>
+    </div>
+
+    <div id="conteudo" style="display: none;">
+        <!-- Insights -->
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+            </div>
+            <div class="card-body" id="insightsConteudo"></div>
+        </div>
+
+        <!-- Distribuição -->
+        <div class="card-custom">
+            <div class="card-header-custom">
+                📊 Distribuição por Quantidade de Dígitos Únicos
+            </div>
+            <div class="card-body" id="distribuicaoQuantidade"></div>
+        </div>
+
+        <!-- Top 3 -->
+        <div class="card-custom">
+            <div class="card-header-custom">
+                🏆 Top 3 Combinações Mais Frequentes
+            </div>
+            <div class="card-body" id="topCombinacoesDestaque"></div>
+        </div>
+
+        <!-- Top 3 Relacao (Digitos / Soma) -->
+        <div class="card-custom">
+            <div class="card-header-custom" style="background: linear-gradient(135deg, #1A46D4 0%, #0F2E92 100%);">
+                🎯 Top Filtros Múltiplos (Qtde. Dígitos / Soma das Dezenas)
+            </div>
+            <div class="card-body" id="topRelacoesContainer"></div>
+        </div>
+
+        <!-- Recomendações -->
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <i class="bi bi-stars"></i> Recomendações Estratégicas
+            </div>
+            <div class="card-body" id="recomendacoesContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function carregarAnalise() {
+        try {
+            const response = await fetch('/api/analise/digitos-unicos');
+            const data = await response.json();
+
+            exibirInsights(data);
+            exibirDistribuicaoQuantidade(data.analise_por_quantidade);
+            exibirTopCombinacoes(data.top_combinacoes, 3);
+            exibirTopRelacoes(data.top_relacoes_soma);
+            exibirRecomendacoes(data);
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('conteudo').style.display = 'block';
+        } catch (error) {
+            console.error('Erro ao carregar análise:', error);
+            document.getElementById('loading').innerHTML = '<p class="text-danger">Erro ao carregar dados!</p>';
+        }
+    }
+
+    function exibirInsights(data) {
+        const insights = [];
+
+        const maisFrequente = data.analise_por_quantidade.reduce((prev, current) =>
+            (prev.frequencia > current.frequencia) ? prev : current
+        );
+
+        insights.push({
+            medal: '🥇',
+            text: `Quantidade mais comum: <strong>${maisFrequente.quantidade} dígitos únicos</strong>`,
+            subtitle: `Apareceu em ${maisFrequente.frequencia} sorteios (${maisFrequente.porcentagem}%)`
+        });
+
+        insights.push({
+            medal: '🥈',
+            text: `Média de dígitos únicos: <strong>${data.quantidade_media}</strong>`,
+            subtitle: `Variação de ${data.quantidade_minima} a ${data.quantidade_maxima} dígitos`
+        });
+
+        insights.push({
+            medal: '🥉',
+            text: `Combinação campeã: <strong>${data.top_combinacoes[0].digitos_str}</strong>`,
+            subtitle: `Apareceu ${data.top_combinacoes[0].frequencia} vezes (${data.top_combinacoes[0].porcentagem}%)`
+        });
+
+        let html = '';
+        insights.forEach(insight => {
+            html += `
+                <div class="insight-box">
+                    <h6>${insight.medal} ${insight.text}</h6>
+                    <p class="mb-0">${insight.subtitle}</p>
+                </div>
+            `;
+        });
+
+        document.getElementById('insightsConteudo').innerHTML = html;
+    }
+
+    function exibirDistribuicaoQuantidade(analise) {
+        let html = '';
+
+        analise.forEach(item => {
+            const cor = item.quantidade === 7 ? '#28a745' : 'var(--ds-dourado)';
+
+            html += `
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong>${item.quantidade} dígitos únicos</strong>
+                        <span style="color: ${cor}; font-weight: bold;">${item.frequencia}x</span>
+                    </div>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar" style="width: ${item.porcentagem}%; background-color: ${cor};">
+                            ${item.porcentagem}%
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('distribuicaoQuantidade').innerHTML = html;
+    }
+
+    function exibirTopCombinacoes(combinacoes, limite) {
+        const medals = ['🥇', '🥈', '🥉'];
+        let html = '';
+
+        combinacoes.slice(0, limite).forEach((combo, index) => {
+            html += `
+                <div class="top3-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <span style="font-size: 2.5em;">${medals[index]}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="digits-visual-box">${combo.digitos_str}</div>
+                            <p class="text-center mb-0 mt-2"><small class="text-muted">${combo.quantidade} dígitos únicos</small></p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="mb-0">${combo.frequencia}</h4>
+                            <small class="text-muted">Aparições</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="mb-0" style="color: var(--ds-dourado);">${combo.porcentagem}%</h4>
+                            <small class="text-muted">Frequência</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('topCombinacoesDestaque').innerHTML = html;
+    }
+
+    function exibirTopRelacoes(relacoes) {
+        let html = '<div class="row">';
+
+        // Exibir o TOP 3 destacado
+        const top3 = relacoes.slice(0, 3);
+        const medals = ['🥇', '🥈', '🥉'];
+        const medalColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+
+        html += '<div class="col-12 mb-4"><h5 class="text-center mb-3">Top 3 Combinações Perfeitas</h5><div class="row justify-content-center">';
+        top3.forEach((rel, idx) => {
+            let info = rel.relacao.split('/'); // ex: "7/112"
+            let qtdeNum = info[0];
+            let somaNum = info[1];
+
+            html += `
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm text-center" style="border-top: 5px solid ${medalColors[idx]}; border-radius: 10px;">
+                    <div class="card-body">
+                        <h2 class="mb-0">${medals[idx]}</h2>
+                        <div class="d-flex justify-content-center align-items-center mt-2 mb-2">
+                            <span class="badge bg-dark fs-5 p-2 me-2" title="Qtde de Dígitos Únicos">${qtdeNum}</span>
+                            <span class="fs-4 fw-bold">/</span>
+                            <span class="badge bg-primary fs-5 p-2 ms-2" title="Soma das Dezenas">${somaNum}</span>
+                        </div>
+                        <h4 class="text-success mb-0">${rel.frequencia}x</h4>
+                        <small class="text-muted">Aparições (${rel.porcentagem}%)</small>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += '</div></div>';
+
+        // Exibir os demais (Top 4 a 15) em formato de lista condensada (centralizado)
+        const rest = relacoes.slice(3, 15);
+        if (rest.length > 0) {
+            html += '<div class="col-12"><h6 class="text-muted text-center mb-3"><i class="bi bi-list-stars"></i> Outros Padrões Frequentes (Top 4-15)</h6><div class="d-flex flex-wrap justify-content-center gap-2">';
+            rest.forEach(rel => {
+                let info = rel.relacao.split('/');
+                html += `
+                <div class="border rounded px-3 py-2 text-center" style="background:#f8f9fa;">
+                    <strong class="d-block text-dark">${info[0]} / ${info[1]}</strong>
+                    <span class="badge bg-secondary">${rel.frequencia}x</span>
+                </div>`;
+            });
+            html += '</div></div>';
+        }
+
+        // Adiciona a Tabela Completa diretamente na interface (Inline) com Filtro
+        if (relacoes.length > 0) {
+            let totalConcursosListados = relacoes.reduce((acc, curr) => acc + curr.frequencia, 0);
+
+            let tableRows = '';
+            relacoes.forEach((rel, idx) => {
+                let info = rel.relacao.split('/');
+
+                let detailBadges = '';
+                rel.concursos.forEach(c => {
+                    let numbersHtml = c.numeros.map(n => `<span class="ball-number">${n}</span>`).join('');
+                    detailBadges += `
+                        <div class="d-inline-block border rounded p-1 m-1 bg-white shadow-sm">
+                            <small class="text-muted fw-bold me-1">#${c.concurso}</small>
+                            ${numbersHtml}
+                        </div>`;
+                });
+
+                tableRows += `
+                <tr class="relacao-row" style="cursor: pointer;" onclick="toggleDetails('detalhe-${idx}')">
+                    <td class="text-muted align-middle pos-col">${idx + 1}º</td>
+                    <td class="align-middle digito-col"><strong>${info[0]}</strong></td>
+                    <td class="align-middle soma-col"><strong class="text-primary">${info[1]}</strong></td>
+                    <td class="text-success fw-bold align-middle freq-col">${rel.frequencia}x</td>
+                    <td class="align-middle perc-col">${rel.porcentagem}%</td>
+                    <td class="align-middle text-muted"><i class="bi bi-chevron-down"></i></td>
+                </tr>
+                <tr id="detalhe-${idx}" class="concursos-details relacao-row-detail">
+                    <td colspan="6" class="text-start p-3">
+                        <h6 class="text-primary mb-2"><i class="bi bi-ticket-detailed"></i> Sorteios com este Padrão (${rel.frequencia} ocorrências)</h6>
+                        <div>${detailBadges}</div>
+                    </td>
+                </tr>`;
+            });
+
+            html += `
+            <div class="col-12 mt-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1A46D4 0%, #0F2E92 100%);">
+                        <div>
+                            <h5 class="mb-0"><i class="bi bi-table"></i> Tabela Completa (Todos os Padrões Mapeados)</h5>
+                            <small class="text-light">Soma de concursos representados: <strong>${totalConcursosListados}</strong></small>
+                        </div>
+                    </div>
+                    <div class="card-body bg-light p-3">
+                        <div class="input-group mb-3 shadow-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="filtroTabelaCompleta" onkeyup="filtrarRelacoes()" class="form-control form-control-lg border-start-0" placeholder="Filtrar por quantidade de dígitos, soma ou ocorrências (ex: 7 ou 112)...">
+                        </div>
+                        <div class="table-responsive bg-white" style="max-height: 500px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px;">
+                            <table class="table table-hover mb-0 text-center" id="tabelaCompletaRelacoes">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable-header border-bottom text-dark" style="position: sticky; top: 0; z-index: 10; background-color: #f8f9fa;" onclick="sortTable(0, 'int')">Rank</th>
+                                        <th class="sortable-header border-bottom text-dark" style="position: sticky; top: 0; z-index: 10; background-color: #f8f9fa;" onclick="sortTable(1, 'int')">Dígitos Únicos</th>
+                                        <th class="sortable-header border-bottom text-dark" style="position: sticky; top: 0; z-index: 10; background-color: #f8f9fa;" onclick="sortTable(2, 'int')">Soma das Dezenas</th>
+                                        <th class="sortable-header border-bottom text-dark" style="position: sticky; top: 0; z-index: 10; background-color: #f8f9fa;" onclick="sortTable(3, 'int')">Aparições</th>
+                                        <th class="sortable-header border-bottom text-dark" style="position: sticky; top: 0; z-index: 10; background-color: #f8f9fa;" onclick="sortTable(4, 'float')">Percentual</th>
+                                        <th class="border-bottom text-dark" style="position: sticky; top: 0; z-index: 10; background-color: #f8f9fa;">Sorteios</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaCompletaBody">
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        html += '</div>';
+        document.getElementById('topRelacoesContainer').innerHTML = html;
+    }
+
+    function toggleDetails(id) {
+        let el = document.getElementById(id);
+        if (el.style.display === "table-row") {
+            el.style.display = "none";
+        } else {
+            el.style.display = "table-row";
+        }
+    }
+
+    function filtrarRelacoes() {
+        let input = document.getElementById("filtroTabelaCompleta");
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById("tabelaCompletaRelacoes");
+        let tr = table.getElementsByClassName("relacao-row");
+
+        for (let i = 0; i < tr.length; i++) {
+            let tdPos = tr[i].getElementsByTagName("td")[0];
+            let tdDigitos = tr[i].getElementsByTagName("td")[1];
+            let tdSoma = tr[i].getElementsByTagName("td")[2];
+            let tdOcorrencias = tr[i].getElementsByTagName("td")[3];
+
+            if (tdDigitos || tdSoma || tdOcorrencias || tdPos) {
+                let txtPos = tdPos.textContent || tdPos.innerText;
+                let txtDigitos = tdDigitos.textContent || tdDigitos.innerText;
+                let txtSoma = tdSoma.textContent || tdSoma.innerText;
+                let txtOcorrencias = tdOcorrencias.textContent || tdOcorrencias.innerText;
+
+                if (txtPos.toUpperCase().indexOf(filter) > -1 ||
+                    txtDigitos.toUpperCase().indexOf(filter) > -1 ||
+                    txtSoma.toUpperCase().indexOf(filter) > -1 ||
+                    txtOcorrencias.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                    // Esconder o relacao-row-detail associado
+                    let nextRow = tr[i].nextElementSibling;
+                    if (nextRow && nextRow.classList.contains("relacao-row-detail")) {
+                        nextRow.style.display = "none";
+                    }
+                }
+            }
+        }
+    }
+
+    let sortSettings = { col: -1, order: 'desc' };
+
+    function sortTable(n, type) {
+        let table, rows, switching, i, j, x, y, shouldSwitch, switchCount = 0;
+        table = document.getElementById("tabelaCompletaBody");
+        if (!table) return;
+
+        let order = 'asc';
+        if (sortSettings.col === n && sortSettings.order === 'asc') {
+            order = 'desc';
+        }
+        sortSettings.col = n;
+        sortSettings.order = order;
+
+        let headers = document.querySelectorAll("#tabelaCompletaRelacoes th.sortable-header");
+        headers.forEach(h => { h.classList.remove('asc', 'desc'); });
+        headers[n].classList.add(order);
+
+        let rowGroups = [];
+        let trList = Array.from(table.getElementsByTagName("tr"));
+        for (let k = 0; k < trList.length; k++) {
+            if (trList[k].classList.contains("relacao-row")) {
+                let group = { main: trList[k], detail: null };
+                if (k + 1 < trList.length && trList[k + 1].classList.contains("relacao-row-detail")) {
+                    group.detail = trList[k + 1];
+                    k++;
+                }
+                rowGroups.push(group);
+            }
+        }
+
+        rowGroups.sort(function (a, b) {
+            let xVal = a.main.getElementsByTagName("td")[n].textContent.replace(/[^\d.,]/g, "").replace(',', '.');
+            let yVal = b.main.getElementsByTagName("td")[n].textContent.replace(/[^\d.,]/g, "").replace(',', '.');
+
+            xVal = parseFloat(xVal) || 0;
+            yVal = parseFloat(yVal) || 0;
+
+            if (order === 'asc') return xVal - yVal;
+            return yVal - xVal;
+        });
+
+        table.innerHTML = "";
+        rowGroups.forEach(g => {
+            table.appendChild(g.main);
+            if (g.detail) table.appendChild(g.detail);
+        });
+    }
+
+    function exibirRecomendacoes(data) {
+        const maisFrequente = data.analise_por_quantidade.reduce((prev, current) =>
+            (prev.frequencia > current.frequencia) ? prev : current
+        );
+
+        let html = `
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> Priorize jogos com <strong>${maisFrequente.quantidade} dígitos únicos</strong> (padrão mais frequente)
+            </div>
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> A combinação <strong>${data.top_combinacoes[0].digitos_str}</strong> é a campeã absoluta
+            </div>
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> Evite jogos com quantidade de dígitos únicos muito raros (abaixo de 1% de frequência)
+            </div>
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> Combine esta análise com outros padrões para maximizar suas chances
+            </div>
+        `;
+
+        document.getElementById('recomendacoesContainer').innerHTML = html;
+    }
+
+    carregarAnalise();
+</script>
+{% endblock %}

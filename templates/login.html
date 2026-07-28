@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Análise por Posição{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <div class="logo mx-auto mb-3"></div>
+                    <h4 class="mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>Entrar no Sistema
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Tabs: Login / Registrar -->
+                    <ul class="nav nav-tabs mb-4" id="authTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#login" type="button" role="tab">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="register-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#register" type="button" role="tab">
+                                <i class="fas fa-user-plus me-1"></i>Registrar
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="authTabsContent">
+                        <!-- Aba de Login -->
+                        <div class="tab-pane fade show active" id="login" role="tabpanel">
+                            <form id="formLogin">
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>Email
+                                    </label>
+                                    <input type="email" class="form-control form-control-lg" 
+                                           id="loginEmail" placeholder="seu@email.com" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="loginSenha" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Senha
+                                    </label>
+                                    <input type="password" class="form-control form-control-lg" 
+                                           id="loginSenha" placeholder="••••••••" required>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div class="mt-3 text-center">
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Credenciais padrão: <strong>admin@analise.com</strong> / <strong>admin123</strong>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Aba de Registro -->
+                        <div class="tab-pane fade" id="register" role="tabpanel">
+                            <form id="formRegistro">
+                                <div class="mb-3">
+                                    <label for="registerNome" class="form-label">
+                                        <i class="fas fa-user me-1"></i>Nome Completo
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" 
+                                           id="registerNome" placeholder="Seu nome completo" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="registerEmail" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>Email
+                                    </label>
+                                    <input type="email" class="form-control form-control-lg" 
+                                           id="registerEmail" placeholder="seu@email.com" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="registerSenha" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Senha
+                                    </label>
+                                    <input type="password" class="form-control form-control-lg" 
+                                           id="registerSenha" placeholder="Mínimo 6 caracteres" required>
+                                    <small class="text-muted">Mínimo de 6 caracteres</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="registerSenhaConfirm" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Confirmar Senha
+                                    </label>
+                                    <input type="password" class="form-control form-control-lg" 
+                                           id="registerSenhaConfirm" placeholder="Confirme sua senha" required>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-user-plus me-2"></i>Criar Conta
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Funções auxiliares
+    function mostrarAlerta(mensagem, tipo = 'info') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+        alert.role = 'alert';
+        alert.innerHTML = `
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alert);
+        
+        // Auto-remover após 5 segundos
+        setTimeout(() => {
+            alert.remove();
+        }, 5012);
+    }
+    
+    // Form de Login
+    document.getElementById('formLogin').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const senha = document.getElementById('loginSenha').value;
+        
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const textoBotao = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
+        
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, senha })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Salvar tokens
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                
+                mostrarAlerta('Login realizado com sucesso! Redirecionando...', 'success');
+                
+                // Redirecionar após 1 segundo
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                mostrarAlerta(data.erro || 'Erro ao fazer login', 'danger');
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = textoBotao;
+            }
+        } catch (error) {
+            mostrarAlerta('Erro ao conectar ao servidor', 'danger');
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoBotao;
+        }
+    });
+    
+    // Form de Registro
+    document.getElementById('formRegistro').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const nome = document.getElementById('registerNome').value;
+        const email = document.getElementById('registerEmail').value;
+        const senha = document.getElementById('registerSenha').value;
+        const senhaConfirm = document.getElementById('registerSenhaConfirm').value;
+        
+        // Validar senhas
+        if (senha !== senhaConfirm) {
+            mostrarAlerta('As senhas não coincidem', 'warning');
+            return;
+        }
+        
+        if (senha.length < 6) {
+            mostrarAlerta('A senha deve ter no mínimo 6 caracteres', 'warning');
+            return;
+        }
+        
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const textoBotao = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Criando conta...';
+        
+        try {
+            const response = await fetch('/api/auth/registrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, email, senha })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Salvar tokens
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                
+                mostrarAlerta('Conta criada com sucesso! Redirecionando...', 'success');
+                
+                // Redirecionar após 1 segundo
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                mostrarAlerta(data.erro || 'Erro ao criar conta', 'danger');
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = textoBotao;
+            }
+        } catch (error) {
+            mostrarAlerta('Erro ao conectar ao servidor', 'danger');
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoBotao;
+        }
+    });
+    
+    // Redirecionar se já estiver logado
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            window.location.href = '/';
+        }
+    });
+</script>
+{% endblock %}

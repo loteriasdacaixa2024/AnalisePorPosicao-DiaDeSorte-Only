@@ -1,0 +1,740 @@
+{% extends "base.html" %}
+
+{% block title %}Cruzamentos Estatísticos - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================================================
+       IDENTIDADE VISUAL DIA DE SORTE - COR PRINCIPAL #D4B31A
+       ========================================================================= */
+    :root {
+        --dourado: #D4B31A;
+        --dourado-claro: #E8CC4D;
+        --dourado-escuro: #B89A10;
+        --creme: #FFF9E6;
+        --creme-escuro: #FFF3CC;
+    }
+
+    /* =========================================================================
+       CABEÇALHO
+       ========================================================================= */
+    .header-cruzamentos {
+        background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+        color: #333;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .header-cruzamentos h2 {
+        font-weight: 900;
+        margin: 0;
+        color: #333;
+    }
+
+    .header-cruzamentos p {
+        margin: 8px 0 0;
+        opacity: 0.85;
+    }
+
+    /* =========================================================================
+       CARDS
+       ========================================================================= */
+    .card-cruzamento {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+    }
+
+    .card-header-dourado {
+        background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+        color: #333;
+        font-weight: 700;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 15px 20px;
+    }
+
+    /* =========================================================================
+       VOLANTE 2D - MAPA DE CALOR
+       ========================================================================= */
+    .volante-container {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+
+    .volante-table {
+        margin: 0 auto;
+        border-collapse: separate;
+        border-spacing: 5px;
+    }
+
+    .volante-header {
+        background: var(--dourado);
+        color: #333;
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: center;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .volante-linha-header {
+        background: var(--dourado);
+        color: #333;
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: center;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .volante-celula {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        vertical-align: middle;
+        font-weight: 900;
+        font-size: 16px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        color: #333;
+    }
+
+    .volante-celula:hover {
+        transform: scale(1.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+
+    .volante-celula.vazio {
+        background: transparent !important;
+        border: none;
+        cursor: default;
+    }
+
+    .volante-celula.vazio:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* =========================================================================
+       TOP RANKING
+       ========================================================================= */
+    .ranking-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .ranking-item {
+        background: var(--creme);
+        border-left: 4px solid var(--dourado);
+        padding: 15px 20px;
+        border-radius: 8px;
+        min-width: 180px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .ranking-item:hover {
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.2);
+        transform: translateY(-3px);
+    }
+
+    .ranking-posicao {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dourado-escuro);
+    }
+
+    .ranking-numero {
+        font-size: 36px;
+        font-weight: 900;
+        color: #333;
+        margin: 5px 0;
+    }
+
+    .ranking-stats {
+        font-size: 13px;
+        color: #666;
+    }
+
+    /* =========================================================================
+       INSIGHTS INTELIGENTES
+       ========================================================================= */
+    .insight-card {
+        background: var(--creme);
+        color: #333;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--dourado);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s;
+    }
+
+    .insight-card:hover {
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.15);
+        border-left-width: 6px;
+    }
+
+    .insight-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .insight-titulo {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--dourado-escuro);
+    }
+
+    .insight-texto {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    /* =========================================================================
+       RECOMENDAÇÕES ESTRATÉGICAS
+       ========================================================================= */
+    .recomendacao-card {
+        background: white;
+        color: #333;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 15px;
+        border: 2px solid var(--creme-escuro);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s;
+    }
+
+    .recomendacao-card:hover {
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.12);
+        border-color: var(--dourado);
+    }
+
+    .recomendacao-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .recomendacao-numero {
+        background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+        color: #333;
+        font-size: 18px;
+        font-weight: 700;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(212, 179, 26, 0.3);
+    }
+
+    .recomendacao-titulo {
+        font-size: 16px;
+        font-weight: 700;
+        flex: 1;
+        color: var(--dourado-escuro);
+    }
+
+    .recomendacao-texto {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 10px;
+        color: #555;
+    }
+
+    .recomendacao-destaque {
+        background: var(--creme);
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        text-align: center;
+        color: var(--dourado-escuro);
+        border: 1px solid var(--creme-escuro);
+    }
+
+    /* =========================================================================
+       ESTATÍSTICAS LINHAS E COLUNAS
+       ========================================================================= */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 12px;
+        padding: 15px;
+    }
+
+    .stats-item {
+        background: var(--creme);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .stats-item:hover {
+        border-color: var(--dourado);
+    }
+
+    .stats-label {
+        font-size: 12px;
+        color: #777;
+        font-weight: 600;
+    }
+
+    .stats-valor {
+        font-size: 22px;
+        font-weight: 900;
+        color: #333;
+        margin-top: 5px;
+    }
+
+    .stats-percentual {
+        font-size: 12px;
+        color: var(--dourado-escuro);
+    }
+
+    /* =========================================================================
+       LEGENDA HEATMAP
+       ========================================================================= */
+    .legenda-heatmap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .legenda-item {
+        width: 30px;
+        height: 20px;
+        border-radius: 4px;
+    }
+
+    .legenda-texto {
+        font-size: 12px;
+        color: #666;
+        margin: 0 10px;
+    }
+
+    /* =========================================================================
+       LOADING
+       ========================================================================= */
+    .loading-container {
+        text-align: center;
+        padding: 50px;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--creme);
+        border-top: 4px solid var(--dourado);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* =========================================================================
+       STATUS ANÁLISES
+       ========================================================================= */
+    .status-badge-implementada {
+        background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+        color: #333;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-badge-pendente {
+        background: #e9ecef;
+        color: #666;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- CABEÇALHO -->
+    <div class="header-cruzamentos">
+        <h2><i class="fas fa-chart-line me-2"></i>Cruzamentos Estatísticos</h2>
+        <p>Análises avançadas cruzando múltiplas dimensões do volante Dia de Sorte</p>
+    </div>
+
+    <!-- ÁREA DE LOADING -->
+    <div id="areaLoading">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h5>Carregando análise...</h5>
+            <p class="text-muted">Processando dados do histórico</p>
+        </div>
+    </div>
+
+    <!-- ÁREA PRINCIPAL (aparece após carregar) -->
+    <div id="areaPrincipal" style="display: none;">
+
+        <!-- ================================================================
+             ANÁLISE 1: MAPA DE CALOR 2D (COLUNA × LINHA)
+             ================================================================ -->
+        <div class="card card-cruzamento">
+            <div class="card-header card-header-dourado">
+                <h5 class="mb-0">
+                    <i class="fas fa-fire me-2"></i>🔥 Mapa de Calor 2D - Coluna × Linha
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-center text-muted mb-3">
+                    <strong>Total de concursos analisados:</strong> <span id="totalConcursos">0</span>
+                </p>
+
+                <!-- VOLANTE 2D -->
+                <div class="volante-container">
+                    <table class="volante-table" id="volanteTable">
+                        <!-- Preenchido via JavaScript -->
+                    </table>
+                </div>
+
+                <!-- LEGENDA -->
+                <div class="legenda-heatmap">
+                    <span class="legenda-texto">Frio</span>
+                    <div class="legenda-item" style="background: #FFF9E6;"></div>
+                    <div class="legenda-item" style="background: #FFF3CC;"></div>
+                    <div class="legenda-item" style="background: #FFECB3;"></div>
+                    <div class="legenda-item" style="background: #FFE599;"></div>
+                    <div class="legenda-item" style="background: #FFDD80;"></div>
+                    <div class="legenda-item" style="background: #F5D066;"></div>
+                    <div class="legenda-item" style="background: #EBC94D;"></div>
+                    <div class="legenda-item" style="background: #E0C133;"></div>
+                    <div class="legenda-item" style="background: #D4B31A;"></div>
+                    <div class="legenda-item" style="background: #C4A510;"></div>
+                    <span class="legenda-texto">Quente</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             ESTATÍSTICAS POR LINHA E COLUNA
+             ================================================================ -->
+        <div class="row">
+            <!-- LINHAS -->
+            <div class="col-md-4">
+                <div class="card card-cruzamento">
+                    <div class="card-header card-header-dourado">
+                        <h6 class="mb-0"><i class="fas fa-grip-lines me-2"></i>Frequência por Linha</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" id="statsLinhas">
+                            <!-- Preenchido via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUNAS -->
+            <div class="col-md-8">
+                <div class="card card-cruzamento">
+                    <div class="card-header card-header-dourado">
+                        <h6 class="mb-0"><i class="fas fa-grip-vertical me-2"></i>Frequência por Coluna</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" id="statsColunas">
+                            <!-- Preenchido via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             TOP RANKING
+             ================================================================ -->
+        <div class="card card-cruzamento">
+            <div class="card-header card-header-dourado">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>🏆 TOP 10 - Números Mais Frequentes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="ranking-container" id="topRanking">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             INSIGHTS INTELIGENTES
+             ================================================================ -->
+        <div class="card card-cruzamento">
+            <div class="card-header card-header-dourado">
+                <h5 class="mb-0">
+                    <i class="fas fa-brain me-2"></i>💡 Insights Inteligentes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="insightsContainer">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+             RECOMENDAÇÕES ESTRATÉGICAS
+             ================================================================ -->
+        <div class="card card-cruzamento">
+            <div class="card-header card-header-dourado">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>🎯 Recomendações Estratégicas
+                </h5>
+            </div>
+            <div class="card-body" id="recomendacoesContainer">
+                <!-- Preenchido via JavaScript -->
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // =========================================================================
+    // CARREGAR DADOS AO INICIAR
+    // =========================================================================
+
+    document.addEventListener('DOMContentLoaded', carregarAnalise);
+
+    async function carregarAnalise() {
+        try {
+            const res = await fetch('/cruzamentos/api/coluna-x-linha');
+            const data = await res.json();
+
+            if (res.ok && data.sucesso) {
+                document.getElementById('areaLoading').style.display = 'none';
+                document.getElementById('areaPrincipal').style.display = 'block';
+                mostrarDados(data);
+            } else {
+                mostrarErro(data.mensagem || 'Erro ao carregar dados');
+            }
+        } catch (e) {
+            mostrarErro(e.message);
+        }
+    }
+
+    // =========================================================================
+    // MOSTRAR DADOS
+    // =========================================================================
+
+    function mostrarDados(data) {
+        document.getElementById('totalConcursos').textContent = data.total_sorteios;
+
+        // VOLANTE 2D
+        renderizarVolante(data.volante_2d);
+
+        // ESTATÍSTICAS LINHAS
+        renderizarStatsLinhas(data.linhas);
+
+        // ESTATÍSTICAS COLUNAS
+        renderizarStatsColunas(data.colunas);
+
+        // TOP RANKING
+        renderizarTopRanking(data.top_ranking);
+
+        // INSIGHTS
+        renderizarInsights(data.insights);
+
+        // RECOMENDAÇÕES
+        renderizarRecomendacoes(data.recomendacoes);
+    }
+
+    // =========================================================================
+    // RENDERIZAR VOLANTE 2D
+    // =========================================================================
+
+    function renderizarVolante(volante) {
+        const table = document.getElementById('volanteTable');
+        table.innerHTML = '';
+
+        // Cabeçalho (colunas)
+        let headerRow = '<tr><td></td>';
+        for (let col = 1; col <= 10; col++) {
+            headerRow += `<td class="volante-header">C${col}</td>`;
+        }
+        headerRow += '</tr>';
+        table.innerHTML += headerRow;
+
+        // Linhas do volante
+        volante.forEach((linha, idx) => {
+            let row = `<tr><td class="volante-linha-header">L${idx + 1}</td>`;
+            linha.forEach(celula => {
+                if (celula.vazio) {
+                    row += '<td class="volante-celula vazio"></td>';
+                } else {
+                    const numFormatado = String(celula.numero).padStart(2, '0');
+                    row += `<td class="volante-celula"
+                               style="background: ${celula.cor_heatmap};"
+                               title="Número ${numFormatado}: ${celula.frequencia}x (${celula.percentual_total}%)">
+                               ${numFormatado}
+                           </td>`;
+                }
+            });
+            row += '</tr>';
+            table.innerHTML += row;
+        });
+    }
+
+    // =========================================================================
+    // RENDERIZAR ESTATÍSTICAS LINHAS
+    // =========================================================================
+
+    function renderizarStatsLinhas(linhas) {
+        const container = document.getElementById('statsLinhas');
+        container.innerHTML = '';
+
+        linhas.forEach(l => {
+            const div = document.createElement('div');
+            div.className = 'stats-item';
+            div.style.borderLeftColor = l.cor_heatmap;
+            div.style.borderLeftWidth = '4px';
+            div.innerHTML = `
+                <div class="stats-label">Linha ${l.linha}</div>
+                <div class="stats-valor">${l.frequencia}</div>
+                <div class="stats-percentual">${l.percentual_total}%</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // =========================================================================
+    // RENDERIZAR ESTATÍSTICAS COLUNAS
+    // =========================================================================
+
+    function renderizarStatsColunas(colunas) {
+        const container = document.getElementById('statsColunas');
+        container.innerHTML = '';
+
+        colunas.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'stats-item';
+            div.style.borderLeftColor = c.cor_heatmap;
+            div.style.borderLeftWidth = '4px';
+            div.innerHTML = `
+                <div class="stats-label">Col ${c.coluna}</div>
+                <div class="stats-valor">${c.frequencia}</div>
+                <div class="stats-percentual">${c.percentual_total}%</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // =========================================================================
+    // RENDERIZAR TOP RANKING
+    // =========================================================================
+
+    function renderizarTopRanking(ranking) {
+        const container = document.getElementById('topRanking');
+        container.innerHTML = '';
+
+        ranking.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'ranking-item';
+            div.style.borderLeftColor = item.cor_heatmap;
+            div.innerHTML = `
+                <div class="ranking-posicao">${item.posicao}º LUGAR</div>
+                <div class="ranking-numero">${String(item.numero).padStart(2, '0')}</div>
+                <div class="ranking-stats">${item.frequencia}x (${item.percentual}%)</div>
+                <div class="ranking-stats" style="font-size: 11px; margin-top: 5px;">
+                    L${item.linha} × C${item.coluna}
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // =========================================================================
+    // RENDERIZAR INSIGHTS
+    // =========================================================================
+
+    function renderizarInsights(insights) {
+        const container = document.getElementById('insightsContainer');
+        container.innerHTML = '';
+
+        insights.forEach(insight => {
+            const div = document.createElement('div');
+            div.className = 'col-md-6 col-lg-4';
+            div.innerHTML = `
+                <div class="insight-card">
+                    <div class="insight-icon">${insight.icone}</div>
+                    <div class="insight-titulo">${insight.titulo}</div>
+                    <div class="insight-texto">${insight.texto}</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // =========================================================================
+    // RENDERIZAR RECOMENDAÇÕES
+    // =========================================================================
+
+    function renderizarRecomendacoes(recomendacoes) {
+        const container = document.getElementById('recomendacoesContainer');
+        container.innerHTML = '';
+
+        recomendacoes.forEach(rec => {
+            const div = document.createElement('div');
+            div.className = 'recomendacao-card';
+            div.innerHTML = `
+                <div class="recomendacao-header">
+                    <div class="recomendacao-numero">${rec.numero}</div>
+                    <div class="recomendacao-titulo">${rec.titulo}</div>
+                </div>
+                <div class="recomendacao-texto">${rec.texto}</div>
+                <div class="recomendacao-destaque">${rec.destaque}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // =========================================================================
+    // ERRO
+    // =========================================================================
+
+    function mostrarErro(msg) {
+        document.getElementById('areaLoading').innerHTML = `
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Erro:</strong> ${msg}
+            </div>
+        `;
+    }
+</script>
+{% endblock %}

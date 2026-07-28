@@ -1,0 +1,2111 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações do Sistema - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-cog me-2"></i>Configurações do Sistema</h2>
+                    <p class="text-muted">Gerencie as configurações globais do sistema e atualize o banco de dados</p>
+                </div>
+                <button class="btn btn-outline-primary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left me-1"></i>Voltar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Update Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-sync-alt me-2"></i>Atualização do Banco de Dados</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Database Status -->
+                    <div class="alert alert-info" id="status-banco">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-2"><i class="fas fa-database me-2"></i>Status do Banco</h6>
+                                <div id="info-banco">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                    Carregando informações...
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="carregarStatusBanco()">
+                                <i class="fas fa-redo me-1"></i>Atualizar Status
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Update Options -->
+                    <div class="row">
+                        <!-- Option 1: Update Last Contest -->
+                        <div class="col-12 col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-arrow-circle-down fa-3x text-primary mb-3"></i>
+                                    <h6 class="card-title">Atualizar Último Concurso</h6>
+                                    <p class="card-text small text-muted">Busca e atualiza apenas o concurso mais recente</p>
+                                    <button class="btn btn-primary btn-sm w-100" onclick="atualizarUltimoConcurso()">
+                                        <i class="fas fa-download me-1"></i>Atualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Option 2: Update Specific Contest -->
+                        <div class="col-12 col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-info">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-bullseye fa-3x text-info mb-3"></i>
+                                    <h6 class="card-title">Concurso Específico</h6>
+                                    <p class="card-text small text-muted">Atualiza um concurso pelo número</p>
+                                    <input
+                                        type="number"
+                                        class="form-control form-control-sm mb-2"
+                                        id="numero-especifico"
+                                        placeholder="Ex: 1098"
+                                        min="1"
+                                        style="font-size: 16px;"
+                                    >
+                                    <button class="btn btn-info btn-sm w-100" onclick="atualizarConcursoEspecifico()">
+                                        <i class="fas fa-download me-1"></i>Atualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Option 3: Update Range -->
+                        <div class="col-12 col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-layer-group fa-3x text-success mb-3"></i>
+                                    <h6 class="card-title">Intervalo de Concursos</h6>
+                                    <p class="card-text small text-muted">Atualiza múltiplos concursos</p>
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <input
+                                                type="number"
+                                                class="form-control form-control-sm"
+                                                id="range-inicio"
+                                                placeholder="Início"
+                                                min="1"
+                                                style="font-size: 16px;"
+                                            >
+                                        </div>
+                                        <div class="col-6">
+                                            <input
+                                                type="number"
+                                                class="form-control form-control-sm"
+                                                id="range-fim"
+                                                placeholder="Fim"
+                                                min="1"
+                                                style="font-size: 16px;"
+                                            >
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-success btn-sm w-100" onclick="atualizarRangeConcursos()">
+                                        <i class="fas fa-download me-1"></i>Atualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Option 4: Update All -->
+                        <div class="col-12 col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-danger">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-database fa-3x text-danger mb-3"></i>
+                                    <h6 class="card-title">Atualizar Todos</h6>
+                                    <p class="card-text small text-muted">Atualiza todos os concursos desde o início</p>
+                                    <div class="alert alert-warning p-2 small mb-2">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Pode demorar!
+                                    </div>
+                                    <button class="btn btn-danger btn-sm w-100" onclick="confirmarAtualizarTodos()">
+                                        <i class="fas fa-cloud-download-alt me-1"></i>Atualizar Tudo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Display -->
+                    <div id="progress-container" class="mt-3" style="display: none;">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h6 class="mb-3">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                        <span class="visually-hidden">Processando...</span>
+                                    </div>
+                                    <span id="progress-title">Atualizando...</span>
+                                </h6>
+                                <div class="progress mb-2" style="height: 25px;">
+                                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 0%">0%</div>
+                                </div>
+                                <div id="progress-details" class="small text-muted"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração de Análises para Gerador de Fechamento -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-chart-line me-2"></i>Análises para Gerador de Fechamento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Selecione quais análises estatísticas devem ser aplicadas ao gerar fechamentos.
+                        As análises ativas serão usadas automaticamente para filtrar e otimizar seus jogos.
+                    </p>
+
+                    <!-- Nav Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="analisesTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="estatisticas-tab" data-bs-toggle="tab"
+                                    data-bs-target="#estatisticas" type="button" role="tab">
+                                <i class="fas fa-chart-bar me-1"></i>Estatísticas Básicas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="padroes-tab" data-bs-toggle="tab"
+                                    data-bs-target="#padroes" type="button" role="tab">
+                                <i class="fas fa-shapes me-1"></i>Padrões Numéricos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="distribuicao-tab" data-bs-toggle="tab"
+                                    data-bs-target="#distribuicao" type="button" role="tab">
+                                <i class="fas fa-th me-1"></i>Distribuição
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="relacionamento-tab" data-bs-toggle="tab"
+                                    data-bs-target="#relacionamento" type="button" role="tab">
+                                <i class="fas fa-project-diagram me-1"></i>Relacionamento
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="temporais-tab" data-bs-toggle="tab"
+                                    data-bs-target="#temporais" type="button" role="tab">
+                                Temporais
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="analisesTabContent">
+                        <!-- Estatísticas Básicas -->
+                        <div class="tab-pane fade show active" id="estatisticas" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-atrasados" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-atrasados">
+                                            <i class="fas fa-clock text-warning me-1"></i>Atrasados
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Números que estão há mais tempo sem sair</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-quentes-frios" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-quentes-frios">
+                                            <i class="fas fa-fire text-danger me-1"></i>Quentes/Frios
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Números mais e menos sorteados recentemente</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-numeros-devidos" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-numeros-devidos">
+                                            <i class="fas fa-exclamation-circle text-info me-1"></i>Números Devidos
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Números com atraso acima da média</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-numeros-juntos" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-numeros-juntos">
+                                            <i class="fas fa-link text-success me-1"></i>Números Juntos
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Pares que aparecem juntos frequentemente</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Padrões Numéricos -->
+                        <div class="tab-pane fade" id="padroes" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-pares-impares" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-pares-impares">
+                                            <i class="fas fa-divide text-primary me-1"></i>Pares/Ímpares
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Distribuição entre pares e ímpares</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-primos-compostos">
+                                        <label class="form-check-label fw-bold" for="toggle-primos-compostos">
+                                            <i class="fas fa-calculator text-secondary me-1"></i>Primos/Compostos
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Números primos vs compostos</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-digito-padrao" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-digito-padrao">
+                                            <i class="fas fa-sort-numeric-down text-info me-1"></i>Dígito Padrão
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Padrão inicial e final dos números</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-soma-dezenas" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-soma-dezenas">
+                                            <i class="fas fa-plus text-warning me-1"></i>Soma Dezenas
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Soma total dos números sorteados</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Distribuição -->
+                        <div class="tab-pane fade" id="distribuicao" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-gaps" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-gaps">
+                                            <i class="fas fa-arrows-alt-h text-primary me-1"></i>Gaps/Distâncias
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Distâncias entre números consecutivos</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-consecutivos" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-consecutivos">
+                                            <i class="fas fa-sort-amount-down text-success me-1"></i>Consecutivos
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Números em sequência (ex: 5,6,7)</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-quadrantes">
+                                        <label class="form-check-label fw-bold" for="toggle-quadrantes">
+                                            <i class="fas fa-th-large text-secondary me-1"></i>Quadrantes
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Distribuição por quadrantes</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-dezenas" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-dezenas">
+                                            <i class="fas fa-layer-group text-info me-1"></i>Dezenas
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Distribuição por faixas de dezenas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Relacionamento -->
+                        <div class="tab-pane fade" id="relacionamento" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-repeticoes" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-repeticoes">
+                                            <i class="fas fa-redo text-warning me-1"></i>Repetições
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Números que repetem do concurso anterior</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-sequencias" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-sequencias">
+                                            <i class="fas fa-stream text-primary me-1"></i>Sequências
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Padrões de sequências numéricas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Temporais -->
+                        <div class="tab-pane fade" id="temporais" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch p-3 border rounded">
+                                        <input class="form-check-input" type="checkbox" id="toggle-meses" checked>
+                                        <label class="form-check-label fw-bold" for="toggle-meses">
+                                            Meses
+                                        </label>
+                                        <p class="small text-muted mb-0 mt-1">Análise temporal por meses</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="mt-4 d-flex gap-2 flex-wrap">
+                        <button class="btn btn-success" onclick="salvarAnalises()">
+                            <i class="fas fa-save me-2"></i>Salvar Configurações de Análises
+                        </button>
+                        <button class="btn btn-primary" onclick="ativarTodas()">
+                            <i class="fas fa-check-double me-2"></i>Ativar Todas
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="desativarTodas()">
+                            <i class="fas fa-times me-2"></i>Desativar Todas
+                        </button>
+                        <button class="btn btn-outline-info" onclick="carregarAnalises()">
+                            <i class="fas fa-sync me-2"></i>Recarregar
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Importante:</strong> As análises selecionadas serão aplicadas automaticamente ao gerar fechamentos.
+                        Desative análises que você não considera relevantes para otimizar o processamento.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração de Cores dos Meses -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-palette me-2"></i>Cores dos Meses</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Personalize as cores usadas para identificar cada mês em todo o sistema.
+                        Estas cores são aplicadas automaticamente em todas as visualizações e tabelas.
+                    </p>
+
+                    <div class="row g-3" id="cores-meses-grid">
+                        <!-- Janeiro -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Janeiro
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-0"
+                                        data-mes="0"
+                                        title="Escolha a cor para Janeiro"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-0">
+                                        Janeiro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fevereiro -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Fevereiro
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-1"
+                                        data-mes="1"
+                                        title="Escolha a cor para Fevereiro"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-1">
+                                        Fevereiro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Março -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Março
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-2"
+                                        data-mes="2"
+                                        title="Escolha a cor para Março"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-2">
+                                        Março
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Abril -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Abril
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-3"
+                                        data-mes="3"
+                                        title="Escolha a cor para Abril"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-3">
+                                        Abril
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Maio -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Maio
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-4"
+                                        data-mes="4"
+                                        title="Escolha a cor para Maio"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-4">
+                                        Maio
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Junho -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Junho
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-5"
+                                        data-mes="5"
+                                        title="Escolha a cor para Junho"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-5">
+                                        Junho
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Julho -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Julho
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-6"
+                                        data-mes="6"
+                                        title="Escolha a cor para Julho"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-6">
+                                        Julho
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Agosto -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Agosto
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-7"
+                                        data-mes="7"
+                                        title="Escolha a cor para Agosto"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-7">
+                                        Agosto
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Setembro -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Setembro
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-8"
+                                        data-mes="8"
+                                        title="Escolha a cor para Setembro"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-8">
+                                        Setembro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Outubro -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Outubro
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-9"
+                                        data-mes="9"
+                                        title="Escolha a cor para Outubro"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-9">
+                                        Outubro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Novembro -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Novembro
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-10"
+                                        data-mes="10"
+                                        title="Escolha a cor para Novembro"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-10">
+                                        Novembro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dezembro -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card border h-100">
+                                <div class="card-body p-3">
+                                    <label class="form-label fw-bold small mb-2">
+                                        Dezembro
+                                    </label>
+                                    <input
+                                        type="color"
+                                        class="form-control form-control-color"
+                                        id="cor-mes-11"
+                                        data-mes="11"
+                                        title="Escolha a cor para Dezembro"
+                                    >
+                                    <div class="mt-2 p-2 text-center rounded mes-preview" id="preview-mes-11">
+                                        Dezembro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button class="btn btn-success" onclick="salvarCoresMeses()">
+                            <i class="fas fa-save me-2"></i>Salvar Cores dos Meses
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="restaurarCoresPadrao()">
+                            <i class="fas fa-undo me-2"></i>Restaurar Cores Padrão
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Dica:</strong> As cores escolhidas aqui serão aplicadas automaticamente em todas
+                        as páginas do sistema, incluindo tabelas, gráficos e visualizações.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração de Valor da Aposta -->
+    <div class="row mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Valor da Aposta Mínima</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Configure o valor da aposta mínima (7 números). Este valor será usado em todo o sistema
+                        para cálculos de custo de jogos e premiações.
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="valor-aposta" class="form-label fw-bold">
+                            <i class="fas fa-dollar-sign me-1"></i>Valor da Aposta (R$)
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="valor-aposta"
+                                placeholder="2.50"
+                                step="0.01"
+                                min="0.01"
+                                style="font-size: 16px;"
+                            >
+                        </div>
+                        <small class="form-text text-muted">
+                            Valor atual: <strong id="valor-atual">Carregando...</strong>
+                        </small>
+                    </div>
+
+                    <button class="btn btn-success" onclick="salvarValorAposta()">
+                        <i class="fas fa-save me-2"></i>Salvar Valor da Aposta
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações do Sistema -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações do Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">Nome do Sistema:</td>
+                                <td id="info-nome">Análise Dia de Sorte</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Versão:</td>
+                                <td id="info-versao">2.0.0</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Desenvolvido para:</td>
+                                <td>Márcio Fernando Maia</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Dica:</strong> Altere o valor da aposta apenas se houver mudança oficial
+                        nos valores da Caixa Econômica Federal.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração de Valores de Prêmios -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Valores Padrão de Prêmios</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Configure os valores padrão dos prêmios. Valores de 7 e 6 acertos são variáveis e
+                        vêm dos resultados oficiais. Valores de 5 acertos (R$ 25,00), 4 acertos (R$ 5,00) e Mês da Sorte (R$ 2,50) são fixos.
+                    </p>
+
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="premio-7-acertos" class="form-label fw-bold">
+                                <i class="fas fa-trophy me-1 text-warning"></i>7 Acertos (R$)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="premio-7-acertos"
+                                    placeholder="0.00"
+                                    step="0.01"
+                                    min="0"
+                                    style="font-size: 16px;"
+                                >
+                            </div>
+                            <small class="form-text text-muted">Valor variável (acumulado)</small>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="premio-6-acertos" class="form-label fw-bold">
+                                <i class="fas fa-trophy me-1 text-secondary"></i>6 Acertos (R$)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="premio-6-acertos"
+                                    placeholder="0.00"
+                                    step="0.01"
+                                    min="0"
+                                    style="font-size: 16px;"
+                                >
+                            </div>
+                            <small class="form-text text-muted">Valor variável</small>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="premio-5-acertos" class="form-label fw-bold">
+                                <i class="fas fa-trophy me-1 text-bronze"></i>5 Acertos (R$)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="premio-5-acertos"
+                                    placeholder="25.00"
+                                    step="0.01"
+                                    min="0"
+                                    style="font-size: 16px;"
+                                >
+                            </div>
+                            <small class="form-text text-muted">Valor fixo padrão (R$ 25,00)</small>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="premio-4-acertos" class="form-label fw-bold">
+                                <i class="fas fa-medal me-1 text-primary"></i>4 Acertos (R$)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="premio-4-acertos"
+                                    placeholder="5.00"
+                                    step="0.01"
+                                    min="0"
+                                    style="font-size: 16px;"
+                                >
+                            </div>
+                            <small class="form-text text-muted">Valor fixo padrão</small>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="premio-mes-sorte" class="form-label fw-bold">
+                                Mês da Sorte (R$)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="premio-mes-sorte"
+                                    placeholder="2.50"
+                                    step="0.01"
+                                    min="0"
+                                    style="font-size: 16px;"
+                                >
+                            </div>
+                            <small class="form-text text-muted">Valor fixo padrão</small>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="salvarValoresPremios()">
+                        <i class="fas fa-save me-2"></i>Salvar Valores de Prêmios
+                    </button>
+
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Nota:</strong> Os valores de 7 e 6 acertos são variáveis e obtidos dos resultados oficiais.
+                        Valores fixos: 5 acertos = R$ 25,00 | 4 acertos = R$ 5,00 | Mês da Sorte = R$ 2,50
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração Modelo E - Reduções -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                    <h5 class="mb-0"><i class="fas fa-compress-arrows-alt me-2"></i>Modelo E - Configuração de Reduções</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Configure os parâmetros padrão do Modelo E (Redução Inteligente do Último Sorteio).
+                        Estas configurações serão usadas como valores iniciais ao abrir a aba.
+                    </p>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="modelo-e-nivel" class="form-label fw-bold">
+                                <i class="fas fa-layer-group me-1 text-info"></i>Nível de Redução Padrão
+                            </label>
+                            <select id="modelo-e-nivel" class="form-select" style="font-size: 16px;">
+                                <option value="1">Nível 1 - C(7,1) = 7 jogos (1 do sorteio + 6 complementares)</option>
+                                <option value="2" selected>Nível 2 - C(7,2) = 21 jogos (2 do sorteio + 5 complementares)</option>
+                                <option value="3">Nível 3 - C(7,3) = 35 jogos (3 do sorteio + 4 complementares)</option>
+                                <option value="4">Nível 4 - C(7,4) = 35 jogos (4 do sorteio + 3 complementares)</option>
+                                <option value="5">Nível 5 - C(7,5) = 21 jogos (5 do sorteio + 2 complementares)</option>
+                                <option value="6">Nível 6 - C(7,6) = 7 jogos (6 do sorteio + 1 complementar)</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Determina quantos números do sorteio anterior serão usados em cada jogo
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="modelo-e-estrategia" class="form-label fw-bold">
+                                <i class="fas fa-robot me-1 text-success"></i>Estratégia de Complemento
+                            </label>
+                            <select id="modelo-e-estrategia" class="form-select" style="font-size: 16px;">
+                                <option value="automatico" selected>🤖 Automático - IA escolhe baseado em estatísticas</option>
+                                <option value="balanceado">⚖️ Balanceado - Distribuição igual entre faixas</option>
+                                <option value="quentes">🔥 Priorizar Quentes - Números mais frequentes</option>
+                                <option value="frios">❄️ Priorizar Frios - Números atrasados</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Define como os números complementares serão selecionados
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="modelo-e-modo" class="form-label fw-bold">
+                                <i class="fas fa-hand-pointer me-1 text-primary"></i>Modo de Seleção Padrão
+                            </label>
+                            <select id="modelo-e-modo" class="form-select" style="font-size: 16px;">
+                                <option value="automatico" selected>🤖 Automático - Sistema escolhe tudo</option>
+                                <option value="hibrido">🔀 Híbrido - Sistema sugere, você ajusta</option>
+                                <option value="manual">✋ Manual - Você escolhe os complementares</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Define o nível de controle do usuário sobre a seleção
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="modelo-e-mes-tipo" class="form-label fw-bold">
+                                Seleção de Mês Padrão
+                            </label>
+                            <select id="modelo-e-mes-tipo" class="form-select" style="font-size: 16px;">
+                                <option value="frequente" selected>🔥 Mais Frequente - Mês que mais saiu</option>
+                                <option value="atrasado">⏰ Mais Atrasado - Mês há mais tempo sem sair</option>
+                                <option value="manual">📅 Manual - Escolher manualmente</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Define como o mês da sorte será pré-selecionado
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button class="btn btn-success" onclick="salvarConfigModeloE()">
+                            <i class="fas fa-save me-2"></i>Salvar Configurações do Modelo E
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="restaurarPadraoModeloE()">
+                            <i class="fas fa-undo me-2"></i>Restaurar Padrão
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Dica:</strong> O Modelo E utiliza o último sorteio como base, desdobrando seus 7 números
+                        e combinando com números complementares para gerar apostas estratégicas.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Preços por Quantidade de Dezenas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Tabela de Preços por Quantidade de Dezenas</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Configure os valores de apostas para cada quantidade de dezenas (7 a 15).
+                        Estes valores são usados para calcular o custo total dos desdobramentos.
+                    </p>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center" style="width: 100px;">Dezenas</th>
+                                    <th class="text-center">Valor da Aposta (R$)</th>
+                                    <th class="text-center" style="width: 150px;">Valor Oficial</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-precos-dezenas">
+                                <!-- 7 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">7</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-7"
+                                                   data-dezenas="7" step="0.01" min="0" value="2.50" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 2,50</td>
+                                </tr>
+                                <!-- 8 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">8</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-8"
+                                                   data-dezenas="8" step="0.01" min="0" value="20.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 20,00</td>
+                                </tr>
+                                <!-- 9 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">9</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-9"
+                                                   data-dezenas="9" step="0.01" min="0" value="90.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 90,00</td>
+                                </tr>
+                                <!-- 10 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">10</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-10"
+                                                   data-dezenas="10" step="0.01" min="0" value="300.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 300,00</td>
+                                </tr>
+                                <!-- 11 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">11</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-11"
+                                                   data-dezenas="11" step="0.01" min="0" value="825.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 825,00</td>
+                                </tr>
+                                <!-- 12 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">12</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-12"
+                                                   data-dezenas="12" step="0.01" min="0" value="1980.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 1.980,00</td>
+                                </tr>
+                                <!-- 13 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">13</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-13"
+                                                   data-dezenas="13" step="0.01" min="0" value="4290.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 4.290,00</td>
+                                </tr>
+                                <!-- 14 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">14</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-14"
+                                                   data-dezenas="14" step="0.01" min="0" value="8580.00" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 8.580,00</td>
+                                </tr>
+                                <!-- 15 dezenas -->
+                                <tr>
+                                    <td class="text-center fw-bold">15</td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control preco-dezena" id="preco-15"
+                                                   data-dezenas="15" step="0.01" min="0" value="16087.50" style="font-size: 16px;">
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-muted">R$ 16.087,50</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2">
+                        <button class="btn btn-success" onclick="salvarPrecosDezenas()">
+                            <i class="fas fa-save me-2"></i>Salvar Tabela de Preços
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="restaurarPrecosOficiais()">
+                            <i class="fas fa-undo me-2"></i>Restaurar Preços Oficiais
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Nota:</strong> Os valores oficiais são da Caixa Econômica Federal.
+                        Altere apenas se houver mudança oficial nos valores.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Todas as Configurações -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Todas as Configurações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Chave</th>
+                                    <th>Valor</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Última Atualização</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-configuracoes">
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="modal-title">Confirmação</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check me-1"></i>Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    carregarValorAposta();
+    carregarTodasConfiguracoes();
+    carregarInformacoesSistema();
+    carregarStatusBanco();
+    carregarAnalises();
+    carregarPrecosDezenas();
+});
+
+// ========================================================================
+// DATABASE UPDATE FUNCTIONS
+// ========================================================================
+
+// Carrega status do banco
+async function carregarStatusBanco() {
+    try {
+        const response = await fetch('/api/configuracoes/status-banco');
+        const data = await response.json();
+
+        const infoBanco = document.getElementById('info-banco');
+
+        if (data.sucesso) {
+            if (data.banco_vazio) {
+                infoBanco.innerHTML = `
+                    <div class="text-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Banco de dados vazio!</strong> Clique em uma das opções acima para começar a popular o banco.
+                    </div>
+                `;
+            } else {
+                infoBanco.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Último Concurso:</strong> ${data.ultimo_concurso || 'N/A'}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Data:</strong> ${data.data_ultimo_concurso || 'N/A'}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Total de Concursos:</strong> ${data.total_concursos || 0}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Primeiro Concurso:</strong> ${data.primeiro_concurso || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            infoBanco.innerHTML = `
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro ao carregar status: ${data.mensagem}
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar status do banco:', error);
+        document.getElementById('info-banco').innerHTML = `
+            <div class="text-danger">
+                <i class="fas fa-times-circle me-2"></i>
+                Erro ao carregar status do banco
+            </div>
+        `;
+    }
+}
+
+// Atualizar último concurso
+async function atualizarUltimoConcurso() {
+    mostrarProgresso('Atualizando último concurso...', 50);
+
+    try {
+        const response = await fetch('/api/configuracoes/atualizar-banco', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tipo: 'ultimo' })
+        });
+
+        const data = await response.json();
+        esconderProgresso();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', data.mensagem, 'success');
+            carregarStatusBanco();
+        } else {
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        esconderProgresso();
+        console.error('Erro:', error);
+        mostrarAlerta('Erro', 'Erro ao atualizar concurso. Tente novamente.', 'danger');
+    }
+}
+
+// Atualizar concurso específico
+async function atualizarConcursoEspecifico() {
+    const numero = document.getElementById('numero-especifico').value;
+
+    if (!numero || numero <= 0) {
+        mostrarAlerta('Atenção', 'Por favor, insira um número de concurso válido!', 'warning');
+        return;
+    }
+
+    mostrarProgresso(`Atualizando concurso ${numero}...`, 50);
+
+    try {
+        const response = await fetch('/api/configuracoes/atualizar-banco', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tipo: 'especifico',
+                numero: parseInt(numero)
+            })
+        });
+
+        const data = await response.json();
+        esconderProgresso();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', data.mensagem, 'success');
+            carregarStatusBanco();
+            document.getElementById('numero-especifico').value = '';
+        } else {
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        esconderProgresso();
+        console.error('Erro:', error);
+        mostrarAlerta('Erro', 'Erro ao atualizar concurso. Tente novamente.', 'danger');
+    }
+}
+
+// Atualizar range de concursos
+async function atualizarRangeConcursos() {
+    const inicio = document.getElementById('range-inicio').value;
+    const fim = document.getElementById('range-fim').value;
+
+    if (!inicio || !fim || inicio <= 0 || fim <= 0) {
+        mostrarAlerta('Atenção', 'Por favor, insira valores válidos para início e fim!', 'warning');
+        return;
+    }
+
+    if (parseInt(inicio) > parseInt(fim)) {
+        mostrarAlerta('Atenção', 'O número inicial deve ser menor ou igual ao final!', 'warning');
+        return;
+    }
+
+    const total = parseInt(fim) - parseInt(inicio) + 1;
+    mostrarProgresso(`Atualizando ${total} concursos...`, 10);
+
+    try {
+        const response = await fetch('/api/configuracoes/atualizar-banco', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tipo: 'range',
+                inicio: parseInt(inicio),
+                fim: parseInt(fim)
+            })
+        });
+
+        const data = await response.json();
+
+        // Atualiza progresso
+        if (data.sucesso) {
+            atualizarProgresso(100, `Concluído: ${data.sucessos} sucessos, ${data.falhas} falhas`);
+            setTimeout(() => {
+                esconderProgresso();
+                mostrarAlerta('Concluído!', data.mensagem, 'success');
+                carregarStatusBanco();
+                document.getElementById('range-inicio').value = '';
+                document.getElementById('range-fim').value = '';
+            }, 2000);
+        } else {
+            esconderProgresso();
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        esconderProgresso();
+        console.error('Erro:', error);
+        mostrarAlerta('Erro', 'Erro ao atualizar concursos. Tente novamente.', 'danger');
+    }
+}
+
+// Confirmar atualizar todos
+function confirmarAtualizarTodos() {
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    document.getElementById('modal-title').textContent = 'Atualizar Todos os Concursos';
+    document.getElementById('modal-message').innerHTML = `
+        <p><strong>ATENÇÃO:</strong> Esta operação irá atualizar todos os concursos desde o início!</p>
+        <p>Isso pode levar <strong>vários minutos</strong> dependendo da quantidade de concursos.</p>
+        <p>Deseja continuar?</p>
+    `;
+
+    document.getElementById('modal-confirm-btn').onclick = function() {
+        modal.hide();
+        atualizarTodosConcursos();
+    };
+
+    modal.show();
+}
+
+// Atualizar todos os concursos
+async function atualizarTodosConcursos() {
+    mostrarProgresso('Buscando total de concursos...', 5);
+
+    try {
+        const response = await fetch('/api/configuracoes/atualizar-banco', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tipo: 'todos' })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            atualizarProgresso(100, `Concluído: ${data.sucessos} sucessos, ${data.falhas} falhas`);
+            setTimeout(() => {
+                esconderProgresso();
+                mostrarAlerta('Concluído!', data.mensagem, 'success');
+                carregarStatusBanco();
+            }, 2000);
+        } else {
+            esconderProgresso();
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        esconderProgresso();
+        console.error('Erro:', error);
+        mostrarAlerta('Erro', 'Erro ao atualizar todos os concursos. Tente novamente.', 'danger');
+    }
+}
+
+// Mostrar progresso
+function mostrarProgresso(titulo, porcentagem) {
+    const container = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const progressTitle = document.getElementById('progress-title');
+
+    container.style.display = 'block';
+    progressTitle.textContent = titulo;
+    progressBar.style.width = porcentagem + '%';
+    progressBar.textContent = porcentagem + '%';
+
+    // Scroll to progress
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Atualizar progresso
+function atualizarProgresso(porcentagem, detalhes) {
+    const progressBar = document.getElementById('progress-bar');
+    const progressDetails = document.getElementById('progress-details');
+
+    progressBar.style.width = porcentagem + '%';
+    progressBar.textContent = porcentagem + '%';
+
+    if (detalhes) {
+        progressDetails.textContent = detalhes;
+    }
+}
+
+// Esconder progresso
+function esconderProgresso() {
+    const container = document.getElementById('progress-container');
+    container.style.display = 'none';
+}
+
+// ========================================================================
+// ANALYSIS CONFIGURATION FUNCTIONS
+// ========================================================================
+
+// Lista de todas as análises com seus IDs
+const analises = [
+    'atrasados', 'quentes-frios', 'numeros-devidos', 'numeros-juntos',
+    'pares-impares', 'primos-compostos', 'digito-padrao', 'soma-dezenas',
+    'gaps', 'consecutivos', 'quadrantes', 'dezenas',
+    'repeticoes', 'sequencias',
+    'meses'
+];
+
+// Carregar estado das análises
+async function carregarAnalises() {
+    try {
+        const response = await fetch('/api/configuracoes/analises');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            // Atualizar cada toggle com o estado salvo
+            Object.keys(data.analises).forEach(key => {
+                const checkbox = document.getElementById(`toggle-${key.replace(/_/g, '-')}`);
+                if (checkbox) {
+                    checkbox.checked = data.analises[key];
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar análises:', error);
+        mostrarAlerta('Erro', 'Erro ao carregar configurações de análises', 'danger');
+    }
+}
+
+// Salvar estado das análises
+async function salvarAnalises() {
+    const configuracoes = {};
+
+    // Coletar estado de todas as análises
+    analises.forEach(analise => {
+        const checkbox = document.getElementById(`toggle-${analise}`);
+        if (checkbox) {
+            // Converter ID do toggle para chave da API (toggle-gaps -> gaps)
+            const chave = analise.replace(/-/g, '_');
+            configuracoes[chave] = checkbox.checked;
+        }
+    });
+
+    try {
+        const response = await fetch('/api/configuracoes/analises/salvar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(configuracoes)
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', 'Configurações de análises salvas com sucesso!', 'success');
+            carregarTodasConfiguracoes();
+        } else {
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar análises:', error);
+        mostrarAlerta('Erro', 'Erro ao salvar configurações de análises. Tente novamente.', 'danger');
+    }
+}
+
+// Ativar todas as análises
+function ativarTodas() {
+    analises.forEach(analise => {
+        const checkbox = document.getElementById(`toggle-${analise}`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
+    mostrarAlerta('Pronto!', 'Todas as análises foram ativadas. Não esqueça de salvar!', 'info');
+}
+
+// Desativar todas as análises
+function desativarTodas() {
+    analises.forEach(analise => {
+        const checkbox = document.getElementById(`toggle-${analise}`);
+        if (checkbox) {
+            checkbox.checked = false;
+        }
+    });
+    mostrarAlerta('Pronto!', 'Todas as análises foram desativadas. Não esqueça de salvar!', 'info');
+}
+
+// ========================================================================
+// CONFIGURATION FUNCTIONS
+// ========================================================================
+
+// Carrega o valor da aposta atual
+async function carregarValorAposta() {
+    try {
+        const response = await fetch('/api/configuracoes/valor-aposta');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            const valor = data.valor_aposta;
+            document.getElementById('valor-aposta').value = valor.toFixed(2);
+            document.getElementById('valor-atual').textContent = `R$ ${valor.toFixed(2)}`;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar valor da aposta:', error);
+        document.getElementById('valor-atual').textContent = 'Erro ao carregar';
+    }
+}
+
+// Salva o valor da aposta
+async function salvarValorAposta() {
+    const valorInput = document.getElementById('valor-aposta');
+    const valor = parseFloat(valorInput.value);
+
+    if (!valor || valor <= 0) {
+        mostrarAlerta('Atenção', 'Por favor, insira um valor válido maior que zero!', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/configuracoes/salvar-valor-aposta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ valor: valor })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', data.mensagem, 'success');
+            document.getElementById('valor-atual').textContent = `R$ ${valor.toFixed(2)}`;
+            carregarTodasConfiguracoes();
+        } else {
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar valor da aposta:', error);
+        mostrarAlerta('Erro', 'Erro ao salvar o valor da aposta. Tente novamente.', 'danger');
+    }
+}
+
+// Salvar valores de prêmios
+async function salvarValoresPremios() {
+    const premio7 = parseFloat(document.getElementById('premio-7-acertos').value) || 0;
+    const premio6 = parseFloat(document.getElementById('premio-6-acertos').value) || 0;
+    const premio5 = parseFloat(document.getElementById('premio-5-acertos').value) || 25.00;
+    const premio4 = parseFloat(document.getElementById('premio-4-acertos').value) || 5.00;
+    const premioMes = parseFloat(document.getElementById('premio-mes-sorte').value) || 2.50;
+
+    try {
+        const response = await fetch('/api/configuracoes/salvar-premios', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                premio_7_acertos: premio7,
+                premio_6_acertos: premio6,
+                premio_5_acertos: premio5,
+                premio_4_acertos: premio4,
+                premio_mes_sorte: premioMes
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', 'Valores de prêmios salvos com sucesso!', 'success');
+            carregarTodasConfiguracoes();
+        } else {
+            mostrarAlerta('Erro', data.mensagem || 'Erro ao salvar valores de prêmios', 'danger');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar valores de prêmios:', error);
+        mostrarAlerta('Erro', 'Erro ao salvar valores de prêmios. Tente novamente.', 'danger');
+    }
+}
+
+// Carrega todas as configurações
+async function carregarTodasConfiguracoes() {
+    try {
+        const response = await fetch('/api/configuracoes/listar');
+        const data = await response.json();
+
+        const tbody = document.getElementById('tabela-configuracoes');
+
+        if (data.sucesso && data.configuracoes.length > 0) {
+            tbody.innerHTML = data.configuracoes.map(config => `
+                <tr>
+                    <td><code>${config.chave}</code></td>
+                    <td><strong>${formatarValor(config.valor, config.tipo)}</strong></td>
+                    <td><span class="badge bg-info">${config.tipo}</span></td>
+                    <td>${config.descricao || '-'}</td>
+                    <td>${config.atualizado_em || '-'}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        Nenhuma configuração encontrada
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+        document.getElementById('tabela-configuracoes').innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger">
+                    Erro ao carregar configurações
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Carrega informações do sistema
+async function carregarInformacoesSistema() {
+    try {
+        const response = await fetch('/api/configuracoes/listar');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            data.configuracoes.forEach(config => {
+                if (config.chave === 'sistema_nome') {
+                    document.getElementById('info-nome').textContent = config.valor;
+                } else if (config.chave === 'sistema_versao') {
+                    document.getElementById('info-versao').textContent = config.valor;
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar informações do sistema:', error);
+    }
+}
+
+// Formata valor conforme o tipo
+function formatarValor(valor, tipo) {
+    if (tipo === 'float') {
+        return `R$ ${parseFloat(valor).toFixed(2)}`;
+    } else if (tipo === 'int') {
+        return parseInt(valor).toLocaleString('pt-BR');
+    } else if (tipo === 'boolean') {
+        return valor ? 'Sim' : 'Não';
+    }
+    return valor;
+}
+
+// Mostra alerta usando modal
+function mostrarAlerta(titulo, mensagem, tipo = 'info') {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+
+    const bgClass = tipo === 'success' ? 'bg-success' :
+                   tipo === 'danger' ? 'bg-danger' :
+                   tipo === 'warning' ? 'bg-warning' : 'bg-info';
+
+    const icon = tipo === 'success' ? 'fa-check-circle' :
+                tipo === 'danger' ? 'fa-exclamation-circle' :
+                tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header ${bgClass} text-white">
+                    <h5 class="modal-title"><i class="fas ${icon} me-2"></i>${titulo}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+// ========================================================================
+// MONTH COLORS FUNCTIONS
+// ========================================================================
+
+// CSS for month color preview
+const style = document.createElement('style');
+style.textContent = `
+.mes-preview {
+    font-weight: bold;
+    border: 1px solid #ddd;
+    font-size: 0.9em;
+}
+
+.form-control-color {
+    width: 100%;
+    height: 38px;
+}
+`;
+document.head.appendChild(style);
+
+// Carregar cores dos meses ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+    carregarCoresMeses();
+
+    // Adicionar event listeners para preview em tempo real
+    for (let i = 0; i < 12; i++) {
+        const input = document.getElementById(`cor-mes-${i}`);
+        if (input) {
+            input.addEventListener('input', function() {
+                atualizarPreview(i, this.value);
+            });
+        }
+    }
+});
+
+// Carregar as cores salvas
+async function carregarCoresMeses() {
+    try {
+        const response = await fetch('/api/cores-meses/listar');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            // CORRIGIDO: A API retorna mês 1-12, mas o HTML usa índice 0-11
+            data.cores.forEach(cor => {
+                // Converter mês 1-12 para índice 0-11 do HTML
+                const indiceHtml = cor.mes - 1;
+                const input = document.getElementById(`cor-mes-${indiceHtml}`);
+                if (input) {
+                    input.value = cor.cor_hex;
+                    atualizarPreview(indiceHtml, cor.cor_hex);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar cores dos meses:', error);
+    }
+}
+
+// Atualizar preview em tempo real
+function atualizarPreview(mes, cor) {
+    const preview = document.getElementById(`preview-mes-${mes}`);
+    if (preview) {
+        preview.style.backgroundColor = cor;
+
+        // Ajustar cor do texto para contraste
+        const r = parseInt(cor.substr(1, 2), 16);
+        const g = parseInt(cor.substr(3, 2), 16);
+        const b = parseInt(cor.substr(5, 2), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+        preview.style.color = brightness > 128 ? '#000000' : '#ffffff';
+    }
+}
+
+// Salvar todas as cores
+async function salvarCoresMeses() {
+    const cores = {};
+
+    // CORRIGIDO: Usar índice 1-12 para os meses (não 0-11)
+    for (let i = 0; i < 12; i++) {
+        const input = document.getElementById(`cor-mes-${i}`);
+        if (input) {
+            // Converter índice 0-11 para mês 1-12
+            const mesNumero = i + 1;
+            cores[mesNumero] = input.value;
+        }
+    }
+
+    try {
+        // CORRIGIDO: Enviar cores diretamente sem wrapper {cores: ...}
+        const response = await fetch('/api/cores-meses/atualizar-multiplas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cores)
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', data.mensagem, 'success');
+
+            // Recarregar a página após 1.5 segundos para aplicar as novas cores
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            mostrarAlerta('Erro', data.mensagem, 'danger');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar cores:', error);
+        mostrarAlerta('Erro', 'Erro ao salvar as cores dos meses. Tente novamente.', 'danger');
+    }
+}
+
+// Restaurar cores padrão
+async function restaurarCoresPadrao() {
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    document.getElementById('modal-title').textContent = 'Restaurar Cores Padrão';
+    document.getElementById('modal-message').innerHTML = `
+        <p>Tem certeza que deseja restaurar as cores padrão?</p>
+        <p><strong>Suas personalizações serão perdidas.</strong></p>
+    `;
+
+    document.getElementById('modal-confirm-btn').onclick = async function() {
+        modal.hide();
+
+        try {
+            const response = await fetch('/api/cores-meses/restaurar-padrao', {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                mostrarAlerta('Sucesso!', data.mensagem, 'success');
+                carregarCoresMeses();
+
+                // Recarregar a página após 1.5 segundos
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                mostrarAlerta('Erro', data.mensagem, 'danger');
+            }
+        } catch (error) {
+            console.error('Erro ao restaurar cores:', error);
+            mostrarAlerta('Erro', 'Erro ao restaurar cores padrão. Tente novamente.', 'danger');
+        }
+    };
+
+    modal.show();
+}
+
+// ========================================================================
+// MODELO E CONFIGURATION FUNCTIONS
+// ========================================================================
+
+// Carregar configurações do Modelo E ao inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    carregarConfigModeloE();
+});
+
+// Carregar configurações salvas do Modelo E
+async function carregarConfigModeloE() {
+    try {
+        const response = await fetch('/api/configuracoes/listar');
+        const data = await response.json();
+
+        if (data.sucesso && data.configuracoes) {
+            data.configuracoes.forEach(config => {
+                switch (config.chave) {
+                    case 'modelo_e_nivel':
+                        document.getElementById('modelo-e-nivel').value = config.valor;
+                        break;
+                    case 'modelo_e_estrategia':
+                        document.getElementById('modelo-e-estrategia').value = config.valor;
+                        break;
+                    case 'modelo_e_modo':
+                        document.getElementById('modelo-e-modo').value = config.valor;
+                        break;
+                    case 'modelo_e_mes_tipo':
+                        document.getElementById('modelo-e-mes-tipo').value = config.valor;
+                        break;
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar configurações do Modelo E:', error);
+    }
+}
+
+// Salvar configurações do Modelo E
+async function salvarConfigModeloE() {
+    const configuracoes = {
+        modelo_e_nivel: document.getElementById('modelo-e-nivel').value,
+        modelo_e_estrategia: document.getElementById('modelo-e-estrategia').value,
+        modelo_e_modo: document.getElementById('modelo-e-modo').value,
+        modelo_e_mes_tipo: document.getElementById('modelo-e-mes-tipo').value
+    };
+
+    try {
+        const response = await fetch('/api/configuracoes/salvar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(configuracoes)
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', 'Configurações do Modelo E salvas com sucesso!', 'success');
+            carregarTodasConfiguracoes();
+        } else {
+            mostrarAlerta('Erro', data.mensagem || 'Erro ao salvar configurações', 'danger');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar configurações do Modelo E:', error);
+        mostrarAlerta('Erro', 'Erro ao salvar configurações do Modelo E. Tente novamente.', 'danger');
+    }
+}
+
+// Restaurar padrões do Modelo E
+function restaurarPadraoModeloE() {
+    document.getElementById('modelo-e-nivel').value = '2';
+    document.getElementById('modelo-e-estrategia').value = 'automatico';
+    document.getElementById('modelo-e-modo').value = 'automatico';
+    document.getElementById('modelo-e-mes-tipo').value = 'frequente';
+
+    mostrarAlerta('Pronto!', 'Valores padrão restaurados. Não esqueça de salvar!', 'info');
+}
+
+// ========================================================================
+// PREÇOS POR DEZENAS FUNCTIONS
+// ========================================================================
+
+// Preços oficiais da Caixa (valores de referência)
+const PRECOS_OFICIAIS = {
+    7: 2.50,
+    8: 20.00,
+    9: 90.00,
+    10: 300.00,
+    11: 825.00,
+    12: 1980.00,
+    13: 4290.00,
+    14: 8580.00,
+    15: 16087.50
+};
+
+// Carregar preços salvos
+async function carregarPrecosDezenas() {
+    try {
+        const response = await fetch('/api/configuracoes/precos-dezenas');
+        const data = await response.json();
+
+        if (data.sucesso && data.precos) {
+            // Preencher os campos com os valores salvos
+            for (let dezenas = 7; dezenas <= 15; dezenas++) {
+                const input = document.getElementById(`preco-${dezenas}`);
+                if (input && data.precos[dezenas] !== undefined) {
+                    input.value = parseFloat(data.precos[dezenas]).toFixed(2);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar preços por dezenas:', error);
+        // Em caso de erro, mantém os valores padrão do HTML
+    }
+}
+
+// Salvar preços
+async function salvarPrecosDezenas() {
+    const precos = {};
+
+    // Coletar valores dos inputs
+    for (let dezenas = 7; dezenas <= 15; dezenas++) {
+        const input = document.getElementById(`preco-${dezenas}`);
+        if (input) {
+            const valor = parseFloat(input.value);
+            if (isNaN(valor) || valor < 0) {
+                mostrarAlerta('Erro', `Valor inválido para ${dezenas} dezenas. Use apenas números positivos.`, 'danger');
+                return;
+            }
+            precos[dezenas] = valor;
+        }
+    }
+
+    try {
+        const response = await fetch('/api/configuracoes/precos-dezenas/salvar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(precos)
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            mostrarAlerta('Sucesso!', 'Tabela de preços salva com sucesso!', 'success');
+            carregarTodasConfiguracoes();
+        } else {
+            mostrarAlerta('Erro', data.mensagem || 'Erro ao salvar preços', 'danger');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar preços:', error);
+        mostrarAlerta('Erro', 'Erro ao salvar tabela de preços. Tente novamente.', 'danger');
+    }
+}
+
+// Restaurar preços oficiais
+function restaurarPrecosOficiais() {
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    document.getElementById('modal-title').textContent = 'Restaurar Preços Oficiais';
+    document.getElementById('modal-message').innerHTML = `
+        <p>Deseja restaurar todos os preços para os valores oficiais da Caixa?</p>
+        <p><strong>Seus valores personalizados serão perdidos.</strong></p>
+    `;
+
+    document.getElementById('modal-confirm-btn').onclick = async function() {
+        modal.hide();
+
+        // Preencher com valores oficiais
+        for (let dezenas = 7; dezenas <= 15; dezenas++) {
+            const input = document.getElementById(`preco-${dezenas}`);
+            if (input && PRECOS_OFICIAIS[dezenas] !== undefined) {
+                input.value = PRECOS_OFICIAIS[dezenas].toFixed(2);
+            }
+        }
+
+        // Salvar automaticamente
+        await salvarPrecosDezenas();
+    };
+
+    modal.show();
+}
+</script>
+{% endblock %}

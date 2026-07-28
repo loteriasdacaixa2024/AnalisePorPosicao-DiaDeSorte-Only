@@ -1,0 +1,8 @@
+{# Padronização obrigatória: texto exato "Mês da Sorte:" #}
+{% macro mes_da_sorte_label(field_id) %}
+<label class="mes-da-sorte-label form-label fw-bold mb-1" for="{{ field_id }}">Mês da Sorte:</label>
+{% endmacro %}
+
+{% macro mes_da_sorte_assets() %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mes_da_sorte.css') }}">
+{% endmacro %}

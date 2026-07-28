@@ -1,0 +1,230 @@
+/* Sistema: Análise por Posição - Dia de Sorte
+   Desenvolvido para: Márcio Fernando Maia
+   Paleta de cores baseada em #D4B31A (amarelo Dia de Sorte) */
+
+:root {
+    /* Cor Primária - Dia de Sorte */
+    --cor-primaria: #D4B31A ;
+    --cor-primaria-hover: #BDAA17 ;
+    --cor-primaria-light: #E5D06B ;
+    --cor-primaria-dark: #9A8012 ;
+    
+    /* Variações de Luminosidade (0-100%) */
+    --cor-primaria-0: #000000;
+    --cor-primaria-10: #2A2303;
+    --cor-primaria-20: #554607;
+    --cor-primaria-30: #7F690A;
+    --cor-primaria-40: #AA8D0D;
+    --cor-primaria-50: #D4B31A;
+    --cor-primaria-60: #DDC245;
+    --cor-primaria-70: #E5D06B;
+    --cor-primaria-80: #EEDF91;
+    --cor-primaria-90: #F6EFB6;
+    --cor-primaria-100: #FFFFFF;
+    
+    /* Cor Secundária */
+    --cor-secundaria: #FFF9E6;
+    --cor-secundaria-hover: #FFF5D6;
+    
+    /* Cores de Fundo */
+    --bg-light: #FFFFFF;
+    --bg-dark: #181818;
+    --bg-card-light: #FFFFFF;
+    --bg-card-dark: #1E1E1E;
+    
+    /* Cores de Texto */
+    --texto-light: #333333;
+    --texto-dark: #E0E0E0;
+    --texto-muted-light: #6c757d;
+    --texto-muted-dark: #9E9E9E;
+    
+    /* Cores de Borda */
+    --borda-light: #dee2e6;
+    --borda-dark: #3A3A3A;
+    
+    /* Cores Auxiliares */
+    --sucesso: #28a745;
+    --info: #17a2b8;
+    --aviso: #ffc107;
+    --perigo: #dc3545;
+    
+    /* Sombras */
+    --sombra-light: rgba(0, 0, 0, 0.1);
+    --sombra-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* Light Mode (padrão) */
+body {
+    --cor-bg: var(--bg-light);
+    --cor-texto: var(--texto-light);
+    --cor-texto-muted: var(--texto-muted-light);
+    --cor-borda: var(--borda-light);
+    --cor-card-bg: var(--bg-card-light);
+    --cor-sombra: var(--sombra-light);
+}
+
+/* Dark Mode */
+body.dark,
+html.dark body {
+    --cor-bg: var(--bg-dark);
+    --cor-texto: var(--texto-dark);
+    --cor-texto-muted: var(--texto-muted-dark);
+    --cor-borda: var(--borda-dark);
+    --cor-card-bg: var(--bg-card-dark);
+    --cor-sombra: var(--sombra-dark);
+    
+    background-color: var(--bg-dark);
+    color: var(--texto-dark);
+}
+
+/* Classes Utilitárias de Cores */
+.bg-primary-custom {
+    background-color: var(--cor-primaria) !important;
+    color: white !important;
+}
+
+.text-primary-custom {
+    color: var(--cor-primaria) !important;
+}
+
+.border-primary-custom {
+    border-color: var(--cor-primaria) !important;
+}
+
+.btn-primary-custom {
+    background-color: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    color: white;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--cor-primaria-hover);
+    border-color: var(--cor-primaria-hover);
+}
+
+/* Badge Primário Customizado */
+.badge.bg-primary {
+    background-color: var(--cor-primaria) !important;
+}
+
+/* Navbar com Cor Primária */
+.navbar.bg-primary {
+    background-color: var(--cor-primaria) !important;
+}
+
+/* Table Headers com Cor Primária */
+.table-primary {
+    background-color: var(--cor-primaria-70) !important;
+    color: var(--texto-light) !important;
+}
+
+.table-primary th {
+    background-color: var(--cor-primaria) !important;
+    color: white !important;
+}
+
+/* Progress Bar Primária */
+.progress-bar.bg-primary {
+    background-color: var(--cor-primaria) !important;
+}
+
+/* Cards em Dark Mode */
+html.dark .card,
+body.dark .card {
+    background-color: var(--cor-card-bg);
+    border-color: var(--cor-borda);
+    color: var(--cor-texto);
+}
+
+html.dark .card-header,
+body.dark .card-header {
+    background-color: var(--bg-card-dark);
+    border-color: var(--cor-borda);
+    color: var(--cor-texto);
+}
+
+/* Tables em Dark Mode */
+html.dark .table,
+body.dark .table {
+    color: var(--cor-texto);
+}
+
+html.dark .table-striped > tbody > tr:nth-of-type(odd) > *,
+body.dark .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+html.dark .table-hover > tbody > tr:hover > *,
+body.dark .table-hover > tbody > tr:hover > * {
+    background-color: rgba(255, 255, 255, 0.075);
+}
+
+/* Forms em Dark Mode */
+html.dark .form-control,
+html.dark .form-select,
+body.dark .form-control,
+body.dark .form-select {
+    background-color: var(--bg-card-dark);
+    border-color: var(--cor-borda);
+    color: var(--cor-texto);
+}
+
+html.dark .form-control:focus,
+html.dark .form-select:focus,
+body.dark .form-control:focus,
+body.dark .form-select:focus {
+    background-color: var(--bg-card-dark);
+    border-color: var(--cor-primaria);
+    color: var(--cor-texto);
+}
+
+/* Modal em Dark Mode */
+html.dark .modal-content,
+body.dark .modal-content {
+    background-color: var(--cor-card-bg);
+    color: var(--cor-texto);
+}
+
+/* Dropdown em Dark Mode */
+html.dark .dropdown-menu,
+body.dark .dropdown-menu {
+    background-color: var(--cor-card-bg);
+    border-color: var(--cor-borda);
+}
+
+html.dark .dropdown-item,
+body.dark .dropdown-item {
+    color: var(--cor-texto);
+}
+
+html.dark .dropdown-item:hover,
+body.dark .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Alertas em Dark Mode */
+html.dark .alert,
+body.dark .alert {
+    background-color: var(--cor-card-bg);
+    border-color: var(--cor-borda);
+    color: var(--cor-texto);
+}
+
+/* Links */
+a {
+    color: var(--cor-primaria);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--cor-primaria-hover);
+}
+
+/* Cores de Gradiente */
+.gradient-primary {
+    background: linear-gradient(135deg, var(--cor-primaria-40) 0%, var(--cor-primaria) 100%);
+}
+
+.gradient-primary-light {
+    background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-primaria-70) 100%);
+}

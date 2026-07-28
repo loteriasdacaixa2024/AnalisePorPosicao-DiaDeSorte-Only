@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-bezier2"></i> Análise de Números Fibonacci
+                </h2>
+                <div>
+                    <a href="/" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button class="btn btn-primary" onclick="carregarAnalise()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted">
+                Analisa a ocorrência de números da sequência de Fibonacci (1, 2, 3, 5, 8, 13, 21) nos sorteios
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3">Carregando análise...</p>
+            </div>
+
+            <div id="resultado" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="insightsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+    document.getElementById('insightsCard').style.display = 'none';
+
+    fetch('/api/analise/fibonacci')
+        .then(response => response.json())
+        .then(data => {
+            exibirResultado(data);
+            gerarInsights(data);
+            loading.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Erro ao carregar análise: ${error.message}
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function exibirResultado(data) {
+    const resultado = document.getElementById('resultado');
+
+    let html = `
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-fill"></i> Resumo Geral (${data.total_concursos} concursos)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <strong>Sorteios COM Fibonacci:</strong><br>
+                            ${data.sorteios_com_fibonacci} (${data.percentual_com_fibonacci}%)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger">
+                            <strong>Sorteios SEM Fibonacci:</strong><br>
+                            ${data.sorteios_sem_fibonacci} (${data.percentual_sem_fibonacci}%)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-info">
+                            <strong>Média por Sorteio:</strong><br>
+                            ${data.media_quantidade} números Fibonacci
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ol"></i> Números Fibonacci Disponíveis no Dia de Sorte
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Posição</th>
+                                <th>Número</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                                <th>Atraso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    data.lista_fibonacci.forEach((fib, index) => {
+        const posicao = index < 3 ? medalhas[index] : `${index + 1}º`;
+        const destaque = index < 3 ? 'table-success' : '';
+        const badgeColor = fib.atraso > 50 ? 'danger' : fib.atraso > 20 ? 'warning' : 'success';
+
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${posicao}</strong></td>
+                <td><span class="badge bg-primary fs-5">${fib.numero}</span></td>
+                <td><strong>${fib.frequencia}x</strong></td>
+                <td>${fib.porcentagem}%</td>
+                <td>${fib.ultimo_concurso || '-'}</td>
+                <td><span class="badge bg-${badgeColor}">${fib.atraso}</span></td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pie-chart-fill"></i> Distribuição por Quantidade
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Quantidade de Fibonacci</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Barra Visual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.distribuicao_quantidade.forEach(dist => {
+        const larguraBarra = Math.min(dist.porcentagem * 2, 100);
+        const rowClass = dist.quantidade === 0 ? 'table-secondary' : dist.quantidade >= 3 ? 'table-success' : '';
+
+        html += `
+            <tr class="${rowClass}">
+                <td><strong>${dist.quantidade}</strong></td>
+                <td>${dist.frequencia}x</td>
+                <td>${dist.porcentagem}%</td>
+                <td>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success"
+                             role="progressbar"
+                             style="width: ${larguraBarra}%"
+                             aria-valuenow="${dist.porcentagem}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            ${dist.porcentagem}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-check"></i> Últimos 20 Sorteios Analisados
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-sm table-striped">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Concurso</th>
+                                <th>Data</th>
+                                <th>Números</th>
+                                <th>Fibonacci</th>
+                                <th>Qtd</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.detalhes_sorteios.slice(0, 20).forEach(sorteio => {
+        const badgeClass = sorteio.quantidade > 0 ? 'bg-success' : 'bg-secondary';
+
+        html += `
+            <tr>
+                <td><strong>${sorteio.concurso}</strong></td>
+                <td>${sorteio.data}</td>
+                <td>${sorteio.numeros.join(', ')}</td>
+                <td>
+                    ${sorteio.fibonacci.length > 0
+                        ? `<span class="text-primary fw-bold">${sorteio.fibonacci.join(', ')}</span>`
+                        : '<span class="text-muted">-</span>'}
+                </td>
+                <td><span class="badge ${badgeClass}">${sorteio.quantidade}</span></td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    resultado.innerHTML = html;
+    resultado.style.display = 'block';
+}
+
+function gerarInsights(data) {
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+
+    const top3 = data.lista_fibonacci.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    let html = `
+        <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-trophy-fill text-warning"></i> Top 3 Números Fibonacci Mais Frequentes:</h6>
+            <ul class="list-group">
+    `;
+
+    top3.forEach((fib, index) => {
+        html += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${medalhas[index]} <strong>${fib.numero}</strong></span>
+                <span>
+                    <span class="badge bg-primary rounded-pill">${fib.frequencia}x</span>
+                    <span class="badge bg-info rounded-pill">${fib.porcentagem}%</span>
+                </span>
+            </li>
+        `;
+    });
+
+    html += `
+            </ul>
+        </div>
+
+        <div class="alert alert-success">
+            <h6 class="fw-bold"><i class="bi bi-check-circle-fill"></i> Presença de Fibonacci:</h6>
+            <p class="mb-0">
+                <strong>${data.percentual_com_fibonacci}%</strong> dos sorteios (${data.sorteios_com_fibonacci} concursos)
+                contêm pelo menos 1 número da sequência de Fibonacci.<br>
+                Média: <strong>${data.media_quantidade}</strong> números Fibonacci por sorteio.
+            </p>
+        </div>
+
+        <div class="alert alert-info">
+            <h6 class="fw-bold"><i class="bi bi-star-fill"></i> Números Mais Frequentes:</h6>
+            <p class="mb-0">
+                Os números Fibonacci mais sorteados são: <strong>${top3[0].numero}</strong> (${top3[0].porcentagem}%),
+                <strong>${top3[1].numero}</strong> (${top3[1].porcentagem}%) e
+                <strong>${top3[2].numero}</strong> (${top3[2].porcentagem}%).
+            </p>
+        </div>
+
+        <div class="alert alert-primary">
+            <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas:</h6>
+            <ul class="mb-0">
+                <li>Números Fibonacci aparecem em <strong>${data.percentual_com_fibonacci}%</strong> dos sorteios</li>
+                <li>Priorize o número <strong>${top3[0].numero}</strong> (mais frequente na sequência)</li>
+                <li>Considere incluir <strong>${Math.round(data.media_quantidade)}</strong> números Fibonacci em seu jogo</li>
+                <li>Números disponíveis: 1, 2, 3, 5, 8, 13, 21 (apenas 7 números no total)</li>
+            </ul>
+        </div>
+
+        <div class="alert alert-light border">
+            <h6 class="fw-bold"><i class="bi bi-info-circle-fill"></i> O que é a Sequência de Fibonacci?</h6>
+            <p class="mb-0">
+                A <strong>Sequência de Fibonacci</strong> é uma sequência matemática onde cada número é a soma dos dois anteriores:<br>
+                <strong>0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89...</strong><br><br>
+                No Dia de Sorte (01-31), os números Fibonacci disponíveis são:<br>
+                <strong>1, 2, 3, 5, 8, 13, 21</strong> (7 números no total)<br><br>
+                Esta sequência aparece em diversos fenômenos naturais e é considerada por alguns apostadores
+                como um padrão interessante para análise.
+            </p>
+        </div>
+    `;
+
+    insightsContent.innerHTML = html;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+{% endblock %}

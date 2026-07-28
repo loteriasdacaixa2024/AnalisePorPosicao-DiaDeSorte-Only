@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}Conversor de Apostas - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --cor-primary: #D4B31A;
+        --cor-primary-dark: #B89615;
+        --cor-primary-light: #E5C942;
+    }
+
+    .conversor-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .conversor-header {
+        background: linear-gradient(135deg, var(--cor-primary) 0%, var(--cor-primary-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .conversor-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .conversor-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .card-conversor {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+
+    .dark .card-conversor {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .upload-zone {
+        border: 3px dashed var(--cor-primary);
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background: rgba(212, 179, 26, 0.05);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .upload-zone:hover {
+        background: rgba(212, 179, 26, 0.1);
+        border-color: var(--cor-primary-dark);
+    }
+
+    .upload-zone.drag-over {
+        background: rgba(212, 179, 26, 0.2);
+        border-color: var(--cor-primary-dark);
+        border-style: solid;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--cor-primary);
+        margin-bottom: 15px;
+    }
+
+    .btn-primary-custom {
+        background: var(--cor-primary);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-primary-custom:hover {
+        background: var(--cor-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.4);
+    }
+
+    .btn-secondary-custom {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-secondary-custom:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .resultado-area {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .dark .resultado-area {
+        background: #1e1e1e;
+    }
+
+    .tabela-apostas {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .tabela-apostas th {
+        background: var(--cor-primary);
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .tabela-apostas td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .dark .tabela-apostas td {
+        border-bottom-color: #444;
+    }
+
+    .tabela-apostas tr:hover {
+        background: rgba(212, 179, 26, 0.1);
+    }
+
+    .validacao-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .validacao-sucesso {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .validacao-erro {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .dark .validacao-sucesso {
+        background: #1e4620;
+        color: #7dff8a;
+    }
+
+    .dark .validacao-erro {
+        background: #4a1e1e;
+        color: #ff7d7d;
+    }
+
+    .section-title {
+        color: var(--cor-primary);
+        font-weight: 700;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--cor-primary);
+    }
+
+    .input-concurso {
+        border: 2px solid var(--cor-primary);
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        width: 150px;
+    }
+
+    .input-concurso:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(212, 179, 26, 0.2);
+    }
+
+    textarea.form-control {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        min-height: 200px;
+    }
+
+    textarea.form-control:focus {
+        border-color: var(--cor-primary);
+        box-shadow: 0 0 0 3px rgba(212, 179, 26, 0.2);
+    }
+
+    .exemplo-formatos {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .dark .exemplo-formatos {
+        background: #1a3a52;
+    }
+
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        padding: 20px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        min-width: 300px;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .dark .toast-notification {
+        background: #2d2d2d;
+    }
+
+    .toast-notification.error {
+        border-left: 4px solid #dc3545;
+    }
+
+    .toast-notification.success {
+        border-left: 4px solid #28a745;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="conversor-container">
+    <!-- Header -->
+    <div class="conversor-header">
+        <h1><i class="fas fa-exchange-alt"></i> Conversor de Apostas - Dia de Sorte</h1>
+        <p>Converta apostas entre formatos TXT e JSON | Aceita de 7 a 15 dezenas por aposta</p>
+    </div>
+
+    <!-- Input do Concurso -->
+    <div class="card-conversor" style="border: 3px solid var(--cor-primary); background: rgba(212, 179, 26, 0.05);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <label for="numeroConcurso" class="form-label fw-bold"
+                    style="font-size: 1.1rem; color: var(--cor-primary-dark);">
+                    <i class="fas fa-trophy"></i> Número do Concurso que irá sair no arquivo JSON:
+                </label>
+                <p class="text-muted mb-2" style="font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Digite o concurso correto ANTES de processar o arquivo
+                </p>
+                <input type="number" id="numeroConcurso" class="input-concurso" value="" min=""
+                    style="font-size: 1.2rem; font-weight: bold; width: 200px;">
+            </div>
+            <div class="col-md-4">
+                <div
+                    style="background: white; padding: 15px; border-radius: 8px; border: 2px solid var(--cor-primary); height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <i class="fas fa-lightbulb" style="color: var(--cor-primary); font-size: 2rem;"></i>
+                    <p class="mb-0 mt-2" style="font-weight: bold; color: var(--cor-primary-dark);">
+                        Concurso: <span id="concursoPreview"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload de Arquivo -->
+    <div class="card-conversor">
+        <h3 class="section-title"><i class="fas fa-cloud-upload-alt"></i> Upload de Arquivo</h3>
+
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">
+                <i class="fas fa-file-upload"></i>
+            </div>
+            <h4>Arraste e solte seu arquivo aqui</h4>
+            <p class="text-muted">ou clique para selecionar</p>
+            <p class="text-muted"><small>Formatos aceitos: .txt, .json</small></p>
+            <input type="file" id="fileInput" accept=".txt,.json" style="display: none;">
+        </div>
+
+        <div id="arquivoSelecionado" style="display: none; margin-top: 15px;">
+            <p><strong>Arquivo selecionado:</strong> <span id="nomeArquivo"></span></p>
+            <button class="btn btn-primary-custom" onclick="processarArquivo()">
+                <i class="fas fa-cogs"></i> Processar Arquivo
+            </button>
+        </div>
+    </div>
+
+    <!-- Área de Texto para Colar -->
+    <div class="card-conversor">
+        <h3 class="section-title"><i class="fas fa-paste"></i> Colar Texto de Apostas</h3>
+
+        <div class="exemplo-formatos">
+            <strong>Formatos aceitos (7 a 15 dezenas por aposta):</strong><br>
+            • Aposta de 7 dezenas: 1 10 11 17 22 27 28 Jan<br>
+            • Aposta de 10 dezenas: 1 5 10 11 15 17 20 22 27 28 Fev<br>
+            • Aposta de 15 dezenas: 1 2 5 7 10 11 15 17 20 22 25 27 28 30 31 Mar<br>
+            • Aceita separadores: espaço, vírgula (,), pipe (|), ponto-e-vírgula (;)<br>
+            • Múltiplas linhas com números separados
+        </div>
+
+        <textarea class="form-control mt-3" id="textoApostas" placeholder="Cole aqui suas apostas...
+
+Exemplos (7 a 15 dezenas):
+1 10 11 17 22 27 28 Jan
+2 5 10 15 20 25 28 29 30 Fev
+3 1 5 9 12 16 18 21 23 25 27 29 31 Mar
+4 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 Abr"></textarea>
+
+        <div class="mt-3">
+            <button class="btn btn-primary-custom me-2" onclick="converterTextoParaJson()">
+                <i class="fas fa-arrow-right"></i> Converter para JSON
+            </button>
+            <button class="btn btn-secondary-custom" onclick="limparTexto()">
+                <i class="fas fa-eraser"></i> Limpar
+            </button>
+        </div>
+    </div>
+
+    <!-- Resultado -->
+    <div class="card-conversor" id="areaResultado" style="display: none;">
+        <h3 class="section-title"><i class="fas fa-check-circle"></i> Resultado da Conversão</h3>
+
+        <div id="infoValidacao"></div>
+
+        <div class="resultado-area">
+            <div id="conteudoResultado"></div>
+        </div>
+
+        <div class="mt-3">
+            <button class="btn btn-primary-custom me-2" onclick="downloadJSON()">
+                <i class="fas fa-download"></i> Download apostas.json
+            </button>
+            <button class="btn btn-primary-custom me-2" onclick="downloadTXT()">
+                <i class="fas fa-download"></i> Download apostas.txt
+            </button>
+            <button class="btn btn-secondary-custom me-2" onclick="converterParaJson()">
+                <i class="fas fa-code"></i> Ver como JSON
+            </button>
+            <button class="btn btn-secondary-custom" onclick="converterParaTexto()">
+                <i class="fas fa-file-alt"></i> Ver como TXT
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dadosAtuais = null;
+
+    // Inicialização: Carregar próximo concurso automaticamente
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/api/resultados/estatisticas');
+            const data = await response.json();
+
+            if (data.sucesso && data.proximo_concurso) {
+                const inputConcurso = document.getElementById('numeroConcurso');
+                inputConcurso.value = data.proximo_concurso;
+
+                // Disparar evento de input para atualizar o preview
+                inputConcurso.dispatchEvent(new Event('input'));
+
+                // Atualizar instrução para informar que foi automático
+                const instrucao = document.querySelector('.text-muted.mb-2');
+                instrucao.innerHTML = `<i class="fas fa-check-circle" style="color: green;"></i> Concurso atualizado automaticamente (${data.proximo_concurso}). Confirme antes de processar.`;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar próximo concurso:', error);
+            // Silencioso para não incomodar o usuário, mantém o value padrão do HTML se falhar
+        }
+    });
+
+    // Atualizar preview do concurso em tempo real
+    document.getElementById('numeroConcurso').addEventListener('input', function () {
+        document.getElementById('concursoPreview').textContent = this.value || '---';
+    });
+
+    // Função para mostrar notificações
+    function showNotification(message, type = 'error') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        toast.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}" style="font-size: 1.5rem; color: ${type === 'error' ? '#dc3545' : '#28a745'};"></i>
+            <div>
+                <strong>${type === 'error' ? 'Erro' : 'Sucesso'}</strong>
+                <p style="margin: 5px 0 0 0;">${message}</p>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Drag and Drop
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            mostrarArquivoSelecionado(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            mostrarArquivoSelecionado(e.target.files[0]);
+        }
+    });
+
+    function mostrarArquivoSelecionado(file) {
+        document.getElementById('nomeArquivo').textContent = file.name;
+        document.getElementById('arquivoSelecionado').style.display = 'block';
+    }
+
+    async function processarArquivo() {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const concurso = document.getElementById('numeroConcurso').value;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('concurso', concurso);
+
+        try {
+            const response = await fetch('/api/conversor/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const resultado = await response.json();
+
+            if (resultado.sucesso) {
+                dadosAtuais = resultado.dados;
+                mostrarResultado(resultado);
+            } else {
+                showNotification(resultado.erro, 'error');
+            }
+        } catch (error) {
+            showNotification('Erro ao processar arquivo: ' + error, 'error');
+        }
+    }
+
+    async function converterTextoParaJson() {
+        const texto = document.getElementById('textoApostas').value.trim();
+        if (!texto) {
+            showNotification('Por favor, cole o texto das apostas', 'error');
+            return;
+        }
+
+        const concurso = parseInt(document.getElementById('numeroConcurso').value);
+
+        try {
+            const response = await fetch('/api/conversor/texto-para-json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto, concurso })
+            });
+
+            const resultado = await response.json();
+
+            if (resultado.sucesso) {
+                dadosAtuais = resultado.dados;
+                mostrarResultado(resultado);
+            } else {
+                showNotification(resultado.erro, 'error');
+            }
+        } catch (error) {
+            showNotification('Erro ao converter: ' + error, 'error');
+        }
+    }
+
+    function mostrarResultado(resultado) {
+        const validacao = resultado.validacao;
+        const dados = resultado.dados;
+
+        // Mostrar área de resultado
+        document.getElementById('areaResultado').style.display = 'block';
+
+        // Info de validação
+        let infoHTML = '';
+        if (validacao.valido) {
+            infoHTML = `
+            <div class="validacao-badge validacao-sucesso mb-3">
+                <i class="fas fa-check-circle"></i>
+                ${validacao.total_apostas} apostas válidas
+            </div>
+        `;
+        } else {
+            infoHTML = `
+            <div class="validacao-badge validacao-erro mb-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                ${validacao.erros.length} erro(s) encontrado(s)
+            </div>
+            <ul class="text-danger">
+                ${validacao.erros.map(e => `<li>${e}</li>`).join('')}
+            </ul>
+        `;
+        }
+        document.getElementById('infoValidacao').innerHTML = infoHTML;
+
+        // Tabela de apostas
+        let tabelaHTML = `
+        <h5>Concurso: ${dados.concurso}</h5>
+        <table class="tabela-apostas">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Números</th>
+                    <th>Mês</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        dados.apostas.forEach(aposta => {
+            tabelaHTML += `
+            <tr>
+                <td>${aposta.numero}</td>
+                <td>${aposta.numeros.join(', ')}</td>
+                <td>${aposta.mes}</td>
+            </tr>
+        `;
+        });
+
+        tabelaHTML += `</tbody></table>`;
+        document.getElementById('conteudoResultado').innerHTML = tabelaHTML;
+
+        // Scroll até resultado
+        document.getElementById('areaResultado').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function converterParaJson() {
+        if (!dadosAtuais) return;
+
+        // Formatar JSON customizado - cada aposta em uma linha COM ESPAÇOS
+        let jsonFormatado = '{\n';
+        jsonFormatado += `  "concurso": ${dadosAtuais.concurso},\n`;
+        jsonFormatado += '  "apostas": [\n';
+
+        dadosAtuais.apostas.forEach((aposta, index) => {
+            const isLast = index === dadosAtuais.apostas.length - 1;
+
+            // Formatar manualmente para garantir espaços após : e ,
+            const numerosFormatados = aposta.numeros.join(', ');
+            const apostaDados = `{"numero": ${aposta.numero}, "numeros": [${numerosFormatados}], "mes": "${aposta.mes}"}`;
+
+            jsonFormatado += `    ${apostaDados}${isLast ? '' : ','}\n`;
+        });
+
+        jsonFormatado += '  ]\n';
+        jsonFormatado += '}';
+
+        document.getElementById('conteudoResultado').innerHTML = `
+        <h5>Formato JSON:</h5>
+        <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; color: #333; overflow-x: auto;">${jsonFormatado}</pre>
+    `;
+    }
+
+    async function converterParaTexto() {
+        if (!dadosAtuais) return;
+
+        try {
+            const response = await fetch('/api/conversor/json-para-texto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosAtuais)
+            });
+
+            const resultado = await response.json();
+
+            if (resultado.sucesso) {
+                document.getElementById('conteudoResultado').innerHTML = `
+                <h5>Formato TXT:</h5>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px;">${resultado.texto}</pre>
+            `;
+            }
+        } catch (error) {
+            showNotification('Erro ao converter: ' + error, 'error');
+        }
+    }
+
+    async function downloadJSON() {
+        if (!dadosAtuais) return;
+
+        try {
+            const response = await fetch('/api/conversor/download/json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosAtuais)
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'apostas.json';
+            a.click();
+        } catch (error) {
+            showNotification('Erro ao baixar: ' + error, 'error');
+        }
+    }
+
+    async function downloadTXT() {
+        if (!dadosAtuais) return;
+
+        try {
+            const response = await fetch('/api/conversor/download/txt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosAtuais)
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'apostas.txt';
+            a.click();
+        } catch (error) {
+            showNotification('Erro ao baixar: ' + error, 'error');
+        }
+    }
+
+    function limparTexto() {
+        document.getElementById('textoApostas').value = '';
+        document.getElementById('areaResultado').style.display = 'none';
+        dadosAtuais = null;
+    }
+</script>
+{% endblock %}

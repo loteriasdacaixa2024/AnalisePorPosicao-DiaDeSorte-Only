@@ -1,0 +1,963 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Colunas - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --laranja: #FF6B35;
+        --laranja-claro: #FFB84D;
+        --bege: #FFF5EB;
+    }
+
+    .volante-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 10px;
+        max-width: 1000px;
+        margin: 20px auto;
+    }
+
+    .coluna-card {
+        text-align: center;
+        padding: 15px 8px;
+        border-radius: 10px;
+        border: 2px solid #ddd;
+        transition: transform 0.2s;
+    }
+
+    .coluna-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .coluna-header {
+        font-weight: 900;
+        color: var(--laranja);
+        margin-bottom: 8px;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+    }
+
+    .numero-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-weight: 900;
+        font-size: 17px;
+        margin: 3px;
+        border: 2px solid #fff;
+        color: #222;
+        position: relative;
+    }
+
+    .numero-box.top-numero {
+        border: 2px solid #dc3545;
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        50% {
+            box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
+
+    .ranking-item {
+        background: var(--bege);
+        border-left: 4px solid var(--laranja);
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+
+    .btn-importar {
+        background: linear-gradient(135deg, var(--laranja), var(--laranja-claro));
+        border: none;
+        color: white;
+        font-weight: bold;
+        padding: 15px 40px;
+        font-size: 18px;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        transition: all 0.3s;
+    }
+
+    .btn-importar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+    }
+
+    .badge.top-numero-badge {
+        background: #dc3545 !important;
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        animation: pulse-red 2s infinite;
+        font-weight: 900;
+        font-size: 15px;
+    }
+
+    .cooc-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        border-radius: 20px;
+        margin: 5px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+    }
+
+    /* TOP RANKING PÓDIO */
+    .podio-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 20px;
+        margin: 30px 0;
+    }
+
+    .podio-item {
+        text-align: center;
+        position: relative;
+        transition: transform 0.3s;
+    }
+
+    .podio-item:hover {
+        transform: translateY(-10px);
+    }
+
+    .podio-box {
+        border-radius: 15px;
+        padding: 20px 15px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        min-width: 180px;
+    }
+
+    .podio-primeiro .podio-box {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        height: 220px;
+        border: 4px solid #FFD700;
+    }
+
+    .podio-segundo .podio-box {
+        background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+        height: 180px;
+        border: 4px solid #C0C0C0;
+    }
+
+    .podio-terceiro .podio-box {
+        background: linear-gradient(135deg, #CD7F32, #B8733E);
+        height: 160px;
+        border: 4px solid #CD7F32;
+    }
+
+    .podio-medalha {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .podio-posicao {
+        font-size: 28px;
+        font-weight: 900;
+        margin-bottom: 10px;
+    }
+
+    .podio-pares {
+        font-size: 20px;
+        font-weight: 900;
+        margin: 10px 0;
+        letter-spacing: 1px;
+    }
+
+    .podio-stats {
+        font-size: 16px;
+        margin-top: 10px;
+        opacity: 0.95;
+    }
+
+    .top-ranking-lista {
+        margin-top: 30px;
+    }
+
+    .top-ranking-item {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-left: 5px solid #6c757d;
+        padding: 15px 20px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.3s;
+    }
+
+    .top-ranking-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .top-ranking-numero {
+        font-size: 24px;
+        font-weight: 900;
+        color: #495057;
+        min-width: 40px;
+    }
+
+    .top-ranking-pares {
+        font-size: 18px;
+        font-weight: bold;
+        color: #212529;
+        flex: 1;
+    }
+
+    .top-ranking-stats {
+        text-align: right;
+        font-weight: bold;
+    }
+
+    /* INSIGHTS E RECOMENDAÇÕES - CORES DIA DE SORTE */
+    .insight-card {
+        background: var(--bege);
+        color: #555;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--laranja);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s;
+    }
+
+    .insight-card:hover {
+        box-shadow: 0 3px 10px rgba(255, 107, 53, 0.12);
+        border-left-width: 5px;
+    }
+
+    .insight-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .insight-titulo {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--laranja);
+    }
+
+    .insight-texto {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #666;
+    }
+
+    .recomendacao-card {
+        background: white;
+        color: #555;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 15px;
+        border: 2px solid var(--laranja-claro);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s;
+    }
+
+    .recomendacao-card:hover {
+        box-shadow: 0 3px 10px rgba(255, 184, 77, 0.15);
+        border-color: var(--laranja);
+    }
+
+    .recomendacao-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .recomendacao-numero {
+        background: linear-gradient(135deg, var(--laranja), var(--laranja-claro));
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(255, 107, 53, 0.25);
+    }
+
+    .recomendacao-titulo {
+        font-size: 16px;
+        font-weight: 700;
+        flex: 1;
+        color: var(--laranja);
+    }
+
+    .recomendacao-texto {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 10px;
+        color: #666;
+    }
+
+    .recomendacao-destaque {
+        background: var(--bege);
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        text-align: center;
+        color: var(--laranja);
+        border: 1px solid var(--laranja-claro);
+    }
+
+    .stat-box {
+        background: var(--bege);
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        margin: 8px 0;
+        border: 1px solid var(--laranja-claro);
+    }
+
+    .stat-numero {
+        font-size: 24px;
+        font-weight: 700;
+        display: block;
+        color: var(--laranja);
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #777;
+        margin-top: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary">
+                <i class="fas fa-th me-2"></i>Análise de Colunas do Volante
+            </h2>
+            <p class="text-muted">Estatísticas completas das 10 colunas do volante Dia de Sorte</p>
+        </div>
+    </div>
+
+    <!-- Área de Status/Importação -->
+    <div id="areaStatus"></div>
+
+    <!-- Área Principal (aparece após importação) -->
+    <div id="areaPrincipal" style="display: none;">
+
+        <!-- Volante com Heatmap -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-fire me-2"></i>Volante com Heatmap de Frequência
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-center text-muted mb-3">
+                    <strong>Total de concursos analisados:</strong> <span id="totalConcursos">0</span>
+                </p>
+                <div id="volanteGrid" class="volante-grid">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Cores mais escuras = colunas mais frequentes
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>Ranking das Colunas (1º ao 10º)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="rankingLista">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Co-ocorrências -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-link me-2"></i>Pares de Colunas que Mais Aparecem Juntas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="coocorrenciasLista">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP RANKING DE PARES -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+                <h5 class="mb-0">
+                    <i class="fas fa-crown me-2"></i>🏆 TOP RANKING - Pares de Colunas Campeões
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- PÓDIO (Top 3) -->
+                <div class="podio-container" id="podioContainer">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <!-- LISTA TOP 10 -->
+                <div class="top-ranking-lista" id="topRankingLista">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- INSIGHTS INTELIGENTES -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, var(--laranja), var(--laranja-claro));">
+                <h5 class="mb-0">
+                    <i class="fas fa-brain me-2"></i>💡 Insights Inteligentes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="insightsContainer">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- RECOMENDAÇÕES ESTRATÉGICAS -->
+        <div class="card shadow-sm">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, var(--laranja-claro), var(--laranja));">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>🎯 Recomendações Estratégicas
+                </h5>
+            </div>
+            <div class="card-body" id="recomendacoesContainer">
+                <!-- Preenchido via JavaScript -->
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Cores do heatmap (bege → laranja)
+    const CORES_HEATMAP = [
+        '#FFF5EB', '#FFE5CC', '#FFD6AD', '#FFC78E', '#FFB84D',
+        '#FFA93D', '#FF9A2D', '#FF8C42', '#FF7D38', '#FF6B35'
+    ];
+
+    // Mapeamento colunas → números
+    const COLUNAS_NUMEROS = {
+        1: [1, 11, 21, 31], 2: [2, 12, 22], 3: [3, 13, 23],
+        4: [4, 14, 24], 5: [5, 15, 25], 6: [6, 16, 26],
+        7: [7, 17, 27], 8: [8, 18, 28], 9: [9, 19, 29],
+        10: [10, 20, 30]
+    };
+
+    // ========================================================================
+    // VERIFICAR SE HÁ DADOS E SE PRECISA ATUALIZAR
+    // ========================================================================
+    async function verificarDados() {
+        try {
+            // 1. Verificar se precisa atualizar
+            const resVerificar = await fetch('/analise-colunas/api/verificar-atualizacao');
+            const verificacao = await resVerificar.json();
+
+            // 2. Se precisar atualizar automaticamente
+            if (verificacao.precisa_atualizar && verificacao.diferenca > 0) {
+                console.log(`🔄 Novos sorteios detectados! Atualizando automaticamente... (${verificacao.diferenca} novos)`);
+                await importarDadosAutomatico();
+                return;
+            }
+
+            // 3. Tentar carregar dados existentes
+            const res = await fetch('/analise-colunas/api/ranking');
+            const data = await res.json();
+
+            if (res.ok && data.ranking && data.ranking.length > 0) {
+                // JÁ TEM DADOS!
+                mostrarDados(data);
+            } else {
+                // NÃO TEM DADOS - mostrar tela de importação
+                mostrarTelaImportacao();
+            }
+        } catch (e) {
+            mostrarTelaImportacao();
+        }
+    }
+
+    // ========================================================================
+    // IMPORTAÇÃO AUTOMÁTICA (sem interação do usuário)
+    // ========================================================================
+    async function importarDadosAutomatico() {
+        document.getElementById('areaStatus').innerHTML = `
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border me-3"></div>
+                    <div>
+                        <strong>🔄 Sincronizando automaticamente...</strong><br>
+                        <small>Novos sorteios detectados. Atualizando análise de colunas...</small>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        try {
+            const res = await fetch('/analise-colunas/api/importar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.sucesso) {
+                document.getElementById('areaStatus').innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        <strong>Sincronizado!</strong> ${data.total_sorteios} sorteios processados automaticamente
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                setTimeout(() => carregarDados(), 500);
+            } else {
+                mostrarTelaImportacao();
+            }
+
+        } catch (e) {
+            mostrarTelaImportacao();
+        }
+    }
+
+    // ========================================================================
+    // TELA DE IMPORTAÇÃO INICIAL
+    // ========================================================================
+    function mostrarTelaImportacao() {
+        document.getElementById('areaStatus').innerHTML = `
+            <div class="card shadow-sm border-warning mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h4>Dados ainda não importados</h4>
+                    <p class="text-muted">
+                        Clique no botão abaixo para processar todos os sorteios
+                        e gerar as estatísticas das colunas do volante.
+                    </p>
+                    <div class="alert alert-info mt-3">
+                        <h6><strong>O que será feito:</strong></h6>
+                        <ul class="text-start">
+                            <li>Buscar todos os sorteios do banco</li>
+                            <li>Mapear números para colunas (1-10)</li>
+                            <li>Calcular estatísticas e rankings</li>
+                            <li>Identificar pares que aparecem juntos</li>
+                        </ul>
+                        <p class="mb-0">
+                            <i class="fas fa-clock me-1"></i>
+                            <strong>Tempo estimado:</strong> 10-30 segundos
+                        </p>
+                    </div>
+                    <button class="btn btn-importar mt-3" onclick="importarDados()">
+                        <i class="fas fa-download me-2"></i>IMPORTAR DADOS AGORA
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ========================================================================
+    // IMPORTAR DADOS
+    // ========================================================================
+    async function importarDados() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+
+        document.getElementById('areaStatus').innerHTML = `
+            <div class="alert alert-warning">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border me-3"></div>
+                    <div>
+                        <strong>Processando dados...</strong><br>
+                        <small>Analisando sorteios. Aguarde...</small>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        try {
+            const res = await fetch('/analise-colunas/api/importar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.sucesso) {
+                document.getElementById('areaStatus').innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Sucesso!</strong> ${data.total_sorteios} sorteios processados
+                        (Concursos ${data.concurso_inicial} a ${data.concurso_final})
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                setTimeout(() => carregarDados(), 1000);
+            } else {
+                mostrarErro(data.mensagem);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-redo me-2"></i>TENTAR NOVAMENTE';
+            }
+
+        } catch (e) {
+            mostrarErro(e.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-redo me-2"></i>TENTAR NOVAMENTE';
+        }
+    }
+
+    // ========================================================================
+    // CARREGAR E MOSTRAR DADOS
+    // ========================================================================
+    async function carregarDados() {
+        try {
+            const res = await fetch('/analise-colunas/api/ranking');
+            const data = await res.json();
+            if (res.ok) mostrarDados(data);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function mostrarDados(data) {
+        document.getElementById('areaPrincipal').style.display = 'block';
+        document.getElementById('areaStatus').style.display = 'none';
+        document.getElementById('totalConcursos').textContent = data.total_concursos;
+
+        // VOLANTE - ORDENAR POR NÚMERO DA COLUNA (1, 2, 3, ... 10)
+        const grid = document.getElementById('volanteGrid');
+        grid.innerHTML = '';
+
+        // Ordenar por coluna crescente
+        const rankingOrdenado = [...data.ranking].sort((a, b) => a.coluna - b.coluna);
+
+        rankingOrdenado.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'coluna-card';
+            div.style.background = item.cor_heatmap;
+
+            div.innerHTML = `
+                <div class="coluna-header">COL ${item.coluna}</div>
+                ${item.numeros.map(n => {
+                    const isTop = item.top_numero === n;
+                    const topClass = isTop ? ' top-numero' : '';
+                    return `<div class="numero-box${topClass}" style="background: ${item.cor_heatmap};">${String(n).padStart(2,'0')}</div>`;
+                }).join('')}
+                <div class="mt-2">
+                    <strong>${item.total_aparicoes}x</strong><br>
+                    <small>${item.frequencia_relativa}%</small>
+                </div>
+            `;
+            grid.appendChild(div);
+        });
+
+        // RANKING
+        const ranking = document.getElementById('rankingLista');
+        ranking.innerHTML = '';
+        data.ranking.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'ranking-item';
+            div.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-1 text-center">
+                        <h3 class="mb-0" style="color: var(--laranja);">${item.ranking}º</h3>
+                    </div>
+                    <div class="col-2">
+                        <strong>Coluna ${item.coluna}</strong>
+                    </div>
+                    <div class="col-4">
+                        ${item.numeros.map(n => {
+                            const isTop = item.top_numero === n;
+                            const topClass = isTop ? ' top-numero-badge' : '';
+                            const badgeBg = isTop ? '' : 'bg-primary';
+                            return `<span class="badge ${badgeBg}${topClass} me-1">${String(n).padStart(2,'0')}</span>`;
+                        }).join('')}
+                    </div>
+                    <div class="col-2 text-center">
+                        <strong>${item.total_aparicoes}</strong> aparições
+                    </div>
+                    <div class="col-2 text-center">
+                        <strong>${item.frequencia_relativa}%</strong>
+                    </div>
+                    <div class="col-1 text-end">
+                        <div style="width:40px;height:40px;background:${item.cor_heatmap};border-radius:50%;border:2px solid #fff;"></div>
+                    </div>
+                </div>
+            `;
+            ranking.appendChild(div);
+        });
+
+        // CO-OCORRÊNCIAS
+        carregarCoocorrencias();
+
+        // INSIGHTS E RECOMENDAÇÕES
+        gerarInsights(data);
+        gerarRecomendacoes(data);
+    }
+
+    async function carregarCoocorrencias() {
+        try {
+            const res = await fetch('/analise-colunas/api/coocorrencias');
+            const data = await res.json();
+
+            const lista = document.getElementById('coocorrenciasLista');
+            lista.innerHTML = '';
+
+            if (data.coocorrencias && data.coocorrencias.length > 0) {
+                data.coocorrencias.forEach(c => {
+                    const span = document.createElement('span');
+                    span.className = 'cooc-badge';
+                    span.textContent = `Col ${c.coluna_1} + Col ${c.coluna_2}: ${c.total_juntas}x (${c.percentual}%)`;
+                    lista.appendChild(span);
+                });
+
+                // POPULAR TOP RANKING
+                popularTopRanking(data.coocorrencias);
+            } else {
+                lista.innerHTML = '<p class="text-muted">Nenhuma co-ocorrência encontrada.</p>';
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function popularTopRanking(coocorrencias) {
+        if (!coocorrencias || coocorrencias.length === 0) return;
+
+        // ====================================================================
+        // PÓDIO - TOP 3
+        // ====================================================================
+        const podioContainer = document.getElementById('podioContainer');
+        podioContainer.innerHTML = '';
+
+        const top3 = coocorrencias.slice(0, 3);
+        const medalhas = ['🥇', '🥈', '🥉'];
+        const classes = ['podio-primeiro', 'podio-segundo', 'podio-terceiro'];
+        const posicoes = ['1º', '2º', '3º'];
+
+        // Ordem para pódio visual: 2º, 1º, 3º (centro fica mais alto)
+        const ordemPodio = [1, 0, 2]; // índices do top3
+
+        ordemPodio.forEach(idx => {
+            if (top3[idx]) {
+                const c = top3[idx];
+                const div = document.createElement('div');
+                div.className = `podio-item ${classes[idx]}`;
+                div.innerHTML = `
+                    <div class="podio-box">
+                        <div class="podio-medalha">${medalhas[idx]}</div>
+                        <div class="podio-posicao">${posicoes[idx]} LUGAR</div>
+                        <div class="podio-pares">COL ${c.coluna_1} + COL ${c.coluna_2}</div>
+                        <div class="podio-stats">
+                            <div style="font-size: 24px; font-weight: 900;">${c.total_juntas}x</div>
+                            <div style="font-size: 18px;">${c.percentual}%</div>
+                        </div>
+                    </div>
+                `;
+                podioContainer.appendChild(div);
+            }
+        });
+
+        // ====================================================================
+        // LISTA TOP 10
+        // ====================================================================
+        const topRankingLista = document.getElementById('topRankingLista');
+        topRankingLista.innerHTML = '<h5 class="text-center mb-4 mt-4" style="color: #6a11cb; font-weight: 900;">📊 TOP 10 COMPLETO</h5>';
+
+        const top10 = coocorrencias.slice(0, 10);
+        top10.forEach((c, index) => {
+            const div = document.createElement('div');
+            div.className = 'top-ranking-item';
+
+            // Cores diferentes para top 3
+            let borderColor = '#6c757d';
+            if (index === 0) borderColor = '#FFD700'; // Ouro
+            else if (index === 1) borderColor = '#C0C0C0'; // Prata
+            else if (index === 2) borderColor = '#CD7F32'; // Bronze
+
+            div.style.borderLeftColor = borderColor;
+
+            div.innerHTML = `
+                <div class="top-ranking-numero">${index + 1}º</div>
+                <div class="top-ranking-pares">
+                    <i class="fas fa-handshake me-2" style="color: ${borderColor};"></i>
+                    COL ${c.coluna_1} + COL ${c.coluna_2}
+                </div>
+                <div class="top-ranking-stats">
+                    <div style="font-size: 20px; color: #28a745;">${c.total_juntas}x</div>
+                    <div style="font-size: 14px; color: #6c757d;">${c.percentual}%</div>
+                </div>
+            `;
+            topRankingLista.appendChild(div);
+        });
+    }
+
+    // ====================================================================
+    // INSIGHTS INTELIGENTES
+    // ====================================================================
+    function gerarInsights(data) {
+        const container = document.getElementById('insightsContainer');
+        container.innerHTML = '';
+
+        const ranking = data.ranking;
+        const top1 = ranking[0]; // Coluna mais frequente
+        const top10 = ranking[9]; // Coluna menos frequente
+        const media = ranking.reduce((acc, r) => acc + r.frequencia_relativa, 0) / ranking.length;
+        const top3 = ranking.slice(0, 3);
+        const bottom3 = ranking.slice(-3);
+
+        const insights = [
+            {
+                icon: '🏆',
+                titulo: 'Coluna Campeã',
+                texto: `A <strong>Coluna ${top1.coluna}</strong> é a mais frequente, aparecendo em <strong>${top1.frequencia_relativa}%</strong> dos sorteios. Seus números (${top1.numeros.join(', ')}) são extremamente relevantes para suas apostas.`
+            },
+            {
+                icon: '📊',
+                titulo: 'Distribuição Desigual',
+                texto: `Há uma diferença de <strong>${(top1.frequencia_relativa - top10.frequencia_relativa).toFixed(2)}%</strong> entre a coluna mais e menos frequente. Isso mostra que algumas colunas são claramente favorecidas nos sorteios.`
+            },
+            {
+                icon: '⚖️',
+                titulo: 'Equilíbrio das Colunas',
+                texto: `A frequência média das colunas é <strong>${media.toFixed(2)}%</strong>. Colunas acima dessa média têm desempenho superior e devem ser priorizadas em suas jogadas.`
+            },
+            {
+                icon: '🎯',
+                titulo: 'Top 3 Dominante',
+                texto: `As 3 colunas mais frequentes (${top3.map(t => `Col ${t.coluna}`).join(', ')}) aparecem juntas em mais de <strong>${top3.reduce((acc, t) => acc + t.frequencia_relativa, 0).toFixed(1)}%</strong> dos casos combinados.`
+            },
+            {
+                icon: '⚠️',
+                titulo: 'Colunas Menos Ativas',
+                texto: `As colunas ${bottom3.map(b => b.coluna).join(', ')} são as menos frequentes. Considere usá-las apenas em apostas mais amplas ou quando combinar com colunas fortes.`
+            },
+            {
+                icon: '🔥',
+                titulo: 'Número Mais Quente',
+                texto: `Cada coluna tem um número destaque (marcado com círculo vermelho pulsante). Esses são os números que mais aparecem dentro de cada coluna e devem ser sua prioridade.`
+            }
+        ];
+
+        insights.forEach(insight => {
+            const div = document.createElement('div');
+            div.className = 'col-md-6 col-lg-4';
+            div.innerHTML = `
+                <div class="insight-card">
+                    <div class="insight-icon">${insight.icon}</div>
+                    <div class="insight-titulo">${insight.titulo}</div>
+                    <div class="insight-texto">${insight.texto}</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // ====================================================================
+    // RECOMENDAÇÕES ESTRATÉGICAS
+    // ====================================================================
+    function gerarRecomendacoes(data) {
+        const container = document.getElementById('recomendacoesContainer');
+        container.innerHTML = '';
+
+        const ranking = data.ranking;
+        const top3 = ranking.slice(0, 3);
+        const numerosTop = top3.map(r => r.top_numero).filter(n => n);
+
+        const recomendacoes = [
+            {
+                num: '1',
+                titulo: 'Aposte nas Colunas Campeãs',
+                texto: 'Priorize sempre as 3 colunas mais frequentes em suas jogadas:',
+                destaque: `Colunas ${top3.map(t => t.coluna).join(', ')} - Juntas aparecem em ${top3.reduce((acc, t) => acc + t.frequencia_relativa, 0).toFixed(1)}% dos sorteios`
+            },
+            {
+                num: '2',
+                titulo: 'Foque nos Números Pulsantes',
+                texto: 'Os números marcados com círculo vermelho pulsante são os TOPS de cada coluna. Use-os como base:',
+                destaque: numerosTop.length > 0 ?
+                    `Números destaque: ${numerosTop.map(n => String(n).padStart(2, '0')).join(', ')}` :
+                    'Observe os números marcados no volante'
+            },
+            {
+                num: '3',
+                titulo: 'Combine Pares Fortes',
+                texto: 'Use os pares de colunas do TOP RANKING como estratégia. Esses pares aparecem juntos com muita frequência.',
+                destaque: 'Veja a seção "TOP RANKING" acima para os melhores pares'
+            },
+            {
+                num: '4',
+                titulo: 'Estratégia Balanceada',
+                texto: 'Misture 2-3 colunas frequentes (top 5) com 1-2 colunas médias. Evite usar muitas colunas fracas de uma vez.',
+                destaque: `Exemplo: Col ${top3[0].coluna} + Col ${top3[1].coluna} + Col ${ranking[4].coluna}`
+            },
+            {
+                num: '5',
+                titulo: 'Acompanhe as Tendências',
+                texto: 'Retorne ao dashboard regularmente e clique em "IMPORTAR DADOS" para atualizar as estatísticas com os sorteios mais recentes.',
+                destaque: 'Dados atualizados = Estratégia mais precisa!'
+            }
+        ];
+
+        recomendacoes.forEach(rec => {
+            const div = document.createElement('div');
+            div.className = 'recomendacao-card';
+            div.innerHTML = `
+                <div class="recomendacao-header">
+                    <div class="recomendacao-numero">${rec.num}</div>
+                    <div class="recomendacao-titulo">${rec.titulo}</div>
+                </div>
+                <div class="recomendacao-texto">${rec.texto}</div>
+                <div class="recomendacao-destaque">${rec.destaque}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function mostrarErro(msg) {
+        document.getElementById('areaStatus').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle me-2"></i>
+                <strong>Erro:</strong> ${msg}
+            </div>
+        `;
+    }
+
+    // INICIAR
+    document.addEventListener('DOMContentLoaded', verificarDados);
+</script>
+{% endblock %}

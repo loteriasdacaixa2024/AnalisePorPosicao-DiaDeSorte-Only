@@ -1,0 +1,585 @@
+{% extends "base.html" %}
+
+{% block title %}Estatísticas - Análise por Posição{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style id="cores-meses-dinamicas">
+    /* As cores dos meses serão carregadas dinamicamente da API /api/cores-meses/listar */
+</style>
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary-custom">
+                <i class="fas fa-chart-bar me-2"></i>Estatísticas e Análises
+            </h2>
+            <p class="text-muted">Análise completa de frequências, atrasos e padrões do Dia de Sorte</p>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">Total de Sorteios</h6>
+                            <h3 class="mb-0" id="totalSorteios">-</h3>
+                        </div>
+                        <i class="fas fa-database fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">Número + Frequente</h6>
+                            <h3 class="mb-0" id="maisFrequente">-</h3>
+                        </div>
+                        <i class="fas fa-star fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">Número + Atrasado</h6>
+                            <h3 class="mb-0" id="maisAtrasado">-</h3>
+                        </div>
+                        <i class="fas fa-clock fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm" id="cardMesMaisSorteado" style="min-height: 120px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1" style="color: rgba(255,255,255,0.7);">Mês + Sorteado</h6>
+                            <h3 class="mb-0 text-white" id="mesMaisSorteado">-</h3>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs de Estatísticas -->
+    <ul class="nav nav-tabs mb-3" id="estatisticasTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="freq-geral-tab" data-bs-toggle="tab"
+                    data-bs-target="#freq-geral" type="button">
+                <i class="fas fa-chart-pie me-1"></i>Frequência Geral
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="freq-posicao-tab" data-bs-toggle="tab"
+                    data-bs-target="#freq-posicao" type="button">
+                <i class="fas fa-map-marker-alt me-1"></i>Por Posição
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="atrasados-tab" data-bs-toggle="tab"
+                    data-bs-target="#atrasados" type="button">
+                <i class="fas fa-hourglass-half me-1"></i>Atrasados
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="mes-sorte-tab" data-bs-toggle="tab"
+                    data-bs-target="#mes-sorte" type="button">
+                Mês da Sorte
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="estatisticasTabsContent">
+        <!-- Aba: Frequência Geral -->
+        <div class="tab-pane fade show active" id="freq-geral" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Frequência Geral de Números (1-31)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th class="text-center">Posição</th>
+                                    <th class="text-center">Número</th>
+                                    <th class="text-center">Frequência</th>
+                                    <th>Percentual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaFrequenciaGeral">
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Frequência por Posição -->
+        <div class="tab-pane fade" id="freq-posicao" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">
+                                <i class="fas fa-map-marker-alt me-2"></i>Frequência por Posição
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <select class="form-select form-select-sm d-inline-block w-auto" id="selectPosicao">
+                                <option value="1">Posição 1</option>
+                                <option value="2">Posição 2</option>
+                                <option value="3">Posição 3</option>
+                                <option value="4">Posição 4</option>
+                                <option value="5">Posição 5</option>
+                                <option value="6">Posição 6</option>
+                                <option value="7">Posição 7</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th class="text-center">Ranking</th>
+                                    <th class="text-center">Número</th>
+                                    <th class="text-center">Frequência</th>
+                                    <th>Percentual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaFrequenciaPosicao">
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Números Atrasados -->
+        <div class="tab-pane fade" id="atrasados" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hourglass-half me-2"></i>Números Mais Atrasados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-warning">
+                                <tr>
+                                    <th class="text-center">Ranking</th>
+                                    <th class="text-center">Número</th>
+                                    <th class="text-center">Atraso (concursos)</th>
+                                    <th class="text-center">Último Concurso</th>
+                                    <th class="text-center">Última Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaAtrasados">
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Mês da Sorte -->
+        <div class="tab-pane fade" id="mes-sorte" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        Estatísticas do Mês da Sorte
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-success">
+                                <tr>
+                                    <th class="text-center">Ranking</th>
+                                    <th>Mês</th>
+                                    <th class="text-center">Frequência</th>
+                                    <th>Percentual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaMesSorte">
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-primary me-2" id="btnGerarPDF">
+                <i class="fas fa-file-pdf me-2"></i>Gerar Relatório PDF
+            </button>
+            <button class="btn btn-success" id="btnGerarExcel">
+                <i class="fas fa-file-excel me-2"></i>Gerar Relatório Excel
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 🎨 OBJETO GLOBAL PARA ARMAZENAR CORES DOS MESES
+    let coresMesesGlobal = {};
+
+    // 🎨 Carregar cores dos meses dinamicamente da API
+    async function carregarCoresMeses() {
+        try {
+            const response = await fetch('/api/cores-meses/listar');
+            const data = await response.json();
+
+            if (data.sucesso && data.cores && Array.isArray(data.cores)) {
+                // Mapeamento de índices para nomes completos
+                const mesesNomes = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+
+                // Criar CSS dinâmico para as cores dos meses
+                let cssRules = '';
+                data.cores.forEach(item => {
+                    const mesIndex = parseInt(item.mes);
+                    const mesNome = mesesNomes[mesIndex];
+
+                    // Armazenar no objeto global (por nome e índice)
+                    coresMesesGlobal[mesNome] = item.cor_hex;
+                    coresMesesGlobal[mesIndex] = item.cor_hex;
+
+                    cssRules += `
+                        .mes-cor-${mesIndex} {
+                            background-color: ${item.cor_hex} !important;
+                            color: white !important;
+                            font-weight: bold;
+                            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                        } /* ${mesNome} */
+                    `;
+                });
+
+                // Injetar CSS no elemento style
+                document.getElementById('cores-meses-dinamicas').innerHTML = cssRules;
+                console.log('✅ Cores dos meses carregadas dinamicamente:', coresMesesGlobal);
+            } else {
+                console.warn('⚠️ Formato inesperado, usando cores padrão');
+                aplicarCoresPadrao();
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar cores dos meses:', error);
+            aplicarCoresPadrao();
+        }
+    }
+
+    // Fallback: Cores padrão caso a API falhe
+    function aplicarCoresPadrao() {
+        const coresPadrao = [
+            '#8B4513', '#4682B4', '#228B22', '#9370DB', '#FF69B4', '#008B8B',
+            '#B8860B', '#DC143C', '#4169E1', '#FF8C00', '#9932CC', '#2F4F4F'
+        ];
+
+        const mesesNomes = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+
+        let cssRules = '';
+        coresPadrao.forEach((cor, index) => {
+            coresMesesGlobal[mesesNomes[index]] = cor;
+            coresMesesGlobal[index] = cor;
+
+            cssRules += `
+                .mes-cor-${index} {
+                    background-color: ${cor} !important;
+                    color: white !important;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                }
+            `;
+        });
+
+        document.getElementById('cores-meses-dinamicas').innerHTML = cssRules;
+        console.warn('⚠️ Usando cores padrão (API não disponível)');
+    }
+
+    // 🎨 Função para aplicar cor dinâmica a um card
+    function aplicarCorMesAoCard(cardId, mesNome) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+
+        const cor = coresMesesGlobal[mesNome];
+        if (cor) {
+            card.style.backgroundColor = cor;
+            card.style.color = 'white';
+            console.log(`✅ Cor aplicada ao card ${cardId}: ${cor} (${mesNome})`);
+        }
+    }
+
+    // Carregar resumo
+    async function carregarResumo() {
+        try {
+            const response = await fetch('/api/sorteios');
+            const data = await response.json();
+
+            if (response.ok && data.total) {
+                document.getElementById('totalSorteios').textContent = data.total;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar resumo:', error);
+        }
+    }
+
+    // Carregar frequência geral
+    async function carregarFrequenciaGeral() {
+        try {
+            const response = await fetch('/api/estatisticas/frequencia-geral');
+            const data = await response.json();
+
+            const tbody = document.getElementById('tabelaFrequenciaGeral');
+            tbody.innerHTML = '';
+
+            if (response.ok && data.length > 0) {
+                // Atualizar card
+                document.getElementById('maisFrequente').textContent = data[0].numero;
+
+                data.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-center fw-bold">${index + 1}º</td>
+                        <td class="text-center">
+                            <span class="badge bg-primary fs-6">${item.numero}</span>
+                        </td>
+                        <td class="text-center">${item.frequencia}</td>
+                        <td>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                     style="width: ${item.percentual}%"
+                                     aria-valuenow="${item.percentual}" aria-valuemin="0" aria-valuemax="100">
+                                    ${item.percentual}%
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar frequência geral:', error);
+        }
+    }
+
+    // Carregar frequência por posição
+    async function carregarFrequenciaPosicao(posicao) {
+        try {
+            const response = await fetch(`/api/estatisticas/frequencia-posicao/${posicao}`);
+            const data = await response.json();
+
+            const tbody = document.getElementById('tabelaFrequenciaPosicao');
+            tbody.innerHTML = '';
+
+            if (response.ok && data.numeros) {
+                data.numeros.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-center fw-bold">${index + 1}º</td>
+                        <td class="text-center">
+                            <span class="badge bg-primary fs-6">${item.numero}</span>
+                        </td>
+                        <td class="text-center">${item.frequencia}</td>
+                        <td>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                     style="width: ${item.percentual}%">
+                                    ${item.percentual}%
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar frequência por posição:', error);
+        }
+    }
+
+    // Carregar números atrasados
+    async function carregarAtrasados() {
+        try {
+            const response = await fetch('/api/estatisticas/atrasados');
+            const data = await response.json();
+
+            const tbody = document.getElementById('tabelaAtrasados');
+            tbody.innerHTML = '';
+
+            if (response.ok && data.numeros_atrasados) {
+                // Atualizar card
+                document.getElementById('maisAtrasado').textContent = data.numeros_atrasados[0].numero;
+
+                data.numeros_atrasados.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-center fw-bold">${index + 1}º</td>
+                        <td class="text-center">
+                            <span class="badge bg-warning fs-6">${item.numero}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-danger">${item.atraso}</span>
+                        </td>
+                        <td class="text-center">${item.ultimo_concurso || 'N/A'}</td>
+                        <td class="text-center">${item.ultima_data}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar atrasados:', error);
+        }
+    }
+
+    // 🎨 Carregar mês da sorte COM CORES DINÂMICAS
+    async function carregarMesSorte() {
+        try {
+            const response = await fetch('/api/estatisticas/mes-sorte');
+            const data = await response.json();
+
+            const tbody = document.getElementById('tabelaMesSorte');
+            tbody.innerHTML = '';
+
+            if (response.ok && data.meses) {
+                // 🔥 ATUALIZAR CARD COM COR DINÂMICA
+                const mesMaisSorteado = data.mais_sorteado.nome;
+                document.getElementById('mesMaisSorteado').textContent = mesMaisSorteado;
+                aplicarCorMesAoCard('cardMesMaisSorteado', mesMaisSorteado);
+
+                // Mapear meses para índice correto (0-11)
+                const mesesIndice = {
+                    'Janeiro': 0, 'Fevereiro': 1, 'Março': 2, 'Abril': 3,
+                    'Maio': 4, 'Junho': 5, 'Julho': 6, 'Agosto': 7,
+                    'Setembro': 8, 'Outubro': 9, 'Novembro': 10, 'Dezembro': 11
+                };
+
+                data.meses.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    const mesIndice = mesesIndice[item.nome] !== undefined ? mesesIndice[item.nome] : 0;
+                    const mesColorClass = `mes-cor-${mesIndice}`;
+
+                    tr.innerHTML = `
+                        <td class="text-center fw-bold">${index + 1}º</td>
+                        <td><span class="badge ${mesColorClass}">${item.nome}</span></td>
+                        <td class="text-center">${item.frequencia}</td>
+                        <td>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     style="width: ${item.percentual}%">
+                                    ${item.percentual}%
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar mês da sorte:', error);
+        }
+    }
+
+    // Função para exibir modal de informação
+    function showInfoModal(mensagem) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Informação</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">${mensagem}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        modal.addEventListener('hidden.bs.modal', () => modal.remove());
+    }
+
+    // Event Listeners
+    document.getElementById('selectPosicao').addEventListener('change', function() {
+        carregarFrequenciaPosicao(this.value);
+    });
+
+    document.getElementById('btnGerarPDF').addEventListener('click', function() {
+        showInfoModal('Funcionalidade de geração de PDF será implementada em breve!');
+    });
+
+    document.getElementById('btnGerarExcel').addEventListener('click', function() {
+        showInfoModal('Funcionalidade de geração de Excel será implementada em breve!');
+    });
+
+    // 🚀 Carregar ao iniciar (ORDEM CORRETA!)
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 1️⃣ PRIMEIRO: Carregar cores dinâmicas dos meses
+        await carregarCoresMeses();
+
+        // 2️⃣ DEPOIS: Carregar os dados que usam as cores
+        carregarResumo();
+        carregarFrequenciaGeral();
+        carregarFrequenciaPosicao(1);
+        carregarAtrasados();
+        carregarMesSorte(); // Agora com cores dinâmicas!
+    });
+</script>
+{% endblock %}

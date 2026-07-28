@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Probabilidade Condicional - Análise Avançada{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    .card { margin-bottom: 20px; }
+    .numero-badge {
+        display: inline-block;
+        min-width: 35px;
+        padding: 6px 10px;
+        margin: 3px;
+        background-color: #D4B31A;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-brain"></i> Probabilidade Condicional</h1>
+    <p class="text-muted">Previsões baseadas em análise histórica condicional</p>
+
+    <div id="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Carregando análise...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-hashtag"></i> Previsão Próximas Dezenas</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Mais Quentes (últimos 20):</h6>
+                        <div id="dezenasQuentes"></div>
+                        <h6 class="mt-3">Mais Atrasadas:</h6>
+                        <div id="dezenasAtrasadas"></div>
+                        <h6 class="mt-3">Por Score Combinado:</h6>
+                        <div id="dezenasScore"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5> Previsão Próximo Mês</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Último mês:</strong> <span id="ultimoMes" class="badge"></span></p>
+                        <p><strong>Transições históricas:</strong> <span id="totalTransicoes">-</span></p>
+                        <h6>Meses mais prováveis:</h6>
+                        <div id="mesesProvaveis"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="fas fa-balance-scale"></i> P(Par/Ímpar | Mês) - Amostra</h5>
+                    </div>
+                    <div class="card-body" id="parImparMes"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-chart-pie"></i> P(Dezena | Mês) - Amostra</h5>
+                    </div>
+                    <div class="card-body" id="dezenaDadoMes"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/analise/probabilidade-condicional');
+        const data = await response.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            return;
+        }
+
+        // Previsão Dezenas
+        const prev = data.probabilidade_proxima_dezena || {};
+
+        const divQuentes = document.getElementById('dezenasQuentes');
+        divQuentes.innerHTML = '';
+        (prev.dezenas_mais_quentes || []).slice(0, 10).forEach(item => {
+            divQuentes.innerHTML += `<span class="numero-badge" title="Freq: ${item.frequencia_recente}">${item.dezena}</span>`;
+        });
+
+        const divAtrasadas = document.getElementById('dezenasAtrasadas');
+        divAtrasadas.innerHTML = '';
+        (prev.dezenas_mais_atrasadas || []).slice(0, 10).forEach(item => {
+            divAtrasadas.innerHTML += `<span class="numero-badge" title="Atraso: ${item.atraso}">${item.dezena}</span>`;
+        });
+
+        const divScore = document.getElementById('dezenasScore');
+        divScore.innerHTML = '';
+        (prev.dezenas_por_score || []).slice(0, 10).forEach(item => {
+            divScore.innerHTML += `<span class="numero-badge" title="Score: ${item.score}">${item.dezena}</span>`;
+        });
+
+        // Previsão Mês
+        const prevMes = data.probabilidade_proximo_mes || {};
+        if (prevMes.ultimo_mes) {
+            const badgeMes = document.getElementById('ultimoMes');
+            badgeMes.className = `badge mes-cor-${prevMes.ultimo_mes - 1}`;
+            badgeMes.textContent = prevMes.ultimo_mes_nome;
+            document.getElementById('totalTransicoes').textContent = prevMes.total_transicoes_historicas || 0;
+
+            const divMesesProb = document.getElementById('mesesProvaveis');
+            divMesesProb.innerHTML = '';
+            (prevMes.meses_mais_provaveis || []).forEach(item => {
+                divMesesProb.innerHTML += `
+                    <p>
+                        <span class="badge mes-cor-${item.mes - 1}">${item.mes_nome}</span>
+                        <span class="badge bg-success">${item.probabilidade}%</span>
+                        (${item.frequencia}x)
+                    </p>
+                `;
+            });
+        }
+
+        // Par/Ímpar dado Mês
+        const divParImpar = document.getElementById('parImparMes');
+        divParImpar.innerHTML = '';
+        (data.probabilidade_par_impar_dado_mes || []).slice(0, 3).forEach(item => {
+            divParImpar.innerHTML += `
+                <p><strong class="badge mes-cor-${item.mes - 1}">${item.mes_nome}</strong></p>
+                <p>Padrão mais comum: ${item.padroes[0]?.padrao || '-'} (${item.padroes[0]?.probabilidade || 0}%)</p>
+            `;
+        });
+
+        // Dezena dado Mês
+        const divDezMes = document.getElementById('dezenaDadoMes');
+        divDezMes.innerHTML = '';
+        (data.probabilidade_dezena_dado_mes || []).slice(0, 3).forEach(item => {
+            const top3 = item.dezenas_mais_provaveis.slice(0, 3).map(d => `<span class="numero-badge">${d.dezena}</span>`).join(' ');
+            divDezMes.innerHTML += `
+                <p><strong class="badge mes-cor-${item.mes - 1}">${item.mes_nome}</strong></p>
+                <p>${top3}</p>
+            `;
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+carregarAnalise();
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+                <!-- Laboratório de Alterações -->
+                <div class="tab-pane fade" id="pane-laboratorio-alteracoes" role="tabpanel"
+                    aria-labelledby="tab-laboratorio-alteracoes">
+                    <link rel="stylesheet" href="{{ url_for('static', filename='css/laboratorio_alteracoes.css') }}">
+                    <div class="container-fluid py-3">
+                        <div class="card shadow-sm lab-header-card mb-3">
+                            <div class="card-header py-2 d-flex flex-wrap align-items-center justify-content-between gap-2"
+                                style="background: linear-gradient(135deg, #d4b31a 0%, #887211 100%); color: #fff;">
+                                <span class="fw-bold"><i class="fas fa-flask"></i> Laboratório de Alterações</span>
+                                <div class="d-flex flex-wrap align-items-center gap-3">
+                                    <div class="form-check form-switch mb-0 lab-toggle-mais">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="labToggleMaisApostas" title="Permite importar e analisar mais de 10 apostas">
+                                        <label class="form-check-label small text-white" for="labToggleMaisApostas">
+                                            Mais de 10 apostas
+                                        </label>
+                                    </div>
+                                    <span class="badge bg-dark" id="labContadorApostas">0 / 10</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-1" id="labLimiteApostasHint">
+                                    Padrão: até 10 apostas. Ative o toggle para importar mais.
+                                </p>
+                                <p class="small text-muted mb-2">
+                                    Compare apostas <strong>originais</strong> vs <strong>alteradas</strong> (diversidade).
+                                    Mês da Sorte com cores do sistema.
+                                </p>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small">Colar apostas (1 por linha)</label>
+                                        <textarea class="form-control form-control-sm" id="labTextoImport" rows="3"
+                                            placeholder="01 05 08 13 17 24 31 Ago"></textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-1" id="labBtnImportar">
+                                            <i class="fas fa-paste"></i> Importar
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small">Arquivo TXT/CSV</label>
+                                        <div id="labDropZone" class="border border-dashed rounded p-3 text-center text-muted small"
+                                            style="min-height: 80px;">
+                                            Arraste o arquivo aqui
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                    <span class="small fw-bold me-1">Modo:</span>
+                                    <div class="form-check form-check-inline mb-0">
+                                        <input class="form-check-input" type="radio" name="labModo" id="labModoAuto" value="auto" checked>
+                                        <label class="form-check-label small" for="labModoAuto">Automático</label>
+                                    </div>
+                                    <div class="form-check form-check-inline mb-0">
+                                        <input class="form-check-input" type="radio" name="labModo" id="labModoHibrido" value="hibrido">
+                                        <label class="form-check-label small" for="labModoHibrido">Híbrido</label>
+                                    </div>
+                                    <div class="form-check form-check-inline mb-0">
+                                        <input class="form-check-input" type="radio" name="labModo" id="labModoManual" value="manual">
+                                        <label class="form-check-label small" for="labModoManual">Manual</label>
+                                    </div>
+                                </div>
+                                <div id="labHibridoPainel" class="alert alert-light py-2 small" style="display:none;">
+                                    <strong>Híbrido:</strong> clique nas dezenas da coluna <em>Original</em> para travá-las na alterada.
+                                    Clique no mês para travar o mês da linha.
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-warning text-dark" id="labBtnAuto">
+                                        <i class="fas fa-random"></i> Gerar alteradas (Auto)
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-info text-dark" id="labBtnHibrido">
+                                        <i class="fas fa-lock"></i> Gerar (Híbrido)
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-success" id="labBtnAnalisar">
+                                        <i class="fas fa-chart-bar"></i> Analisar vs concurso
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark" id="labBtnSalvar">
+                                        <i class="fas fa-database"></i> Salvar acertos (JSON)
+                                    </button>
+                                </div>
+                                <p class="small text-muted mb-0 mt-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    Reformula a aposta: troca <strong>no mínimo 3 dezenas</strong> (ou metade) por números
+                                    <strong>novos no volante</strong>. Quando usa ±1/±2, é só no substituto da dezena que saiu.
+                                    Mesma quantidade colada; máx. 2 do concurso; mês trocado.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card shadow-sm lab-analise-card mb-3">
+                            <div class="card-header py-2 lab-analise-card-header">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="fw-bold small"><i class="fas fa-chart-line"></i> Análise comparativa</span>
+                                    <span class="badge bg-secondary lab-analise-badge">Original vs Alterada</span>
+                                </div>
+                                <p class="small text-muted mb-0 mt-1 lab-analise-intro">
+                                    Compare cada aposta importada com sua versão alterada contra o <strong>concurso de referência</strong>.
+                                    Ao trocar o concurso, acertos, cores e ranking são recalculados. Premiação considera faixas 4–7 dezenas;
+                                    mês da sorte entra como desempate no ranking. Passe o mouse nos indicadores para detalhes.
+                                </p>
+                            </div>
+                            <div class="card-body py-3">
+                        <div class="lab-comparacao-grid mb-0">
+                            <div>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                    <h6 class="fw-bold text-secondary mb-0"><i class="fas fa-list"></i> Apostas (Original | Alterada)</h6>
+                                    <button type="button" class="btn btn-success lab-btn-exportar-txt" id="labBtnExportarTxt"
+                                        title="Baixa arquivo TXT com dezenas e mês de cada aposta alterada">
+                                        <i class="fas fa-download"></i> Exportar alteradas (TXT)
+                                    </button>
+                                </div>
+                                <div class="lab-concurso-proximo mb-2">
+                                    <label class="form-label small fw-bold mb-1" for="labSelectConcurso">
+                                        <i class="fas fa-calendar-check"></i> Concurso de referência
+                                    </label>
+                                    <div class="row g-2 align-items-stretch">
+                                        <div class="col-sm-5 col-lg-4">
+                                            <select class="form-select form-select-sm lab-select-concurso" id="labSelectConcurso"
+                                                aria-label="Concurso de referência"></select>
+                                            <div class="form-text mb-0">Recalcula acertos ao trocar.</div>
+                                        </div>
+                                        <div class="col-sm-7 col-lg-8">
+                                            <div id="labConcursoBanner" class="lab-concurso-banner border rounded p-2 bg-light small h-100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="labResumoPainel" class="mb-2"></div>
+                                <div class="lab-legenda-card mb-2" id="labLegendaCores">
+                                    <div class="lab-legenda-head">
+                                        <span class="lab-legenda-title"><i class="fas fa-palette"></i> Legenda visual</span>
+                                    </div>
+                                    <div class="lab-legenda-body">
+                                        <div class="lab-legenda-group">
+                                            <span class="lab-legenda-group-label">Dezenas na grade</span>
+                                            <ul class="lab-legenda-list">
+                                                <li class="lab-legenda-item">
+                                                    <span class="lab-dezena lab-leg-swatch" aria-hidden="true"></span>
+                                                    <span><strong>Fora</strong> — não está na aposta</span>
+                                                </li>
+                                                <li class="lab-legenda-item">
+                                                    <span class="lab-dezena sel lab-leg-swatch" aria-hidden="true"></span>
+                                                    <span><strong>Na aposta</strong> — dezena escolhida</span>
+                                                </li>
+                                                <li class="lab-legenda-item">
+                                                    <span class="lab-dezena sel hit lab-leg-swatch" aria-hidden="true"></span>
+                                                    <span><strong>Acertou</strong> — saiu no concurso de referência</span>
+                                                </li>
+                                                <li class="lab-legenda-item">
+                                                    <span class="lab-dezena sel hit-max lab-leg-swatch" aria-hidden="true"></span>
+                                                    <span><strong>Destaque 6+</strong> — linha com 6 ou mais acertos</span>
+                                                </li>
+                                                <li class="lab-legenda-item">
+                                                    <span class="lab-dezena sel conc lab-leg-swatch" aria-hidden="true"></span>
+                                                    <span><strong>Do concurso</strong> — dezena sorteada (máx. 2 por aposta alterada)</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="lab-legenda-group lab-legenda-group-mes">
+                                            <span class="lab-legenda-group-label">Mês da Sorte</span>
+                                            <ul class="lab-legenda-list">
+                                                <li class="lab-legenda-item">
+                                                    <span class="lab-mes-pill lab-leg-mes-swatch" style="outline:3px solid #d4b31a">mês ✓</span>
+                                                    <span><strong>Mês premiado</strong> — acertou o mês do concurso</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="lab-legenda-dica">
+                                        <i class="fas fa-lightbulb"></i>
+                                        Importe com mês no fim da linha: <code>Ago</code>, <code>8</code> ou <code>Agosto</code>
+                                    </div>
+                                </div>
+                                <div id="labLinhasContainer"></div>
+                                <div class="lab-export-bar mt-2 p-2 rounded border bg-light d-flex flex-wrap align-items-center justify-content-between gap-2" style="display:none;">
+                                    <span class="small text-muted mb-0">
+                                        <i class="fas fa-file-alt"></i> Arquivo TXT: uma linha por aposta alterada (dezenas + mês).
+                                    </span>
+                                    <button type="button" class="btn btn-success lab-btn-exportar-txt" id="labBtnExportarTxtRodape"
+                                        title="Baixa arquivo TXT com dezenas e mês de cada aposta alterada">
+                                        <i class="fas fa-download"></i> Baixar TXT das alteradas
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold"><i class="fas fa-trophy"></i> Ranking unificado
+                                    <i class="fas fa-question-circle text-muted lab-help-icon"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Todas as apostas (originais e alteradas) ordenadas por acertos. Em empate, quem acertou o mês sobe."></i>
+                                </h6>
+                                <div id="labRankingLista" class="border rounded bg-white p-2"></div>
+                                <h6 class="fw-bold mt-3"><i class="fas fa-history"></i> Histórico (acertos no banco)</h6>
+                                <div id="labHistoricoLista" class="border rounded bg-white p-2 small" style="max-height:200px;overflow:auto;"></div>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>

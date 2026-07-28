@@ -1,0 +1,295 @@
+<!-- Sistema: Análise por Posição - Dia de Sorte -->
+<!-- Template: Lista de Eventos Intuitivos -->
+<!-- ESTE ARQUIVO VAI EM: templates/eventos_intuitivos/lista.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Eventos Intuitivos{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-primary: #D4B31A;
+        --ds-primary-dark: #b69816;
+        --ds-primary-darker: #9f8514;
+        --ds-primary-light: #e6c533;
+        --ds-primary-lighter: #f1df8e;
+        --ds-primary-pale: #fcf9e8;
+        --ds-accent: #2d2606;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .page-header h2 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .page-header p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .btn-ds-primary {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 12px 25px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ds-primary:hover {
+        background: linear-gradient(135deg, var(--ds-primary-dark) 0%, var(--ds-primary-darker) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.4);
+    }
+
+    .evento-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .evento-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .evento-card .card-header {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: white;
+        padding: 15px 20px;
+        border-bottom: none;
+    }
+
+    .evento-card .card-header h5 {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .evento-card .card-body {
+        padding: 20px;
+    }
+
+    .evento-card .card-footer {
+        background: var(--ds-primary-pale);
+        border-top: 1px solid var(--ds-primary-lighter);
+        padding: 12px 15px;
+    }
+
+    .badge-tipo {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .badge-sonho {
+        background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        color: white;
+    }
+
+    .badge-fato {
+        background: linear-gradient(135deg, #00b894 0%, #55efc4 100%);
+        color: white;
+    }
+
+    .badge-sinal {
+        background: linear-gradient(135deg, #fdcb6e 0%, #ffeaa7 100%);
+        color: #2d3436;
+    }
+
+    .badge-outro {
+        background: linear-gradient(135deg, #e17055 0%, #fab1a0 100%);
+        color: white;
+    }
+
+    .badge-apostas {
+        background: var(--ds-primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .btn-ver {
+        background: var(--ds-primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ver:hover {
+        background: var(--ds-primary-dark);
+        color: white;
+    }
+
+    .btn-excluir {
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-excluir:hover {
+        background: #c82333;
+        color: white;
+    }
+
+    .alert-info-ds {
+        background: var(--ds-primary-pale);
+        border: 1px solid var(--ds-primary-lighter);
+        color: var(--ds-primary-darker);
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+    }
+
+    .alert-info-ds i {
+        font-size: 2rem;
+        color: var(--ds-primary);
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .alert-info-ds a {
+        color: var(--ds-primary-dark);
+        font-weight: 600;
+        text-decoration: underline;
+    }
+
+    .alert-info-ds a:hover {
+        color: var(--ds-primary-darker);
+    }
+
+    .data-evento {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .descricao-evento {
+        color: #444;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .icon-tipo {
+        font-size: 1.1rem;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2>
+                        <i class="fas fa-brain"></i> Eventos Intuitivos
+                    </h2>
+                    <p>Sonhos, fatos e sinais que geraram apostas</p>
+                </div>
+                <a href="{{ url_for('eventos.novo') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-plus"></i> Novo Evento
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if eventos %}
+    <div class="row">
+        {% for evento in eventos %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card evento-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% if evento.tipo == 'sonho' %}
+                            <i class="fas fa-moon icon-tipo"></i>
+                        {% elif evento.tipo == 'fato' %}
+                            
+                        {% elif evento.tipo == 'sinal' %}
+                            <i class="fas fa-lightbulb icon-tipo"></i>
+                        {% else %}
+                            <i class="fas fa-star icon-tipo"></i>
+                        {% endif %}
+                        {{ evento.titulo }}
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <p class="data-evento mb-2">
+                        <i class="fas fa-clock"></i> {{ evento.data_evento }}
+                    </p>
+
+                    <p class="descricao-evento mb-3">
+                        {{ evento.descricao[:100] }}{% if evento.descricao|length > 100 %}...{% endif %}
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge-apostas">
+                            <i class="fas fa-ticket-alt"></i> {{ evento.total_apostas }} aposta(s)
+                        </span>
+                        <span class="badge-tipo badge-{{ evento.tipo }}">
+                            {{ evento.tipo|upper }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('eventos.detalhes', evento_id=evento.id) }}"
+                           class="btn btn-ver">
+                            <i class="fas fa-eye"></i> Ver Detalhes
+                        </a>
+                        <form method="POST" action="{{ url_for('eventos.excluir', evento_id=evento.id) }}"
+                              style="display:inline;"
+                              onsubmit="return confirm('Tem certeza que deseja excluir este evento?');">
+                            <button type="submit" class="btn btn-excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="alert-info-ds">
+                <i class="fas fa-inbox"></i>
+                <h4>Nenhum evento cadastrado</h4>
+                <p class="mb-3">Comece registrando seu primeiro evento intuitivo!</p>
+                <a href="{{ url_for('eventos.novo') }}" class="btn btn-ds-primary btn-lg">
+                    <i class="fas fa-plus"></i> Criar Primeiro Evento
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
