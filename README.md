@@ -1,0 +1,1 @@
+AnalisePorPosicao-DiaDeSorte-Only
