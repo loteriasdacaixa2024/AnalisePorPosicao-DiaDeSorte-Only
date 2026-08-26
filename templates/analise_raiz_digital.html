@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-diagram-3"></i> Análise de Raiz Digital
+                </h2>
+                <div>
+                    <a href="/" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button class="btn btn-primary" onclick="carregarAnalise()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted">
+                Analisa a raiz digital dos números sorteados (soma iterativa até obter 1-9)
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3">Carregando análise...</p>
+            </div>
+
+            <div id="resultado" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="insightsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+    document.getElementById('insightsCard').style.display = 'none';
+
+    fetch('/api/analise/raiz-digital')
+        .then(response => response.json())
+        .then(data => {
+            exibirResultado(data);
+            gerarInsights(data);
+            loading.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Erro ao carregar análise: ${error.message}
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function exibirResultado(data) {
+    const resultado = document.getElementById('resultado');
+
+    let html = `
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle-fill"></i> Mapa de Raízes Digitais (01-31)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Raiz</th>
+                                <th>Números</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.mapa_raizes.forEach(item => {
+        html += `
+            <tr>
+                <td class="text-center"><strong class="fs-5">${item.raiz}</strong></td>
+                <td>${item.numeros.join(', ')}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-fill"></i> Distribuição de Raízes Digitais (${data.total_concursos} concursos)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Posição</th>
+                                <th>Raiz Digital</th>
+                                <th>Frequência Total</th>
+                                <th>Percentual</th>
+                                <th>Média por Sorteio</th>
+                                <th>Barra Visual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    data.distribuicao_raizes.forEach((raiz, index) => {
+        const posicao = index < 3 ? medalhas[index] : `${index + 1}º`;
+        const destaque = index < 3 ? 'table-success' : '';
+        const larguraBarra = Math.min(raiz.porcentagem * 8, 100);
+
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${posicao}</strong></td>
+                <td class="text-center"><span class="badge bg-primary fs-6">${raiz.raiz}</span></td>
+                <td><strong>${raiz.frequencia}x</strong></td>
+                <td>${raiz.porcentagem}%</td>
+                <td>${raiz.media_por_sorteio}</td>
+                <td>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: ${larguraBarra}%"
+                             aria-valuenow="${raiz.porcentagem}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            ${raiz.porcentagem}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trophy-fill"></i> Top 20 Padrões de Raízes Digitais
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Posição</th>
+                                <th>Padrão</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                                <th>Atraso</th>
+                                <th>Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.padroes.forEach((padrao, index) => {
+        const posicao = index < 3 ? medalhas[index] : `${index + 1}º`;
+        const destaque = index < 3 ? 'table-success' : '';
+        const badgeColor = padrao.atraso > 50 ? 'danger' : padrao.atraso > 20 ? 'warning' : 'success';
+
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${posicao}</strong></td>
+                <td><small>${padrao.padrao}</small></td>
+                <td><strong>${padrao.frequencia}x</strong></td>
+                <td>${padrao.percentual}%</td>
+                <td>${padrao.ultimo_concurso}</td>
+                <td><span class="badge bg-${badgeColor}">${padrao.atraso}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info" onclick="toggleDetalhes('detalhes-${index}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr id="detalhes-${index}" style="display: none;">
+                <td colspan="7">
+                    <div class="p-3 bg-light">
+                        <h6>Últimos 5 concursos com este padrão:</h6>
+                        <ul class="mb-0">
+        `;
+
+        padrao.concursos.slice(0, 5).forEach(concurso => {
+            html += `
+                <li>
+                    <strong>Concurso ${concurso.concurso}</strong> (${concurso.data}):<br>
+                    Números: ${concurso.numeros.join(', ')}<br>
+                    Raízes: <span class="text-primary">${concurso.raizes.join(', ')}</span>
+                </li>
+            `;
+        });
+
+        html += `
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    resultado.innerHTML = html;
+    resultado.style.display = 'block';
+}
+
+function toggleDetalhes(id) {
+    const elemento = document.getElementById(id);
+    if (elemento.style.display === 'none') {
+        elemento.style.display = 'table-row';
+    } else {
+        elemento.style.display = 'none';
+    }
+}
+
+function gerarInsights(data) {
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+
+    const top3_raizes = data.distribuicao_raizes.slice(0, 3);
+    const bottom3_raizes = data.distribuicao_raizes.slice(-3);
+    const top3_padroes = data.padroes.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    let html = `
+        <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-trophy-fill text-warning"></i> Top 3 Raízes Mais Frequentes:</h6>
+            <ul class="list-group">
+    `;
+
+    top3_raizes.forEach((raiz, index) => {
+        html += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${medalhas[index]} <strong>Raiz ${raiz.raiz}</strong></span>
+                <span>
+                    <span class="badge bg-primary rounded-pill">${raiz.frequencia}x</span>
+                    <span class="badge bg-info rounded-pill">${raiz.porcentagem}%</span>
+                    <span class="badge bg-secondary rounded-pill">Média: ${raiz.media_por_sorteio}</span>
+                </span>
+            </li>
+        `;
+    });
+
+    html += `
+            </ul>
+        </div>
+
+        <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-star-fill text-primary"></i> Top 3 Padrões Mais Frequentes:</h6>
+            <ul class="list-group">
+    `;
+
+    top3_padroes.forEach((padrao, index) => {
+        html += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${medalhas[index]} <strong>${padrao.padrao}</strong></span>
+                <span>
+                    <span class="badge bg-primary rounded-pill">${padrao.frequencia}x</span>
+                    <span class="badge bg-info rounded-pill">${padrao.percentual}%</span>
+                </span>
+            </li>
+        `;
+    });
+
+    html += `
+            </ul>
+        </div>
+
+        <div class="alert alert-success">
+            <h6 class="fw-bold"><i class="bi bi-check-circle-fill"></i> Raízes Mais Comuns:</h6>
+            <p class="mb-0">
+                As raízes <strong>${top3_raizes[0].raiz}</strong>, <strong>${top3_raizes[1].raiz}</strong> e <strong>${top3_raizes[2].raiz}</strong>
+                são as mais frequentes nos sorteios.<br>
+                Raiz ${top3_raizes[0].raiz} aparece em média <strong>${top3_raizes[0].media_por_sorteio}</strong> vezes por sorteio.
+            </p>
+        </div>
+
+        <div class="alert alert-warning">
+            <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Raízes Menos Comuns:</h6>
+            <p class="mb-0">
+                As raízes <strong>${bottom3_raizes[0].raiz}</strong>, <strong>${bottom3_raizes[1].raiz}</strong> e <strong>${bottom3_raizes[2].raiz}</strong>
+                são as menos frequentes.
+            </p>
+        </div>
+
+        <div class="alert alert-primary">
+            <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas:</h6>
+            <ul class="mb-0">
+                <li>Priorize números com raiz digital <strong>${top3_raizes[0].raiz}</strong> (mais frequente)</li>
+                <li>Considere também raízes <strong>${top3_raizes[1].raiz}</strong> e <strong>${top3_raizes[2].raiz}</strong></li>
+                <li>O padrão mais comum é <strong>${top3_padroes[0].padrao}</strong> (${top3_padroes[0].percentual}%)</li>
+                <li>Diversifique as raízes digitais em seu jogo para cobrir mais possibilidades</li>
+            </ul>
+        </div>
+
+        <div class="alert alert-light border">
+            <h6 class="fw-bold"><i class="bi bi-info-circle-fill"></i> O que é Raiz Digital?</h6>
+            <p class="mb-0">
+                A <strong>raiz digital</strong> é obtida somando repetidamente os dígitos até obter um número de 1 a 9.<br>
+                <strong>Exemplos:</strong><br>
+                • Número <strong>29</strong>: 2+9 = 11 → 1+1 = <strong>2</strong> (raiz digital)<br>
+                • Número <strong>18</strong>: 1+8 = <strong>9</strong> (raiz digital)<br>
+                • Número <strong>7</strong>: <strong>7</strong> (raiz digital - já é um dígito)<br>
+                • Número <strong>25</strong>: 2+5 = <strong>7</strong> (raiz digital)
+            </p>
+        </div>
+    `;
+
+    insightsContent.innerHTML = html;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+{% endblock %}

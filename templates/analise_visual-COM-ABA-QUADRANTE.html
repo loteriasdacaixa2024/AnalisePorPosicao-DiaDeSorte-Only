@@ -1,0 +1,1312 @@
+{% extends "base.html" %}
+
+{% block title %}Análise Visual - Dia de Sorte{% endblock %}
+
+{% block content %}
+
+<!-- Estilos específicos para visualização -->
+<style>
+/* ============================================
+   ESTILOS GERAIS
+   ============================================ */
+
+.visualizacao-container {
+    min-height: 80vh;
+}
+
+/* ============================================
+   ABA PRINCIPAL - GRADE 01-31 (ESTILO VOLANTE)
+   ============================================ */
+
+.linha-concurso {
+    display: flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s;
+    gap: 10px;
+}
+
+.linha-concurso:hover {
+    background-color: rgba(212, 179, 26, 0.1);
+}
+
+/* Informações do concurso em linha */
+.info-concurso {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.info-concurso .numero-concurso {
+    font-weight: bold;
+    color: #1a1a2e;
+    font-size: 13px;
+}
+
+.info-concurso .data-concurso {
+    color: #666;
+    font-size: 11px;
+}
+
+.info-concurso .dia-semana {
+    color: #999;
+    font-size: 10px;
+}
+
+/* Grade horizontal de 31 números (estilo volante) */
+.grade-31 {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+    overflow-x: auto;
+}
+
+.numero-31 {
+    width: 30px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+/* Número NÃO sorteado - cinza claro */
+.numero-31.nao-sorteado {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    border: 1px solid #dee2e6;
+}
+
+/* Número SORTEADO - amarelo/dourado com texto preto */
+.numero-31.sorteado {
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #FFA500;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+}
+
+/* ============================================
+   ABA CÍRCULOS - ESTILO VOLANTE COMPACTO
+   ============================================ */
+
+/* Container dos cards - grid mais denso */
+.grid-circulos-compacto {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 6px;
+    padding: 4px;
+}
+
+.card-circulo {
+    background: linear-gradient(180deg, #fff9e6 0%, #fff 100%);
+    border: 1px solid #F4D03F;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.card-circulo .header-circulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #F4D03F;
+    font-size: 11px;
+}
+
+.card-circulo .header-circulo strong {
+    font-size: 12px;
+}
+
+.card-circulo .header-circulo small {
+    font-size: 10px;
+}
+
+/* Grade 10 colunas compacta */
+.grade-circulos {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+}
+
+.numero-circulo {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.numero-circulo.nao-sorteado {
+    background-color: #f8f9fa;
+    color: #999;
+    border: 1px solid #dee2e6;
+}
+
+.numero-circulo.sorteado {
+    background-color: #F39C12;
+    color: #fff;
+    border: 1px solid #E67E22;
+}
+
+
+/* ============================================
+   ABA COMPACTO 6x6 - LAYOUT ULTRA COMPACTO
+   ============================================ */
+
+/* Container grid denso */
+.grid-compacto-denso {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 4px;
+    padding: 4px;
+}
+
+.card-compacto {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+.card-compacto .header-compacto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 10px;
+}
+
+.card-compacto .header-compacto strong {
+    font-size: 11px;
+}
+
+.grade-compacta {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2px;
+}
+
+.numero-compacto {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.numero-compacto.nao-sorteado {
+    background-color: #f5f5f5;
+    color: #aaa;
+    border: 1px solid #e0e0e0;
+}
+
+.numero-compacto.sorteado {
+    background-color: #F39C12;
+    color: #fff;
+    border: 1px solid #E67E22;
+}
+
+/* ============================================
+   ABA LINHA HORIZONTAL
+   ============================================ */
+
+.item-linha-horizontal {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    border-bottom: 1px solid #e9ecef;
+    gap: 15px;
+}
+
+.item-linha-horizontal:hover {
+    background-color: rgba(243, 156, 18, 0.05);
+}
+
+.info-linha-h {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+    white-space: nowrap;
+}
+
+.info-linha-h .numero-concurso {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.info-linha-h .data-concurso {
+    color: #666;
+    font-size: 11px;
+}
+
+.numeros-linha-h {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.numero-linha-h {
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #F39C12;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(243, 156, 18, 0.3);
+}
+
+/* ============================================
+   ABA LISTA VERTICAL - LAYOUT COMPACTO
+   ============================================ */
+
+/* Container grid denso para vertical */
+.grid-vertical-denso {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 4px;
+    padding: 4px;
+}
+
+.card-vertical {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.header-vertical {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 4px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 3px;
+}
+
+.header-vertical .numero-concurso {
+    font-weight: bold;
+    font-size: 10px;
+    color: #333;
+}
+
+.header-vertical .data-concurso {
+    font-size: 8px;
+    color: #888;
+}
+
+.lista-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+}
+
+.numero-lista-v {
+    width: 32px;
+    padding: 3px 0;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #F39C12;
+    color: #fff;
+}
+
+.footer-vertical {
+    text-align: center;
+    margin-top: 3px;
+    padding-top: 2px;
+    border-top: 1px solid #eee;
+}
+
+/* ============================================
+   MESES DA SORTE
+   ============================================ */
+
+.badge-mes {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ============================================
+   ABA QUADRANTES - LAYOUT COMPACTO SEM GRÁFICOS
+   ============================================ */
+
+.quadrantes-container {
+    padding: 10px;
+}
+
+/* Volante Visual Compacto */
+.volante-visual {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.volante-titulo {
+    background-color: #FF9800;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.volante-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.quadrante-box {
+    background-color: white;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+}
+
+.numero-quadrante {
+    background-color: #FFD700;
+    border: 1px solid #333;
+    color: #000;
+    font-weight: bold;
+    font-size: 11px;
+    text-align: center;
+    padding: 4px 2px;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.numero-quadrante.vazio {
+    background-color: #333;
+    border-color: #333;
+}
+
+.numero-quadrante .freq-mini {
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.freq-max { color: #28a745; }
+.freq-min { color: #dc3545; }
+.freq-normal { color: #555; }
+
+.quadrante-label {
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    margin-top: 3px;
+    font-size: 10px;
+}
+
+/* Estatísticas Compactas */
+.stats-quadrantes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.stat-quadrante {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+}
+
+.stat-quadrante .q-numero {
+    font-size: 11px;
+    color: #666;
+    font-weight: 600;
+}
+
+.stat-quadrante .q-valor {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-quadrante .q-media {
+    font-size: 9px;
+    color: #888;
+}
+
+/* Top Padrões Compacto */
+.padroes-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.padrao-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 11px;
+    gap: 8px;
+}
+
+.padrao-item:hover {
+    background-color: #f8f9fa;
+}
+
+.padrao-item.top3 {
+    background-color: #fff8e1;
+}
+
+.padrao-rank {
+    font-weight: bold;
+    width: 24px;
+    text-align: center;
+}
+
+.padrao-rank.gold { color: #FFD700; }
+.padrao-rank.silver { color: #C0C0C0; }
+.padrao-rank.bronze { color: #CD7F32; }
+
+.padrao-pattern {
+    font-family: monospace;
+    font-size: 10px;
+    color: #333;
+    flex: 1;
+}
+
+.padrao-freq {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.padrao-perc {
+    color: #666;
+    font-size: 10px;
+}
+
+/* Insights Compactos */
+.insight-box {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.insight-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1565c0;
+    margin-bottom: 6px;
+}
+
+.insight-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+.insight-desc {
+    font-size: 10px;
+    color: #666;
+}
+
+/* ============================================
+   LOADING E SCROLL
+   ============================================ */
+
+.container-scroll {
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    color: #666;
+}
+
+/* ============================================
+   RESPONSIVO
+   ============================================ */
+
+@media (max-width: 768px) {
+    .info-concurso {
+        min-width: 100px;
+        font-size: 10px;
+    }
+
+    .numero-31 {
+        width: 22px;
+        height: 22px;
+        font-size: 9px;
+    }
+
+    .grid-circulos-compacto {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    .numero-circulo {
+        width: 20px;
+        height: 20px;
+        font-size: 8px;
+    }
+
+    .grid-compacto-denso {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .numero-compacto {
+        width: 22px;
+        height: 22px;
+        font-size: 8px;
+    }
+
+    .grid-vertical-denso {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
+
+    .numero-lista-v {
+        width: 28px;
+        font-size: 10px;
+        padding: 2px 0;
+    }
+}
+</style>
+
+<div class="container-fluid py-4 visualizacao-container">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #D4B31A 0%, #F4D03F 100%);">
+                <div class="card-body text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title mb-1">
+                                <i class="fas fa-eye"></i>
+                                Análise Visual
+                            </h2>
+                            <p class="mb-0">
+                                Visualização gráfica dos resultados do Dia de Sorte
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <div id="statsHeader">
+                                <span class="badge bg-dark" id="badgeTotalConcursos">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abas de Visualização -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white">
+            <ul class="nav nav-tabs card-header-tabs" id="tabsVisualizacao" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-principal" data-bs-toggle="tab"
+                            data-bs-target="#pane-principal" type="button">
+                        <i class="fas fa-th"></i> Principal (01-31)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-circulos" data-bs-toggle="tab"
+                            data-bs-target="#pane-circulos" type="button">
+                        <i class="fas fa-circle"></i> Círculos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-compacto" data-bs-toggle="tab"
+                            data-bs-target="#pane-compacto" type="button">
+                        <i class="fas fa-grip-horizontal"></i> Compacto 6x6
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-horizontal" data-bs-toggle="tab"
+                            data-bs-target="#pane-horizontal" type="button">
+                        <i class="fas fa-arrows-alt-h"></i> Linha Horizontal
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-vertical" data-bs-toggle="tab"
+                            data-bs-target="#pane-vertical" type="button">
+                        <i class="fas fa-arrows-alt-v"></i> Lista Vertical
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-quadrantes" data-bs-toggle="tab"
+                            data-bs-target="#pane-quadrantes" type="button">
+                        <i class="fas fa-th-large"></i> Quadrantes
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body">
+            <!-- Controles -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-sort"></i></span>
+                        <select class="form-select" id="selectOrdem">
+                            <option value="desc">Mais recente primeiro</option>
+                            <option value="asc">Mais antigo primeiro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                        <select class="form-select" id="selectLimite">
+                            <option value="50">Últimos 50</option>
+                            <option value="100">Últimos 100</option>
+                            <option value="200">Últimos 200</option>
+                            <option value="500">Últimos 500</option>
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check form-switch mt-2" id="toggleOrdemContainer" style="display: none;">
+                        <input class="form-check-input" type="checkbox" id="toggleOrdemNumeros">
+                        <label class="form-check-label" for="toggleOrdemNumeros">
+                            Ordem Crescente (padrão: Ordem de Sorteio)
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" id="btnCarregar">
+                        <i class="fas fa-sync-alt"></i> Carregar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conteúdo das Abas -->
+            <div class="tab-content" id="tabsVisualizacaoContent">
+
+                <!-- Aba Principal (01-31) -->
+                <div class="tab-pane fade show active" id="pane-principal" role="tabpanel">
+                    <div class="container-scroll" id="containerPrincipal">
+                        <div class="loading-overlay" id="loadingPrincipal">
+                            <div class="spinner-border text-warning mb-3" role="status"></div>
+                            <span>Carregando concursos...</span>
+                        </div>
+                        <div id="listaPrincipal"></div>
+                    </div>
+                </div>
+
+                <!-- Aba Círculos -->
+                <div class="tab-pane fade" id="pane-circulos" role="tabpanel">
+                    <div class="container-scroll" id="containerCirculos">
+                        <div class="grid-circulos-compacto" id="listaCirculos"></div>
+                    </div>
+                </div>
+
+                <!-- Aba Compacto -->
+                <div class="tab-pane fade" id="pane-compacto" role="tabpanel">
+                    <div class="container-scroll" id="containerCompacto">
+                        <div class="grid-compacto-denso" id="listaCompacto"></div>
+                    </div>
+                </div>
+
+                <!-- Aba Linha Horizontal -->
+                <div class="tab-pane fade" id="pane-horizontal" role="tabpanel">
+                    <div class="container-scroll" id="containerHorizontal">
+                        <div id="listaHorizontal"></div>
+                    </div>
+                </div>
+
+                <!-- Aba Lista Vertical -->
+                <div class="tab-pane fade" id="pane-vertical" role="tabpanel">
+                    <div class="container-scroll" id="containerVertical">
+                        <div class="grid-vertical-denso" id="listaVertical"></div>
+                    </div>
+                </div>
+
+                <!-- Aba Quadrantes -->
+                <div class="tab-pane fade" id="pane-quadrantes" role="tabpanel">
+                    <div class="quadrantes-container">
+                        <div id="loadingQuadrantes" class="text-center py-4">
+                            <div class="spinner-border text-warning" role="status"></div>
+                            <p class="mt-2 small text-muted">Carregando análise de quadrantes...</p>
+                        </div>
+                        <div id="conteudoQuadrantes" style="display: none;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================
+// VARIÁVEIS GLOBAIS
+// ============================================
+
+let concursosCarregados = [];
+let ordemNumeros = 'sorteio'; // 'sorteio' ou 'crescente'
+
+// Cores dos meses
+const CORES_MESES = {
+    1: '#E74C3C', 2: '#9B59B6', 3: '#3498DB', 4: '#1ABC9C',
+    5: '#2ECC71', 6: '#F1C40F', 7: '#E67E22', 8: '#E74C3C',
+    9: '#8E44AD', 10: '#2980B9', 11: '#16A085', 12: '#27AE60'
+};
+
+const NOMES_MESES = {
+    1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+    5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+    9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+};
+
+// ============================================
+// INICIALIZAÇÃO
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Event Listeners
+    document.getElementById('btnCarregar').addEventListener('click', carregarConcursos);
+    document.getElementById('selectOrdem').addEventListener('change', carregarConcursos);
+    document.getElementById('selectLimite').addEventListener('change', carregarConcursos);
+    document.getElementById('toggleOrdemNumeros').addEventListener('change', function() {
+        ordemNumeros = this.checked ? 'crescente' : 'sorteio';
+        renderizarTodasAbas();
+    });
+
+    // Mostrar toggle de ordem nas abas que suportam
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            const targetId = e.target.getAttribute('data-bs-target');
+            const toggleContainer = document.getElementById('toggleOrdemContainer');
+
+            // Mostrar toggle apenas nas abas que faz sentido
+            if (['#pane-compacto', '#pane-horizontal', '#pane-vertical'].includes(targetId)) {
+                toggleContainer.style.display = 'block';
+            } else {
+                toggleContainer.style.display = 'none';
+            }
+        });
+    });
+
+    // Carregar estatísticas e concursos iniciais
+    carregarEstatisticas();
+    carregarConcursos();
+});
+
+// ============================================
+// CARREGAR DADOS
+// ============================================
+
+async function carregarEstatisticas() {
+    try {
+        const response = await fetch('/analise-visual/api/estatisticas');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            const stats = data.estatisticas;
+            document.getElementById('badgeTotalConcursos').innerHTML = `
+                <i class="fas fa-database"></i> ${stats.total_concursos} concursos
+                <small class="ms-2">(${stats.primeiro_concurso} - ${stats.ultimo_concurso})</small>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+    }
+}
+
+async function carregarConcursos() {
+    const ordem = document.getElementById('selectOrdem').value;
+    const limite = document.getElementById('selectLimite').value;
+
+    // Mostrar loading
+    document.getElementById('loadingPrincipal').style.display = 'flex';
+    document.getElementById('listaPrincipal').innerHTML = '';
+
+    try {
+        let url = `/analise-visual/api/concursos?ordem=${ordem}`;
+        if (limite) {
+            url += `&limite=${limite}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.sucesso) {
+            concursosCarregados = data.concursos;
+            renderizarTodasAbas();
+        } else {
+            mostrarErro('Erro ao carregar concursos: ' + data.erro);
+        }
+
+    } catch (error) {
+        console.error('Erro ao carregar concursos:', error);
+        mostrarErro('Erro de conexão ao carregar concursos');
+    } finally {
+        document.getElementById('loadingPrincipal').style.display = 'none';
+    }
+}
+
+// ============================================
+// RENDERIZAÇÃO
+// ============================================
+
+function renderizarTodasAbas() {
+    renderizarAbaPrincipal();
+    renderizarAbaCirculos();
+    renderizarAbaCompacto();
+    renderizarAbaHorizontal();
+    renderizarAbaVertical();
+}
+
+function renderizarAbaPrincipal() {
+    const container = document.getElementById('listaPrincipal');
+
+    if (concursosCarregados.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted p-4">Nenhum concurso encontrado</p>';
+        return;
+    }
+
+    let html = '';
+    concursosCarregados.forEach(concurso => {
+        const numeros = concurso.numeros_ordenados; // Sempre ordenado na aba principal
+
+        html += `
+            <div class="linha-concurso" title="Concurso ${concurso.concurso} - ${concurso.data} - Mês: ${concurso.mes_sorte_nome}">
+                <div class="info-concurso">
+                    <div class="numero-concurso">#${concurso.concurso}</div>
+                    <div class="data-concurso">${concurso.data || 'N/A'}</div>
+                    <div class="dia-semana">${concurso.dia_semana_abrev || ''}</div>
+                </div>
+                <div class="grade-31">
+                    ${gerarGrade31(numeros)}
+                </div>
+                <div class="ms-2">
+                    <span class="badge badge-mes" style="background-color: ${CORES_MESES[concurso.mes_sorte]}; color: white;">
+                        ${concurso.mes_sorte_nome ? concurso.mes_sorte_nome.substring(0, 3) : ''}
+                    </span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function gerarGrade31(numerosSorteados) {
+    let html = '';
+    for (let n = 1; n <= 31; n++) {
+        const sorteado = numerosSorteados.includes(n);
+        const classe = sorteado ? 'sorteado' : 'nao-sorteado';
+        html += `<div class="numero-31 ${classe}">${String(n).padStart(2, '0')}</div>`;
+    }
+    return html;
+}
+
+function renderizarAbaCirculos() {
+    const container = document.getElementById('listaCirculos');
+
+    if (concursosCarregados.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted p-4">Nenhum concurso encontrado</p>';
+        return;
+    }
+
+    let html = '';
+    concursosCarregados.forEach(concurso => {
+        const numeros = concurso.numeros_ordenados;
+
+        html += `
+            <div class="card-circulo">
+                <div class="header-circulo">
+                    <div>
+                        <strong>#${concurso.concurso}</strong>
+                        <small class="text-muted">${concurso.data || ''}</small>
+                    </div>
+                    <span class="badge" style="background-color: ${CORES_MESES[concurso.mes_sorte]}; color: white; font-size: 9px; padding: 2px 6px;">
+                        ${concurso.mes_sorte_nome ? concurso.mes_sorte_nome.substring(0, 3) : ''}
+                    </span>
+                </div>
+                <div class="grade-circulos">
+                    ${gerarGradeCirculos10Colunas(numeros)}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function gerarGradeCirculos10Colunas(numerosSorteados) {
+    let html = '';
+    // Gerar todos os 31 números em sequência
+    // O CSS de grid 10 colunas vai dispor automaticamente:
+    // Linha 1: 01-10
+    // Linha 2: 11-20
+    // Linha 3: 21-30
+    // Linha 4: 31
+    for (let n = 1; n <= 31; n++) {
+        const sorteado = numerosSorteados.includes(n);
+        const classe = sorteado ? 'sorteado' : 'nao-sorteado';
+        html += `<div class="numero-circulo ${classe}">${String(n).padStart(2, '0')}</div>`;
+    }
+    return html;
+}
+
+function renderizarAbaCompacto() {
+    const container = document.getElementById('listaCompacto');
+
+    if (concursosCarregados.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted p-4">Nenhum concurso encontrado</p>';
+        return;
+    }
+
+    let html = '';
+    concursosCarregados.forEach(concurso => {
+        const numeros = ordemNumeros === 'crescente' ? concurso.numeros_ordenados : concurso.numeros;
+
+        html += `
+            <div class="card-compacto">
+                <div class="header-compacto">
+                    <div>
+                        <strong>#${concurso.concurso}</strong>
+                        <small class="text-muted ms-1">${concurso.data || ''}</small>
+                    </div>
+                    <span class="badge" style="background-color: ${CORES_MESES[concurso.mes_sorte]}; color: white; font-size: 8px; padding: 2px 5px;">
+                        ${concurso.mes_sorte_nome ? concurso.mes_sorte_nome.substring(0, 3) : ''}
+                    </span>
+                </div>
+                <div class="grade-compacta">
+                    ${gerarGradeCompacta(numeros)}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function gerarGradeCompacta(numerosSorteados) {
+    let html = '';
+    for (let n = 1; n <= 31; n++) {
+        const sorteado = numerosSorteados.includes(n);
+        const classe = sorteado ? 'sorteado' : 'nao-sorteado';
+        html += `<div class="numero-compacto ${classe}">${String(n).padStart(2, '0')}</div>`;
+    }
+    // Adicionar célula vazia para completar grade 6x6 (36 posições, temos 31)
+    for (let i = 0; i < 5; i++) {
+        html += `<div class="numero-compacto" style="visibility: hidden;">00</div>`;
+    }
+    return html;
+}
+
+function renderizarAbaHorizontal() {
+    const container = document.getElementById('listaHorizontal');
+
+    if (concursosCarregados.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted p-4">Nenhum concurso encontrado</p>';
+        return;
+    }
+
+    let html = '';
+    concursosCarregados.forEach(concurso => {
+        const numeros = ordemNumeros === 'crescente' ? concurso.numeros_ordenados : concurso.numeros;
+
+        html += `
+            <div class="item-linha-horizontal">
+                <div class="info-linha-h">
+                    <span class="numero-concurso">#${concurso.concurso}</span>
+                    <span class="data-concurso">${concurso.data || ''}</span>
+                    <span class="badge badge-mes" style="background-color: ${CORES_MESES[concurso.mes_sorte]}; color: white;">
+                        ${concurso.mes_sorte_nome ? concurso.mes_sorte_nome.substring(0, 3) : ''}
+                    </span>
+                </div>
+                <div class="numeros-linha-h">
+                    ${numeros.map(n => `<span class="numero-linha-h">${String(n).padStart(2, '0')}</span>`).join('')}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function renderizarAbaVertical() {
+    const container = document.getElementById('listaVertical');
+
+    if (concursosCarregados.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted p-4">Nenhum concurso encontrado</p>';
+        return;
+    }
+
+    let html = '';
+    concursosCarregados.forEach(concurso => {
+        const numeros = ordemNumeros === 'crescente' ? concurso.numeros_ordenados : concurso.numeros;
+
+        html += `
+            <div class="card-vertical">
+                <div class="header-vertical">
+                    <span class="numero-concurso">#${concurso.concurso}</span>
+                    <span class="data-concurso">${concurso.data ? concurso.data.substring(0, 5) : ''}</span>
+                </div>
+                <div class="lista-vertical">
+                    ${numeros.map(n => `<span class="numero-lista-v">${String(n).padStart(2, '0')}</span>`).join('')}
+                </div>
+                <div class="footer-vertical">
+                    <span class="badge" style="background-color: ${CORES_MESES[concurso.mes_sorte]}; color: white; font-size: 8px; padding: 1px 4px;">
+                        ${concurso.mes_sorte_nome ? concurso.mes_sorte_nome.substring(0, 3) : ''}
+                    </span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// ============================================
+// ABA QUADRANTES
+// ============================================
+
+let dadosQuadrantes = null;
+let quadrantesCarregados = false;
+
+// Estrutura dos quadrantes do volante
+const QUADRANTES_CONFIG = {
+    1: [1, 2, 3, 4],
+    2: [5, 6, 7, 8],
+    3: [9, 10, 11, 12],
+    4: [13, 14, 15, 16],
+    5: [17, 18, 19, 20],
+    6: [21, 22, 23, 24],
+    7: [25, 26, 27, 28],
+    8: [29, 30, 31, 0] // 0 = vazio
+};
+
+async function carregarQuadrantes() {
+    if (quadrantesCarregados && dadosQuadrantes) {
+        renderizarQuadrantes(dadosQuadrantes);
+        return;
+    }
+
+    document.getElementById('loadingQuadrantes').style.display = 'block';
+    document.getElementById('conteudoQuadrantes').style.display = 'none';
+
+    try {
+        const response = await fetch('/api/analise/quadrantes-volante');
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        dadosQuadrantes = data;
+        quadrantesCarregados = true;
+        renderizarQuadrantes(data);
+
+    } catch (error) {
+        console.error('Erro ao carregar quadrantes:', error);
+        document.getElementById('conteudoQuadrantes').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Erro ao carregar: ${error.message}
+            </div>
+        `;
+        document.getElementById('conteudoQuadrantes').style.display = 'block';
+    } finally {
+        document.getElementById('loadingQuadrantes').style.display = 'none';
+    }
+}
+
+function renderizarQuadrantes(data) {
+    const container = document.getElementById('conteudoQuadrantes');
+
+    // Encontrar quadrante mais frequente
+    const medias = data.media_quadrantes;
+    let qMaisFreq = 1;
+    let maxMedia = 0;
+    for (let q = 1; q <= 8; q++) {
+        if (medias[q] > maxMedia) {
+            maxMedia = medias[q];
+            qMaisFreq = q;
+        }
+    }
+
+    let html = `
+        <div class="row">
+            <!-- Coluna Esquerda: Volante + Stats -->
+            <div class="col-lg-6">
+                <!-- Volante Visual -->
+                <div class="volante-visual">
+                    <div class="volante-titulo">
+                        <i class="fas fa-th-large"></i> QUADRANTES DA DIA DE SORTE
+                    </div>
+                    <div class="volante-grid">
+                        ${renderizarVolanteQuadrantes(data)}
+                    </div>
+                </div>
+
+                <!-- Estatísticas por Quadrante -->
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2"><i class="fas fa-chart-bar"></i> Estatísticas (${data.total_concursos} concursos)</h6>
+                    <div class="stats-quadrantes">
+                        ${Object.keys(data.frequencia_por_quadrante).map(q => `
+                            <div class="stat-quadrante ${parseInt(q) === qMaisFreq ? 'border-success' : ''}">
+                                <div class="q-numero">Q${q}</div>
+                                <div class="q-valor">${data.frequencia_por_quadrante[q]}</div>
+                                <div class="q-media">μ ${data.media_quadrantes[q]}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Insights -->
+                <div class="row">
+                    <div class="col-6">
+                        <div class="insight-box">
+                            <div class="insight-title"><i class="fas fa-trophy"></i> Quadrante + Frequente</div>
+                            <div class="insight-value">Q${qMaisFreq}</div>
+                            <div class="insight-desc">Média: ${medias[qMaisFreq]} por sorteio</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="insight-box" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                            <div class="insight-title" style="color: #c62828;"><i class="fas fa-users"></i> Vizinhos</div>
+                            <div class="insight-value" style="color: #b71c1c;">${data.analise_vizinhos.percentual}%</div>
+                            <div class="insight-desc">aparecem com vizinhos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Top Padrões -->
+            <div class="col-lg-6">
+                <h6 class="fw-bold mb-2"><i class="fas fa-trophy"></i> Top 20 Padrões Mais Frequentes</h6>
+                <div class="padroes-container border rounded">
+                    ${renderizarTopPadroes(data.padroes)}
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+    container.style.display = 'block';
+}
+
+function renderizarVolanteQuadrantes(data) {
+    let html = '';
+
+    for (let q = 1; q <= 8; q++) {
+        const numeros = QUADRANTES_CONFIG[q];
+        const freq = data.frequencia_por_quadrante[q];
+
+        html += `
+            <div>
+                <div class="quadrante-box">
+                    ${numeros.map(n => {
+                        if (n > 0) {
+                            const freqNum = data.frequencia_numeros[n] || 0;
+                            let freqClass = 'freq-normal';
+                            if (freqNum === data.max_freq) freqClass = 'freq-max';
+                            else if (freqNum === data.min_freq) freqClass = 'freq-min';
+
+                            return `
+                                <div class="numero-quadrante">
+                                    <span>${String(n).padStart(2, '0')}</span>
+                                    <span class="freq-mini ${freqClass}">${freqNum}</span>
+                                </div>
+                            `;
+                        } else {
+                            return `<div class="numero-quadrante vazio"></div>`;
+                        }
+                    }).join('')}
+                </div>
+                <div class="quadrante-label">Q${q} (${freq})</div>
+            </div>
+        `;
+    }
+
+    return html;
+}
+
+function renderizarTopPadroes(padroes) {
+    const medalhas = ['🥇', '🥈', '🥉'];
+    let html = '';
+
+    padroes.slice(0, 20).forEach((p, idx) => {
+        const isTop3 = idx < 3;
+        let rankClass = '';
+        if (idx === 0) rankClass = 'gold';
+        else if (idx === 1) rankClass = 'silver';
+        else if (idx === 2) rankClass = 'bronze';
+
+        html += `
+            <div class="padrao-item ${isTop3 ? 'top3' : ''}">
+                <span class="padrao-rank ${rankClass}">${isTop3 ? medalhas[idx] : (idx + 1)}</span>
+                <span class="padrao-pattern">${p.padrao}</span>
+                <span class="padrao-freq">${p.frequencia}x</span>
+                <span class="padrao-perc">${p.percentual}%</span>
+            </div>
+        `;
+    });
+
+    return html;
+}
+
+// Listener para carregar quadrantes quando a aba for selecionada
+document.addEventListener('DOMContentLoaded', function() {
+    const tabQuadrantes = document.getElementById('tab-quadrantes');
+    if (tabQuadrantes) {
+        tabQuadrantes.addEventListener('shown.bs.tab', function() {
+            carregarQuadrantes();
+        });
+    }
+});
+
+// ============================================
+// UTILIDADES
+// ============================================
+
+function mostrarErro(mensagem) {
+    document.getElementById('listaPrincipal').innerHTML = `
+        <div class="alert alert-danger m-3">
+            <i class="fas fa-exclamation-triangle"></i> ${mensagem}
+        </div>
+    `;
+}
+
+</script>
+{% endblock %}

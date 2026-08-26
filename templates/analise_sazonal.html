@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Análise Sazonal - Análise Avançada{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    .card { margin-bottom: 20px; }
+    .numero-badge {
+        display: inline-block;
+        min-width: 35px;
+        padding: 6px 10px;
+        margin: 3px;
+        background-color: #D4B31A;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-leaf"></i> Análise Sazonal</h1>
+    <p class="text-muted">Comportamento por trimestres, semestres e estações do ano</p>
+
+    <div id="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Carregando análise...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5> Análise por Trimestre</h5>
+                    </div>
+                    <div class="card-body" id="analiseTrimestres"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5> Análise por Semestre</h5>
+                    </div>
+                    <div class="card-body" id="analiseSemestres"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="fas fa-sun"></i> Análise por Estação</h5>
+                    </div>
+                    <div class="card-body" id="analiseEstacoes"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-chart-line"></i> Tendências Sazonais</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-striped">
+                            <thead><tr><th>Trimestre</th><th>Soma Média</th><th>Pares Médio</th><th>Sorteios</th></tr></thead>
+                            <tbody id="tabelaTendencias"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/analise/sazonal');
+        const data = await response.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            return;
+        }
+
+        // Trimestres
+        const divTrim = document.getElementById('analiseTrimestres');
+        divTrim.innerHTML = '';
+        (data.analise_por_trimestre || []).forEach(item => {
+            const top5 = item.top_dezenas.slice(0, 5).map(d => `<span class="numero-badge">${d.dezena}</span>`).join(' ');
+            divTrim.innerHTML += `
+                <div class="mb-3">
+                    <h6><strong>${item.nome}</strong> (${item.total_sorteios} sorteios)</h6>
+                    <p>Top Dezenas: ${top5}</p>
+                </div>
+            `;
+        });
+
+        // Semestres
+        const divSem = document.getElementById('analiseSemestres');
+        divSem.innerHTML = '';
+        (data.analise_por_semestre || []).forEach(item => {
+            const top5 = item.top_dezenas.slice(0, 5).map(d => `<span class="numero-badge">${d.dezena}</span>`).join(' ');
+            divSem.innerHTML += `
+                <div class="mb-3">
+                    <h6><strong>${item.nome}</strong> (${item.total_sorteios} sorteios)</h6>
+                    <p>${top5}</p>
+                </div>
+            `;
+        });
+
+        // Estações
+        const divEst = document.getElementById('analiseEstacoes');
+        divEst.innerHTML = '';
+        (data.analise_por_estacao || []).forEach(item => {
+            const top5 = item.top_dezenas.slice(0, 5).map(d => `<span class="numero-badge">${d.dezena}</span>`).join(' ');
+            divEst.innerHTML += `
+                <div class="mb-3">
+                    <h6><strong>${item.estacao}</strong> (${item.total_sorteios} sorteios)</h6>
+                    <p>${top5}</p>
+                </div>
+            `;
+        });
+
+        // Tendências
+        const tabelaTend = document.getElementById('tabelaTendencias');
+        tabelaTend.innerHTML = '';
+        (data.tendencias_sazonais || []).forEach(item => {
+            tabelaTend.innerHTML += `<tr><td>${item.nome}</td><td>${item.soma_media}</td><td>${item.pares_medio}</td><td>${item.total_sorteios}</td></tr>`;
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+carregarAnalise();
+</script>
+{% endblock %}

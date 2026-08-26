@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Análise de Ausentes (Escapes) - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #171303;
+        color: #fcf9e8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5 pb-5">
+    {% include 'analise_ausentes_pane.html' %}
+</div>
+{% endblock %}

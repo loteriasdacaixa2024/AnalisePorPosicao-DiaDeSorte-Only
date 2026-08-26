@@ -1,0 +1,238 @@
+<link rel="stylesheet" href="/static/css/locais_sorte.css">
+
+<div class="ls-dia-theme" id="pane-locais-sorte-root">
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header card-header-ls d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h5 class="mb-0">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                Relatório de Análise — Locais da Sorte (Dia de Sorte)
+            </h5>
+            <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-ls-primary" id="ls-btn-sync" onclick="lsSincronizarJson()">
+                    <i class="fas fa-database me-1"></i> Sincronizar JSON → SQL
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-dark" onclick="lsCarregarPainel()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body py-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <small class="text-muted">
+                    <i class="fas fa-folder-open"></i> Pasta exclusiva:
+                    <code id="ls-pasta-info" class="small">—</code>
+                </small>
+                <span id="ls-status-sync" class="small text-muted"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explicação rápida -->
+    <div class="alert alert-info mb-3" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Como usar este relatório?</strong>
+        <ul class="mb-0 mt-2 small">
+            <li><strong>Bolão vs Simples:</strong> Compara apostas em grupo (bolão) com apostas individuais. Note que a <em>média de prêmio por aposta</em> em bolões é geralmente maior!</li>
+            <li><strong>"LOTERIAS EM CANAIS ELETRONICOS":</strong> Representa apostas feitas online (aplicativo, site da Caixa) — não tem lotérica física associada!</li>
+        </ul>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <div class="text-muted small">Registros no SQL</div>
+                <div class="valor" id="ls-kpi-registros">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <div class="text-muted small">Concursos</div>
+                <div class="valor" id="ls-kpi-concursos">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <div class="text-muted small">Soma prêmios</div>
+                <div class="valor text-success" id="ls-kpi-premios">R$ 0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <div class="text-muted small">JSON na pasta / Última import.</div>
+                <div class="valor" style="font-size:1rem;">
+                    <span id="ls-kpi-json">0</span>
+                    <small class="text-muted d-block" id="ls-kpi-ultima">—</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparação inteligente -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="card comparativo-card shadow-sm h-100">
+                <div class="card-header bg-dark text-white py-2">
+                    <strong><i class="fas fa-balance-scale me-1"></i> Bolão vs Simples</strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Estratégia</th><th class="text-end">Apostas</th><th class="text-end">Total prêmios</th><th class="text-end">Média</th></tr></thead>
+                        <tbody id="ls-tbody-bolao-vs"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card comparativo-card shadow-sm h-100">
+                <div class="card-header py-2" style="background:#1a1a2e;color:#D4B31A;">
+                    <strong><i class="fas fa-chart-bar me-1"></i> Padrões por faixa de acertos</strong>
+                </div>
+                <div class="card-body p-0 scroll-tabela" style="max-height:220px;">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Acertos</th><th>Tipo</th><th class="text-end">Qtd</th><th class="text-end">Soma</th><th class="text-end">Média</th></tr></thead>
+                        <tbody id="ls-tbody-padroes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="card comparativo-card shadow-sm">
+                <div class="card-header py-2 small fw-bold">Top cidades</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0"><tbody id="ls-tbody-top-cidades"></tbody></table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card comparativo-card shadow-sm">
+                <div class="card-header py-2 small fw-bold">Top lotéricas</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0"><tbody id="ls-tbody-top-lotericas"></tbody></table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card comparativo-card shadow-sm">
+                <div class="card-header py-2 small fw-bold">Concursos mais lucrativos</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0"><tbody id="ls-tbody-top-concursos"></tbody></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-ls p-3 mb-3 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0 fw-bold"><i class="fas fa-filter text-warning"></i> Filtros avançados</h6>
+            <div>
+                <button type="button" class="btn btn-sm btn-ls-gold" onclick="lsAplicarFiltros()">Aplicar</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="lsLimparFiltros()">Limpar</button>
+            </div>
+        </div>
+        <div class="row g-2">
+            <div class="col-md-2">
+                <label>Busca global</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-busca" placeholder="Cidade, lotérica, concurso...">
+            </div>
+            <div class="col-md-1">
+                <label>Concurso</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-concurso" placeholder="=1217 ou >1200">
+            </div>
+            <div class="col-md-2">
+                <label>Local</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-local" placeholder="Cidade ou lotérica">
+            </div>
+            <div class="col-md-1">
+                <label>Acertos</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-acertos" placeholder="6 acertos">
+            </div>
+            <div class="col-md-1">
+                <label>Estratégia</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-estrategia" placeholder="Bolão">
+            </div>
+            <div class="col-md-1">
+                <label>Tipo aposta</label>
+                <select class="form-select form-select-sm ls-filtro-input" id="ls-filtro-tipo">
+                    <option value="">Todos</option>
+                    <option value="Simples">Simples</option>
+                    <option value="Bolão">Bolão</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label>Canal</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-canal" placeholder="Físico">
+            </div>
+            <div class="col-md-1">
+                <label>Valor (>, <, =)</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-valor" placeholder=">1000">
+            </div>
+            <div class="col-md-1">
+                <label>Cotas</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-cotas" placeholder="=1">
+            </div>
+            <div class="col-md-1">
+                <label>Nº apostados</label>
+                <input type="text" class="form-control form-control-sm ls-filtro-input" id="ls-filtro-numeros" placeholder="=7">
+            </div>
+        </div>
+        <p class="small text-muted mb-0 mt-2">
+            <i class="fas fa-info-circle"></i> Filtros numéricos: use <code>&gt;100</code>, <code>&lt;50</code> ou <code>=1217</code>. Dados vêm do SQL — não da pasta JSON.
+        </p>
+    </div>
+
+    <!-- Tabela principal -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 bg-white">
+            <span class="fw-bold"><i class="fas fa-table me-1"></i> Relatório inteligente</span>
+            <div class="d-flex align-items-center gap-2">
+                <select class="form-select form-select-sm" id="ls-ordenacao" style="width:auto;">
+                    <option value="concurso:desc">Concurso ↓</option>
+                    <option value="concurso:asc">Concurso ↑</option>
+                    <option value="valor_premio:desc">Prêmio ↓</option>
+                    <option value="valor_premio:asc">Prêmio ↑</option>
+                    <option value="cidade:asc">Cidade A-Z</option>
+                </select>
+                <select class="form-select form-select-sm" id="ls-por-pagina" style="width:auto;">
+                    <option value="25">25/pág</option>
+                    <option value="50" selected>50/pág</option>
+                    <option value="100">100/pág</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body p-0 scroll-tabela">
+            <table class="table table-hover table-sm table-ls mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-coluna="concurso">Concurso <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="cidade">Cidade <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="unidade_loterica">Lotérica <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="tipo_aposta">Tipo <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="faixa_acertos">Acertos <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="qtd_numeros_apostados">Nº <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="canal_vendas">Canal <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="cotas">Cotas <i class="fas fa-sort ms-1"></i></th>
+                        <th class="sortable" data-coluna="valor_premio">Valor <i class="fas fa-sort ms-1"></i></th>
+                        <th>Prêmio</th>
+                        <th class="sortable" data-coluna="data_importacao">Importado <i class="fas fa-sort ms-1"></i></th>
+                        <th>Arquivo</th>
+                    </tr>
+                </thead>
+                <tbody id="ls-tbody-relatorio"></tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="small text-muted" id="ls-info-paginacao">—</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-dark" id="ls-btn-pag-ant" onclick="lsPaginaAnterior()">Anterior</button>
+                <button type="button" class="btn btn-sm btn-ls-gold" id="ls-btn-pag-prox" onclick="lsPaginaProxima()">Próxima</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/locais_sorte_relatorio.js"></script>

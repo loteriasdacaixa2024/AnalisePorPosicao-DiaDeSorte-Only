@@ -1,0 +1,238 @@
+PROMPT PROFISSIONAL — NOVA ABA WEB “RELATÓRIO LOCAIS DA SORTE (DIA DE SORTE)”
+
+Você é um desenvolvedor sênior full-stack responsável por evoluir um sistema existente de análises de loterias.
+
+🎯 OBJETIVO GERAL
+
+Criar uma nova aba dentro da interface web existente (http://localhost:5151/central-conferencias) chamada:
+
+📊 Relatório de Análise — Locais da Sorte (Dia de Sorte)
+
+Esta aba será dedicada exclusivamente à modalidade Dia de Sorte, com foco em análise avançada, comparação de resultados e tomada de decisão sobre estratégias (bolões, apostas simples, etc).
+
+📁 ESTRUTURA DE DADOS (IMPORTANTE)
+
+Os dados já estão sendo baixados manualmente e armazenados em:
+
+D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\conferencias-locais-da-sorte\Dia-de-Sorte
+Regras:
+Essa pasta será exclusiva dessa nova interface
+Não interferir em outras modalidades já existentes
+Arquivos serão principalmente .json
+O sistema deve ler automaticamente todos os arquivos dessa pasta
+🧠 PIPELINE DE PROCESSAMENTO
+
+O sistema deve monitorar ou ler periodicamente a pasta:
+
+...\Dia-de-Sorte
+Cada arquivo .json deve ser:
+Validado
+Normalizado
+Inserido em banco de dados SQL
+O banco SQL será a base principal para consultas rápidas
+A interface web NÃO deve ler arquivos diretamente, apenas o banco
+🗄️ BANCO DE DADOS (SQL)
+
+Criar estrutura otimizada para consultas rápidas com:
+
+Índices em colunas filtráveis
+Suporte a busca por:
+concurso
+local
+posição
+acertos
+estratégia (bolão / simples / etc)
+modalidade (fixo: Dia de Sorte)
+🌐 INTERFACE WEB (NOVA ABA)
+
+Criar uma nova aba dentro do sistema:
+
+central-conferencias → Relatório Locais da Sorte
+🎨 UI/UX
+Tema baseado no Dia de Sorte
+Paleta sugerida:
+Amarelo dourado (#D4B31A e variações)
+Tons escuros para contraste
+Destaques em verde para acertos e vermelho para perdas
+📊 FUNCIONALIDADES DA ABA
+1. Tabela principal (relatório inteligente)
+
+Exibir todos os registros com:
+
+Concurso
+Local
+Estratégia
+Tipo de aposta (simples / bolão)
+Acertos
+ROI / desempenho (se existir)
+Data
+Observações
+2. Filtros avançados (OBRIGATÓRIO)
+
+Todos os campos da tabela devem ser filtráveis com:
+
+filtro textual (contains)
+filtro numérico (>, <, =)
+múltiplos filtros combinados
+busca global rápida (tipo “Google table search”)
+3. Comparação inteligente
+
+Permitir visualizar:
+
+Bolão vs aposta simples
+Locais mais eficientes
+Concursos mais lucrativos
+Padrões por posição
+4. Performance
+Consultas devem vir do SQL (não JSON direto)
+Paginação obrigatória
+Indexação para busca rápida
+Cache opcional para consultas repetidas
+⚙️ BACKEND
+
+Criar camada responsável por:
+
+Ler JSON da pasta:
+
+D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\conferencias-locais-da-sorte\Dia-de-Sorte
+Converter e inserir no SQL
+Atualizar incrementalmente (não duplicar registros)
+API REST para fornecer dados à interface
+🔄 FLUXO FINAL DO SISTEMA
+JSON (pasta local)
+      ↓
+ETL Python (importador)
+      ↓
+Banco SQL otimizado
+      ↓
+API Flask / Backend
+      ↓
+Interface Web (nova aba)
+🚨 IMPORTANTE
+O sistema atual já existente NÃO deve ser quebrado
+Essa implementação é modular e isolada
+Apenas a nova aba será adicionada
+A pasta existente continua sendo alimentada manualmente
+A nova interface é apenas para leitura + análise avançada
+🧩 RESULTADO ESPERADO
+
+Uma tela onde o usuário consiga:
+
+Ver claramente se bolões valem mais que apostas simples
+Comparar locais de sorte com precisão
+Filtrar qualquer dado instantaneamente
+Tomar decisões baseadas em estatísticas reais
+Trabalhar exclusivamente com Dia de Sorte sem interferência de outras modalidades
+
+
+
+python extrair_locais_sorte.py -m 3 --todos
+python extrair_locais_sorte.py -m 9 --todos
+
+
+
+
+VC DEVE DESDOBRAR DE DOIS EM DOIS  CADA COLUNA ESCOLHIDA...
+EXEMPLO... 
+ESCOLHI 3 COLUNAS ENTÃO  O SISTEMA DEVE DESDOBRAR CADA UMA DAS TRES COLUNAS DE DOIS EM DOIS
+VOU DAR UM EXEMPLO 
+COLUNA 1  ESCOLHIDA DESDOBRAR DE DOIS EM DOIS (MOSTRAR O  DESDOBRAMENTO)
+COLUNA 10 ESCOLHIDA DESDOBRAR DE DOIS EM DOIS (MOSTRAR O  DESDOBRAMENTO)
+COLUNA 07 ESCOLHIDA DESDOBRAR DE DOIS EM DOIS (MOSTRAR O  DESDOBRAMENTO)
+ENTÃO VAI SER DUPLA (DO DESDOBRAMENTO) E COMO SÃO  TRES COLUNAS.. VAI DAR 2,2,2 IGUAL  A 6 DEZENAS...
+AI  É SO  FAZER PARA 8 DEZENAS, 10,12,14,15,18,20 
+
+
+
+sl D:\loterias\AnalisePorPosicao-DiaDeSorte-Only\
+.\venv\scripts\activate
+
+
+python extrair_locais_sorte.py -m 1 --todos
+python extrair_locais_sorte.py -m 3 --todos
+
+
+
+vc  dis "Concursos com 3 linhas duplicadas " eu  esperavaverpelo mesnos  3  dezenas  na mesma linha ou  eu estou  errado ou  vc esta errado.. (rota http://localhost:5156/analise/ aba Linhas e Colunas
+
+
+
+
+observe o concurso numero 3010 os  resultados
+03 30 33 35 45 47
+sendo que foi  usado 2 colunas a  3 e 5 
+as dezenas 33 e 35 na mesma linha (duas dezenas por linha)
+as dezenas 35 e 45 na mesma linha  + ((duas dezenas por linha)
+
+ou seja este padrão mostra que 
+sairam duas dezenas em linhas separada
+duas dezenas na mesma linha porem em duas colunas...vou  tirar um  print pra vc entender..
+ou seja quero saber quantos sorteio sairam neste mesmo exato  padrão
+ou seja duas dezenas por  colunas
+tres dezenas por colunas
+quatro  dezenas por  coluna
+
+
+TOME COMO EXEMPLO
+D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\templates\central_conferencias.html (Concursos Disponiveis
+
+APLIQUE NO  MEGASENA...
+
+A PASTA ASER CHEGADA SEMPRE SERÁ ESTA..
+D:\Loterias\LoteriasPosicao\AnalisePorPosicao-MegaSena-Only\conferencia_apostas MAIS O  NUMERO DO CONCURSO...
+
+
+
+23 24 35 37 53 54 55 57
+15 23 24 33 49 50 53 54
+01 10 15 23 41 43 45 49
+07 15 24 25 37 54 55 57
+23 24 34 35 37 43 45 47
+03 07 15 23 24 25 35 37
+10 15 24 25 31 40 51 55
+03 07 15 25 53 54 55 57
+34 43 45 47 53 54 55 57
+01 03 10 23 29 35 41 49
+
+loteriasdacaixa2024@gmail.com
+96249545965013Mfm@@
+
+
+presico que  vc turbine  a questão  da  aba http://localhost:5156/central-conferencias/#concursos concurso disponivel SEGUE OS PRINTS.. uma coisa que  não pode  faltar..coberturas, valor  ganhos... seja fiel ao  prints... e uma coisa quenão pode faltar e  o comparação  la onde mostra o ABS note  que tem as duas abas...seja  fiel 
+
+
+Ajustando a coluna DIFERENÇA (+1/+2 e -1/-2 com sinal, sem destaque) e o ABS com verde até um limite fixo (ex.: ≤20) no contexto da Mega-Sena.
+
+Ajustes feitos:
+
+DIFERENÇA
+0 → célula vazia (sem destaque, texto neutro)
++1 e +2 → +1, +2
+-1 e -2 → -1, -2
+Outros (ex.: 7, 4, 3) → só o número, sem + nem -
+Sem cor vermelha nem destaque nessa coluna
+ABS (referência Mega-Sena)
+Limite fixo: soma |Δ| ≤ 20 → fonte verde (volante bem alinhado às 6 posições do sorteio)
+16, 17, 18, 19, 20 ficam verdes
+Tom mais forte quanto menor: 0 (todas as posições certas), até 6, 12, depois verde mais claro até 20
+Acima de 20 → texto padrão (cinza/escuro), sem fundo colorido
+Removido o heat map relativo à tabela (só comparação com o limite 20)
+Recarregue com Ctrl+F5. Se quiser outro limite (ex. 15 ou 25), dá para alterar a constante ABS_LIMITE_V
+
+vamos nos  atentar ao padrão
+
+
+
++Milionária — http://localhost:5157/desdobramento/
+Dezenas: mesmo padrão Mega-Sena (16 dezenas → fechamento em jogos de 6, volante 01–50).
+Trevos (aba separada): escolha 4 trevos (1–6) → gera 6 apostas de 2 trevos (C(4,2)), garantindo par se acertar 2 dos 4.
+Menu Desdobramento adicionado.
+
+Dupla Sena — http://localhost:5158/desdobramento/
+Um desdobramento só (6 dezenas), vale para 1º e 2º sorteio do mesmo concurso.
+Volante 01–50, mesma lógica de fechamento da Mega-Sena.
+
+Dia de Sorte — http://localhost:5160/desdobramento/
+Conteúdo do antigo Gerador Especial movido para /desdobramento/.
+Menu atualizado; /gerador-especial/ redireciona para /desdobramento/.
+Mantém a lógica de 16 dezenas → jogos de 7 e 8 (client-side, como antes).

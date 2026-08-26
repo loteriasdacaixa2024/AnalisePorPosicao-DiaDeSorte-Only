@@ -1,0 +1,221 @@
+/* Análise volante inteligente — paleta Dia de Sorte (#d4b31a) */
+.volante-inteligente-container {
+    background: #fcf9e8;
+    border-radius: 12px;
+    border: 1px solid #d4b31a;
+    padding: 20px;
+    margin-top: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(91, 76, 11, 0.08);
+}
+
+.volante-inteligente-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #eed877;
+}
+
+.volante-inteligente-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #5b4c0b;
+    margin: 0;
+}
+
+/* Toolbar resultados */
+.volante-resultados-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.volante-resultados-titulo {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #5b4c0b;
+}
+
+.btn-volante-active {
+    background: #d4b31a !important;
+    color: #5b4c0b !important;
+    border-color: #887211 !important;
+    font-weight: 700;
+}
+
+.btn-outline-volante {
+    border-color: #d4b31a;
+    color: #5b4c0b;
+    background: #fff;
+}
+
+.btn-outline-volante:hover {
+    background: #fcf9e8;
+    color: #5b4c0b;
+}
+
+/* Grid volante editável */
+.volante-gerador-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.volante-aposta-card-editable {
+    background: linear-gradient(180deg, #fff 0%, #fcf9e8 100%);
+    border: 1px solid #d4b31a;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(91, 76, 11, 0.06);
+    transition: box-shadow 0.2s;
+}
+
+.volante-aposta-card-editable:hover {
+    box-shadow: 0 4px 14px rgba(212, 179, 26, 0.25);
+}
+
+.volante-aposta-head,
+.volante-normal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #5b4c0b;
+}
+
+.badge-volante-mes {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #d4b31a;
+    color: #5b4c0b;
+}
+
+.volante-aposta-dica {
+    font-size: 10px;
+    color: #887211;
+    margin: 0 0 8px;
+}
+
+.grade-circulos-editavel {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 3px;
+}
+
+.volante-num-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 32px;
+    max-height: 32px;
+    margin: 0 auto;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+    line-height: 1;
+}
+
+.volante-num-btn:hover {
+    transform: scale(1.12);
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.volante-num-btn.sorteado {
+    background: #ffd700 !important;
+    color: #000 !important;
+    border: 2px solid #ffa500 !important;
+}
+
+.volante-num-btn.nao-sorteado {
+    background: #fff !important;
+    color: #adb5bd !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.volante-num-btn:focus {
+    outline: 2px solid #5b4c0b;
+    outline-offset: 1px;
+}
+
+.volante-aposta-resumo,
+.volante-normal-resumo {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed #eed877;
+    font-size: 11px;
+    font-weight: 600;
+    color: #5b4c0b;
+    letter-spacing: 0.04em;
+}
+
+/* Vista normal (lista / pills) */
+.volante-lista-normal {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.volante-normal-card {
+    background: #fff;
+    border: 1px solid #eed877;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.volante-normal-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 8px 0 4px;
+}
+
+.volante-pill {
+    min-width: 34px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    color: #adb5bd;
+    transition: all 0.12s;
+}
+
+.volante-pill:hover {
+    border-color: #d4b31a;
+    color: #5b4c0b;
+}
+
+.volante-pill-on {
+    background: #ffd700;
+    color: #000;
+    border: 2px solid #ffa500;
+}
+
+.volante-aposta-aviso {
+    font-size: 10px;
+    color: #dc3545;
+    min-height: 14px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.volante-aposta-aviso.show {
+    opacity: 1;
+}

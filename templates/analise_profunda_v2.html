@@ -1,0 +1,668 @@
+{% extends "base.html" %}
+
+{% block title %}Análise Profunda de Técnicas v2 | Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    :root {
+        --primary-color: #5D5CDE;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .main-container {
+        padding: 2rem 0;
+    }
+
+    .header-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .mode-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .mode-button {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+    .mode-button:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(93, 92, 222, 0.3);
+    }
+
+    .mode-button.active {
+        border-color: var(--primary-color);
+        background: linear-gradient(135deg, rgba(93, 92, 222, 0.1) 0%, rgba(61, 60, 189, 0.05) 100%);
+    }
+
+    .mode-button i {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .progress-massa {
+        height: 40px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 20px;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #3d3cbd 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(93, 92, 222, 0.4);
+    }
+
+    #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        min-width: 400px;
+    }
+
+    .spinner-custom {
+        width: 4rem;
+        height: 4rem;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .result-item {
+        padding: 0.5rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+
+    .result-item.success {
+        background: #d4edda;
+        border-left-color: #28a745;
+    }
+
+    .result-item.error {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+    }
+
+    #rangeSummary {
+        background: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Loading Overlay -->
+<div id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner-custom"></div>
+        <h5 id="loadingTitle">Processando...</h5>
+        <p class="text-muted" id="loadingSubtitle">Aguarde...</p>
+        <div class="progress mt-3">
+            <div id="loadingProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                role="progressbar" style="width: 0%">0%</div>
+        </div>
+        <p class="mt-2 small text-muted" id="loadingInfo">-</p>
+    </div>
+</div>
+
+<div class="container main-container">
+    <!-- Header -->
+    <div class="header-section">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1><i class="bi bi-lightbulb-fill text-warning"></i> Análise Profunda de Técnicas v2</h1>
+                <p class="lead mb-0">
+                    Descubra os padrões matemáticos usando ~150 técnicas avançadas
+                </p>
+            </div>
+            <div class="col-md-5 text-end d-flex justify-content-end gap-2 align-items-center">
+                <a href="/ferramentas/fechamentos" class="btn fw-bold text-dark px-4 py-2"
+                    style="background: linear-gradient(135deg, #D4B31A 0%, #E6C533 100%); border: none; border-radius: 25px; box-shadow: 0 4px 15px rgba(212, 179, 26, 0.4); transition: transform 0.3s ease;"
+                    onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 8px 25px rgba(212, 179, 26, 0.6)';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(212, 179, 26, 0.4)';"
+                    title="Ir para Gerador / Fechamentos">
+                    <i class="bi bi-ticket-detailed-fill text-dark me-1"></i> Compor Apostas
+                </a>
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-toggle="modal"
+                    data-bs-target="#infoModal">
+                    <i class="bi bi-info-circle"></i> Como Funciona
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seletor de Modo -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-gear-fill"></i> Modo de Análise
+                    </h5>
+                    <div class="mode-selector">
+                        <div class="mode-button active" id="modeIndividual" onclick="selecionarModo('individual')">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <h6 class="mt-2">Individual</h6>
+                            <small class="text-muted">1 concurso por vez</small>
+                        </div>
+                        <div class="mode-button" id="modeMassa" onclick="selecionarModo('massa')">
+                            <i class="bi bi-files"></i>
+                            <h6 class="mt-2">Análise em Massa</h6>
+                            <small class="text-muted">Múltiplos concursos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário Individual -->
+    <div id="formIndividualContainer" class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">
+                        <i class="bi bi-search"></i> Analisar Concurso
+                    </h5>
+                    <form id="formAnalisar">
+                        <div class="mb-3">
+                            <label for="numeroConcurso" class="form-label">Número do Concurso</label>
+                            <input type="number" class="form-control form-control-lg text-center" id="numeroConcurso"
+                                placeholder="Ex: 1138" min="1" required>
+                            <div class="form-text">Digite o número do concurso para análise</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="bi bi-play-circle-fill"></i> Iniciar Análise Profunda
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário Massa -->
+    <div id="formMassaContainer" class="row mb-4" style="display: none;">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">
+                        <i class="bi bi-files"></i> Análise em Massa (Range)
+                    </h5>
+                    <form id="formAnalisarMassa">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="concursoInicial" class="form-label">Concurso Inicial</label>
+                                <input type="number" class="form-control form-control-lg text-center"
+                                    id="concursoInicial" placeholder="Ex: 1090" min="1" required
+                                    onchange="calcularRange()">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="concursoFinal" class="form-label">Concurso Final</label>
+                                <input type="number" class="form-control form-control-lg text-center" id="concursoFinal"
+                                    placeholder="Ex: 1138" min="1" required onchange="calcularRange()">
+                            </div>
+                        </div>
+
+                        <div id="rangeSummary" style="display: none;">
+                            <strong>Resumo:</strong><br>
+                            Total de concursos: <span id="rangeTotal">-</span><br>
+                            Tempo estimado: <span id="rangeTime">-</span>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="salvarAutomatico" checked>
+                            <label class="form-check-label" for="salvarAutomatico">
+                                Salvar automaticamente no banco de dados
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-custom w-100 mt-3">
+                            <i class="bi bi-rocket-takeoff-fill"></i> Iniciar Análise em Massa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de Resultados (Massa) -->
+    <div id="resultadosMassaArea" style="display: none;">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill"></i> Processamento Concluído</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Estatísticas da Massa -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-check-circle-fill stats-icon text-success"></i>
+                                    <div class="stats-value" id="massaSucessos">-</div>
+                                    <div class="stats-label">Sucessos</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-x-circle-fill stats-icon text-danger"></i>
+                                    <div class="stats-value" id="massaErros">-</div>
+                                    <div class="stats-label">Erros</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-database-fill stats-icon text-primary"></i>
+                                    <div class="stats-value" id="massaSalvos">-</div>
+                                    <div class="stats-label">Salvos no Banco</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-clock-fill stats-icon text-info"></i>
+                                    <div class="stats-value" id="massaTempo">-</div>
+                                    <div class="stats-label">Tempo (ms)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detalhes -->
+                        <h6 class="mt-4">Detalhes por Concurso:</h6>
+                        <div id="massaDetalhes" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Preenchido via JS -->
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-success btn-lg me-2" onclick="verRanking()">
+                                <i class="bi bi-trophy-fill"></i> Ver Ranking de Técnicas
+                            </button>
+                            <button class="btn btn-outline-primary btn-lg" onclick="novaAnalise()">
+                                <i class="bi bi-arrow-clockwise"></i> Nova Análise
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal de Informações -->
+<div class="modal fade" id="infoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-info-circle-fill"></i> Novidades da Versão 2.0</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="text-primary">🚀 O que há de novo?</h6>
+                <ul>
+                    <li><strong>~150 Técnicas</strong> (antes eram 55)</li>
+                    <li><strong>Análise em Massa</strong> - Processe 50+ concursos de uma vez</li>
+                    <li><strong>Novas Categorias:</strong>
+                        <ul>
+                            <li><span class="badge bg-info">J</span> Partes do Ano (20 técnicas)</li>
+                            <li><span class="badge bg-success">K</span> Dígitos do Prêmio (30 técnicas)</li>
+                            <li><span class="badge bg-warning">L</span> Espelhamento 6↔️9 (automático)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h6 class="text-primary mt-4">📊 Análise em Massa</h6>
+                <p>
+                    Escolha um range de concursos (ex: 1090 até 1138) e o sistema processa TODOS automaticamente,
+                    salvando no banco para gerar estatísticas confiáveis.
+                </p>
+
+                <div class="alert alert-success">
+                    <i class="bi bi-lightbulb-fill"></i> <strong>Dica:</strong>
+                    Quanto mais concursos analisados, mais preciso fica o ranking de técnicas!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast de Notificação -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toastNotificacao" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            <strong class="me-auto">Notificação</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastMensagem">
+            Mensagem aqui
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Estado
+    let modoAtual = 'individual';
+
+    // Elementos
+    const formAnalisar = document.getElementById('formAnalisar');
+    const formAnalisarMassa = document.getElementById('formAnalisarMassa');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // Event Listeners
+    formAnalisar.addEventListener('submit', analisarIndividual);
+    formAnalisarMassa.addEventListener('submit', analisarMassa);
+
+    // Função: Selecionar Modo
+    function selecionarModo(modo) {
+        modoAtual = modo;
+
+        document.getElementById('modeIndividual').classList.remove('active');
+        document.getElementById('modeMassa').classList.remove('active');
+
+        if (modo === 'individual') {
+            document.getElementById('modeIndividual').classList.add('active');
+            document.getElementById('formIndividualContainer').style.display = 'block';
+            document.getElementById('formMassaContainer').style.display = 'none';
+        } else {
+            document.getElementById('modeMassa').classList.add('active');
+            document.getElementById('formIndividualContainer').style.display = 'none';
+            document.getElementById('formMassaContainer').style.display = 'block';
+        }
+
+        document.getElementById('resultadosMassaArea').style.display = 'none';
+    }
+
+    // Função: Calcular Range
+    function calcularRange() {
+        const inicial = parseInt(document.getElementById('concursoInicial').value);
+        const final = parseInt(document.getElementById('concursoFinal').value);
+
+        if (inicial && final && inicial <= final) {
+            const total = final - inicial + 1;
+            const tempoMs = total * 2; // ~2ms por concurso
+
+            document.getElementById('rangeTotal').textContent = total;
+            document.getElementById('rangeTime').textContent = tempoMs < 1000 ?
+                `~${tempoMs}ms` : `~${(tempoMs / 1000).toFixed(1)}s`;
+            document.getElementById('rangeSummary').style.display = 'block';
+        } else {
+            document.getElementById('rangeSummary').style.display = 'none';
+        }
+    }
+
+    // Função: Mostrar Toast
+    function mostrarToast(mensagem, tipo = 'success') {
+        const toastEl = document.getElementById('toastNotificacao');
+        const toastMensagem = document.getElementById('toastMensagem');
+        const toastHeader = toastEl.querySelector('.toast-header i');
+
+        toastMensagem.textContent = mensagem;
+
+        if (tipo === 'success') {
+            toastHeader.className = 'bi bi-check-circle-fill text-success me-2';
+        } else if (tipo === 'error') {
+            toastHeader.className = 'bi bi-exclamation-triangle-fill text-danger me-2';
+        }
+
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+
+    // Função: Analisar Individual
+    async function analisarIndividual(e) {
+        e.preventDefault();
+
+        const concurso = document.getElementById('numeroConcurso').value;
+
+        if (!concurso) {
+            mostrarToast('Por favor, digite um número de concurso', 'error');
+            return;
+        }
+
+        // Mostrar loading
+        document.getElementById('loadingTitle').textContent = 'Analisando Concurso ' + concurso;
+        document.getElementById('loadingSubtitle').textContent = 'Aplicando ~150 técnicas matemáticas';
+        document.getElementById('loadingProgress').style.width = '100%';
+        document.getElementById('loadingProgress').textContent = 'Processando...';
+        loadingOverlay.style.display = 'flex';
+
+        try {
+            const response = await fetch(`/analise-profunda/analisar/${concurso}`);
+            const data = await response.json();
+
+            if (!data.sucesso) {
+                throw new Error(data.erro || 'Erro ao analisar concurso');
+            }
+
+            // Redirecionar para página original de resultados
+            mostrarToast('Análise concluída! Redirecionando...', 'success');
+            setTimeout(() => {
+                window.location.href = '/analise-profunda/';
+            }, 1000);
+
+        } catch (error) {
+            mostrarToast(error.message, 'error');
+        } finally {
+            loadingOverlay.style.display = 'none';
+        }
+    }
+
+    // Função: Analisar Massa
+    async function analisarMassa(e) {
+        e.preventDefault();
+
+        const inicial = parseInt(document.getElementById('concursoInicial').value);
+        const final = parseInt(document.getElementById('concursoFinal').value);
+        const salvarAuto = document.getElementById('salvarAutomatico').checked;
+
+        if (!inicial || !final) {
+            mostrarToast('Preencha ambos os campos (inicial e final)', 'error');
+            return;
+        }
+
+        if (inicial > final) {
+            mostrarToast('Concurso inicial deve ser menor que o final', 'error');
+            return;
+        }
+
+        const total = final - inicial + 1;
+
+        if (total > 200) {
+            mostrarToast('Limite máximo: 200 concursos por vez', 'error');
+            return;
+        }
+
+        // Mostrar loading
+        document.getElementById('loadingTitle').textContent = `Processando ${total} concursos...`;
+        document.getElementById('loadingSubtitle').textContent = 'Aplicando ~150 técnicas em cada um';
+        document.getElementById('loadingProgress').style.width = '0%';
+        document.getElementById('loadingProgress').textContent = '0%';
+        document.getElementById('loadingInfo').textContent = `Concursos ${inicial} a ${final}`;
+        loadingOverlay.style.display = 'flex';
+
+        try {
+            const response = await fetch('/analise-profunda/analisar-massa', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    concurso_inicial: inicial,
+                    concurso_final: final,
+                    salvar_automatico: salvarAuto
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.sucesso) {
+                throw new Error(data.erro || 'Erro ao processar análise em massa');
+            }
+
+            // Atualizar progresso
+            document.getElementById('loadingProgress').style.width = '100%';
+            document.getElementById('loadingProgress').textContent = '100%';
+
+            // Renderizar resultados
+            renderizarResultadosMassa(data);
+            mostrarToast('Análise em massa concluída!', 'success');
+
+        } catch (error) {
+            mostrarToast(error.message, 'error');
+        } finally {
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    // Função: Renderizar Resultados Massa
+    function renderizarResultadosMassa(data) {
+        // Mostrar área
+        document.getElementById('resultadosMassaArea').style.display = 'block';
+
+        // Stats
+        document.getElementById('massaSucessos').textContent = data.resumo.sucessos;
+        document.getElementById('massaErros').textContent = data.resumo.erros;
+        document.getElementById('massaSalvos').textContent = data.resumo.salvos;
+        document.getElementById('massaTempo').textContent = data.resumo.tempo_processamento_ms + 'ms';
+
+        // Detalhes
+        const detalhesHtml = data.detalhes.map(det => {
+            const classe = det.status === 'sucesso' ? 'success' : 'error';
+            const icone = det.status === 'sucesso' ? '✓' : '✗';
+
+            if (det.status === 'sucesso') {
+                return `
+                        <div class="result-item ${classe}">
+                            <strong>${icone} Concurso ${det.concurso}</strong> -
+                            Cobertura: ${det.cobertura.toFixed(0)}% |
+                            Acertos: ${det.acertos}
+                        </div>
+                    `;
+            } else {
+                return `
+                        <div class="result-item ${classe}">
+                            <strong>${icone} Concurso ${det.concurso}</strong> -
+                            Erro: ${det.erro}
+                        </div>
+                    `;
+            }
+        }).join('');
+
+        document.getElementById('massaDetalhes').innerHTML = detalhesHtml;
+
+        // Scroll para resultados
+        document.getElementById('resultadosMassaArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Função: Ver Ranking
+    function verRanking() {
+        window.open('/analise-profunda/ranking-tecnicas?top=10', '_blank');
+    }
+
+    // Função: Nova Análise
+    function novaAnalise() {
+        document.getElementById('resultadosMassaArea').style.display = 'none';
+        document.getElementById('formAnalisarMassa').reset();
+        document.getElementById('rangeSummary').style.display = 'none';
+    }
+</script>
+{% endblock %}

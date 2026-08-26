@@ -1,0 +1,326 @@
+/* Laboratório de Alterações — Dia de Sorte (#D4B31A) */
+#pane-laboratorio-alteracoes {
+    --lab-gold: #d4b31a;
+    --lab-gold-dark: #5b4c0b;
+}
+
+#pane-laboratorio-alteracoes .lab-header-card {
+    border-left: 5px solid var(--lab-gold);
+}
+
+#pane-laboratorio-alteracoes .lab-dezena {
+    width: 28px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    margin: 1px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#pane-laboratorio-alteracoes .lab-dezena.sel {
+    background: #1a46d4;
+    color: #fff;
+    border-color: #0f2e92;
+}
+
+#pane-laboratorio-alteracoes .lab-dezena.fixa {
+    outline: 2px dashed var(--lab-gold);
+    outline-offset: 1px;
+}
+
+#pane-laboratorio-alteracoes .lab-mes-pill.fixa-mes {
+    outline: 3px solid var(--lab-gold-dark);
+    font-weight: 800;
+}
+
+#pane-laboratorio-alteracoes .lab-dezena.hit {
+    background: #28a745 !important;
+    color: #fff !important;
+    border-color: #1e7e34 !important;
+    box-shadow: 0 0 6px rgba(40, 167, 69, 0.6);
+}
+
+#pane-laboratorio-alteracoes .lab-dezena.conc {
+    box-shadow: 0 0 0 2px #fd7e14;
+}
+
+#pane-laboratorio-alteracoes .lab-mes-alt {
+    cursor: pointer;
+}
+
+#pane-laboratorio-alteracoes .lab-mes-alt:hover {
+    filter: brightness(0.92);
+}
+
+#pane-laboratorio-alteracoes .lab-dezena.hit-max {
+    background: #ff8c00 !important;
+    color: #000 !important;
+    border-color: #e67e00 !important;
+    box-shadow: 0 0 8px rgba(255, 140, 0, 0.75);
+}
+
+#pane-laboratorio-alteracoes .lab-export-bar {
+    border-color: var(--lab-gold) !important;
+    border-width: 2px !important;
+}
+
+#pane-laboratorio-alteracoes .lab-btn-exportar-txt {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+#pane-laboratorio-alteracoes .lab-linha-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.65rem;
+    margin-bottom: 0.5rem;
+    background: #fff;
+}
+
+#pane-laboratorio-alteracoes .lab-linha-card.valida {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+#pane-laboratorio-alteracoes .lab-mes-pill {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#pane-laboratorio-alteracoes .lab-mes-pill.hit-mes {
+    outline: 3px solid var(--lab-gold);
+    font-weight: 800;
+}
+
+#pane-laboratorio-alteracoes .lab-rank-6,
+#pane-laboratorio-alteracoes .lab-rank-7 {
+    font-weight: 700;
+}
+
+#pane-laboratorio-alteracoes .lab-rank-7 {
+    color: #b45309;
+}
+
+#pane-laboratorio-alteracoes .lab-analise-card {
+    border-left: 4px solid var(--lab-gold);
+}
+
+#pane-laboratorio-alteracoes .lab-analise-card-header {
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+#pane-laboratorio-alteracoes .lab-analise-intro {
+    line-height: 1.45;
+    max-width: 920px;
+}
+
+#pane-laboratorio-alteracoes .lab-analise-badge {
+    font-weight: 500;
+    font-size: 0.7rem;
+}
+
+#pane-laboratorio-alteracoes .lab-select-concurso {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(0.62rem, 1.1vw + 0.45rem, 0.78rem);
+    line-height: 1.2;
+    padding: 0.35rem 1.75rem 0.35rem 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#pane-laboratorio-alteracoes .lab-concurso-proximo {
+    padding: 0.5rem 0.65rem;
+    background: #fffef5;
+    border: 1px solid #e8d98a;
+    border-radius: 8px;
+    border-left: 4px solid var(--lab-gold);
+}
+
+#pane-laboratorio-alteracoes .lab-concurso-banner {
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#pane-laboratorio-alteracoes .lab-concurso-banner-inner {
+    justify-content: center;
+}
+
+#pane-laboratorio-alteracoes .lab-concurso-nums {
+    letter-spacing: 0.04em;
+}
+
+#pane-laboratorio-alteracoes .lab-resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    #pane-laboratorio-alteracoes .lab-resumo-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+#pane-laboratorio-alteracoes .lab-metric-box {
+    cursor: help;
+    background: #fff;
+    transition: background 0.15s ease;
+}
+
+#pane-laboratorio-alteracoes .lab-metric-box:hover {
+    background: #fffef8;
+}
+
+#pane-laboratorio-alteracoes .lab-metric-label {
+    font-size: 0.72rem;
+}
+
+#pane-laboratorio-alteracoes .lab-metric-hint,
+#pane-laboratorio-alteracoes .lab-help-icon {
+    font-size: 0.72rem;
+    opacity: 0.55;
+    cursor: help;
+}
+
+#pane-laboratorio-alteracoes .lab-metric-box:hover .lab-metric-hint,
+#pane-laboratorio-alteracoes .lab-help-icon:hover {
+    opacity: 0.9;
+}
+
+#pane-laboratorio-alteracoes .lab-toggle-mais .form-check-input,
+#pane-laboratorio-alteracoes .lab-toggle-mais .form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+    overflow: hidden;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-head {
+    padding: 0.4rem 0.65rem;
+    background: #f3f3f3;
+    border-bottom: 1px solid #ececec;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-body {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem 1.25rem;
+    padding: 0.55rem 0.65rem 0.45rem;
+}
+
+@media (max-width: 768px) {
+    #pane-laboratorio-alteracoes .lab-legenda-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-group-label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: #444;
+    line-height: 1.25;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-item strong {
+    font-weight: 600;
+    color: #333;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-dica {
+    font-size: 0.72rem;
+    color: #666;
+    padding: 0.4rem 0.65rem;
+    background: #fffef5;
+    border-top: 1px dashed #e8d98a;
+}
+
+#pane-laboratorio-alteracoes .lab-legenda-dica code {
+    font-size: 0.7rem;
+    padding: 0.05rem 0.25rem;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+}
+
+#pane-laboratorio-alteracoes .lab-leg-swatch {
+    width: 24px;
+    height: 22px;
+    margin: 0;
+    flex-shrink: 0;
+    pointer-events: none;
+    font-size: 9px;
+}
+
+#pane-laboratorio-alteracoes .lab-leg-mes-swatch {
+    font-size: 0.62rem;
+    padding: 0.08rem 0.35rem;
+    flex-shrink: 0;
+}
+
+#pane-laboratorio-alteracoes .lab-empty-msg {
+    padding: 1rem;
+    background: #fafafa;
+    border-radius: 6px;
+    border: 1px dashed #ddd;
+}
+
+#pane-laboratorio-alteracoes .lab-comparacao-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 992px) {
+    #pane-laboratorio-alteracoes .lab-comparacao-grid {
+        grid-template-columns: 1fr;
+    }
+}

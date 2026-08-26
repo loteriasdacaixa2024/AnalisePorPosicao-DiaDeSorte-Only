@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}Índice Central de Análises - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-sitemap text-primary me-2"></i>Índice Central Magnífico</h2>
+            <p class="text-muted">Explore de forma estruturada TODAS as funcionalidades analíticas mapeadas do sistema
+                Dia de Sorte.</p>
+        </div>
+    </div>
+
+    <!-- Tabela expansível -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i>Catálogo de Inteligência Numérica</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tabelaIndice">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" width="25%"><i class="fas fa-search me-1"></i> Análise</th>
+                            <th scope="col" width="60%"><i class="fas fa-info-circle me-1"></i> Objetivo Algorítmico
+                            </th>
+                            <th scope="col" width="15%" class="text-center"><i class="fas fa-link me-1"></i> Acesso
+                                Direto</th>
+                        </tr>
+                    </thead>
+
+                    <!-- ================= MACRO VISÕES E DASHBOARDS ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"><i class="fas fa-globe me-2"></i> 1. Macro Visões &
+                                Dashboards (Análises por Posição)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Painel de Estatísticas Gerais</td>
+                            <td>Toda a visão de frequências brutas globais distribuída por Sorteio, Dezenas, e
+                                Posicionamento na linha de sorteio.</td>
+                            <td class="text-center"><a href="/estatisticas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Análise Tubular Inteligente</td>
+                            <td>Panorama universal em blocos verticais (concursos lado a lado) do comportamento contínuo
+                                (Dezenas + Mês da Sorte na mesma lâmina).</td>
+                            <td class="text-center"><a href="/analise/tubular"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Análise Visual Estágios</td>
+                            <td>Malha magnética quadriculada para visualização direta de quebras de comportamento no
+                                volante ao longo do tempo.</td>
+                            <td class="text-center"><a href="/analise-visual"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Análise Profunda Avançada</td>
+                            <td>Raio-X super detalhado mapeando comportamentos invisíveis da totalidade dos resultados
+                                anteriores baseando-se em eventos raros.</td>
+                            <td class="text-center"><a href="/analise-profunda/v2"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <!-- NOVA ROTA INCLUÍDA PELO USUÁRIO (Index) -->
+                        <tr>
+                            <td class="fw-bold text-danger">Painel Central de Ordenação Index</td>
+                            <td>A tela de Início (Home) adaptada, onde você consegue checar exatamente todos os GAPS por
+                                Posição 1 a 7 e filtrar via Base Crescente de Sortimentos.</td>
+                            <td class="text-center"><a href="/" class="btn btn-sm btn-outline-danger w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                    </tbody>
+
+
+                    <!-- ================= ANALISES POSICIONAIS ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"><i class="fas fa-globe me-2"></i> 1a. Posicional</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Volante: Mínima e Máxima (Teto Ideal)</td>
+                            <td>Define faixas flutuantes (Mínimo, Máximo e Mediana) para estipular qual deve ser o
+                                limite algorítmico do preenchimento da Posição 1 à Posição 7 do volante.</td>
+                            <td class="text-center"><a href="/posicao-minima-maxima"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Números Atrasados por Posição</td>
+                            <td>Detalha cirurgicamente qual dígito parou de frequentar a "Posição N" e a quantos
+                                concursos ele já quebrou o próprio relógio de demora.</td>
+                            <td class="text-center"><a href="/analise/numeros-atrasados"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                    </tbody>
+                    <!-- ================= FREQUÊNCIA, LIMÍTES E ATRASOS ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"><i class="fas fa-stopwatch me-2"></i> 2. Frequência, Limites
+                                & Atrasos</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Quentes & Frios</td>
+                            <td>Disseca o grau de fervura atual de cada dezena num recorte customizável (Ex: últimos 10
+                                shows) - Essencial para mesclar jogos no Multiplexador.</td>
+                            <td class="text-center"><a href="/analise/quentes-frios"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <td class="fw-bold text-primary">Números Devidos</td>
+                        <td>Classifica em ranking rigoroso as dezenas que ultrapassaram sua margem histórica e estão no
+                            período crítico de estouro matemático hoje.</td>
+                        <td class="text-center"><a href="/analise/numeros-devidos"
+                                class="btn btn-sm btn-outline-primary w-100"><i
+                                    class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Previsão de Atrasados</td>
+                            <td>Sistema algorítmico preditivo que usa a defasagem atípica real cruzada com inércia para
+                                indicar tendências de colapso do atraso (Retorno).</td>
+                            <td class="text-center"><a href="/analise/previsao-atrasados"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Ciclos das Dezenas</td>
+                            <td>Mensura o ciclo vital rotatório das 31 dezenas e acusa exatamente faltam poucas peças
+                                para ocorrer o fechamento do "Ano Cíclico".</td>
+                            <td class="text-center"><a href="/analise-ciclos-dezenas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                    </tbody>
+
+                    <!-- ================= SEQUÊNCIAS E REPETIÇÕES ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"><i class="fas fa-clone me-2"></i> 3. Sequências de Choque e
+                                Repetições</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Repetição e Persistência</td>
+                            <td>Analisa sequências ininterruptas (quantas vezes uma dezena/mês saiu grudada concursos a
+                                fio), calculando o recorde (max_sequencia).</td>
+                            <td class="text-center"><a href="/analise/repeticao-persistencia"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Números Consecutivos (Vizinhos)</td>
+                            <td>Acusa a formação de trincas/blocos horizontais num mesmo sorteio (ex: 29-30-31),
+                                mostrando se jogar engatado na diagonal compensa.</td>
+                            <td class="text-center"><a href="/analise/numeros-consecutivos"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Finais Iguais</td>
+                            <td>Verifica a incidência no volante de jogos que terminam cheios de casadinhas verticais
+                                ex: (07, 17, 27). Ajuda a aplicar restrição no fechador.</td>
+                            <td class="text-center"><a href="/analises/finais-iguais"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Dezenas Casadas / Juntas</td>
+                            <td>Mapeia qual dezena obrigatoriamente "puxou sua irmã" criando Duques Inseparáveis que
+                                andam perambulando nos mesmos concursos ao longo dos anos.</td>
+                            <td class="text-center"><a href="/analise/numeros-juntos"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Repetição Concurso Anterior</td>
+                            <td>Levanta a porcentagem cruel natural da quebra do filtro "Max 2" quando de repente 4 ou 5
+                                bolas que já tinham caído, caem de novo.</td>
+                            <td class="text-center"><a href="/repeticao" class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                    </tbody>
+
+                    <!-- ================= GEOMETRIA E PADRÕES NUMÉRICOS ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"><i class="fas fa-project-diagram me-2"></i> 4. Padrões
+                                Geométricos e Algébricos no Volante</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Pares e Ímpares</td>
+                            <td>Estudo clássico inquebrável sobre flutuação entre a balança de pares/ímpares.</td>
+                            <td class="text-center"><a href="/analise/pares-impares"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Fibonacci</td>
+                            <td>Estátistica restrita apenas às pérolas da sequência dourada orgânica: (1, 2, 3, 5, 8,
+                                13, 21), medindo se ela engrenou recentemente.</td>
+                            <td class="text-center"><a href="/analise/fibonacci"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Primos vs Compostos</td>
+                            <td>Isola matematicamente todos os escudos primos do volante identificando quantos
+                                sobrevivem por evento.</td>
+                            <td class="text-center"><a href="/analise/primos-compostos"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Múltiplos (Ex: Trinca X)</td>
+                            <td>Varre a frequência de cadência fixa, ex: Dezenas que caíram em cascatas divisoras
+                                (03-06-09-12-15).</td>
+                            <td class="text-center"><a href="/analise/multiplos"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Soma Extrema das Dezenas</td>
+                            <td>Curva de Gauss purista sobre qual é o somatório ideal para bater na trave principal de
+                                dispersão harmônica.</td>
+                            <td class="text-center"><a href="/analise/soma-dezenas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Cruzamentos (GAPS Expansivos)</td>
+                            <td>Cruza distanciamento do pulo inter-linhas do grid versus intervalos verticais cruzados
+                                (Ex: gap de linhas x colunas juntos na lâmina do tempo).</td>
+                            <td class="text-center"><a href="/cruzamentos/dashboard"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                    </tbody>
+
+                    <!-- ================= COMPORTAMENTO: MÊS DA SORTE ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"> 5. Comportamento:
+                                Mês da Sorte</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Acúmulos vs Mês da Sorte</td>
+                            <td>Mapeia qual Mês esteve acoplado diretamente sempre que o R$ principal do jogo acumulou
+                                sem sete acertos.</td>
+                            <td class="text-center"><a href="/analise/acumulos-mes"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Transição entre Meses (Switch)</td>
+                            <td>Radar de correntes migratórias - Descobre pra qual mês a bolinha mais migra
+                                estatisticamente logo após Janeiro quebrar (Transições Diretas em Série).</td>
+                            <td class="text-center"><a href="/analise/transicao-meses"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Expectativa Atemporal dos Meses</td>
+                            <td>Ranking duro comparando os atrasos cruciais dos meses x média natural para acusar qual
+                                está segurando o cano prestes a jorrar.</td>
+                            <td class="text-center"><a href="/analise/expectativa-meses"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Correlação Oculta: Mês/Dezena</td>
+                            <td>Exibe se os prêmios quando "Abriu Julho no Mês da Sorte", costumam puxar as dezenas XYZ
+                                magnéticas presas no bolo.</td>
+                            <td class="text-center"><a href="/analise/correlacao-mes-dezenas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Evolução Histórica Temporal</td>
+                            <td>Gráficos mostrando a linha de ascendencia ou morte das frequências mensais ano-a-ano
+                                (2018 a Atual).</td>
+                            <td class="text-center"><a href="/analise/evolucao-meses"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                    </tbody>
+
+                    <!-- ================= SIMULADORES, GERADORES E CONFERÊNCIA ================= -->
+                    <tbody class="table-group-divider">
+                        <tr class="table-dark">
+                            <td colspan="3" class="fw-bold"><i class="fas fa-cogs me-2"></i> 6. Simuladores, Motores de
+                                Palpites & Conferência</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Central de Desdobramentos (E)</td>
+                            <td>Plataforma de matrizes rotacionais garantidoras de acertos mediante fechamentos
+                                pre-configurados.</td>
+                            <td class="text-center"><a href="/desdobramentos"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-success">Página Unificada de Fechamentos</td>
+                            <td>Reúne geradores inteligentes (Minimalistas e Tubulares), com forte controle para
+                                distribuição customizada de dezenas baixas, médias e altas. <span
+                                    class="badge bg-danger ms-1">HOT</span></td>
+                            <td class="text-center"><a href="/ferramentas/fechamentos"
+                                    class="btn btn-sm btn-outline-success w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Gerador de Fechamentos V2 (Modo Isolado Antigo)</td>
+                            <td>Motor em modo único com aba Isolada para distribuição customizada por posições fixas.
+                            </td>
+                            <td class="text-center"><a href="/ferramentas/gerar-fechamento"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Gerador por Padrões Completos</td>
+                            <td>Gera apostas combinando modelos numéricos, equilibrando distribuições densas e finas.
+                            </td>
+                            <td class="text-center"><a href="/gerador-padroes"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Resumo Analítico de Apostas</td>
+                            <td>Dashboard avançado para auditar estatisticamente os bilhetes de aposta, mapeando as
+                                faltantes e atrasadas.</td>
+                            <td class="text-center"><a href="/central-conferencias/resumo-apostas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">O Filtrador Master de Combinações</td>
+                            <td>Processador tipo "peneira de garimpo" para limpar sujeiras e refinar palpites jogando
+                                fora lixo lógico numérico.</td>
+                            <td class="text-center"><a href="/filtrador-combinacoes/"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-success">Gerador Especial (Baixa Conectividade)</td>
+                            <td>Motor Multiplexador para rodar até 14 modelos customizados de dezenas gerando sequências
+                                com filtros e deduplicação nativa em pool. <span class="badge bg-danger ms-1">HOT</span>
+                            </td>
+                            <td class="text-center"><a href="/gerador-especial/"
+                                    class="btn btn-sm btn-outline-success w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Calculadora de Probabilidade Direta</td>
+                            <td>Medidor instantâneo preditivo para medir se a coluna que você anotou tem peso mortífero
+                                de ocorrência.</td>
+                            <td class="text-center"><a href="/analise/calculadora-probabilidade"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Registro: Eventos Intuitivos</td>
+                            <td>Canivete do Analista. Registre ideias abstratas, pressentimentos ou dicas diárias para
+                                conferência sistêmica posterior a base de matrizes OCR.</td>
+                            <td class="text-center"><a href="/eventos-intuitivos"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Conversor e Parser Universal</td>
+                            <td>Batedor cego que aglutina, reconfigura, e converte formatos estranhos (TXT copiados da
+                                web) para tabelas legíveis json-base.</td>
+                            <td class="text-center"><a href="/conversor-apostas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Monitoramento Passivo de Apostas</td>
+                            <td>Fique de sentinela observando como andam as suas criações contra a realidade sorteada da
+                                parede cega temporal.</td>
+                            <td class="text-center"><a href="/monitoramento-apostas"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-primary">Central Base de Conferências</td>
+                            <td>Núcleo primário de submissão de arquivos com varredura total por faixas de prêmio real e
+                                contabilização exata de "Ternos, Quadras etc".</td>
+                            <td class="text-center"><a href="/central-conferencias"
+                                    class="btn btn-sm btn-outline-primary w-100"><i
+                                        class="fas fa-external-link-alt me-1"></i> Acessar</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-light text-muted">
+                <small><i class="fas fa-rocket me-1"></i> Totalizando mais de 35 ferramentas cadastradas no Core deste
+                    diretório.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("Índice Central de Análises Massivo carregado!");
+    });
+</script>
+{% endblock %}

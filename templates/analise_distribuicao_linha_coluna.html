@@ -1,0 +1,759 @@
+{% extends "base.html" %}
+{% block title %}Análise Distribuição Linha × Coluna - Dia de Sorte{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: '#D4B31A',
+                'primary-light': '#E5C942',
+                'primary-dark': '#B89615'
+            }
+        }
+    },
+    darkMode: 'class'
+}
+</script>
+
+<style>
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.toast-animation { animation: slideIn 0.3s ease-out; }
+.modal-animation { animation: fadeIn 0.3s ease-out; }
+.spinner { animation: spin 1s linear infinite; }
+.pulse-animation { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #D4B31A;
+}
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #D4B31A;
+}
+
+.heatmap-cell {
+    transition: all 0.3s ease;
+}
+.heatmap-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+}
+</style>
+
+<div class="max-w-7xl mx-auto p-6">
+    <!-- Header com Gradiente -->
+    <div class="bg-gradient-to-r from-primary via-primary-light to-primary-dark text-white p-8 rounded-xl shadow-2xl mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">
+                    <i class="fas fa-th"></i> Distribuição Linha × Coluna
+                </h1>
+                <p class="text-white opacity-90">Análise completa de distribuição espacial das dezenas no volante</p>
+            </div>
+            <!-- Botão de Sincronização Verde -->
+            <button id="btnSincronizar" onclick="sincronizarAnalise()"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                <i class="fas fa-sync-alt" id="iconSincronizar"></i>
+                <span id="textSincronizar">Sincronizar API</span>
+            </button>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div id="progressContainer" class="mt-4 hidden">
+            <div class="flex justify-between mb-1 text-sm">
+                <span id="progressText">Carregando...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="w-full bg-white bg-opacity-30 rounded-full h-3 overflow-hidden">
+                <div id="progressBar" class="bg-white h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p class="text-xs mt-1 text-white opacity-75">
+                <i class="far fa-clock"></i> Tempo estimado: <span id="tempoEstimado">--</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Toggle Switch Linha/Coluna -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <div class="flex items-center justify-center gap-6">
+            <span class="text-xl font-semibold text-gray-700 dark:text-gray-300" id="labelLinha">
+                <i class="fas fa-arrows-alt-h"></i> LINHA
+            </span>
+
+            <div class="relative inline-block w-20 align-middle select-none">
+                <input type="checkbox" id="toggleTipo" onchange="alternarTipo()"
+                       class="toggle-checkbox absolute block w-10 h-10 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300">
+                <label for="toggleTipo" class="toggle-label block overflow-hidden h-10 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+            </div>
+
+            <span class="text-xl font-semibold text-gray-400 dark:text-gray-500" id="labelColuna">
+                <i class="fas fa-arrows-alt-v"></i> COLUNA
+            </span>
+        </div>
+        <p class="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Alterne entre análise por <strong>Linha</strong> (horizontal) ou <strong>Coluna</strong> (vertical) do volante
+        </p>
+    </div>
+
+    <!-- Container Principal -->
+    <div id="mainContent" class="space-y-8">
+
+        <!-- Cards de Estatísticas Rápidas -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="statsCards">
+            <!-- Dinamicamente preenchido -->
+        </div>
+
+        <!-- TOP 3 -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6" id="top3Section">
+            <h2 class="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-trophy"></i> TOP 3 Mais Frequentes
+            </h2>
+            <div id="top3Content" class="space-y-4">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+        <!-- Insight Inteligente -->
+        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900 dark:to-yellow-800 border-l-4 border-yellow-500 rounded-xl p-6 shadow-lg" id="insightSection">
+            <h2 class="text-xl font-bold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                <i class="fas fa-lightbulb"></i> Insight Inteligente
+            </h2>
+            <p id="insightText" class="text-yellow-900 dark:text-yellow-100 text-lg leading-relaxed">
+                <!-- Dinamicamente preenchido -->
+            </p>
+        </div>
+
+        <!-- Regiões Quentes e Frias -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900 dark:to-orange-900 rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+                <h3 class="text-xl font-bold text-red-700 dark:text-red-200 mb-4">
+                    🔥 Regiões Quentes
+                </h3>
+                <div id="regioesQuentes" class="flex flex-wrap gap-2">
+                    <!-- Dinamicamente preenchido -->
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                <h3 class="text-xl font-bold text-blue-700 dark:text-blue-200 mb-4">
+                    ❄️ Regiões Frias
+                </h3>
+                <div id="regioesFrias" class="flex flex-wrap gap-2">
+                    <!-- Dinamicamente preenchido -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de Calor -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-fire"></i> Mapa de Calor
+            </h2>
+            <div id="mapaCalor" class="grid grid-cols-5 md:grid-cols-7 gap-3">
+                <!-- Dinamicamente preenchido -->
+            </div>
+            <div class="mt-6 flex justify-between items-center text-sm">
+                <span class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-blue-200 rounded"></div> Baixa frequência
+                </span>
+                <span class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-orange-500 rounded"></div> Média frequência
+                </span>
+                <span class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-red-700 rounded"></div> Alta frequência
+                </span>
+            </div>
+        </div>
+
+        <!-- Gráfico de Distribuição -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-chart-bar"></i> Distribuição Histórica
+            </h2>
+            <canvas id="chartDistribuicao" height="100"></canvas>
+        </div>
+
+        <!-- Análise Comparativa -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-exchange-alt"></i> Análise Comparativa: Linha × Coluna
+            </h2>
+            <div id="comparativaContent">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+        <!-- Desvio Padrão e Anomalias -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-chart-line"></i> Análise de Desvio Padrão
+            </h2>
+            <div id="desvioContent">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+        <!-- Clusterização -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-project-diagram"></i> Clusterização de Padrões
+            </h2>
+            <div id="clustersContent">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+        <!-- Probabilidade -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-percentage"></i> Probabilidade da Próxima Composição
+            </h2>
+            <div id="probabilidadeContent">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+        <!-- Alertas de Anomalias -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-red-600 mb-6 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i> Alertas de Anomalias
+            </h2>
+            <div id="alertasContent" class="space-y-3">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+        <!-- Recomendação Final -->
+        <div class="bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl shadow-2xl p-8">
+            <h2 class="text-3xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-star"></i> Recomendação Estratégica
+            </h2>
+            <div id="recomendacaoContent" class="text-lg leading-relaxed whitespace-pre-line">
+                <!-- Dinamicamente preenchido -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<script>
+let tipoAtual = 'linha';
+let dadosCompletos = null;
+let chartDistribuicao = null;
+
+// Função de sincronização com progresso
+async function sincronizarAnalise() {
+    const btn = document.getElementById('btnSincronizar');
+    const icon = document.getElementById('iconSincronizar');
+    const text = document.getElementById('textSincronizar');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressText = document.getElementById('progressText');
+    const tempoEstimado = document.getElementById('tempoEstimado');
+
+    // Desabilitar botão
+    btn.disabled = true;
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+    icon.classList.add('spinner');
+    text.textContent = 'Sincronizando...';
+
+    // Mostrar progresso
+    progressContainer.classList.remove('hidden');
+
+    const etapas = [
+        { texto: 'Conectando ao banco de dados', tempo: 500 },
+        { texto: 'Carregando histórico de sorteios', tempo: 800 },
+        { texto: 'Calculando distribuições', tempo: 1200 },
+        { texto: 'Analisando padrões', tempo: 1000 },
+        { texto: 'Gerando clusters', tempo: 1500 },
+        { texto: 'Calculando probabilidades', tempo: 800 },
+        { texto: 'Detectando anomalias', tempo: 600 },
+        { texto: 'Gerando recomendações', tempo: 500 },
+        { texto: 'Finalizando análise', tempo: 400 }
+    ];
+
+    let progresso = 0;
+    const incremento = 100 / etapas.length;
+    const tempoTotal = etapas.reduce((acc, e) => acc + e.tempo, 0);
+    tempoEstimado.textContent = `${(tempoTotal / 1000).toFixed(1)}s`;
+
+    try {
+        for (let i = 0; i < etapas.length; i++) {
+            progressText.textContent = etapas[i].texto;
+            progresso += incremento;
+            progressBar.style.width = `${progresso}%`;
+            progressPercent.textContent = `${Math.round(progresso)}%`;
+
+            await new Promise(resolve => setTimeout(resolve, etapas[i].tempo));
+        }
+
+        // Carregar dados da API
+        const response = await fetch('/api/analise/distribuicao-linha-coluna/completa');
+        if (!response.ok) throw new Error('Erro ao carregar dados');
+
+        dadosCompletos = await response.json();
+
+        // Renderizar dados
+        renderizarAnalise();
+
+        // Progresso 100%
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+        progressText.textContent = 'Análise concluída!';
+
+        showToast('success', 'Sucesso!', 'Análise sincronizada com sucesso');
+
+        setTimeout(() => {
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+        }, 2000);
+
+    } catch (error) {
+        showToast('error', 'Erro!', 'Falha ao sincronizar: ' + error.message);
+        progressText.textContent = 'Erro na sincronização';
+        progressBar.classList.add('bg-red-500');
+    } finally {
+        // Reabilitar botão
+        btn.disabled = false;
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        icon.classList.remove('spinner');
+        text.textContent = 'Sincronizar API';
+    }
+}
+
+// Função de alternância Linha/Coluna
+function alternarTipo() {
+    const toggle = document.getElementById('toggleTipo');
+    const labelLinha = document.getElementById('labelLinha');
+    const labelColuna = document.getElementById('labelColuna');
+
+    if (toggle.checked) {
+        tipoAtual = 'coluna';
+        labelLinha.classList.remove('text-gray-700');
+        labelLinha.classList.add('text-gray-400');
+        labelColuna.classList.remove('text-gray-400');
+        labelColuna.classList.add('text-gray-700');
+    } else {
+        tipoAtual = 'linha';
+        labelColuna.classList.remove('text-gray-700');
+        labelColuna.classList.add('text-gray-400');
+        labelLinha.classList.remove('text-gray-400');
+        labelLinha.classList.add('text-gray-700');
+    }
+
+    if (dadosCompletos) {
+        renderizarAnalise();
+    }
+}
+
+// Renderizar toda a análise
+function renderizarAnalise() {
+    if (!dadosCompletos) return;
+
+    const distribKey = `distribuicao_${tipoAtual}`;
+    const dados = dadosCompletos[distribKey];
+
+    // Stats Cards
+    renderizarStatsCards();
+
+    // TOP 3
+    renderizarTop3();
+
+    // Insight
+    renderizarInsight();
+
+    // Regiões Quentes e Frias
+    renderizarRegioes();
+
+    // Mapa de Calor
+    renderizarMapaCalor();
+
+    // Gráfico
+    renderizarGrafico();
+
+    // Comparativa
+    renderizarComparativa();
+
+    // Desvio
+    renderizarDesvio();
+
+    // Clusters
+    renderizarClusters();
+
+    // Probabilidade
+    renderizarProbabilidade();
+
+    // Alertas
+    renderizarAlertas();
+
+    // Recomendação
+    renderizarRecomendacao();
+}
+
+function renderizarStatsCards() {
+    const distribKey = `distribuicao_${tipoAtual}`;
+    const dados = dadosCompletos[distribKey];
+
+    const freqTotal = dados.distribuicao.reduce((sum, item) => sum + item.frequencia, 0);
+    const media = Math.round(freqTotal / dados.distribuicao.length);
+    const maisFreq = Math.max(...dados.distribuicao.map(d => d.frequencia));
+    const menosFreq = Math.min(...dados.distribuicao.map(d => d.frequencia));
+
+    const html = `
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Total de Sorteios</p>
+                    <p class="text-3xl font-bold">${dados.total_sorteios}</p>
+                </div>
+                <i class="fas fa-database text-4xl opacity-30"></i>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Frequência Média</p>
+                    <p class="text-3xl font-bold">${media}</p>
+                </div>
+                <i class="fas fa-chart-line text-4xl opacity-30"></i>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Mais Frequente</p>
+                    <p class="text-3xl font-bold">${maisFreq}</p>
+                </div>
+                <i class="fas fa-fire text-4xl opacity-30"></i>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Menos Frequente</p>
+                    <p class="text-3xl font-bold">${menosFreq}</p>
+                </div>
+                <i class="fas fa-snowflake text-4xl opacity-30"></i>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('statsCards').innerHTML = html;
+}
+
+function renderizarTop3() {
+    const topKey = `top3_${tipoAtual}s`;
+    const top3 = dadosCompletos[topKey].top3;
+
+    const medalhas = ['🥇', '🥈', '🥉'];
+    const cores = ['from-yellow-400 to-yellow-500', 'from-gray-300 to-gray-400', 'from-orange-400 to-orange-500'];
+
+    const html = top3.map((item, idx) => `
+        <div class="bg-gradient-to-r ${cores[idx]} text-white rounded-lg p-5 flex items-center justify-between shadow-md transform transition-transform hover:scale-105">
+            <div class="flex items-center gap-4">
+                <span class="text-4xl">${medalhas[idx]}</span>
+                <div>
+                    <p class="text-lg font-bold">${tipoAtual.charAt(0).toUpperCase() + tipoAtual.slice(1)} ${item.posicao}</p>
+                    <p class="text-sm opacity-90">${item.frequencia} aparições</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-3xl font-bold">${item.percentual}%</p>
+            </div>
+        </div>
+    `).join('');
+
+    document.getElementById('top3Content').innerHTML = html;
+}
+
+function renderizarInsight() {
+    const insightKey = `insight_${tipoAtual}`;
+    const insight = dadosCompletos[insightKey].insight;
+
+    document.getElementById('insightText').textContent = insight;
+}
+
+function renderizarRegioes() {
+    const regioesKey = `regioes_quentes_${tipoAtual}`;
+    const regioes = dadosCompletos[regioesKey];
+
+    const htmlQuentes = regioes.quentes.map(pos =>
+        `<span class="inline-block bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-md">${pos}</span>`
+    ).join('');
+
+    const htmlFrias = regioes.frias.map(pos =>
+        `<span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-md">${pos}</span>`
+    ).join('');
+
+    document.getElementById('regioesQuentes').innerHTML = htmlQuentes || '<p class="text-gray-500">Nenhuma região quente detectada</p>';
+    document.getElementById('regioesFrias').innerHTML = htmlFrias || '<p class="text-gray-500">Nenhuma região fria detectada</p>';
+}
+
+function renderizarMapaCalor() {
+    const mapaKey = `mapa_calor_${tipoAtual}`;
+    const mapa = dadosCompletos[mapaKey].mapa;
+
+    const html = mapa.map(cell => {
+        let bgColor = 'bg-blue-200';
+        if (cell.intensidade > 70) bgColor = 'bg-red-700';
+        else if (cell.intensidade > 40) bgColor = 'bg-orange-500';
+        else if (cell.intensidade > 20) bgColor = 'bg-yellow-400';
+
+        return `
+            <div class="heatmap-cell ${bgColor} rounded-lg p-6 text-center font-bold text-white shadow-lg cursor-pointer relative group">
+                <div class="text-2xl">${cell.posicao}</div>
+                <div class="text-xs opacity-80">${cell.valor}</div>
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    Frequência: ${cell.valor}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('mapaCalor').innerHTML = html;
+}
+
+function renderizarGrafico() {
+    const distribKey = `distribuicao_${tipoAtual}`;
+    const dados = dadosCompletos[distribKey];
+
+    const labels = dados.distribuicao.map(d => `${tipoAtual.charAt(0).toUpperCase() + tipoAtual.slice(1)} ${d.posicao}`);
+    const values = dados.distribuicao.map(d => d.frequencia);
+
+    const ctx = document.getElementById('chartDistribuicao').getContext('2d');
+
+    if (chartDistribuicao) {
+        chartDistribuicao.destroy();
+    }
+
+    chartDistribuicao = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Frequência',
+                data: values,
+                backgroundColor: 'rgba(212, 179, 26, 0.7)',
+                borderColor: 'rgba(212, 179, 26, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function renderizarComparativa() {
+    const comp = dadosCompletos.comparativa;
+
+    const html = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-4">
+                <h4 class="font-bold text-blue-700 dark:text-blue-200 mb-2">📊 Distribuição por Linhas</h4>
+                <p class="text-sm text-gray-700 dark:text-gray-300">Total de sorteios: ${comp.linhas.total_sorteios}</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 rounded-lg p-4">
+                <h4 class="font-bold text-purple-700 dark:text-purple-200 mb-2">📊 Distribuição por Colunas</h4>
+                <p class="text-sm text-gray-700 dark:text-gray-300">Total de sorteios: ${comp.colunas.total_sorteios}</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <h4 class="font-bold text-gray-700 dark:text-gray-200 mb-3">🔗 Top 5 Combinações Linha × Coluna</h4>
+            <div class="space-y-2">
+                ${comp.top_combinacoes.map(c => `
+                    <div class="flex justify-between items-center bg-white dark:bg-gray-600 px-4 py-2 rounded">
+                        <span class="font-mono font-bold">${c.combinacao}</span>
+                        <span class="bg-primary text-white px-3 py-1 rounded-full text-sm">${c.frequencia}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    document.getElementById('comparativaContent').innerHTML = html;
+}
+
+function renderizarDesvio() {
+    const desvioKey = `desvio_${tipoAtual}`;
+    const desvio = dadosCompletos[desvioKey];
+
+    const html = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-blue-50 dark:bg-blue-900 rounded-lg p-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300">Média</p>
+                <p class="text-3xl font-bold text-blue-600 dark:text-blue-300">${desvio.media}</p>
+            </div>
+            <div class="bg-purple-50 dark:bg-purple-900 rounded-lg p-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300">Desvio Padrão</p>
+                <p class="text-3xl font-bold text-purple-600 dark:text-purple-300">${desvio.desvio_padrao}</p>
+            </div>
+        </div>
+
+        ${desvio.anomalias.length > 0 ? `
+            <h4 class="font-bold text-red-600 mb-3">⚠️ Anomalias Detectadas</h4>
+            <div class="space-y-2">
+                ${desvio.anomalias.map(a => `
+                    <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 p-3 rounded">
+                        <p class="font-semibold">${tipoAtual.charAt(0).toUpperCase() + tipoAtual.slice(1)} ${a.posicao}: ${a.status}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Z-Score: ${a.z_score} | Frequência: ${a.frequencia}</p>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '<p class="text-gray-500">Nenhuma anomalia detectada</p>'}
+    `;
+
+    document.getElementById('desvioContent').innerHTML = html;
+}
+
+function renderizarClusters() {
+    const clusters = dadosCompletos.clusters.clusters;
+
+    const cores = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500'];
+
+    const html = `
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Total de sorteios analisados: ${dadosCompletos.clusters.total_analisados}</p>
+        <div class="grid grid-cols-1 md:grid-cols-${clusters.length} gap-4">
+            ${clusters.map((c, idx) => `
+                <div class="${cores[idx % cores.length]} text-white rounded-lg p-6 text-center shadow-lg">
+                    <p class="text-sm opacity-90">Cluster ${c.cluster}</p>
+                    <p class="text-4xl font-bold my-2">${c.tamanho}</p>
+                    <p class="text-sm opacity-90">${c.percentual}% dos sorteios</p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    document.getElementById('clustersContent').innerHTML = html;
+}
+
+function renderizarProbabilidade() {
+    const probKey = `probabilidade_${tipoAtual}`;
+    const prob = dadosCompletos[probKey].probabilidades;
+
+    const html = prob.map(p => `
+        <div class="flex items-center mb-3">
+            <span class="w-32 font-semibold">${tipoAtual.charAt(0).toUpperCase() + tipoAtual.slice(1)} ${p.posicao}</span>
+            <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+                <div class="bg-primary h-6 rounded-full flex items-center justify-end pr-2 text-white text-xs font-bold transition-all duration-500"
+                     style="width: ${p.probabilidade}%">
+                    ${p.probabilidade}%
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    document.getElementById('probabilidadeContent').innerHTML = html;
+}
+
+function renderizarAlertas() {
+    const alertas = dadosCompletos.alertas.alertas;
+
+    if (alertas.length === 0) {
+        document.getElementById('alertasContent').innerHTML = `
+            <div class="bg-green-50 dark:bg-green-900 border-l-4 border-green-500 p-4 rounded">
+                <p class="text-green-700 dark:text-green-200 font-semibold">✅ Nenhuma anomalia crítica detectada</p>
+            </div>
+        `;
+        return;
+    }
+
+    const html = alertas.map(a => {
+        const bgColor = a.severidade === 'alta' ? 'bg-red-50 dark:bg-red-900 border-red-500' : 'bg-yellow-50 dark:bg-yellow-900 border-yellow-500';
+        const icon = a.severidade === 'alta' ? '🚨' : '⚠️';
+
+        return `
+            <div class="${bgColor} border-l-4 p-4 rounded shadow">
+                <p class="font-semibold">${icon} ${a.mensagem}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Tipo: ${a.tipo} | Severidade: ${a.severidade}</p>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('alertasContent').innerHTML = html;
+}
+
+function renderizarRecomendacao() {
+    const rec = dadosCompletos.recomendacao.recomendacao;
+
+    document.getElementById('recomendacaoContent').innerHTML = rec.replace(/\*\*/g, '');
+}
+
+// Função de Toast
+function showToast(type, title, message) {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+    };
+
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-xl toast-animation flex items-center gap-3 min-w-[300px]`;
+    toast.innerHTML = `
+        <i class="fas ${icons[type]} text-2xl"></i>
+        <div class="flex-1">
+            <p class="font-bold">${title}</p>
+            <p class="text-sm opacity-90">${message}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    document.getElementById('toastContainer').appendChild(toast);
+
+    setTimeout(() => toast.remove(), 5000);
+}
+
+// Carregar ao iniciar página
+document.addEventListener('DOMContentLoaded', () => {
+    sincronizarAnalise();
+});
+</script>
+{% endblock %}

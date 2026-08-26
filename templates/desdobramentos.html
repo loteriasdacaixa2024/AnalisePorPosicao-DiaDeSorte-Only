@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% block title %}Desdobramentos - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #3b82f6;
+        --primary-dark: #2563eb;
+        --success-color: #10b981;
+        --success-dark: #059669;
+        --warning-color: #f59e0b;
+        --info-color: #06b6d4;
+    }
+
+    .dezena-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        border: 2px solid #e5e7eb;
+        background: white;
+        color: #374151;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+    .dark .dezena-btn {
+        background: #374151;
+        color: white;
+        border-color: #4b5563;
+    }
+
+    .dezena-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .dezena-btn.grupo-a {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border-color: #1d4ed8;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .dezena-btn.grupo-b {
+        background: linear-gradient(135deg, var(--success-color), var(--success-dark));
+        color: white;
+        border-color: #047857;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .dezena-btn.grupo-fixo-a {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border-color: #1d4ed8;
+    }
+
+    .dezena-btn.grupo-fixo-b {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        border-color: #b45309;
+    }
+
+    .dezena-btn.variacoes-a,
+    .dezena-btn.variacoes-b {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border-color: #047857;
+    }
+
+    .dezena-btn.sugerida {
+        animation: pulse 2s infinite;
+    }
+
+    .dezena-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .modo-btn {
+        transition: all 0.3s ease;
+        border: 2px solid #e5e7eb;
+    }
+
+    .modo-btn.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+        color: white !important;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        border-color: #1d4ed8;
+    }
+
+    .game-table {
+        font-size: 13px;
+        border-collapse: collapse;
+    }
+
+    .game-table th {
+        background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        color: white;
+        padding: 12px 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
+
+    .game-table td {
+        padding: 8px;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .dark .game-table td {
+        border-color: #4b5563;
+    }
+
+    .game-table .fixa-cell {
+        background: #dbeafe;
+        color: #1e40af;
+        font-weight: 700;
+    }
+
+    .dark .game-table .fixa-cell {
+        background: #1e3a8a;
+        color: #dbeafe;
+    }
+
+    .game-table .variavel-cell {
+        background: #d1fae5;
+        color: #065f46;
+        font-weight: 700;
+    }
+
+    .dark .game-table .variavel-cell {
+        background: #064e3b;
+        color: #d1fae5;
+    }
+
+    .game-table .grupo-fixo-a-cell {
+        background: #dbeafe;
+        color: #1e40af;
+        font-weight: 700;
+    }
+
+    .game-table .grupo-fixo-b-cell {
+        background: #fef3c7;
+        color: #92400e;
+        font-weight: 700;
+    }
+
+    .explicacao-item {
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Tabs Customizados */
+    .nav-tabs {
+        border-bottom: 3px solid #e5e7eb;
+        margin-bottom: 2rem;
+    }
+
+    .dark .nav-tabs {
+        border-bottom-color: #4b5563;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6b7280;
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -3px;
+    }
+
+    .dark .nav-tabs .nav-link {
+        color: #9ca3af;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: var(--primary-color);
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        background: transparent;
+        border-bottom: 3px solid var(--primary-color);
+    }
+
+    .tab-badge {
+        display: inline-block;
+        background: #e5e7eb;
+        color: #374151;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        margin-left: 0.5rem;
+        font-weight: 600;
+    }
+
+    .dark .tab-badge {
+        background: #4b5563;
+        color: #d1d5db;
+    }
+
+    .nav-link.active .tab-badge {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .dark .header-gradient {
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="header-gradient">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-1"><i class="fas fa-layer-group me-2"></i>Desdobramentos</h1>
+                <p class="mb-0 opacity-90">Escolha o modelo de desdobramento ideal para sua estratégia</p>
+            </div>
+            <button class="btn btn-light" onclick="window.history.back()">
+                <i class="fas fa-arrow-left me-1"></i>Voltar
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="modelosTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="modelo-a-tab" data-bs-toggle="tab" data-bs-target="#modelo-a"
+                type="button" role="tab">
+                <i class="fas fa-cube me-2"></i>Modelo A
+                <span class="tab-badge">5+2</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="modelo-b-tab" data-bs-toggle="tab" data-bs-target="#modelo-b" type="button"
+                role="tab">
+                <i class="fas fa-cubes me-2"></i>Modelo B
+                <span class="tab-badge">Fixo A+B</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="modelo-c-tab" data-bs-toggle="tab" data-bs-target="#modelo-c" type="button"
+                role="tab">
+                <i class="fas fa-box me-2"></i>Modelo C
+                <span class="tab-badge">5+3</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="modelo-d-tab" data-bs-toggle="tab" data-bs-target="#modelo-d" type="button"
+                role="tab">
+                <i class="fas fa-boxes me-2"></i>Modelo D
+                <span class="tab-badge">4+3B</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="modelo-e-tab" data-bs-toggle="tab" data-bs-target="#modelo-e" type="button"
+                role="tab">
+                <i class="fas fa-compress-arrows-alt me-2"></i>Modelo E
+                <span class="tab-badge">Reduções</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="modelo-f-tab" data-bs-toggle="tab" data-bs-target="#modelo-f" type="button"
+                role="tab">
+                <i class="fas fa-random me-2"></i>Modelo F
+                <span class="tab-badge">Otimizado</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="modelosTabsContent">
+        <!-- MODELO A -->
+        <div class="tab-pane fade show active" id="modelo-a" role="tabpanel">
+            {% include 'desdobramento_conteudo_modelo_a.html' %}
+        </div>
+
+        <!-- MODELO B -->
+        <div class="tab-pane fade" id="modelo-b" role="tabpanel">
+            {% include 'desdobramento_conteudo_modelo_b.html' %}
+        </div>
+
+        <!-- MODELO C -->
+        <div class="tab-pane fade" id="modelo-c" role="tabpanel">
+            {% include 'desdobramento_conteudo_modelo_c.html' %}
+        </div>
+
+        <!-- MODELO D -->
+        <div class="tab-pane fade" id="modelo-d" role="tabpanel">
+            {% include 'desdobramento_conteudo_modelo_d.html' %}
+        </div>
+
+        <!-- MODELO E -->
+        <div class="tab-pane fade" id="modelo-e" role="tabpanel">
+            {% include 'desdobramento_conteudo_modelo_e.html' %}
+        </div>
+
+        <!-- MODELO F -->
+        <div class="tab-pane fade" id="modelo-f" role="tabpanel">
+            {% include 'desdobramento_conteudo_modelo_f.html' %}
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+    <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="errorToastMessage"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função global para mostrar toast de erro
+    function showError(message) {
+        const toastEl = document.getElementById('errorToast');
+        const messageEl = document.getElementById('errorToastMessage');
+        messageEl.textContent = message;
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+
+    // Força abrir o Modelo E e rolar até o botão Manual quando a âncora pedir
+    document.addEventListener('DOMContentLoaded', () => {
+        const { hash } = window.location;
+        if (!hash) return;
+
+        const wantsManual = hash === '#btn-modo-e-manual';
+        const wantsTabE = hash === '#modelo-e-tab' || hash === '#modelo-e' || wantsManual;
+
+        if (wantsTabE) {
+            const tabTrigger = document.querySelector('#modelo-e-tab');
+            if (tabTrigger) {
+                const tab = new bootstrap.Tab(tabTrigger);
+                tab.show();
+            }
+
+            // Aguarda a aba aparecer antes de rolar
+            setTimeout(() => {
+                const target = wantsManual
+                    ? document.querySelector('#btn-modo-e-manual')
+                    : document.querySelector('#modelo-e');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.focus?.();
+                }
+            }, 150);
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,233 @@
+[
+  {
+    "id": "equilibrada",
+    "nome": "Estratégia Equilibrada",
+    "descricao": "Distribui números uniformemente entre grupos baixo, médio e alto",
+    "parametros": {
+      "digitos_unicos": {
+        "max": 1,
+        "permitir": true
+      },
+      "finais_iguais_max": 2,
+      "grupo_alto": {
+        "max": 31,
+        "min": 21,
+        "quantidade": 2
+      },
+      "grupo_baixo": {
+        "max": 10,
+        "min": 1,
+        "quantidade": 2
+      },
+      "grupo_medio": {
+        "max": 20,
+        "min": 11,
+        "quantidade": 3
+      },
+      "impares": {
+        "max": 4,
+        "min": 3
+      },
+      "pares": {
+        "max": 4,
+        "min": 3
+      },
+      "repeticoes_anterior_max": 3,
+      "sequencias_max": 2
+    }
+  },
+  {
+    "id": "conservadora",
+    "nome": "Estratégia Conservadora",
+    "descricao": "Evita extremos, foca em números do meio",
+    "parametros": {
+      "grupo_baixo": {
+        "min": 1,
+        "max": 10,
+        "quantidade": 1
+      },
+      "grupo_medio": {
+        "min": 11,
+        "max": 20,
+        "quantidade": 5
+      },
+      "grupo_alto": {
+        "min": 21,
+        "max": 31,
+        "quantidade": 1
+      },
+      "pares": {
+        "min": 3,
+        "max": 4
+      },
+      "impares": {
+        "min": 3,
+        "max": 4
+      },
+      "sequencias_max": 1,
+      "finais_iguais_max": 1,
+      "repeticoes_anterior_max": 2,
+      "digitos_unicos": {
+        "permitir": false,
+        "max": 0
+      }
+    }
+  },
+  {
+    "id": "agressiva",
+    "nome": "Estratégia Agressiva",
+    "descricao": "Permite mais variações e extremos",
+    "parametros": {
+      "grupo_baixo": {
+        "min": 1,
+        "max": 10,
+        "quantidade": 3
+      },
+      "grupo_medio": {
+        "min": 11,
+        "max": 20,
+        "quantidade": 2
+      },
+      "grupo_alto": {
+        "min": 21,
+        "max": 31,
+        "quantidade": 2
+      },
+      "pares": {
+        "min": 2,
+        "max": 5
+      },
+      "impares": {
+        "min": 2,
+        "max": 5
+      },
+      "sequencias_max": 3,
+      "finais_iguais_max": 3,
+      "repeticoes_anterior_max": 4,
+      "digitos_unicos": {
+        "permitir": true,
+        "max": 2
+      }
+    }
+  },
+  {
+    "id": "pares_dominantes",
+    "nome": "Estratégia Pares Dominantes",
+    "descricao": "Favorece números pares sobre ímpares",
+    "parametros": {
+      "grupo_baixo": {
+        "min": 1,
+        "max": 10,
+        "quantidade": 2
+      },
+      "grupo_medio": {
+        "min": 11,
+        "max": 20,
+        "quantidade": 2
+      },
+      "grupo_alto": {
+        "min": 21,
+        "max": 31,
+        "quantidade": 3
+      },
+      "pares": {
+        "min": 5,
+        "max": 5
+      },
+      "impares": {
+        "min": 2,
+        "max": 2
+      },
+      "sequencias_max": 2,
+      "finais_iguais_max": 2,
+      "repeticoes_anterior_max": 3,
+      "digitos_unicos": {
+        "permitir": true,
+        "max": 1
+      }
+    }
+  },
+  {
+    "id": "impares_dominantes",
+    "nome": "Estratégia Ímpares Dominantes",
+    "descricao": "Favorece números ímpares sobre pares",
+    "parametros": {
+      "grupo_baixo": {
+        "min": 1,
+        "max": 10,
+        "quantidade": 3
+      },
+      "grupo_medio": {
+        "min": 11,
+        "max": 20,
+        "quantidade": 2
+      },
+      "grupo_alto": {
+        "min": 21,
+        "max": 31,
+        "quantidade": 2
+      },
+      "pares": {
+        "min": 2,
+        "max": 2
+      },
+      "impares": {
+        "min": 5,
+        "max": 5
+      },
+      "sequencias_max": 2,
+      "finais_iguais_max": 2,
+      "repeticoes_anterior_max": 3,
+      "digitos_unicos": {
+        "permitir": true,
+        "max": 1
+      }
+    }
+  },
+  {
+    "id": "minimalista",
+    "nome": "Estratégia Minimalista",
+    "descricao": "Restrições mínimas, máxima liberdade",
+    "parametros": {
+      "digitos_unicos": {
+        "max": 3,
+        "permitir": true
+      },
+      "finais_iguais_max": 5,
+      "grupo_alto": {
+        "max": 31,
+        "min": 21,
+        "quantidade": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "grupo_baixo": {
+        "max": 10,
+        "min": 1,
+        "quantidade": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "grupo_medio": {
+        "max": 20,
+        "min": 11,
+        "quantidade": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "impares": {
+        "max": 6,
+        "min": 1
+      },
+      "pares": {
+        "max": 6,
+        "min": 1
+      },
+      "repeticoes_anterior_max": 7,
+      "sequencias_max": 5
+    }
+  }
+]

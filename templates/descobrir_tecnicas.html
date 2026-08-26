@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block title %}Descoberta de Técnicas - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #D4B31A;
+        --primary-dark: #b69816;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin: 12px 0;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .tecnica-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #ddd;
+        transition: all 0.3s ease;
+    }
+
+    .tecnica-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .tecnica-card.alta-confianca {
+        border-left-color: var(--success-color);
+        background: #f0fdf4;
+    }
+
+    .tecnica-card.media-confianca {
+        border-left-color: var(--warning-color);
+        background: #fffbeb;
+    }
+
+    .tecnica-card.baixa-confianca {
+        border-left-color: var(--danger-color);
+        background: #fef2f2;
+    }
+
+    .tecnica-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .tecnica-id {
+        font-family: monospace;
+        font-weight: bold;
+        color: var(--primary-color);
+        background: rgba(212, 179, 26, 0.1);
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .tecnica-taxa {
+        font-weight: bold;
+        padding: 6px 16px;
+        border-radius: 20px;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .taxa-alta {
+        background: var(--success-color);
+    }
+
+    .taxa-media {
+        background: var(--warning-color);
+    }
+
+    .taxa-baixa {
+        background: var(--danger-color);
+    }
+
+    .tecnica-apelido {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 8px;
+    }
+
+    .tecnica-formula {
+        font-family: monospace;
+        background: #f3f4f6;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: #4b5563;
+        margin-bottom: 8px;
+    }
+
+    .tecnica-detalhes {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #f3f4f6;
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .campo-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+
+    .badge-numero {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-data {
+        background: #fce7f3;
+        color: #9f1239;
+    }
+
+    .badge-premio {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .btn-exportar {
+        background: var(--info-color);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-exportar:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .concurso-badge {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-1">
+                <i class="fas fa-lightbulb text-warning me-2"></i>
+                Descoberta de Técnicas
+            </h2>
+            <p class="text-muted">
+                Analise concursos passados e descubra quais técnicas/padrões foram usados para gerar as dezenas sorteadas
+            </p>
+        </div>
+    </div>
+
+    <!-- Formulário de Análise -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        Configurar Análise
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Como funciona:</strong> O sistema analisa os 3 campos da API (número do concurso, data e prêmio estimado do próximo concurso) e tenta descobrir quais fórmulas/técnicas geraram as dezenas sorteadas.
+                    </div>
+
+                    <form id="formAnalise">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    Concurso Inicial
+                                </label>
+                                <input type="number" class="form-control" id="concursoInicial" required min="1" placeholder="Ex: 1134">
+                                <small class="form-text text-muted">Primeiro concurso a analisar</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    Concurso Final (opcional)
+                                </label>
+                                <input type="number" class="form-control" id="concursoFinal" min="1" placeholder="Ex: 1136">
+                                <small class="form-text text-muted">Deixe vazio para analisar apenas 1 concurso</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-play-circle me-2"></i>
+                                Iniciar Descoberta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-spinner" id="loadingState">
+        <div class="spinner"></div>
+        <h5>Analisando concursos...</h5>
+        <p class="text-muted">Testando técnicas e descobrindo padrões</p>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4" id="statsContainer" style="display: none;">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-label">Concursos Analisados</div>
+                <div class="stat-value" id="statConcursos">0</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card" style="border-left-color: var(--success-color);">
+                <div class="stat-label">Técnicas Descobertas</div>
+                <div class="stat-value text-success" id="statTecnicas">0</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card" style="border-left-color: var(--warning-color);">
+                <div class="stat-label">Alta Confiança</div>
+                <div class="stat-value text-warning" id="statAltaConfianca">0</div>
+                <small class="text-muted">≥ 70% de acerto</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card" style="border-left-color: var(--info-color);">
+                <div class="stat-label">Média Confiança</div>
+                <div class="stat-value text-info" id="statMediaConfianca">0</div>
+                <small class="text-muted">40% - 69%</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="row" id="resultsContainer" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-alt me-2"></i>
+                        Técnicas Descobertas
+                    </h5>
+                    <button class="btn btn-exportar btn-sm" onclick="exportarTecnicas()">
+                        <i class="fas fa-download me-1"></i>
+                        Exportar JSON
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="tecnicasLista">
+                        <!-- Técnicas serão inseridas aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+        <i class="fas fa-search"></i>
+        <h5>Nenhuma análise realizada ainda</h5>
+        <p>Configure os concursos acima e clique em "Iniciar Descoberta"</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let tecnicasDescobertasGlobal = [];
+
+// Função para mostrar mensagens (substitui alert)
+function showMessage(message, type = 'error') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show`;
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.style.minWidth = '300px';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+
+document.getElementById('formAnalise').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const concursoInicial = parseInt(document.getElementById('concursoInicial').value);
+    const concursoFinalInput = document.getElementById('concursoFinal').value;
+    const concursoFinal = concursoFinalInput ? parseInt(concursoFinalInput) : null;
+
+    // Validações
+    if (!concursoInicial || concursoInicial < 1) {
+        showMessage('Por favor, insira um número de concurso válido', 'warning');
+        return;
+    }
+
+    if (concursoFinal && concursoFinal < concursoInicial) {
+        showMessage('Concurso final deve ser maior ou igual ao inicial', 'warning');
+        return;
+    }
+
+    // Mostrar loading
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('statsContainer').style.display = 'none';
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+
+    try {
+        const response = await fetch('/descobrir-tecnicas/analisar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                concursoInicial: concursoInicial,
+                concursoFinal: concursoFinal
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            exibirResultados(data);
+        } else {
+            showMessage('Erro: ' + data.erro, 'error');
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Erro ao analisar:', error);
+        showMessage('Erro ao realizar análise: ' + error.message, 'error');
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'block';
+    }
+});
+
+function exibirResultados(data) {
+    // Ocultar loading
+    document.getElementById('loadingState').style.display = 'none';
+
+    // Atualizar estatísticas
+    const totalConcursos = data.total_concursos_analisados || 1;
+    const tecnicas = data.tecnicas || [];
+
+    document.getElementById('statConcursos').textContent = totalConcursos;
+    document.getElementById('statTecnicas').textContent = tecnicas.length;
+
+    // Contar por nível de confiança
+    const altaConfianca = tecnicas.filter(t => t.taxa_acerto >= 70).length;
+    const mediaConfianca = tecnicas.filter(t => t.taxa_acerto >= 40 && t.taxa_acerto < 70).length;
+
+    document.getElementById('statAltaConfianca').textContent = altaConfianca;
+    document.getElementById('statMediaConfianca').textContent = mediaConfianca;
+
+    // Mostrar estatísticas
+    document.getElementById('statsContainer').style.display = 'flex';
+
+    // Renderizar técnicas
+    const container = document.getElementById('tecnicasLista');
+
+    if (tecnicas.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-inbox fa-3x mb-3"></i><p>Nenhuma técnica descoberta neste intervalo</p></div>';
+    } else {
+        container.innerHTML = tecnicas.map(tecnica => renderizarTecnica(tecnica)).join('');
+    }
+
+    // Salvar técnicas globalmente para exportação
+    tecnicasDescobertasGlobal = tecnicas;
+
+    // Mostrar resultados
+    document.getElementById('resultsContainer').style.display = 'block';
+}
+
+function renderizarTecnica(tecnica) {
+    // Determinar classe CSS baseada na taxa de acerto
+    let classeConfianca = 'baixa-confianca';
+    let classeTaxa = 'taxa-baixa';
+
+    if (tecnica.taxa_acerto >= 70) {
+        classeConfianca = 'alta-confianca';
+        classeTaxa = 'taxa-alta';
+    } else if (tecnica.taxa_acerto >= 40) {
+        classeConfianca = 'media-confianca';
+        classeTaxa = 'taxa-media';
+    }
+
+    // Badge do campo
+    let badgeCampo = '';
+    if (tecnica.campo_usado.includes('numero')) {
+        badgeCampo = '<span class="campo-badge badge-numero">Número Concurso</span>';
+    } else if (tecnica.campo_usado.includes('data')) {
+        badgeCampo = '<span class="campo-badge badge-data">Data</span>';
+    } else if (tecnica.campo_usado.includes('valor')) {
+        badgeCampo = '<span class="campo-badge badge-premio">Prêmio</span>';
+    }
+
+    // Concursos onde acertou
+    const concursosHtml = tecnica.concursos_acertou
+        ? tecnica.concursos_acertou.slice(0, 10).map(c => `<span class="concurso-badge">${c}</span>`).join(' ')
+        : '';
+
+    const maisText = tecnica.concursos_acertou && tecnica.concursos_acertou.length > 10
+        ? `<span class="text-muted">... e mais ${tecnica.concursos_acertou.length - 10}</span>`
+        : '';
+
+    return `
+        <div class="tecnica-card ${classeConfianca}">
+            <div class="tecnica-header">
+                <span class="tecnica-id">${tecnica.id}</span>
+                <span class="tecnica-taxa ${classeTaxa}">${tecnica.taxa_acerto}%</span>
+            </div>
+            <div class="tecnica-apelido">${tecnica.apelido}</div>
+            ${badgeCampo}
+            <div class="tecnica-formula">
+                <i class="fas fa-code me-1"></i>
+                ${tecnica.formula}
+            </div>
+            <div class="tecnica-detalhes">
+                <strong>Acertos:</strong> ${tecnica.total_acertos} de ${tecnica.concursos_acertou ? tecnica.concursos_acertou.length : 0} concursos
+                ${tecnica.frequencia_dezenas ? `<br><strong>Dezenas geradas:</strong> ${tecnica.frequencia_dezenas.join(', ')}` : ''}
+                ${concursosHtml ? `<br><strong>Concursos onde acertou:</strong><br>${concursosHtml} ${maisText}` : ''}
+            </div>
+        </div>
+    `;
+}
+
+function exportarTecnicas() {
+    if (tecnicasDescobertasGlobal.length === 0) {
+        showMessage('Nenhuma técnica para exportar', 'warning');
+        return;
+    }
+
+    const exportacao = {
+        versao: '1.0',
+        data_exportacao: new Date().toISOString(),
+        total_tecnicas: tecnicasDescobertasGlobal.length,
+        tecnicas: tecnicasDescobertasGlobal
+    };
+
+    const dataStr = JSON.stringify(exportacao, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tecnicas_descobertas_${new Date().getTime()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

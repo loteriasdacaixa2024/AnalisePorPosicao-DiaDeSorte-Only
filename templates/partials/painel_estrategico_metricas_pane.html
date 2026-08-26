@@ -1,0 +1,190 @@
+{# Painel Estratégico — métricas de conferências (mesmos IDs esperados pelo painel_estrategico_metricas.js) #}
+<div class="tab-pane fade" id="pane-painel-estrategico-estrutura" role="tabpanel" aria-labelledby="tab-painel-estrategico-estrutura">
+    <div class="card shadow-sm border-0">
+        <div class="card-header text-white d-flex justify-content-between align-items-center"
+            style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);">
+            <h5 class="mb-0">
+                <i class="fas fa-chart-line"></i> Painel Estratégico & Métricas de Evolução
+            </h5>
+            <button type="button" class="btn btn-sm btn-light text-primary" onclick="if (window.carregarDadosDashboard) carregarDadosDashboard();">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Conferências Realizadas</h6>
+                            <h2 class="display-6 fw-bold text-primary" id="kpi-total-conferencias">--</h2>
+                            <small class="text-muted">Histórico total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Eficiência Média</h6>
+                            <h2 class="display-6 fw-bold text-success" id="kpi-eficiencia-media">--%</h2>
+                            <small class="text-success"><i class="fas fa-bullseye"></i> Cobertura de acertos</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">ROI Global</h6>
+                            <h2 class="display-6 fw-bold" id="kpi-roi-global">--%</h2>
+                            <small id="kpi-lucro-total" class="fw-bold">R$ --</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Custo Médio / Dezena</h6>
+                            <h2 class="display-6 fw-bold text-info" id="kpi-custo-dezena">R$ --</h2>
+                            <small class="text-muted">Investimento otimizado</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold">
+                            <i class="fas fa-chart-area text-primary"></i> Evolução da Eficiência (Cobertura %)
+                        </div>
+                        <div class="card-body">
+                            <div style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="chartEvolucaoEficiencia"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold">
+                            <i class="fas fa-tachometer-alt text-warning"></i> Redundância Média
+                        </div>
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <div style="position: relative; height: 200px; width: 100%;">
+                                <canvas id="chartRedundancia"></canvas>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <h4 id="valor-redundancia" class="fw-bold text-dark">--</h4>
+                                <small class="text-muted">Índice de repetição de números</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold">
+                            <i class="fas fa-th text-danger"></i> Mapa de Calor - Frequência de Dezenas
+                        </div>
+                        <div class="card-body">
+                            <div id="heatmap-blindspots" class="d-flex flex-wrap gap-1 justify-content-center p-3">
+                                <p class="text-muted">Carregando mapa de calor...</p>
+                            </div>
+                            <div class="mt-2 text-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span class="badge bg-danger">0x</span> Nunca Jogada |
+                                    <span class="badge bg-success opacity-25">Pouco</span> |
+                                    <span class="badge bg-success">Muito</span>
+                                </small>
+                            </div>
+                            <div class="collapse mt-1" id="legendaEstrategiaSaldo">
+                                <div class="card card-body p-2 border shadow-sm">
+                                    <h6 class="text-start bg-light p-1 border-bottom mb-2"><i class="fas fa-list-ol"></i> Tabela de Repetições (Ref. Anterior)</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered text-center mb-0" style="font-size: 0.75rem;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Saldo</th>
+                                                    <th>Repetiu do Anterior</th>
+                                                    <th>Avaliação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="table-danger bg-opacity-10">
+                                                    <td class="fw-bold">16</td>
+                                                    <td>0 (Nenhuma)</td>
+                                                    <td class="text-danger fw-bold">PÉSSIMO!</td>
+                                                </tr>
+                                                <tr class="table-warning bg-opacity-10">
+                                                    <td class="fw-bold">15</td>
+                                                    <td>1 Dezena</td>
+                                                    <td class="text-warning fw-bold">RISCO ALTO</td>
+                                                </tr>
+                                                <tr class="table-warning bg-opacity-10">
+                                                    <td class="fw-bold">14</td>
+                                                    <td>2 Dezenas</td>
+                                                    <td class="text-warning fw-bold">RISCO ALTO</td>
+                                                </tr>
+                                                <tr class="table-success bg-opacity-25">
+                                                    <td class="fw-bold fs-6">13</td>
+                                                    <td>3 Dezenas</td>
+                                                    <td class="text-success fw-bold">PADRÃO IDEAL ⭐</td>
+                                                </tr>
+                                                <tr class="table-success bg-opacity-25">
+                                                    <td class="fw-bold fs-6">12</td>
+                                                    <td>4 Dezenas</td>
+                                                    <td class="text-success fw-bold">PADRÃO IDEAL ⭐</td>
+                                                </tr>
+                                                <tr class="table-warning bg-opacity-10">
+                                                    <td class="fw-bold">11</td>
+                                                    <td>5 Dezenas</td>
+                                                    <td class="text-warning fw-bold">ARRISCADO</td>
+                                                </tr>
+                                                <tr class="table-warning bg-opacity-10">
+                                                    <td class="fw-bold">10</td>
+                                                    <td>6 Dezenas</td>
+                                                    <td class="text-warning fw-bold">ARRISCADO</td>
+                                                </tr>
+                                                <tr class="table-danger bg-opacity-10">
+                                                    <td class="fw-bold">≤ 9</td>
+                                                    <td>7 (Todas!)</td>
+                                                    <td class="text-danger fw-bold">RUIM!</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="mt-1 text-muted text-start fst-italic" style="font-size: 0.7rem;">
+                                        * Estatisticamente, o Dia de Sorte costuma repetir entre 3 e 4 dezenas do concurso anterior.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold">
+                            <i class="fas fa-lightbulb text-info"></i> Insights & Dicas para 5+ Acertos
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning border-0 shadow-sm mb-3">
+                                <h6 class="alert-heading fw-bold small"><i class="fas fa-star"></i> Como sair dos 4 acertos?</h6>
+                                <ul id="lista-insights-estrategicos" class="mb-0 ps-3 small">
+                                    <li>Analisando seus jogos...</li>
+                                </ul>
+                            </div>
+                            <h6 class="text-muted border-bottom pb-2 small">Suas Dezenas Mais Frequentes</h6>
+                            <div id="stats-mais-jogadas" class="d-flex gap-1 mb-3 flex-wrap">
+                                <span class="text-muted small">Carregando...</span>
+                            </div>
+                            <h6 class="text-muted border-bottom pb-2 small">Pontos Cegos (Nunca Jogadas)</h6>
+                            <div id="stats-pontos-cegos" class="d-flex flex-wrap gap-1">
+                                <span class="text-muted small">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

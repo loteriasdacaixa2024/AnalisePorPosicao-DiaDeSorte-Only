@@ -1,0 +1,63 @@
+
+1. Página inicial (a que abre em /)
+http://localhost:5151/
+
+Título: “Dia de Sorte - Análise por Posição”
+Tabela com colunas Posição 1 a 7
+Filtros: número + posição (1–7) + mês + concurso
+É o lugar mais “consulta histórica” por posição.
+
+2. Estatísticas — abas por posição (o mais completo)
+http://localhost:5151/estatisticas
+
+Menu: Estatísticas Numerais → Por Posição (ou Estatísticas Gerais I → Frequência Geral, que leva à mesma página).
+
+Dentro da página, abas importantes:
+
+Aba	Para quê
+Por Posição
+Frequência de cada dezena em cada posição (1–7)
+Atraso/Posição
+Atraso por posição
+Faixas/Posição
+Faixas ligadas à posição
+Análise filtrada
+“Quando saiu X na posição Y, o que mais aparece…”
+3. Números atrasados por posição
+http://localhost:5151/analise/numeros-atrasados
+
+Menu: Estatísticas Numerais → Números Atrasados por Posição
+
+Foco em atraso/frequência separado por bola 1–7.
+
+4. Posição mínima / máxima (+ palpites)
+http://localhost:5151/posicao-minima-maxima
+
+Menu: Estatísticas Gerais II → Análise Posição Máxima Mínima
+
+Análise de limites por posição e opção de gerar palpites por essa lógica.
+
+5. Gerador Especial — aba Atraso Posição
+http://localhost:5151/gerador-especial/
+
+Dentro da página, botão de aba “Atraso Posição” — gera apostas usando atraso por posição (API gerar_atraso_posicao).
+
+6. Palpites — método Por Posição
+http://localhost:5151/palpites
+
+No método de geração, escolha “Por Posição” — usa as dezenas mais frequentes em cada posição (1ª a 7ª).
+
+O que não é “por posição” (para não confundir)
+Rota	O que é
+/analise-visual
+Volante, círculos, linhas, colunas, Elite — usa posicao_1…7 nos dados, mas o foco é visual/volante, não estudo clássico 1ª–7ª bola
+/analise-visual/#pane-simulador-elite
+Top 10 / dígitos únicos — não é análise por posição
+Atalho rápido
+Se você quer só lembrar um lugar:
+→ http://localhost:5151/estatisticas e abra a aba “Por Posição”.
+
+Se quiser gerar jogos por posição:
+→ Palpites (Por Posição) ou Gerador Especial → Atraso Posição ou Posição mín/máx.
+
+Se disser o que você quer fazer (só ver histórico, gerar aposta, ou atraso), indico o caminho exato em um clique no menu.

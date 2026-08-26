@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Gaps Completo - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>
+                        Análise Completa de Gaps e Dígitos
+                    </h2>
+                    <p class="text-muted mb-0">Análise estatística avançada de padrões e distâncias</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success btn-lg" onclick="atualizarAnalise()" id="btnAtualizar">
+                        <i class="fas fa-sync-alt me-2"></i>Atualizar Análise
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left me-1"></i>Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info de Atualização -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info" id="infoAtualizacao">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Última atualização:</strong> <span id="dataAtualizacao">Carregando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5" style="display: none;">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted fs-5">Analisando dados do banco...</p>
+    </div>
+
+    <!-- Container Principal -->
+    <div id="resultadosContainer" style="display: none;">
+
+        <!-- ===== ANÁLISE 1: DÍGITOS INICIAIS ===== -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-fingerprint me-2"></i>
+                            ANÁLISE 1 - Dígitos Iniciais
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Transformação de dezenas em dígitos:
+                            <strong>0</strong> = 01-09,
+                            <strong>1</strong> = 10-19,
+                            <strong>2</strong> = 20-29,
+                            <strong>3</strong> = 30+
+                        </p>
+
+                        <!-- Estatísticas Gerais de Dígitos -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Total de Sorteios</h6>
+                                        <h2 class="text-primary mb-0" id="totalSorteiosDigitos">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-2">Frequência de Dígitos Individuais</h6>
+                                        <div id="digitosIndividuais" class="d-flex gap-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top 3 Padrões de Dígitos -->
+                        <h5 class="mb-3"><i class="fas fa-trophy me-2 text-warning"></i>Top 3 Padrões Mais Frequentes</h5>
+                        <div id="top3Digitos" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ANÁLISE 2: GAPS ===== -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-ruler-horizontal me-2"></i>
+                            ANÁLISE 2 - Gaps (Distâncias)
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Gaps = distâncias entre números consecutivos ordenados.
+                            Exemplo: <strong>01, 03, 04, 08</strong> → gaps: <strong>2, 1, 4</strong>
+                        </p>
+
+                        <!-- Estatísticas Gerais de Gaps -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Gap Médio Geral</h6>
+                                        <h2 class="text-success mb-0" id="gapMedioGeral">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Gap Mediano</h6>
+                                        <h2 class="text-success mb-0" id="gapMediano">-</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-2">Top 3 Gaps Individuais</h6>
+                                        <div id="gapsIndividuais" class="d-flex gap-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top 3 Padrões Completos de Gaps -->
+                        <h5 class="mb-3"><i class="fas fa-trophy me-2 text-warning"></i>Top 3 Padrões Completos</h5>
+                        <div id="top3Gaps" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CRUZAMENTO ===== -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0">
+                            <i class="fas fa-layer-group me-2"></i>
+                            CRUZAMENTO - Dígitos × Gaps
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            Análise da relação entre padrões de dígitos iniciais e o tamanho dos gaps.
+                            <strong>Gaps Curtos</strong> ≤2 | <strong>Médios</strong> 3-5 | <strong>Longos</strong> >5
+                        </p>
+
+                        <div id="cruzamentoTabela"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SUGESTÕES DE JOGOS ===== -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-info">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            SUGESTÕES DE JOGOS
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            Jogos sugeridos com base nos padrões mais frequentes identificados
+                        </p>
+
+                        <div id="sugestoesJogos"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Carregar análise automaticamente ao abrir a página
+document.addEventListener('DOMContentLoaded', function() {
+    atualizarAnalise();
+});
+
+// Função principal para atualizar toda a análise
+async function atualizarAnalise() {
+    const btnAtualizar = document.getElementById('btnAtualizar');
+    const loading = document.getElementById('loading');
+    const resultados = document.getElementById('resultadosContainer');
+
+    // Mostrar loading
+    btnAtualizar.disabled = true;
+    btnAtualizar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Atualizando...';
+    loading.style.display = 'block';
+    resultados.style.display = 'none';
+
+    try {
+        // Buscar análise completa da API
+        const response = await fetch('/api/analise-gaps/completa');
+        const data = await response.json();
+
+        if (!data.sucesso) {
+            mostrarErro(data.mensagem || 'Erro ao carregar análise');
+            return;
+        }
+
+        // Atualizar data de atualização
+        document.getElementById('dataAtualizacao').textContent = data.data_atualizacao;
+
+        // Exibir cada seção
+        exibirAnaliseDigitos(data.digitos);
+        exibirAnaliseGaps(data.gaps);
+        exibirCruzamento(data.cruzamento);
+        exibirSugestoes(data.sugestoes);
+
+        // Mostrar resultados
+        loading.style.display = 'none';
+        resultados.style.display = 'block';
+
+    } catch (error) {
+        mostrarErro('Erro ao conectar com servidor: ' + error.message);
+    } finally {
+        btnAtualizar.disabled = false;
+        btnAtualizar.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Atualizar Análise';
+    }
+}
+
+// ===== EXIBIR ANÁLISE DE DÍGITOS =====
+function exibirAnaliseDigitos(dados) {
+    if (!dados.sucesso) {
+        document.getElementById('top3Digitos').innerHTML = `
+            <div class="col-12"><div class="alert alert-danger">${dados.mensagem}</div></div>
+        `;
+        return;
+    }
+
+    // Total de sorteios
+    document.getElementById('totalSorteiosDigitos').textContent = dados.total_sorteios;
+
+    // Dígitos individuais
+    const digitosIndiv = document.getElementById('digitosIndividuais');
+    digitosIndiv.innerHTML = Object.entries(dados.digitos_individuais)
+        .slice(0, 4)
+        .map(([digito, freq]) => `
+            <div class="badge bg-primary fs-6">
+                Dígito <strong>${digito}</strong>: ${freq}×
+            </div>
+        `).join('');
+
+    // Top 3 Padrões
+    const top3Container = document.getElementById('top3Digitos');
+    top3Container.innerHTML = dados.top_3_padroes.map((item, index) => `
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 ${item.aparece_recente ? 'border-success' : ''}">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        ${index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                        #${index + 1} - Padrão: ${item.padrao}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Frequência:</span>
+                            <span class="badge bg-primary fs-6">${item.frequencia}× (${item.percentual.toFixed(1)}%)</span>
+                        </div>
+                        ${item.aparece_recente ?
+                            '<div class="alert alert-success py-2 mb-0"><i class="fas fa-fire me-1"></i><strong>Reapareceu recentemente!</strong></div>'
+                            : ''}
+                    </div>
+
+                    <h6 class="text-muted mb-2">Exemplos:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Concurso</th>
+                                    <th>Números</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${item.exemplos.slice(0, 3).map(ex => `
+                                    <tr>
+                                        <td><strong>${ex.concurso}</strong></td>
+                                        <td><small>${ex.numeros.map(n => String(n).padStart(2, '0')).join(', ')}</small></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== EXIBIR ANÁLISE DE GAPS =====
+function exibirAnaliseGaps(dados) {
+    if (!dados.sucesso) {
+        document.getElementById('top3Gaps').innerHTML = `
+            <div class="col-12"><div class="alert alert-danger">${dados.mensagem}</div></div>
+        `;
+        return;
+    }
+
+    // Estatísticas gerais
+    document.getElementById('gapMedioGeral').textContent = dados.gap_medio_geral.toFixed(2);
+    document.getElementById('gapMediano').textContent = dados.gap_mediano.toFixed(1);
+
+    // Gaps individuais
+    const gapsIndiv = document.getElementById('gapsIndividuais');
+    gapsIndiv.innerHTML = dados.top_3_gaps_individuais.map(item => `
+        <div class="badge bg-success fs-6">
+            Gap <strong>${item.gap}</strong>: ${item.frequencia}× (${item.percentual.toFixed(1)}%)
+        </div>
+    `).join('');
+
+    // Top 3 Padrões Completos
+    const top3Container = document.getElementById('top3Gaps');
+    top3Container.innerHTML = dados.top_3_padroes_completos.map((item, index) => `
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 ${item.aparece_recente ? 'border-success' : ''}">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        ${index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                        #${index + 1} - Padrão: ${item.padrao}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Frequência:</span>
+                            <span class="badge bg-success fs-6">${item.frequencia}× (${item.percentual.toFixed(1)}%)</span>
+                        </div>
+                        ${item.aparece_recente ?
+                            '<div class="alert alert-success py-2 mb-0"><i class="fas fa-fire me-1"></i><strong>Reapareceu recentemente!</strong></div>'
+                            : ''}
+                    </div>
+
+                    <h6 class="text-muted mb-2">Exemplos:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Concurso</th>
+                                    <th>Números</th>
+                                    <th>Gap Médio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${item.exemplos.slice(0, 3).map(ex => `
+                                    <tr>
+                                        <td><strong>${ex.concurso}</strong></td>
+                                        <td><small>${ex.numeros.map(n => String(n).padStart(2, '0')).join(', ')}</small></td>
+                                        <td>${ex.gap_medio.toFixed(1)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== EXIBIR CRUZAMENTO =====
+function exibirCruzamento(dados) {
+    if (!dados.sucesso) {
+        document.getElementById('cruzamentoTabela').innerHTML = `
+            <div class="alert alert-danger">${dados.mensagem}</div>
+        `;
+        return;
+    }
+
+    const container = document.getElementById('cruzamentoTabela');
+    container.innerHTML = `
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Padrão de Dígitos</th>
+                        <th>Frequência</th>
+                        <th>Gap Médio</th>
+                        <th>Gaps Curtos (≤2)</th>
+                        <th>Gaps Médios (3-5)</th>
+                        <th>Gaps Longos (>5)</th>
+                        <th>Classificação</th>
+                        <th>Exemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${dados.top_5_cruzamentos.map(item => `
+                        <tr>
+                            <td><strong>${item.padrao_digitos}</strong></td>
+                            <td><span class="badge bg-primary">${item.frequencia}×</span></td>
+                            <td>${item.gap_medio.toFixed(2)}</td>
+                            <td>${item.gaps_curtos_perc.toFixed(1)}%</td>
+                            <td>${item.gaps_medios_perc.toFixed(1)}%</td>
+                            <td>${item.gaps_longos_perc.toFixed(1)}%</td>
+                            <td><span class="badge bg-warning">${item.classificacao_dominante}</span></td>
+                            <td>
+                                ${item.exemplos[0] ? `
+                                    <small>
+                                        Conc. ${item.exemplos[0].concurso}:
+                                        ${item.exemplos[0].numeros.map(n => String(n).padStart(2, '0')).join(',')}
+                                    </small>
+                                ` : '-'}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i>
+            <strong>Interpretação:</strong> A tabela mostra como diferentes padrões de dígitos se relacionam com o tamanho dos gaps.
+            Padrões com muitos dígitos baixos (0 e 1) tendem a ter gaps curtos, enquanto padrões mistos têm gaps variados.
+        </div>
+    `;
+}
+
+// ===== EXIBIR SUGESTÕES =====
+function exibirSugestoes(dados) {
+    if (!dados.sucesso) {
+        document.getElementById('sugestoesJogos').innerHTML = `
+            <div class="alert alert-danger">${dados.mensagem}</div>
+        `;
+        return;
+    }
+
+    const container = document.getElementById('sugestoesJogos');
+    container.innerHTML = dados.sugestoes.map((sug, index) => `
+        <div class="card mb-3 border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>
+                    Sugestão #${index + 1}: ${sug.tipo}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Padrão de Referência:</h6>
+                        <p class="fs-5"><strong>${sug.padrao_referencia}</strong></p>
+
+                        <h6 class="text-muted mt-3">Justificativa:</h6>
+                        <p>${sug.justificativa}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Números Sugeridos:</h6>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            ${sug.numeros.map(n => `
+                                <div class="badge bg-primary fs-4 p-3">${String(n).padStart(2, '0')}</div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-outline-success btn-sm" onclick="copiarNumeros(${JSON.stringify(sug.numeros)})">
+                            <i class="fas fa-copy me-1"></i>Copiar Números
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== UTILITÁRIOS =====
+function copiarNumeros(numeros) {
+    const texto = numeros.map(n => String(n).padStart(2, '0')).join(', ');
+    navigator.clipboard.writeText(texto).then(() => {
+        mostrarSucesso('Números copiados: ' + texto);
+    });
+}
+
+function mostrarErro(mensagem) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-times-circle me-2"></i>Erro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function mostrarSucesso(mensagem) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    alert.style.zIndex = '9999';
+    alert.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alert);
+    setTimeout(() => alert.remove(), 3000);
+}
+</script>
+{% endblock %}

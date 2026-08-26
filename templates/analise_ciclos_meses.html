@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Ciclos e Padrões de Meses - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">🔄 Análise de Ciclos e Padrões de Meses</h2>
+                <a href="/" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+            <p class="text-muted mt-2">Identifica ciclos de repetição, tendências e padrões de transição entre meses</p>
+        </div>
+    </div>
+
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted">Analisando ciclos de todos os meses...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <strong>📊 Total de Concursos:</strong> <span id="totalConcursos">-</span> |
+                    <strong>🗓️ Meses Analisados:</strong> <span id="totalMeses">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3">🏆 Ranking de Meses por Probabilidade</h4>
+            </div>
+            <div id="rankingMeses" class="col-12">
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">🔄 Padrões de Transição Mais Fortes</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Quando um mês sai, qual tende a sair em seguida?</p>
+                        <div id="padroesTransicao">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">💡 Insights Inteligentes</h5>
+                    </div>
+                    <div class="card-body" id="insightsContainer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const nomesMeses = {
+    1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+    5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+    9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+};
+
+// Helper function para obter índice da cor do mês (0-11)
+function obterIndiceMes(numeroMes) {
+    // numeroMes vem como 1-12, precisamos converter para 0-11
+    return numeroMes - 1;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    carregarAnalise();
+});
+
+function carregarAnalise() {
+    fetch('/api/analise/ciclos-meses')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Erro: ${data.error}
+                    </div>
+                `;
+                return;
+            }
+
+            exibirDados(data);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            document.getElementById('loading').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Erro ao carregar análise
+                </div>
+            `;
+        });
+}
+
+function exibirDados(data) {
+    document.getElementById('totalConcursos').textContent = data.total_concursos;
+    document.getElementById('totalMeses').textContent = data.analise_ciclos.length;
+
+    exibirRanking(data.analise_ciclos);
+    exibirPadroesTransicao(data.padroes_fortes);
+    gerarInsights(data);
+}
+
+function exibirRanking(ciclos) {
+    const container = document.getElementById('rankingMeses');
+    let html = '<div class="row">';
+
+    ciclos.forEach((ciclo, index) => {
+        const medalha = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`;
+        const mesIndex = obterIndiceMes(ciclo.mes);
+
+        html += `
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header mes-cor-${mesIndex} text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>${medalha} ${nomesMeses[ciclo.mes]}</strong>
+                            <span class="badge bg-${ciclo.fase_classe}">${ciclo.fase_atual}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>📊 Aparições:</strong> ${ciclo.total_aparicoes}</p>
+                        <p class="mb-2"><strong>⏱️ Intervalo Médio:</strong> ${ciclo.intervalo_medio} concursos</p>
+                        <p class="mb-2"><strong>📏 Min/Max:</strong> ${ciclo.intervalo_min} / ${ciclo.intervalo_max}</p>
+                        <p class="mb-2"><strong>🎯 Regularidade:</strong>
+                            <span class="badge bg-${ciclo.regularidade_classe}">${ciclo.regularidade}</span>
+                            <small>(CV: ${ciclo.coeficiente_variacao}%)</small>
+                        </p>
+                        <p class="mb-2"><strong>📈 Tendência:</strong>
+                            <span class="badge bg-${ciclo.tendencia_classe}">${ciclo.tendencia_icone} ${ciclo.tendencia}</span>
+                        </p>
+                        <p class="mb-2"><strong>⏳ Atraso Atual:</strong> ${ciclo.atraso_atual} concursos</p>
+                        <hr>
+                        <div class="text-center">
+                            <h5 class="mb-0">🎲 ${ciclo.probabilidade_proxima}%</h5>
+                            <small class="text-muted">Probabilidade Próxima</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function exibirPadroesTransicao(padroes) {
+    const container = document.getElementById('padroesTransicao');
+
+    if (!padroes || padroes.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum padrão forte identificado.</p>';
+        return;
+    }
+
+    let html = '<div class="row">';
+
+    padroes.forEach((padrao, index) => {
+        const mesOrigemIndex = obterIndiceMes(padrao.mes_origem);
+        const mesDestinoIndex = obterIndiceMes(padrao.mes_destino);
+
+        html += `
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="alert alert-primary mb-0">
+                    <h6 class="mb-2">#${index + 1} -
+                        <span class="badge mes-cor-${mesOrigemIndex}">${nomesMeses[padrao.mes_origem]}</span>
+                        →
+                        <span class="badge mes-cor-${mesDestinoIndex}">${nomesMeses[padrao.mes_destino]}</span>
+                    </h6>
+                    <p class="mb-0">
+                        <strong>${padrao.frequencia}x</strong> ocorrências
+                        <span class="badge bg-primary">${padrao.percentual}%</span>
+                    </p>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function gerarInsights(data) {
+    const insights = [];
+    const ciclos = data.analise_ciclos;
+
+    if (ciclos.length > 0) {
+        const maisAtrasado = ciclos[0];
+        insights.push({
+            icone: '🔥',
+            titulo: `${nomesMeses[maisAtrasado.mes]} em Fase de ${maisAtrasado.fase_atual}`,
+            texto: `O mês ${nomesMeses[maisAtrasado.mes]} está ${maisAtrasado.atraso_atual} concursos sem aparecer (intervalo médio: ${maisAtrasado.intervalo_medio}). ${maisAtrasado.fase_atual === 'Seca' ? 'Período crítico de ausência!' : 'Merece atenção especial!'}`
+        });
+    }
+
+    const mesesRegulares = ciclos.filter(c => c.regularidade === 'Muito Regular');
+    if (mesesRegulares.length > 0) {
+        insights.push({
+            icone: '🎯',
+            titulo: `${mesesRegulares.length} Mês(es) com Padrão Muito Regular`,
+            texto: `${mesesRegulares.map(m => nomesMeses[m.mes]).join(', ')} apresentam ciclos muito previsíveis (CV < 30%). Ideais para estratégias baseadas em intervalos.`
+        });
+    }
+
+    const mesesAumentando = ciclos.filter(c => c.tendencia === 'Frequência Aumentando');
+    if (mesesAumentando.length > 0) {
+        insights.push({
+            icone: '📈',
+            titulo: `${mesesAumentando.length} Mês(es) em Tendência de Alta`,
+            texto: `${mesesAumentando.map(m => nomesMeses[m.mes]).join(', ')} estão saindo com maior frequência recentemente. Tendência positiva detectada!`
+        });
+    }
+
+    if (data.padroes_fortes && data.padroes_fortes.length > 0) {
+        const melhorPadrao = data.padroes_fortes[0];
+        insights.push({
+            icone: '🔄',
+            titulo: `Padrão Sequencial Forte Detectado`,
+            texto: `Quando ${nomesMeses[melhorPadrao.mes_origem]} sai, ${nomesMeses[melhorPadrao.mes_destino]} tende a aparecer em seguida (${melhorPadrao.percentual}% das vezes). Use isso para apostas consecutivas!`
+        });
+    }
+
+    const mesesIrregulares = ciclos.filter(c => c.regularidade === 'Muito Irregular');
+    if (mesesIrregulares.length > 0) {
+        insights.push({
+            icone: '⚠️',
+            titulo: `${mesesIrregulares.length} Mês(es) com Comportamento Imprevisível`,
+            texto: `${mesesIrregulares.map(m => nomesMeses[m.mes]).join(', ')} têm padrões muito irregulares (CV > 70%). Cuidado ao basear estratégias nesses meses.`
+        });
+    }
+
+    exibirInsights(insights);
+}
+
+function exibirInsights(insights) {
+    const container = document.getElementById('insightsContainer');
+    let html = '';
+
+    const insightsExibir = insights.slice(0, 3);
+
+    insightsExibir.forEach((insight, index) => {
+        const medalhas = ['🥇', '🥈', '🥉'];
+        html += `
+            <div class="alert alert-light border-start border-5 border-warning mb-3">
+                <h6>${medalhas[index]} ${insight.titulo}</h6>
+                <p class="mb-0">${insight.icone} ${insight.texto}</p>
+            </div>
+        `;
+    });
+
+    html += `
+        <div class="alert alert-info mb-0">
+            <strong>💡 Recomendação Estratégica:</strong><br>
+            Combine meses em "fase de seca" com padrões de transição fortes.
+            Priorize meses regulares para apostas consistentes e observe tendências de alta para capturar momentos favoráveis.
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+</script>
+{% endblock %}

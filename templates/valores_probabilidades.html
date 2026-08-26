@@ -1,0 +1,645 @@
+{% extends "base.html" %}
+
+{% block title %}Valores e Probabilidades - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-calculator me-2"></i>Valores e Probabilidades</h2>
+                    <p class="text-muted">Tabelas oficiais e cálculo de valores de apostas</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt me-1"></i>Atualizar
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left me-1"></i>Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração do Valor Base -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="fas fa-cog me-2 text-primary"></i>Configurar Valor Base da Aposta</h5>
+                    <div class="row align-items-end">
+                        <div class="col-md-4">
+                            <label for="valor-base-input" class="form-label">Valor da aposta de 7 números:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
+                                    type="number"
+                                    id="valor-base-input"
+                                    class="form-control"
+                                    value="2.50"
+                                    step="0.01"
+                                    min="0.01"
+                                    style="font-size: 16px;"
+                                >
+                            </div>
+                            <div class="form-text">Valor atual oficial da Caixa: Acima</div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary btn-lg" onclick="calcularValores()">
+                                <i class="fas fa-calculator me-2"></i>Calcular Valores
+                            </button>
+                        </div>
+						
+                    <!--<div class="col-md-4">
+                            <button class="btn btn-outline-secondary" onclick="resetarValorPadrao()">
+                                <i class="fas fa-undo me-2"></i>Resetar para R$ 2,50
+                            </button>
+                        </div>
+					-->	
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Atualizar Dados de Premiação -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-database me-2"></i>Atualizar Dados de Premiação no Banco</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Busque e salve os dados oficiais de premiação da API da Caixa:</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-success btn-lg w-100" onclick="atualizarUltimoConcurso()">
+                                <i class="fas fa-sync-alt me-2"></i>Atualizar Último Concurso
+                            </button>
+                            <small class="text-muted d-block mt-2">Atualiza apenas o concurso mais recente</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <button class="btn btn-warning btn-lg w-100" onclick="atualizarTodosSemDados()">
+                                <i class="fas fa-cloud-download-alt me-2"></i>Atualizar Todos sem Dados
+                            </button>
+                            <small class="text-muted d-block mt-2">Atualiza todos os concursos sem premiação</small>
+                        </div>
+                    </div>
+
+                    <div id="resultado-atualizacao" class="mt-3 d-none"></div>
+
+                    <div id="loading-atualizacao" class="text-center py-3 d-none">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Atualizando...</span>
+                        </div>
+                        <p class="mt-2 mb-0 text-muted">Buscando dados da API da Caixa...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-tabelas" class="text-center py-5 d-none">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted">Calculando valores...</p>
+    </div>
+
+    <!-- Tabelas -->
+    <div id="tabelas-container">
+        <!-- Tabela de Preços -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Tabela de Preços</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Quantidade de Números</th>
+                                        <th>Combinações</th>
+                                        <th class="text-end">Valor da Aposta</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-precos-body">
+                                    <tr><td colspan="3" class="text-center">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Probabilidades -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-dice me-2"></i>Tabela de Probabilidades</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th>Números Apostados</th>
+                                        <th class="text-center">7 Acertos</th>
+                                        <th class="text-center">6 Acertos</th>
+                                        <th class="text-center">5 Acertos</th>
+                                        <th class="text-center">4 Acertos</th>
+                                        <th class="text-center">Mês da Sorte</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-probabilidades-body">
+                                    <tr><td colspan="6" class="text-center">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Observação:</strong> As probabilidades indicam "1 em X" chances de ganhar em cada faixa.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prêmios Fixos -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Prêmios Fixos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center" id="premios-fixos-container">
+                            <div class="col-md-4">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="text-muted">4 Acertos</h6>
+                                        <h3 class="text-warning mb-0">R$ 5,00</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="text-muted">5 Acertos</h6>
+                                        <h3 class="text-warning mb-0">R$ 25,00</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="text-muted">Mês da Sorte</h6>
+                                        <h3 class="text-warning mb-0">R$ 2,50</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Importante:</strong> Os valores de 6 e 7 acertos são variáveis e dependem da arrecadação total do concurso (43,79% da arrecadação: 70% para 7 acertos, 30% para 6 acertos).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Quantidade de Prêmios -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-gift me-2"></i>Quantidade de Prêmios a Receber</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Selecione a quantidade de números para ver quantos prêmios você recebe ao acertar:</p>
+                        <div class="mb-3">
+                            <select id="select-quantidade-numeros" class="form-select" style="font-size: 16px;">
+                                <option value="7">7 números (aposta simples)</option>
+                                <option value="8">8 números</option>
+                                <option value="9">9 números</option>
+                                <option value="10">10 números</option>
+                                <option value="11">11 números</option>
+                                <option value="12">12 números</option>
+                                <option value="13">13 números</option>
+                                <option value="14">14 números</option>
+                                <option value="15">15 números</option>
+                            </select>
+                        </div>
+                        <div id="tabela-quantidade-premios"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let valorBaseAtual = 2.50; // Valor padrão, será sobrescrito
+
+// ===== INICIALIZAÇÃO =====
+document.addEventListener('DOMContentLoaded', async function() {
+    // 1. PRIMEIRO: Carregar valor da configuração e prêmios fixos
+    await carregarValorDaConfiguracao();
+    await carregarPremiosFixos();
+
+    // 2. DEPOIS: Carregar tabelas com valores corretos
+    carregarTabelaCompleta();
+    carregarQuantidadePremios(7);
+
+    // Event listener para mudança de quantidade de números
+    document.getElementById('select-quantidade-numeros').addEventListener('change', function() {
+        carregarQuantidadePremios(parseInt(this.value));
+    });
+});
+
+// ===== CARREGAR VALOR DA CONFIGURAÇÃO =====
+async function carregarValorDaConfiguracao() {
+    try {
+        const response = await fetch('/api/configuracoes/valor-aposta');
+        const data = await response.json();
+
+        if (data.sucesso && data.valor_aposta) {
+            valorBaseAtual = data.valor_aposta;
+            document.getElementById('valor-base-input').value = valorBaseAtual.toFixed(2);
+            console.log(`✅ Valor da aposta carregado da configuração: R$ ${valorBaseAtual.toFixed(2)}`);
+        } else {
+            console.warn('⚠️ Usando valor padrão R$ 2,50 (configuração não encontrada)');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar valor da configuração:', error);
+        console.warn('⚠️ Usando valor padrão R$ 2,50');
+    }
+}
+
+// ===== CARREGAR PRÊMIOS FIXOS =====
+async function carregarPremiosFixos() {
+    try {
+        const response = await fetch('/api/configuracoes/premios-fixos');
+        const data = await response.json();
+
+        if (data.sucesso && data.premios_fixos) {
+            const premios = data.premios_fixos;
+
+            // Atualizar os cards de prêmios fixos no HTML
+            const cardsContainer = document.getElementById('premios-fixos-container');
+            if (cardsContainer) {
+                cardsContainer.innerHTML = `
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h6 class="text-muted">4 Acertos</h6>
+                                <h3 class="text-warning mb-0">R$ ${premios['4_acertos'].toFixed(2)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h6 class="text-muted">5 Acertos</h6>
+                                <h3 class="text-warning mb-0">R$ ${premios['5_acertos'].toFixed(2)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h6 class="text-muted">Mês da Sorte</h6>
+                                <h3 class="text-warning mb-0">R$ ${premios['mes_sorte'].toFixed(2)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            console.log('✅ Prêmios fixos carregados da configuração');
+        } else {
+            console.warn('⚠️ Usando valores padrão para prêmios fixos');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar prêmios fixos:', error);
+        console.warn('⚠️ Usando valores padrão para prêmios fixos');
+    }
+}
+
+// ===== CALCULAR VALORES =====
+async function calcularValores() {
+    const input = document.getElementById('valor-base-input');
+    const valorBase = parseFloat(input.value);
+
+    if (isNaN(valorBase) || valorBase <= 0) {
+        mostrarAlerta('Por favor, insira um valor válido maior que zero!');
+        return;
+    }
+
+    valorBaseAtual = valorBase;
+    await carregarTabelaCompleta();
+}
+
+function resetarValorPadrao() {
+    document.getElementById('valor-base-input').value = '2.50';
+    valorBaseAtual = 2.50;
+    carregarTabelaCompleta();
+}
+
+// ===== CARREGAR TABELA COMPLETA =====
+async function carregarTabelaCompleta() {
+    document.getElementById('loading-tabelas').classList.remove('d-none');
+
+    try {
+        const response = await fetch('/api/valores-probabilidades/tabela-completa', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                valor_base: valorBaseAtual
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            exibirTabelaPrecos(data.tabela.tabela);
+            exibirTabelaProbabilidades(data.tabela.tabela);
+        } else {
+            mostrarErro('Erro ao carregar tabelas: ' + data.mensagem);
+        }
+    } catch (error) {
+        mostrarErro('Erro ao conectar com o servidor: ' + error.message);
+    } finally {
+        document.getElementById('loading-tabelas').classList.add('d-none');
+    }
+}
+
+// ===== EXIBIR TABELAS =====
+function exibirTabelaPrecos(tabela) {
+    const tbody = document.getElementById('tabela-precos-body');
+
+    tbody.innerHTML = tabela.map(item => `
+        <tr>
+            <td><strong>${item.quantidade_numeros} números</strong></td>
+            <td>${item.quantidade_jogos.toLocaleString('pt-BR')} combinações</td>
+            <td class="text-end"><strong>R$ ${item.valor_aposta.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+        </tr>
+    `).join('');
+}
+
+function exibirTabelaProbabilidades(tabela) {
+    const tbody = document.getElementById('tabela-probabilidades-body');
+
+    tbody.innerHTML = tabela.map(item => {
+        const prob = item.probabilidades;
+        return `
+            <tr>
+                <td><strong>${item.quantidade_numeros} números</strong></td>
+                <td class="text-center">1 em ${prob['7_acertos'].toLocaleString('pt-BR')}</td>
+                <td class="text-center">1 em ${prob['6_acertos'].toLocaleString('pt-BR')}</td>
+                <td class="text-center">1 em ${prob['5_acertos'].toLocaleString('pt-BR')}</td>
+                <td class="text-center">1 em ${prob['4_acertos'].toLocaleString('pt-BR')}</td>
+                <td class="text-center">1 em ${prob.mes_sorte.toLocaleString('pt-BR')}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ===== CARREGAR QUANTIDADE DE PRÊMIOS =====
+async function carregarQuantidadePremios(quantidadeNumeros) {
+    try {
+        const response = await fetch(`/api/valores-probabilidades/quantidade-premios/${quantidadeNumeros}`);
+        const data = await response.json();
+
+        if (data.sucesso) {
+            exibirQuantidadePremios(data.premios, quantidadeNumeros);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar quantidade de prêmios:', error);
+    }
+}
+
+function exibirQuantidadePremios(premios, quantidadeNumeros) {
+    const container = document.getElementById('tabela-quantidade-premios');
+
+    let html = '<div class="table-responsive"><table class="table table-bordered">';
+    html += '<thead class="table-primary"><tr>';
+    html += '<th>Acertando</th>';
+    html += '<th class="text-center">7 Acertos</th>';
+    html += '<th class="text-center">6 Acertos</th>';
+    html += '<th class="text-center">5 Acertos</th>';
+    html += '<th class="text-center">4 Acertos</th>';
+    html += '</tr></thead><tbody>';
+
+    ['acertando_7', 'acertando_6', 'acertando_5', 'acertando_4'].forEach(acerto => {
+        if (premios[acerto]) {
+            const label = acerto.replace('acertando_', '') + ' números';
+            html += `<tr><td><strong>${label}</strong></td>`;
+
+            ['7_acertos', '6_acertos', '5_acertos', '4_acertos'].forEach(faixa => {
+                const qtd = premios[acerto][faixa] || 0;
+                html += `<td class="text-center ${qtd > 0 ? 'bg-success bg-opacity-10' : ''}">${qtd}</td>`;
+            });
+
+            html += '</tr>';
+        }
+    });
+
+    html += '</tbody></table></div>';
+
+    html += `<div class="alert alert-primary mt-3">`;
+    html += `<i class="fas fa-star me-2"></i>`;
+    html += `<strong>Mês da Sorte:</strong> ${premios.mes_sorte} prêmio(s) de R$ 2,50`;
+    html += `</div>`;
+
+    container.innerHTML = html;
+}
+
+// ===== ATUALIZAR PREMIAÇÃO =====
+async function atualizarUltimoConcurso() {
+    document.getElementById('loading-atualizacao').classList.remove('d-none');
+    document.getElementById('resultado-atualizacao').classList.add('d-none');
+
+    try {
+        const response = await fetch('/api/atualizar-premiacao/ultimo', {
+            method: 'POST'
+        });
+
+        const data = await response.json();
+
+        exibirResultadoAtualizacao(data);
+
+    } catch (error) {
+        exibirResultadoAtualizacao({
+            sucesso: false,
+            mensagem: 'Erro ao conectar com o servidor: ' + error.message
+        });
+    } finally {
+        document.getElementById('loading-atualizacao').classList.add('d-none');
+    }
+}
+
+async function atualizarTodosSemDados() {
+    const confirmar = await mostrarConfirmacao(
+        'Atualizar todos os concursos sem dados de premiação?',
+        'Esta operação pode demorar alguns minutos dependendo da quantidade de concursos.'
+    );
+
+    if (!confirmar) return;
+
+    document.getElementById('loading-atualizacao').classList.remove('d-none');
+    document.getElementById('resultado-atualizacao').classList.add('d-none');
+
+    try {
+        const response = await fetch('/api/atualizar-premiacao/todos-sem-dados', {
+            method: 'POST'
+        });
+
+        const data = await response.json();
+
+        exibirResultadoAtualizacao(data);
+
+    } catch (error) {
+        exibirResultadoAtualizacao({
+            sucesso: false,
+            mensagem: 'Erro ao conectar com o servidor: ' + error.message
+        });
+    } finally {
+        document.getElementById('loading-atualizacao').classList.add('d-none');
+    }
+}
+
+function exibirResultadoAtualizacao(data) {
+    const container = document.getElementById('resultado-atualizacao');
+    container.classList.remove('d-none');
+
+    if (data.sucesso) {
+        let html = `<div class="alert alert-success">`;
+        html += `<i class="fas fa-check-circle me-2"></i>`;
+        html += `<strong>${data.mensagem}</strong>`;
+
+        if (data.dados) {
+            html += `<div class="mt-2">`;
+            html += `<small>Concurso ${data.dados.concurso}:</small><br>`;
+            html += `<small>• 7 acertos: ${data.dados.ganhadores_7} ganhadores - R$ ${data.dados.valor_7.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</small><br>`;
+            html += `<small>• 6 acertos: ${data.dados.ganhadores_6} ganhadores - R$ ${data.dados.valor_6.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</small>`;
+            html += `</div>`;
+        }
+
+        if (data.resultados) {
+            html += `<div class="mt-2">`;
+            html += `<small>Total processados: ${data.resultados.total}</small><br>`;
+            html += `<small>✅ Sucesso: ${data.resultados.sucesso}</small><br>`;
+            html += `<small>❌ Erros: ${data.resultados.erros}</small>`;
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
+    } else {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle me-2"></i>
+                <strong>Erro:</strong> ${data.mensagem}
+            </div>
+        `;
+    }
+}
+
+// ===== UTILITÁRIOS =====
+function mostrarAlerta(mensagem) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Atenção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function mostrarErro(mensagem) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-times-circle me-2"></i>Erro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function mostrarConfirmacao(titulo, mensagem) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title"><i class="fas fa-question-circle me-2"></i>${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">${mensagem}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="window.confirmResult = false">Cancelar</button>
+                        <button type="button" class="btn btn-warning" data-bs-dismiss="modal" onclick="window.confirmResult = true">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const bsModal = new bootstrap.Modal(modal);
+        window.confirmResult = false;
+        bsModal.show();
+        modal.addEventListener('hidden.bs.modal', () => {
+            resolve(window.confirmResult);
+            modal.remove();
+        });
+    });
+}
+</script>
+{% endblock %}

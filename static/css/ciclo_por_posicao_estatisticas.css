@@ -1,0 +1,413 @@
+.ciclo-pos-ajuda {
+    background: linear-gradient(135deg, #fffef5 0%, #f8f4e3 100%);
+    border-left: 4px solid #d4b31a !important;
+}
+
+.ciclo-pos-accordion .accordion-button {
+    background: transparent;
+    color: #5b4c0b;
+    box-shadow: none;
+    font-size: 0.875rem;
+}
+
+.ciclo-pos-accordion .accordion-button:not(.collapsed) {
+    background: rgba(212, 179, 26, 0.12);
+    color: #3d3407;
+}
+
+.ciclo-pos-accordion .accordion-button::after {
+    filter: brightness(0.4);
+}
+
+.ciclo-pos-tab .card-header-ciclo {
+    background: linear-gradient(135deg, #d4b31a 0%, #887211 100%);
+    color: #1a1a1a;
+}
+
+.ciclo-pos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.ciclo-pos-mapa-wrap {
+    background: #faf8f0;
+    border: 1px solid #e8dfc0;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.ciclo-pos-mapa .ciclo-mapa-dezenas {
+    line-height: 1.9;
+}
+
+.ciclo-mapa-row {
+    cursor: pointer;
+}
+
+.ciclo-mapa-row-ativo {
+    background: rgba(212, 179, 26, 0.18) !important;
+}
+
+.ciclo-mapa-row-top td:first-child {
+    border-left: 3px solid #d4b31a;
+}
+
+.ciclo-pos-card-pos.mais-pendentes {
+    border-color: #c9a010;
+    background: #fff8dc;
+}
+
+.ciclo-pos-card-pendentes {
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.35;
+    color: #5b4c0b;
+    word-break: break-all;
+}
+
+.ciclo-pos-lista-completa,
+.ciclo-pos-lista-saidas {
+    line-height: 2;
+}
+
+.ciclo-pendente-atraso {
+    position: relative;
+    padding-right: 4px;
+    padding-bottom: 10px;
+}
+
+.ciclo-atraso-num {
+    display: block;
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1;
+    color: #886611;
+    text-align: center;
+}
+
+.ciclo-saida-badge {
+    background: #e8f4e8;
+    border-color: #9cb89c;
+    color: #2d5a2d;
+}
+
+.ciclo-pos-card-pos {
+    border: 1px solid #e0d5a8;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fcf9e8;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.ciclo-pos-card-pos:hover,
+.ciclo-pos-card-pos.ativo {
+    border-color: #d4b31a;
+    box-shadow: 0 0 0 2px rgba(212, 179, 26, 0.35);
+}
+
+.ciclo-pos-card-pos .prog {
+    height: 6px;
+    background: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ciclo-pos-card-pos .prog-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #887211, #d4b31a);
+}
+
+.ciclo-pendente-badge {
+    display: inline-block;
+    min-width: 28px;
+    padding: 2px 6px;
+    margin: 2px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #fff3cd;
+    border: 1px solid #d4b31a;
+    color: #5b4c0b;
+}
+
+.ciclo-aposta-linha {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.ciclo-aposta-linha:last-child {
+    border-bottom: none;
+}
+
+.ciclo-pos-compositor .ciclo-jogo-nums {
+    font-family: ui-monospace, monospace;
+    letter-spacing: 0.05em;
+}
+
+#cicloPosBtnOrdenar.active {
+    background: #d4b31a;
+    border-color: #887211;
+    color: #1a1a1a;
+}
+
+/* Painéis sem rolagem interna — página rola para mostrar tudo */
+.ciclo-pos-tab,
+.ciclo-pos-tab .ciclo-pos-scroll-box,
+.ciclo-pos-tab .ciclo-pos-scroll-mapa,
+.ciclo-pos-tab .ciclo-impressao-matriz,
+.ciclo-pos-tab .ciclo-impressao-apostas,
+.ciclo-pos-tab #cicloPosApostasLista {
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+.ciclo-pos-scroll-box {
+    overflow: visible;
+}
+
+.ciclo-pos-scroll-mapa {
+    overflow: visible;
+}
+
+.ciclo-pos-mapa-wrap .ciclo-pos-mapa tbody td {
+    vertical-align: top;
+    padding: 8px 6px;
+}
+
+.ciclo-pos-mapa-wrap .ciclo-mapa-dezenas {
+    line-height: 2;
+    white-space: normal;
+}
+
+.ciclo-pos-scroll-cruzamento {
+    border: 1px solid #e8dfc0;
+    border-radius: 6px;
+    background: #fff;
+    padding: 6px;
+}
+
+.ciclo-pos-scroll-jogos {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fafafa;
+    padding: 8px;
+}
+
+.ciclo-comp-jogo-linha {
+    font-family: ui-monospace, monospace;
+    padding: 6px 4px;
+    border-bottom: 1px solid #eee;
+}
+
+.ciclo-comp-jogo-linha:last-child {
+    border-bottom: none;
+}
+
+.ciclo-impressao-matriz,
+.ciclo-impressao-apostas {
+    min-height: 0;
+}
+
+.ciclo-imp-table thead th {
+    background: #fff3cd;
+}
+
+.ciclo-imp-matriz-wrap {
+    overflow-x: auto;
+}
+
+.ciclo-imp-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.ciclo-imp-table .ciclo-imp-col-pos,
+.ciclo-imp-table .ciclo-imp-idx-col,
+.ciclo-imp-table .ciclo-imp-padrao-col {
+    width: calc(100% / 9);
+    min-width: 0;
+    max-width: none;
+    padding: 4px 2px !important;
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+.ciclo-imp-table .ciclo-imp-padrao-col {
+    background: #fafafa;
+    border-left: 2px solid #d4b31a !important;
+}
+
+.ciclo-imp-padrao-ds {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: inherit;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ciclo-imp-aposta-padrao {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.ciclo-imp-acoes-matriz .btn-lg {
+    font-size: 0.95rem;
+}
+
+.ciclo-imp-cell {
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+}
+
+.ciclo-imp-aposta-nums {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+}
+
+.ciclo-imp-table-regra .ciclo-imp-lista-jogaveis {
+    font-family: ui-monospace, monospace;
+    line-height: 1.5;
+    max-width: 420px;
+}
+
+.ciclo-imp-table-regra thead th {
+    background: #fff3cd;
+}
+
+.ciclo-imp-vazio {
+    background: #f5f5f5;
+    color: #bbb;
+}
+
+/* Matriz impressão — cores por tipo (não usar só negrito) */
+.ciclo-imp-table tbody td.ciclo-imp-cel-jogavel {
+    background-color: #fff176 !important;
+    color: #4a3b00 !important;
+    font-weight: 600 !important;
+    border-color: #d4b31a !important;
+    box-shadow: inset 0 0 0 1px rgba(212, 179, 26, 0.55);
+}
+
+.ciclo-imp-table tbody td.ciclo-imp-cel-complemento {
+    background-color: #bbdefb !important;
+    color: #0d47a1 !important;
+    font-weight: 600 !important;
+    border-color: #64b5f6 !important;
+    box-shadow: inset 0 0 0 1px rgba(33, 150, 243, 0.35);
+}
+
+.ciclo-imp-table tbody td.ciclo-imp-cel-nao-apostar {
+    background-color: #ffcdd2 !important;
+    color: #b71c1c !important;
+    font-weight: 600 !important;
+    border-color: #e57373 !important;
+}
+
+.ciclo-imp-table tbody td.ciclo-imp-cel-saida {
+    background-color: #c8e6c9 !important;
+    color: #1b5e20 !important;
+    font-weight: 600 !important;
+    border-color: #81c784 !important;
+}
+
+.ciclo-imp-table.table-hover tbody tr:hover td.ciclo-imp-cel-jogavel {
+    background-color: #ffeb3b !important;
+}
+
+.ciclo-imp-table.table-hover tbody tr:hover td.ciclo-imp-cel-complemento {
+    background-color: #90caf9 !important;
+}
+
+.ciclo-imp-table.table-hover tbody tr:hover td.ciclo-imp-cel-saida {
+    background-color: #a5d6a7 !important;
+}
+
+.ciclo-imp-table.table-hover tbody tr:hover td.ciclo-imp-cel-nao-apostar {
+    background-color: #ef9a9a !important;
+}
+
+.ciclo-imp-legenda-matriz {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.ciclo-imp-legenda-matriz span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.ciclo-imp-legenda-amostra {
+    display: inline-block;
+    min-width: 2.2rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-align: center;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.ciclo-imp-legenda-amostra.ciclo-imp-cel-jogavel {
+    background-color: #fff176;
+    color: #4a3b00;
+}
+
+.ciclo-imp-legenda-amostra.ciclo-imp-cel-complemento {
+    background-color: #bbdefb;
+    color: #0d47a1;
+}
+
+.ciclo-imp-legenda-amostra.ciclo-imp-cel-saida {
+    background-color: #c8e6c9;
+    color: #1b5e20;
+}
+
+.ciclo-imp-legenda-amostra.ciclo-imp-cel-nao-apostar {
+    background-color: #ffcdd2;
+    color: #b71c1c;
+}
+
+.ciclo-imp-idx-col {
+    background: #faf8f0;
+    min-width: 48px;
+}
+
+.ciclo-imp-cell-click:not(.ciclo-imp-vazio) {
+    cursor: pointer;
+}
+
+.ciclo-imp-idx-click,
+.ciclo-imp-regra-row,
+.ciclo-imp-col-head {
+    cursor: pointer;
+}
+
+.ciclo-imp-cell-sel,
+.ciclo-imp-row-sel .ciclo-imp-idx-col {
+    background: rgba(212, 179, 26, 0.45) !important;
+    outline: 2px solid #887211;
+}
+
+.ciclo-imp-regra-sel {
+    background: rgba(212, 179, 26, 0.25) !important;
+}
+
+@media print {
+    .ciclo-impressao-30-card .btn,
+    .ciclo-pos-tab .card:not(.ciclo-impressao-30-card) {
+        display: none !important;
+    }
+}

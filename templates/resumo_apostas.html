@@ -1,0 +1,1025 @@
+{% extends "base.html" %}
+
+{% block title %}Resumo das Apostas - Dia de Sorte{% endblock %}
+
+{% block content %}
+
+<!-- Custom Styles for Painel Visual Moderno -->
+<style>
+    :root {
+        --cor-primaria: #1a1a2e;
+        --cor-secundaria: #2d2d44;
+        --cor-destaque: #D4B31A;
+        --cor-luxo: #F4D03F;
+        --border-radius: 12px;
+    }
+
+    .painel-header {
+        background: linear-gradient(135deg, var(--cor-destaque) 0%, var(--cor-luxo) 100%);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        color: #1a1a2e;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.4);
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .painel-header h2 {
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .painel-header p {
+        margin: 5px 0 0 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-left: 5px solid var(--cor-destaque);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-card-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .metric-card-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--cor-primaria);
+        line-height: 1;
+    }
+
+    /* Cores personalizadas por métrica */
+    .border-investido {
+        border-left-color: #6c757d;
+    }
+
+    .text-investido {
+        color: #495057;
+    }
+
+    .border-ganho {
+        border-left-color: #28a745;
+    }
+
+    .text-ganho {
+        color: #28a745;
+    }
+
+    .border-premiados {
+        border-left-color: #17a2b8;
+    }
+
+    .text-premiados {
+        color: #17a2b8;
+    }
+
+    .border-melhor {
+        border-left-color: #f39c12;
+    }
+
+    .text-melhor {
+        color: #f39c12;
+    }
+
+    .tabela-resumo th {
+        background-color: var(--cor-primaria);
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-bottom: 0;
+        padding: 12px;
+    }
+
+    .tabela-resumo td {
+        vertical-align: middle;
+        padding: 12px;
+    }
+
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-sim {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .badge-nao {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .valor-badge {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .loader-container {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--cor-destaque);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px auto;
+    }
+
+    .bola-sorteio {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Navegação de volta (opcional, para contextualizar) -->
+    <a href="/central-conferencias" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="fas fa-arrow-left"></i> Voltar para Central
+    </a>
+
+    <!-- Painel Principal -->
+    <div class="painel-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-chart-bar me-2"></i>Resumo Global das Apostas</h2>
+                <p>Análise de TODOS os Concursos Disponíveis (Automático)</p>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-dark btn-sm rounded-pill px-3" onclick="recarregarResumo()" id="btn-atualizar">
+                    <i class="fas fa-sync-alt me-1"></i> Verificar Novos Resultados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div class="loader-container" id="loader-area">
+        <div class="loader"></div>
+        <h5 class="text-muted">Processando jogos em segundo plano...</h5>
+        <small class="text-muted">Analisando agrupamentos de concursos</small>
+    </div>
+
+    <!-- Área de Erro -->
+    <div class="alert alert-danger shadow-sm d-none" id="error-area">
+        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Ops! Algo deu errado.</h5>
+        <p id="error-msg" class="mb-0">Não foi possível carregar o resumo.</p>
+    </div>
+
+    <!-- Resultados e Cards -->
+    <div id="conteudo-resumo" class="d-none">
+
+        <!-- Cards Superiores -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4 col-sm-6">
+                <div class="metric-card border-destaque">
+                    <div class="metric-card-title"><i class="fas fa-hashtag"></i> Concursos Analisados</div>
+                    <div class="metric-card-value text-primaria" id="card-concursos">--</div>
+                    <small class="text-muted mt-1" id="card-data-concurso">Processados via OCR/JSON</small>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="metric-card border-destaque">
+                    <div class="metric-card-title"><i class="fas fa-file-invoice"></i> Total de Jogos</div>
+                    <div class="metric-card-value text-primaria" id="card-jogos">--</div>
+                    <small class="text-muted mt-1">Jogos verificados historicamente</small>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="metric-card border-premiados">
+                    <div class="metric-card-title"><i class="fas fa-trophy"></i> Jogos Premiados</div>
+                    <div class="metric-card-value text-premiados" id="card-qtd-premiados">--</div>
+                    <small class="text-muted mt-1">Acertos que geraram retorno</small>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="metric-card border-investido">
+                    <div class="metric-card-title"><i class="fas fa-wallet"></i> Valor Investido Geral</div>
+                    <div class="metric-card-value text-investido" id="card-investido">R$ 0,00</div>
+                    <small class="text-muted mt-1" id="card-lucro-roi">ROI Global: --</small>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="metric-card border-ganho">
+                    <div class="metric-card-title"><i class="fas fa-hand-holding-usd"></i> Valor Ganho Geral</div>
+                    <div class="metric-card-value text-ganho" id="card-ganho">R$ 0,00</div>
+                    <small class="text-success mt-1 fw-bold" id="card-lucro-bruto">Lucro: R$ 0,00</small>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="metric-card border-melhor">
+                    <div class="metric-card-title"><i class="fas fa-medal"></i> Melhor Resultado Histórico</div>
+                    <div class="metric-card-value text-melhor" id="card-melhor-resultado">--</div>
+                    <small class="text-muted mt-1">Premiação máxima alcançada globalmente</small>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Botão/Área de Inteligência -->
+        <div class="card shadow-sm border-0 mb-4" id="card-inteligencia"
+            style="border-radius: var(--border-radius); background: linear-gradient(to right, #ffffff, #fdfbf1);">
+            <div class="card-body p-4 text-center">
+                <button class="btn btn-warning btn-lg rounded-pill fw-bold text-dark px-5 shadow-sm"
+                    onclick="toggleInteligencia()" id="btn-toggle-intel" style="min-width: 350px;">
+                    <i class="fas fa-brain me-2"></i> Inteligência: Análise de Estratégias (3 Faltantes)
+                </button>
+
+                <!-- Área expandida de inteligência (Inicia oculta) -->
+                <div id="painel-inteligencia" class="mt-4 text-start d-none"
+                    style="border-top: 1px solid #eee; padding-top: 25px;">
+                    <div class="row">
+                        <!-- Coluna 1: Relatório Estatístico -->
+                        <div class="col-lg-6 mb-4">
+                            <h5 class="fw-bold mb-1 text-primary" style="font-size: 1.1rem;"><i
+                                    class="fas fa-chart-pie me-2"></i> Relatório Quântico (<span
+                                    id="int-total-jogos">0</span> jogos c/ 4 pts)</h5>
+                            <p class="text-muted mb-2" style="font-size: 0.85rem; line-height: 1.3;">O sistema extraiu
+                                todos os seus jogos quase ganhadores e "desmontou" a estrutura de cada um, procurando
+                                sua força oculta e o padrão que o fez perder.</p>
+                            <button class="btn btn-sm btn-outline-primary mb-4 rounded-pill fw-bold bg-white shadow-sm"
+                                onclick="abrirModalInterpretacao()"><i class="fas fa-magic me-1"></i> Interpretar Meus
+                                Números (Aprenda a Ler)</button>
+
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="me-3" style="min-width: 155px;">
+                                    <div class="badge bg-success py-2 px-3 shadow-sm rounded-pill w-100"
+                                        style="text-align: left;"><i class="fas fa-fire me-1"></i> Núcleo
+                                        Forte Fixos</div>
+                                    <div class="text-muted mt-1 px-1" style="font-size: 0.70rem; line-height: 1.1;">Suas
+                                        dezenas com maior taxa real de acertos nas cartelas avaliadas. Mantemos elas.
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 border-start border-2 border-success ps-3"
+                                    id="int-nucleo-forte">--</div>
+                            </div>
+
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3" style="min-width: 155px;">
+                                    <div class="badge bg-danger py-2 px-3 shadow-sm rounded-pill w-100"
+                                        style="text-align: left;"><i class="fas fa-times-circle me-1"></i>
+                                        Evitar (Zona Erro)</div>
+                                    <div class="text-muted mt-1 px-1" style="font-size: 0.70rem; line-height: 1.1;">As
+                                        dezenas teimosas que você sempre jogou, mas que se provaram o motivo real de
+                                        erro.</div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 border-start border-2 border-danger ps-3"
+                                    id="int-zona-erro">--</div>
+                            </div>
+
+                            <div class="d-flex align-items-center mt-4 p-3 rounded shadow-sm"
+                                style="background-color: #fff8e6; border: 1px dashed #E2BB2B;">
+                                <div class="w-100">
+                                    <div class="fw-bold text-dark mb-1" style="font-size: 0.95rem;"><i
+                                            class="fas fa-search-plus text-warning me-1"></i> O que nos faltou pra
+                                        chegar a 7?</div>
+                                    <p class="text-muted mb-2" style="font-size: 0.8rem; line-height: 1.2;">O algoritmo
+                                        rastreou quais dezenas foram sorteadas (Oficiais) e escaparam da sua cartela,
+                                        sendo hoje seus melhores substitutos em potencial:</p>
+                                    <div class="d-flex flex-wrap gap-1 mt-2 mb-2" id="int-top-faltantes">--</div>
+                                    <div class="small fw-bold text-secondary mt-2" style="font-size: 0.75rem;">Foco das
+                                        Bolas Faltantes (Onde Erramos Mais):</div>
+                                    <div class="d-flex w-100 mt-1 shadow-sm"
+                                        style="height: 12px; border-radius: 6px; overflow: hidden;"
+                                        id="int-bar-faltantes">
+                                        <div class="bg-primary" style="width: 33%"></div>
+                                        <div class="bg-warning" style="width: 34%"></div>
+                                        <div class="bg-danger" style="width: 33%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted mt-1 fw-bold"
+                                        style="font-size: 0.70rem;" id="int-txt-faltantes">
+                                        <span class="text-primary">Baixas: 33%</span>
+                                        <span class="text-warning">Médias: 34%</span>
+                                        <span class="text-danger">Altas: 33%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna 2: Jogos Otimizados -->
+                        <div class="col-lg-6">
+                            <h5 class="fw-bold mb-1" style="color: #6B5113; font-size: 1.1rem;"><i
+                                    class="fas fa-lightbulb text-warning me-2"></i> Combinações Sugeridas pelo Robô
+                            </h5>
+                            <p class="text-muted mb-4" style="font-size: 0.85rem; line-height: 1.3;">Através da
+                                estatística validada ao lado, o robô trancou as suas 4 dezenas fixas vitoriosas no
+                                centro (verde) e completou as 3 lacunas perigosas com os Top Substitutos Faltantes de
+                                ponta, <strong>garantindo matematicamente que nunca passem de 2 altas (&gt;25)</strong>.
+                            </p>
+
+                            <div id="int-jogos-sugeridos" class="d-flex flex-column gap-2 mb-2">
+                                <!-- JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela Detalhada -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-layer-group text-primary me-2"></i>Resumo por Concurso</h5>
+                <span class="badge bg-light text-dark border"><i class="fas fa-info-circle text-muted me-1"></i> Apenas
+                    Leitura</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="overflow-x: visible;">
+                    <table class="table table-hover tabela-resumo mb-0 text-center" id="tabela-principal-resumo">
+                        <thead>
+                            <tr>
+                                <th>Concurso</th>
+                                <th>Dia de Sorteio</th>
+                                <th>Total Jogos</th>
+                                <th>Premiados</th>
+                                <th>Melhor Resultado</th>
+                                <th>Valor Total Ganho</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-processados">
+                            <!-- JS populacional -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light text-muted text-center py-2" style="font-size: 0.85rem;">
+                Processado via módulo automático Isolado de Resumos
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Interpretação -->
+    <div class="modal fade" id="modalInterpretacao" tabindex="-1" aria-labelledby="modalInterpretacaoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 8px;">
+                <div class="modal-header text-white border-0 py-3"
+                    style="background: linear-gradient(135deg, #0d6efd, #0dcaf0);">
+                    <h5 class="modal-title fw-bold" id="modalInterpretacaoLabel"><i class="fas fa-magic me-2"></i> O
+                        Mapa Interativo do Próximo Jogo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-light text-dark" style="font-size: 0.95rem; line-height: 1.6;"
+                    id="conteudo-interpretacao">
+                    <!-- Gerado via JS -->
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-secondary px-4 rounded-pill"
+                        data-bs-dismiss="modal">Entendido!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes do Concurso (Tooltip avançado) -->
+    <div class="modal fade" id="modalResultados" tabindex="-1" aria-labelledby="modalResultadosLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 580px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 4px; overflow: hidden;">
+                <div class="modal-header border-0 shadow-sm d-flex align-items-center"
+                    style="background-color: #E2BB2B; padding: 12px 20px;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-clover"
+                            style="color: white; font-size: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></i>
+                        <h5 class="modal-title fw-bold m-0" id="modalResultadosLabel"
+                            style="color: #6B5113; font-size: 1.15rem;">Resultado dia de sorte</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white opacity-75" data-bs-dismiss="modal"
+                        aria-label="Close" style="font-size: 0.8rem;"></button>
+                </div>
+                <div class="modal-body bg-white" style="padding: 24px 30px;">
+                    <!-- Cabeçalho do Concurso -->
+                    <div class="d-flex justify-content-between mb-4 align-items-center border-bottom pb-3 mt-1">
+                        <div class="fs-6 text-secondary" style="color: #666 !important;">Concurso: <span
+                                id="md-concurso" class="fw-bold fs-5 text-dark">----</span></div>
+                        <div class="text-end">
+                            <span class="fs-6" style="color: #666;">Prêmio Total: </span>
+                            <span class="fw-bold fs-4 text-success ms-1" id="md-premio">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <div class="row text-start mt-2 pb-2">
+                        <div class="col-6 mb-3 position-relative">
+                            <h6 class="fw-bold mb-3" style="color: #004D7F; font-size: 0.95rem;">Números sorteados</h6>
+                            <div class="d-flex flex-wrap gap-1 mb-3" id="md-bolas-sorteadas">
+                                <!-- JS -->
+                            </div>
+                            <div class="text-secondary" style="font-size: 0.95rem;">Mês de sorte: <span
+                                    id="md-mes-sorteado" class="fw-bold"
+                                    style="color: #8A6511; text-transform: uppercase;">---</span></div>
+                        </div>
+                        <div class="col-6 border-start ps-4">
+                            <h6 class="fw-bold mb-3" style="color: #004D7F; font-size: 0.95rem;">Seus números</h6>
+                            <div class="d-flex flex-wrap gap-1 mb-3" id="md-bolas-apostadas">
+                                <!-- JS -->
+                            </div>
+                            <div class="text-secondary" style="font-size: 0.95rem;">Mês de sorte: <span
+                                    id="md-mes-apostado" class="fw-bold"
+                                    style="color: #888; text-transform: uppercase;">---</span></div>
+                            <div class="text-secondary mt-1" style="font-size: 0.95rem;">Acertos: <span id="md-acertos"
+                                    class="fw-bold" style="color: #555;">0 números</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dataGlobal = [];
+    const nomesMeses = ['', 'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarResumo();
+    });
+
+    function recarregarResumo() {
+        carregarResumo();
+    }
+
+    async function carregarResumo() {
+        const loader = document.getElementById('loader-area');
+        const conteudo = document.getElementById('conteudo-resumo');
+        const erro = document.getElementById('error-area');
+        const btn = document.getElementById('btn-atualizar');
+
+        // Toggle UI
+        loader.style.display = 'block';
+        conteudo.classList.add('d-none');
+        erro.classList.add('d-none');
+        btn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/resumo-apostas/todos-processados');
+            const data = await resp.json();
+
+            if (!resp.ok || !data.sucesso) {
+                throw new Error(data.mensagem || 'Erro desconhecido da API');
+            }
+
+            dataGlobal = data.concursos_detalhados || [];
+
+            // Atualiza os Painéis Superiores Globais
+            document.getElementById('card-concursos').innerText = data.total_concursos_analisados || '0';
+            document.getElementById('card-jogos').innerText = data.total_jogos_gerais;
+            document.getElementById('card-qtd-premiados').innerText = data.total_jogos_premiados;
+            document.getElementById('card-investido').innerText = `R$ ${data.total_investido_geral.toFixed(2).replace('.', ',')}`;
+            document.getElementById('card-ganho').innerText = `R$ ${data.total_ganho_geral.toFixed(2).replace('.', ',')}`;
+
+            // Lógica de Lucro Global
+            const lucro = data.lucro_global;
+            const luc_el = document.getElementById('card-lucro-bruto');
+            const roi_el = document.getElementById('card-lucro-roi');
+
+            if (lucro > 0) {
+                luc_el.innerText = `Lucro Líquido Global: R$ ${lucro.toFixed(2).replace('.', ',')}`;
+                luc_el.className = "text-success mt-1 fw-bold";
+                document.getElementById('card-ganho').className = "metric-card-value text-ganho";
+            } else if (lucro < 0) {
+                luc_el.innerText = `Prejuízo Global: R$ ${Math.abs(lucro).toFixed(2).replace('.', ',')}`;
+                luc_el.className = "text-danger mt-1 fw-bold";
+                document.getElementById('card-ganho').className = "metric-card-value text-danger";
+            } else {
+                luc_el.innerText = `Empate Financeiro`;
+                luc_el.className = "text-muted mt-1 fw-bold";
+            }
+
+            let roi = 0;
+            if (data.total_investido_geral > 0) roi = (lucro / data.total_investido_geral) * 100;
+            roi_el.innerText = `ROI Global: ${roi.toFixed(2)}%`;
+
+            // Identificar Melhor Resultado Global
+            let max_acertos = data.melhor_acerto_global;
+            let teve_mes = data.teve_mes_sorte_global;
+            let melhor_texto = "Nenhum Acerto";
+
+            if (max_acertos > 0 || teve_mes) {
+                melhor_texto = `${max_acertos} Acertos`;
+                if (teve_mes) {
+                    if (max_acertos > 0) melhor_texto += " + Mês";
+                    else melhor_texto = "Apenas Mês";
+                }
+            }
+            document.getElementById('card-melhor-resultado').innerText = melhor_texto;
+
+
+            // Tabela Detalhada por Concurso
+            const tbody = document.getElementById('tabela-processados');
+            tbody.innerHTML = '';
+
+            data.concursos_detalhados.forEach((c, index) => {
+                const acertos = c.melhor_acerto;
+                const mes = c.teve_mes;
+                const premium = c.ganho;
+
+                const rowClass = premium > 0 ? "bg-success bg-opacity-10 linha-dados" : "linha-dados";
+
+                let textoMelhorAcerto = acertos > 0 ? `${acertos} pts` : '-';
+                if (mes) textoMelhorAcerto += (acertos > 0 ? " + Mês" : " + Mês");
+
+                const row = document.createElement('tr');
+                row.className = rowClass;
+
+                row.innerHTML = `
+                    <td class="fw-bold fs-5 d-flex align-items-center justify-content-center filter-col-0">
+                        ${c.concurso}
+                        <button class="btn btn-sm btn-light ms-2 text-primary shadow-sm border btn-ver-concurso" style="border-radius: 50%; width: 34px; height: 34px;" onclick="abrirModalConcurso(${index})" title="Ver Resumo do Sorteio e Melhor Aposta">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                    </td>
+                    <td class="text-muted filter-col-1"><small>${c.data}</small></td>
+                    <td class="fw-bold filter-col-2">${c.jogos_processados}</td>
+                    <td class="filter-col-3">
+                        <span class="status-badge ${c.jogos_premiados > 0 ? 'badge-sim' : 'badge-nao'}">
+                            ${c.jogos_premiados}
+                        </span>
+                    </td>
+                    <td class="fw-bold text-dark filter-col-4">${textoMelhorAcerto}</td>
+                    <td class="filter-col-5">
+                        ${premium > 0
+                        ? `<span class="valor-badge px-3 py-2 fs-6">R$ ${premium.toFixed(2).replace('.', ',')}</span>`
+                        : `<span class="text-muted small">R$ 0,00</span>`
+                    }
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Inteligência Avançada (Gravar em window pra uso local no toggle)
+            if (data.analise_inteligente) {
+                window.analiseInteligente = data.analise_inteligente;
+            } else {
+                window.analiseInteligente = null;
+            }
+
+            // Exibir blocos
+            loader.style.display = 'none';
+            conteudo.classList.remove('d-none');
+            btn.disabled = false;
+
+            configurarFiltrosTabela();
+        } catch (error) {
+            console.error(error);
+            loader.style.display = 'none';
+            erro.classList.remove('d-none');
+            document.getElementById('error-msg').innerText = error.message;
+            btn.disabled = false;
+        }
+    }
+
+    function toggleInteligencia() {
+        const painel = document.getElementById('painel-inteligencia');
+        const btn = document.getElementById('btn-toggle-intel');
+
+        if (painel.classList.contains('d-none')) {
+            painel.classList.remove('d-none');
+            btn.innerHTML = '<i class="fas fa-times me-2"></i> Ocultar Inteligência';
+            btn.classList.replace('btn-warning', 'btn-outline-secondary');
+
+            renderizarInteligencia();
+        } else {
+            painel.classList.add('d-none');
+            btn.innerHTML = '<i class="fas fa-brain me-2"></i> Inteligência: Análise de Estratégias (3 Faltantes)';
+            btn.classList.replace('btn-outline-secondary', 'btn-warning');
+        }
+    }
+
+    function renderizarInteligencia() {
+        if (!window.analiseInteligente) return;
+        const analise = window.analiseInteligente;
+
+        document.getElementById('int-total-jogos').innerText = analise.total_jogos_4_acertos;
+
+        // Render bolas para nucleo forte
+        const nucleoStr = analise.nucleo_forte.map(n => `<div class="d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.85rem; background-color: #28a745; color: white;">${n.toString().padStart(2, '0')}</div>`).join('');
+        document.getElementById('int-nucleo-forte').innerHTML = nucleoStr;
+
+        const erroStr = analise.zona_erro.map(n => `<div class="d-flex align-items-center justify-content-center fw-bold text-danger border border-danger bg-white" style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.85rem;">${n.toString().padStart(2, '0')}</div>`).join('');
+        document.getElementById('int-zona-erro').innerHTML = erroStr;
+
+        const faltamStr = analise.top_faltantes.map(n => `<div class="d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.85rem; background-color: #E2BB2B; color: #5C430B;">${n.toString().padStart(2, '0')}</div>`).join('');
+        document.getElementById('int-top-faltantes').innerHTML = faltamStr;
+
+        const listJogos = document.getElementById('int-jogos-sugeridos');
+        listJogos.innerHTML = '';
+
+        analise.jogos_sugeridos.forEach((j, idx) => {
+            const numBolas = j.map(n => {
+                const isFixa = analise.nucleo_forte.includes(n);
+                if (isFixa) return `<div class="d-flex align-items-center justify-content-center fw-bold shadow-sm me-1" style="width: 30px; height: 30px; border-radius: 50%; font-size: 0.8rem; background-color: #28a745; color: white;">${n.toString().padStart(2, '0')}</div>`;
+                return `<div class="d-flex align-items-center justify-content-center fw-bold shadow-sm me-1 bg-white" style="width: 30px; height: 30px; border-radius: 50%; font-size: 0.8rem; color: #333; border: 2px solid #E2BB2B;">${n.toString().padStart(2, '0')}</div>`;
+            }).join('');
+
+            listJogos.innerHTML += `
+                <div class="d-flex align-items-center justify-content-between p-2 rounded shadow-sm bg-white" style="border-left: 4px solid #E2BB2B; border-top: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                    <div class="fw-bold text-muted me-2" style="font-size: 0.75rem; min-width: 45px;">JOGO ${idx + 1}</div>
+                    <div class="d-flex flex-wrap">${numBolas}</div>
+                    <div>
+                        <button class="btn btn-sm btn-light border shadow-sm text-secondary px-2" onclick="copiarJogo('${j.map(x => x.toString().padStart(2, '0')).join(' - ')}')" title="Copiar"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+
+        listJogos.innerHTML += `
+            <div class="d-flex gap-2 mt-2">
+                <button class="btn btn-sm btn-outline-secondary w-50 shadow-sm" onclick="exportarJogosTxt()"><i class="fas fa-download"></i> Baixar N°s (.txt)</button>
+                <button class="btn btn-sm btn-outline-primary w-50 shadow-sm" onclick="enviarParaSimuladorFiltros()"><i class="fas fa-filter"></i> Enviar p/ Simulador</button>
+            </div>
+        `;
+    }
+
+    function exportarJogosTxt() {
+        if (!window.analiseInteligente || !window.analiseInteligente.jogos_sugeridos) return;
+
+        const jogos = window.analiseInteligente.jogos_sugeridos;
+        let txt = "";
+        jogos.forEach(j => {
+            txt += j.map(x => x.toString().padStart(2, '0')).join(' ') + '\n';
+        });
+
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'jogos_sugeridos_robo.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function enviarParaSimuladorFiltros() {
+        if (!window.analiseInteligente || !window.analiseInteligente.jogos_sugeridos) return;
+
+        const jogos = window.analiseInteligente.jogos_sugeridos;
+        const mesSugerido = window.analiseInteligente.melhor_mes_sugerido || 1;
+
+        // Vamos enviar um formato que o Simulador reconheça {numeros: [], mes: X}
+        const payload = jogos.map(j => ({ numeros: j, mes: mesSugerido }));
+
+        localStorage.setItem('importarParaSimuladorFiltros', JSON.stringify(payload));
+        window.location.href = '/analise-visual/#pane-simulador-filtros';
+    }
+
+    // ==========================================
+    // FILTRO DINÂMICO DE TABELA (CLICK NO TÍTULO)
+    // ==========================================
+    function configurarFiltrosTabela() {
+        const table = document.getElementById('tabela-principal-resumo');
+        if (!table || table.dataset.filtrosConfigurados) return;
+
+        const thead = table.querySelector('thead tr');
+        const ths = thead.querySelectorAll('th');
+
+        ths.forEach((th, index) => {
+            th.style.position = 'relative';
+
+            // Mantém o texto original e anexa os ícones
+            const textoOriginal = th.innerHTML;
+            th.innerHTML = `
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <span class="sort-trigger fw-bold" title="Clique para ordenar" style="cursor: pointer; user-select: none;">
+                        ${textoOriginal} <i class="fas fa-sort sort-icon" style="font-size: 0.8rem; opacity: 0.3;"></i>
+                    </span>
+                    <i class="fas fa-filter filter-trigger" title="Clique para filtrar" style="font-size: 0.85rem; opacity: 0.7; color: inherit; cursor: pointer;"></i>
+                </div>
+            `;
+
+            // Cria o input flutuante
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control form-control-sm mt-1 filter-input';
+            input.placeholder = 'Pesquisar...';
+            input.style.display = 'none';
+            input.style.position = 'absolute';
+            input.style.zIndex = '1000';
+            input.style.width = '100%';
+            input.style.left = '0';
+            input.style.top = '100%';
+            input.style.boxShadow = '0px 4px 6px rgba(0,0,0,0.1)';
+            input.dataset.colIndex = index;
+
+            const sortTrigger = th.querySelector('.sort-trigger');
+            const filterTrigger = th.querySelector('.filter-trigger');
+
+            // Evento Ordenar
+            sortTrigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                ordenarTabelaJavascript(index, th);
+            });
+
+            // Clicar no funil alterna a exibição do input
+            filterTrigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const isHidden = input.style.display === 'none';
+                input.style.display = isHidden ? 'block' : 'none';
+                if (isHidden) input.focus();
+            });
+
+            // Evento de digitação para filtrar as linhas
+            input.addEventListener('keyup', executarFiltrosTabela);
+
+            // Impede que clicar no input feche ou ordene acidentalmente
+            input.addEventListener('click', e => e.stopPropagation());
+
+            th.appendChild(input);
+        });
+
+        table.dataset.filtrosConfigurados = 'true';
+    }
+
+    function executarFiltrosTabela() {
+        const table = document.getElementById('tabela-principal-resumo');
+        const tbody = document.getElementById('tabela-processados');
+        const inputs = table.querySelectorAll('.filter-input');
+        const linhas = tbody.querySelectorAll('tr.linha-dados');
+
+        const filtrosAplica = [];
+        inputs.forEach(inp => {
+            filtrosAplica[inp.dataset.colIndex] = inp.value.toLowerCase().trim();
+        });
+
+        linhas.forEach(linha => {
+            let exibirLinha = true;
+
+            for (let idx = 0; idx < filtrosAplica.length; idx++) {
+                const termo = filtrosAplica[idx];
+                if (termo) {
+                    const celula = linha.querySelector(`.filter-col-${idx}`);
+                    if (celula) {
+                        let textoCelula = celula.textContent || celula.innerText;
+
+                        if (idx === 0) {
+                            const spanValor = celula.cloneNode(true);
+                            const btn = spanValor.querySelector('.btn-ver-concurso');
+                            if (btn) spanValor.removeChild(btn);
+                            textoCelula = spanValor.textContent || spanValor.innerText;
+                        }
+
+                        if (!textoCelula.toLowerCase().includes(termo)) {
+                            exibirLinha = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            linha.style.display = exibirLinha ? '' : 'none';
+        });
+    }
+
+    function ordenarTabelaJavascript(colIndex, thElement) {
+        const table = document.getElementById('tabela-principal-resumo');
+        const tbody = document.getElementById('tabela-processados');
+        const linhas = Array.from(tbody.querySelectorAll('tr.linha-dados'));
+
+        let isAsc = thElement.dataset.sortDir === 'asc';
+        let dirMultiplier = isAsc ? -1 : 1;
+        thElement.dataset.sortDir = isAsc ? 'desc' : 'asc';
+
+        // Resetar estilos dos icones
+        table.querySelectorAll('th .sort-icon').forEach(icon => {
+            icon.className = 'fas fa-sort sort-icon';
+            icon.style.opacity = '0.3';
+            icon.style.color = 'inherit';
+        });
+
+        // Ativar icone atual
+        const currentIcon = thElement.querySelector('.sort-icon');
+        currentIcon.className = isAsc ? 'fas fa-sort-down sort-icon text-primary' : 'fas fa-sort-up sort-icon text-primary';
+        currentIcon.style.opacity = '1';
+
+        const limpaCelula = (c) => {
+            if (!c) return '';
+            let clone = c.cloneNode(true);
+            let btn = clone.querySelector('.btn-ver-concurso');
+            if (btn) clone.removeChild(btn);
+            return (clone.textContent || clone.innerText).trim();
+        };
+
+        linhas.sort((a, b) => {
+            let celulaA = a.querySelector(`.filter-col-${colIndex}`);
+            let celulaB = b.querySelector(`.filter-col-${colIndex}`);
+
+            let valA = limpaCelula(celulaA);
+            let valB = limpaCelula(celulaB);
+
+            // Tratamento especial para Datas (DD/MM/YYYY)
+            const regexData = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            if (regexData.test(valA) && regexData.test(valB)) {
+                let [, d1, m1, y1] = valA.match(regexData);
+                let [, d2, m2, y2] = valB.match(regexData);
+                valA = y1 + m1 + d1;
+                valB = y2 + m2 + d2;
+                return valA.localeCompare(valB) * dirMultiplier;
+            }
+
+            // Tratamento especial para Moeda e Números
+            let numStrA = valA.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+            let numStrB = valB.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+
+            let numA = parseFloat(numStrA);
+            let numB = parseFloat(numStrB);
+
+            // Se contiverem números ou a string começar com hífens limpos
+            let ehNumA = !isNaN(numA) && /\d/.test(numStrA);
+            let ehNumB = !isNaN(numB) && /\d/.test(numStrB);
+
+            // "Nenhum" ou "-" pode ser tratado como numero ZERO no contexto da loteria
+            if (valA === '-' || valA.includes('pts') === false && isNaN(numA)) numA = 0;
+            if (valB === '-' || valB.includes('pts') === false && isNaN(numB)) numB = 0;
+
+            if (ehNumA && ehNumB) {
+                return (numA - numB) * dirMultiplier;
+            }
+
+            // Fallback de string normal
+            return valA.toLowerCase().localeCompare(valB.toLowerCase()) * dirMultiplier;
+        });
+
+        // Re-injetar na DOM na ordem correta
+        linhas.forEach(linha => tbody.appendChild(linha));
+    }
+
+    function copiarJogo(txt) {
+        navigator.clipboard.writeText(txt).then(() => { alert('Jogo copiado com sucesso:\\n' + txt); });
+    }
+
+    function renderBolas(containerId, numeros, marcados = []) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (!numeros || numeros.length === 0) {
+            container.innerHTML = '<span class="text-muted small py-2">Sem dados</span>';
+            return;
+        }
+
+        const numsSorted = [...numeros].sort((a, b) => a - b);
+
+        numsSorted.forEach(num => {
+            const isMatch = marcados.includes(num);
+            let style = isMatch ? "background-color: #DBAC00; color: white; border: none;" : "background-color: white; color: #888; border: 1px solid #ccc;";
+
+            // Números sorteados (oficiais) sempre são dourados
+            if (containerId === 'md-bolas-sorteadas') {
+                style = "background-color: #DBAC00; color: white; border: none;";
+            }
+
+            container.innerHTML += `<div class="d-flex align-items-center justify-content-center shadow-sm fw-bold" style="width: 28px; height: 28px; border-radius: 50%; font-size: 0.85rem; ${style}">${num.toString().padStart(2, '0')}</div>`;
+        });
+    }
+
+    function abrirModalConcurso(index) {
+        const item = dataGlobal[index];
+        if (!item) return;
+
+        document.getElementById('md-concurso').innerText = item.concurso;
+        document.getElementById('md-premio').innerText = `R$ ${item.ganho.toFixed(2).replace('.', ',')}`;
+
+        // Números oficiais (sorteados)
+        renderBolas('md-bolas-sorteadas', item.numeros_sorteados);
+        document.getElementById('md-mes-sorteado').innerText = item.mes_sorteado ? nomesMeses[item.mes_sorteado] || item.mes_sorteado : 'Indisponível';
+
+        // Melhor jogo
+        const j = item.jogo_destaque;
+        const bolasApostadas = document.getElementById('md-bolas-apostadas');
+        const mesA = document.getElementById('md-mes-apostado');
+        const acertosStr = document.getElementById('md-acertos');
+
+        if (j && j.numeros_apostados && j.numeros_apostados.length > 0) {
+            renderBolas('md-bolas-apostadas', j.numeros_apostados, j.numeros_acertados || []);
+            let mNome = j.mes_apostado ? nomesMeses[j.mes_apostado] || j.mes_apostado : '--';
+            mesA.innerText = mNome;
+
+            if (j.acertou_mes) {
+                mesA.style.color = "#DBAC00";
+            } else {
+                mesA.style.color = "#888";
+            }
+
+            acertosStr.innerText = `${j.numeros_acertados ? j.numeros_acertados.length : 0} números`;
+        } else {
+            bolasApostadas.innerHTML = '<span class="text-muted small py-2">Nenhuma aposta válida para exibir</span>';
+            mesA.innerText = '--';
+            mesA.style.color = "#888";
+            acertosStr.innerText = '0 números';
+        }
+
+        // Mostrar o Modal usando a API Vanilla do Bootstrap 5 (que já consta no projeto)
+        const element = document.getElementById('modalResultados');
+        const modal = new bootstrap.Modal(element);
+        modal.show();
+    }
+    function abrirModalInterpretacao() {
+        if (!window.analiseInteligente) return;
+        const analise = window.analiseInteligente;
+
+        const nucleoStr = analise.nucleo_forte.map(n => `[${n.toString().padStart(2, '0')}]`).join(' ');
+        const erroStr = analise.zona_erro.map(n => `[${n.toString().padStart(2, '0')}]`).join(' ');
+        const faltantesStr = analise.top_faltantes.slice(0, 3).map(n => `[${n.toString().padStart(2, '0')}]`).join(', ');
+
+        const b = analise.distribuicao_faltantes ? analise.distribuicao_faltantes.baixas : 0;
+        const m = analise.distribuicao_faltantes ? analise.distribuicao_faltantes.medias : 0;
+        const a = analise.distribuicao_faltantes ? analise.distribuicao_faltantes.altas : 0;
+
+        let dicaFaixa = "equilibrada";
+        if (b > m && b > a) dicaFaixa = "fortemente focada em buscar dezenas <strong>baixas (01 a 10)</strong>";
+        else if (m > b && m > a) dicaFaixa = "fortemente focada em buscar dezenas <strong>médias (11 a 20)</strong>";
+        else if (a > b && a > m) dicaFaixa = "fortemente focada em buscar dezenas <strong>altas (21 a 31)</strong>";
+
+        let conteudoHTML = `
+            <div class="mb-4">
+                <h6 class="fw-bold text-success border-bottom pb-2 mb-3"><i class="fas fa-shield-alt me-2"></i>Passo 1: O "Núcleo Blindado" (Sempre Jogue)</h6>
+                <p>Observe a sua base verde dinâmica atual: <strong class="fs-5 text-success">${nucleoStr}</strong>.<br>
+                Em quase todos os seus próximos jogos, essas chaves numéricas devem estar presentes como <strong>"Bases Fixas"</strong>. A lei estatística provou que, nos seus jogos passados, elas foram o pilar dos prêmios. Fixe-as!</p>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="fw-bold text-danger border-bottom pb-2 mb-3"><i class="fas fa-ban me-2"></i>Passo 2: A "Zona Amaldiçoada" (Corte Imediato)</h6>
+                <p>Evite ao máximo a faixa vermelha atual: <strong class="text-danger">${erroStr}</strong>.<br>
+                Vocé tem insistido nessas dezenas em suas apostas, mas elas estão repetidamente sabotando sua chance de chegar aos 7 acertos. Esse é o "buraco" principal do seu volante. <strong>Pare de apostar nelas temporariamente.</strong></p>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="fw-bold text-warning border-bottom pb-2 mb-3" style="color: #c99300 !important;"><i class="fas fa-puzzle-piece me-2"></i>Passo 3: Fechando a Trinca Faltante</h6>
+                <p>O sistema descobriu que os números Oficiais do Concurso que frequentemente caem (enquanto você empaca nos 4 pts e perde) são: <strong>${faltantesStr}</strong>...<br>
+                A tendência atual da sua falta para os grandes prêmios é <strong>${dicaFaixa}</strong>.<br>
+                Distribua as vagas restantes no seu bilhete olhando essa barra de cores. Exemplo: sempre adicione os top faltantes evitando múltiplas dezenas da faixa que já está cheia ou isolando dezenas altas (como o robô faz).</p>
+            </div>
+
+            <div class="alert alert-info border-info mt-4 rounded shadow-sm">
+                <i class="fas fa-robot me-2 fs-5 float-start text-info mt-1"></i>
+                <div style="margin-left: 35px;"><strong>O Caminho Mais Rápido (Robô Otimizador):</strong><br>
+                Se não quiser quebrar a cabeça, apenas feche este aviso e olhe para o quadro à direita ("Combinações Sugeridas"). O robô já isolou a zona amaldiçoada, plantou seu núcleo e preencheu as lacunas usando essas mesmas leis milimetricamente! Basta "Copiar".</div>
+            </div>
+        `;
+
+        document.getElementById('conteudo-interpretacao').innerHTML = conteudoHTML;
+
+        const modalEl = document.getElementById('modalInterpretacao');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+</script>
+
+{% endblock %}

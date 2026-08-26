@@ -1,0 +1,995 @@
+# Auditoria Completa de Responsividade e UX — Mobile First
+
+## Contexto
+
+Estou realizando a disponibilização remota de aplicações que atualmente funcionam em **localhost**, utilizando recursos como **Cloudflare, Netlify e Nginx**, com configurações por meio de arquivos `.conf`, como `nginx.conf`.
+
+As aplicações foram desenvolvidas, em sua maioria, com foco em **telas grandes e monitores em orientação paisagem**. Ao disponibilizá-las remotamente e acessá-las por diferentes dispositivos, identifiquei problemas de adaptação em algumas telas, principalmente em **celulares, tablets e dispositivos com orientação retrato**.
+
+Por esse motivo, quero realizar uma **auditoria geral e completa de responsividade e experiência do usuário (UX/UI)** em toda a aplicação.
+
+## Seu papel
+
+Atue como um **especialista sênior em UX/UI, Design Responsivo, Mobile First, Front-End e acessibilidade visual**.
+
+Analise a aplicação como um produto que precisa funcionar de maneira consistente em diferentes tamanhos, resoluções e orientações de tela.
+
+O princípio principal da revisão deve ser:
+
+> **Mobile First:** a interface deve funcionar corretamente primeiro em telas pequenas e, a partir daí, adaptar-se progressivamente a telas maiores.
+
+## Objetivo principal
+
+O objetivo deste trabalho é **EXCLUSIVAMENTE revisar, corrigir e aprimorar a responsividade e a experiência visual da aplicação**.
+
+A aplicação deverá apresentar uma experiência adequada em:
+
+* 📱 Celulares;
+* 📱 Celulares em orientação retrato;
+* 📱 Celulares em orientação paisagem;
+* 📲 Tablets;
+* 📲 Tablets em retrato;
+* 📲 Tablets em paisagem;
+* 💻 Notebooks;
+* 🖥️ Monitores convencionais;
+* 🖥️ Monitores ultrawide;
+* 📺 TVs e telas muito grandes;
+* ⌚ Dispositivos com telas extremamente pequenas, quando tecnicamente aplicável;
+* Orientação **retrato e paisagem**.
+
+## Auditoria geral
+
+Faça uma revisão **REALMENTE GERAL**, não apenas de algumas páginas.
+
+Analise **todas as telas, páginas, componentes e elementos visuais existentes na aplicação**, incluindo, mas não se limitando a:
+
+* Menu principal;
+* Menus laterais;
+* Menus superiores;
+* Submenus;
+* Botões;
+* Links;
+* Formulários;
+* Campos de entrada;
+* Selects;
+* Checkboxes;
+* Radio buttons;
+* Tabelas;
+* Cards;
+* Painéis;
+* Modais;
+* Alertas;
+* Mensagens;
+* Cabeçalhos;
+* Rodapés;
+* Abas;
+* Gráficos;
+* Indicadores;
+* Filtros;
+* Barras de pesquisa;
+* Paginação;
+* Elementos de navegação;
+* Ícones;
+* Textos;
+* Títulos;
+* Subtítulos;
+* Espaçamentos;
+* Margens;
+* Padding;
+* Imagens;
+* Containers;
+* Colunas;
+* Linhas;
+* Elementos que utilizam `flex`;
+* Elementos que utilizam `grid`;
+* Elementos com posicionamento absoluto;
+* Elementos com largura ou altura fixa;
+* Elementos que possam causar overflow horizontal ou vertical.
+
+## O que deve ser identificado
+
+Procure especificamente por problemas como:
+
+* Conteúdo cortado;
+* Elementos saindo da tela;
+* Scroll horizontal desnecessário;
+* Botões que ficam sobrepostos;
+* Textos quebrando de maneira inadequada;
+* Títulos ocupando espaço excessivo;
+* Menus que não se adaptam;
+* Tabelas impossíveis de visualizar em telas pequenas;
+* Campos muito largos;
+* Campos muito pequenos para toque;
+* Ícones desalinhados;
+* Espaçamentos excessivos ou insuficientes;
+* Elementos sobrepostos;
+* Containers ultrapassando a largura da viewport;
+* `width` e `height` fixos inadequados;
+* Uso inadequado de `px`;
+* Problemas com `min-width` e `max-width`;
+* Problemas de `flex-wrap`;
+* Problemas de CSS Grid;
+* Breakpoints inadequados;
+* Media queries incompletas;
+* Componentes que funcionam em paisagem, mas quebram em retrato;
+* Componentes que funcionam no desktop, mas quebram no celular;
+* Componentes que funcionam no celular, mas ficam visualmente ruins em telas grandes;
+* Problemas de acessibilidade visual;
+* Elementos pequenos demais para interação por toque;
+* Problemas de legibilidade;
+* Problemas de contraste;
+* Hierarquia visual inadequada;
+* Comportamentos inconsistentes entre telas.
+
+## Responsividade não significa apenas "diminuir"
+
+Não faça uma simples redução dos elementos para caber na tela.
+
+Analise o **comportamento da interface**.
+
+Quando necessário, determine se determinado componente deve:
+
+* Redimensionar;
+* Reorganizar;
+* Quebrar linha;
+* Mudar de posição;
+* Transformar colunas em linhas;
+* Transformar uma tabela em estrutura adaptável;
+* Ocultar informações secundárias;
+* Alterar a disposição dos botões;
+* Transformar um menu desktop em menu apropriado para dispositivos móveis;
+* Ajustar tamanhos de fonte;
+* Ajustar espaçamentos;
+* Alterar a hierarquia visual.
+
+A interface deve continuar **funcional, legível, organizada e intuitiva**, independentemente do tamanho ou orientação da tela.
+
+## Mobile First
+
+Sempre que for necessário alterar CSS ou estrutura visual, priorize uma abordagem **Mobile First**.
+
+A lógica deve ser:
+
+**Tela pequena → Tablet → Desktop → Tela grande → TV**
+
+Não quero uma solução baseada apenas em "remendos" específicos para determinados dispositivos.
+
+Prefira soluções estruturais, reutilizáveis e sustentáveis.
+
+Utilize, quando apropriado:
+
+* `rem`;
+* `%`;
+* `vw`;
+* `vh`;
+* `clamp()`;
+* `min()`;
+* `max()`;
+* `minmax()`;
+* Flexbox;
+* CSS Grid;
+* Media queries;
+* Container queries, quando fizer sentido;
+* Layouts fluidos.
+
+Evite dimensões fixas desnecessárias que prejudiquem a adaptação.
+
+## Orientação da tela
+
+Teste e analise obrigatoriamente os dois cenários:
+
+### Retrato
+
+A interface deve funcionar corretamente mesmo com pouca largura disponível.
+
+### Paisagem
+
+A interface deve aproveitar adequadamente o espaço horizontal sem criar distorções, excesso de espaços ou componentes desproporcionais.
+
+Não considere que "funciona em desktop" significa que a responsividade está correta.
+
+## Telas grandes
+
+Também não quero que a correção para dispositivos móveis prejudique os monitores grandes.
+
+Em telas grandes, analise:
+
+* Largura máxima dos conteúdos;
+* Centralização;
+* Aproveitamento adequado do espaço;
+* Tamanho dos componentes;
+* Legibilidade;
+* Proporção dos elementos;
+* Excesso de espaço vazio;
+* Layout ultrawide;
+* TVs e resoluções muito altas.
+
+A aplicação deve permanecer visualmente equilibrada tanto em uma tela pequena quanto em uma tela grande.
+
+## Regra fundamental
+
+**NÃO altere a lógica da aplicação.**
+
+Não modifique:
+
+* Regras de negócio;
+* Cálculos;
+* Algoritmos;
+* Consultas;
+* Banco de dados;
+* Rotinas;
+* APIs;
+* Endpoints;
+* Funcionalidades existentes;
+* Geração de dados;
+* Processamentos;
+* Critérios de análise;
+* Regras de funcionamento.
+
+Não crie novas funcionalidades.
+
+Não remova funcionalidades existentes.
+
+Não altere aquilo que já está funcionando corretamente do ponto de vista funcional.
+
+### O escopo é exclusivamente:
+
+**RESPONSIVIDADE + UX/UI + ADAPTAÇÃO VISUAL PARA DIFERENTES TELAS E ORIENTAÇÕES.**
+
+## Preservação da aplicação
+
+Antes de alterar qualquer componente, entenda como ele funciona atualmente.
+
+Não faça alterações indiscriminadas.
+
+Se uma solução já funciona corretamente, **preserve-a**.
+
+Faça somente as alterações necessárias para resolver problemas de responsividade, layout, usabilidade visual e adaptação entre dispositivos.
+
+## Critério de qualidade
+
+Ao final da revisão, quero que a aplicação tenha uma experiência consistente:
+
+**Celular → Tablet → Notebook → Desktop → Monitor grande → TV**
+
+e:
+
+**Retrato ↔ Paisagem**
+
+A mudança de tamanho ou orientação da tela não deve fazer com que a interface "quebre".
+
+## Resultado esperado
+
+Faça uma **auditoria completa de toda a aplicação**, identificando os problemas de responsividade e corrigindo-os de maneira estrutural e profissional.
+
+Não se limite à primeira tela encontrada.
+
+Percorra **todas as telas e componentes existentes**.
+
+A pergunta que deve orientar toda a revisão é:
+
+> **"Se o usuário abrir esta aplicação em qualquer dispositivo, com qualquer tamanho razoável de tela e em retrato ou paisagem, a interface continuará organizada, legível, funcional e agradável de usar?"**
+
+Se a resposta for não, identifique o problema e corrija **somente a camada relacionada à responsividade e UX/UI**.
+
+### Regra final
+
+**Este trabalho NÃO é uma refatoração geral da aplicação.**
+
+**Este trabalho NÃO é para melhorar funcionalidades.**
+
+**Este trabalho NÃO é para criar recursos novos.**
+
+**Este trabalho NÃO é para alterar cálculos ou regras de negócio.**
+
+**Este trabalho é exclusivamente uma revisão profissional, completa e abrangente de RESPONSIVIDADE, UX/UI e adaptação da interface para diferentes tamanhos e orientações de tela.**
+
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+---------------------------------------------------------------------------------------------
+# Auditoria Completa de Links, Rotas e Caminhos para Ambiente Remoto
+
+## Contexto
+
+Tenho uma aplicação que atualmente funciona corretamente em ambiente local (`localhost`), porém ela será disponibilizada para acesso remoto através do domínio:
+
+**marciofernandomaia.com.br**
+
+O objetivo desta tarefa é realizar uma **auditoria completa de todos os links, rotas, caminhos e referências da aplicação**, garantindo que tudo continue funcionando corretamente quando acessado remotamente pelo domínio.
+
+## Seu papel
+
+Atue como um **especialista sênior em aplicações web, arquitetura de URLs, rotas, Front-End, Back-End, proxy reverso, Nginx e implantação de aplicações em ambiente remoto**.
+
+Analise a aplicação considerando a diferença entre:
+
+**Ambiente local**
+`localhost`
+
+e
+
+**Ambiente remoto**
+`https://marciofernandomaia.com.br/`
+
+## Objetivo principal
+
+O objetivo é garantir que **TODOS os links e caminhos da aplicação funcionem corretamente no ambiente remoto**.
+
+Faça uma auditoria geral e abrangente da aplicação.
+
+Não analise somente a página inicial.
+
+Percorra todas as páginas, menus, telas e componentes existentes.
+
+## O que deve ser auditado
+
+Verifique absolutamente todas as referências relacionadas a navegação e acesso aos recursos da aplicação, incluindo:
+
+* Links internos;
+* Links externos;
+* Menus;
+* Submenus;
+* Botões que redirecionam para outras páginas;
+* `href`;
+* `src`;
+* Formulários;
+* `action`;
+* Rotas;
+* Endpoints;
+* URLs geradas pelo JavaScript;
+* `fetch()`;
+* AJAX;
+* APIs;
+* Redirecionamentos;
+* Links em templates;
+* Links gerados dinamicamente;
+* Links relativos;
+* Links absolutos;
+* Caminhos de arquivos;
+* CSS;
+* JavaScript;
+* Imagens;
+* Ícones;
+* Fontes;
+* Arquivos estáticos;
+* Downloads;
+* Uploads;
+* Links de retorno;
+* Links de navegação entre módulos;
+* Links utilizados em menus laterais ou superiores;
+* Paginação;
+* Filtros que alterem a URL;
+* Parâmetros enviados pela URL;
+* Rotas com parâmetros;
+* Rotas com query string.
+
+## Principal problema a ser investigado
+
+Identifique referências que funcionam somente em `localhost`, por exemplo:
+
+* `http://localhost/...`
+* `http://127.0.0.1/...`
+* caminhos absolutos apontando para o ambiente local;
+* portas específicas do computador local;
+* URLs hardcoded;
+* caminhos de arquivos específicos da máquina;
+* referências que ignoram o domínio remoto;
+* chamadas para serviços que somente existem no ambiente local.
+
+Verifique também situações em que um link relativo possa funcionar localmente, mas produzir uma URL incorreta quando a aplicação estiver hospedada em:
+
+**https://marciofernandomaia.com.br/**
+
+## Domínio oficial
+
+Considere como endereço público principal:
+
+**https://marciofernandomaia.com.br/**
+
+Sempre que necessário, avalie se a aplicação deve utilizar:
+
+* URL relativa;
+* URL absoluta;
+* caminho baseado no domínio;
+* variável de configuração;
+* variável de ambiente;
+* `BASE_URL`;
+* rota relativa;
+* rota absoluta.
+
+Não simplesmente substitua todas as URLs por `marciofernandomaia.com.br`.
+
+Primeiro determine qual é a solução tecnicamente correta para cada caso.
+
+## Nginx e Proxy Reverso
+
+Considere que a aplicação pode estar sendo disponibilizada remotamente através de **Nginx como proxy reverso**.
+
+Analise possíveis problemas relacionados a:
+
+* `location`;
+* `proxy_pass`;
+* Redirecionamentos;
+* Portas internas;
+* Host;
+* Headers;
+* `X-Forwarded-Host`;
+* `X-Forwarded-Proto`;
+* HTTPS;
+* WebSocket, quando utilizado;
+* Prefixos de rota;
+* Subdomínios;
+* Caminhos internos da aplicação.
+
+Verifique se existe alguma incompatibilidade entre:
+
+**Domínio público → Nginx → Aplicação**
+
+## HTTPS
+
+Verifique se existem referências utilizando:
+
+`http://`
+
+quando deveriam utilizar:
+
+`https://`
+
+Identifique possíveis problemas de:
+
+* Mixed Content;
+* Redirecionamento HTTP → HTTPS;
+* Recursos carregados por HTTP;
+* APIs acessadas por HTTP;
+* Links internos inconsistentes.
+
+## Não alterar funcionalidades
+
+Esta auditoria NÃO deve modificar a lógica da aplicação.
+
+Não altere:
+
+* Cálculos;
+* Algoritmos;
+* Banco de dados;
+* Regras de negócio;
+* Processamentos;
+* Funções existentes;
+* APIs existentes;
+* Estrutura funcional;
+* Regras de análise;
+* Geração de dados.
+
+O objetivo é exclusivamente garantir que a aplicação possa ser acessada e navegada corretamente através do domínio remoto.
+
+## Não criar funcionalidades
+
+Não crie funcionalidades novas.
+
+Não reformule a interface.
+
+Não faça redesign.
+
+Não faça alterações de UX/UI que não estejam diretamente relacionadas ao funcionamento dos links e rotas.
+
+Não faça alterações de responsividade.
+
+**O escopo é exclusivamente: LINKS + ROTAS + URLs + CAMINHOS + REFERÊNCIAS + ACESSO REMOTO.**
+
+## Estratégia de análise
+
+Faça a auditoria seguindo esta sequência:
+
+### 1. Mapear a aplicação
+
+Identifique todas as páginas, módulos, telas, menus e rotas existentes.
+
+### 2. Mapear os links
+
+Localize todos os links e mecanismos de navegação.
+
+### 3. Identificar referências locais
+
+Procure por:
+
+* `localhost`;
+* `127.0.0.1`;
+* portas locais;
+* IPs locais;
+* caminhos absolutos;
+* URLs hardcoded;
+* referências dependentes da máquina local.
+
+### 4. Identificar URLs problemáticas
+
+Determine quais URLs podem falhar quando a aplicação estiver acessível através do domínio.
+
+### 5. Corrigir
+
+Faça somente as correções necessárias para que os links funcionem no ambiente remoto.
+
+### 6. Validar
+
+Depois das alterações, valide novamente toda a navegação.
+
+## Critério de sucesso
+
+A aplicação deve permitir que o usuário entre por:
+
+**https://marciofernandomaia.com.br/**
+
+e consiga navegar por todas as páginas e funcionalidades existentes sem encontrar links quebrados ou referências incorretas ao ambiente local.
+
+O fluxo esperado é:
+
+**Domínio → Página inicial → Menu → Tela → Submenu → Outra tela → Formulário → Endpoint → Retorno**
+
+Tudo deve funcionar corretamente no ambiente remoto.
+
+## Relatório final
+
+Ao terminar, apresente um relatório contendo:
+
+### Links/rotas encontrados
+
+Liste os principais links e rotas identificados.
+
+### Problemas encontrados
+
+Para cada problema, informe:
+
+* Arquivo;
+* Linha, quando possível;
+* URL ou caminho problemático;
+* Motivo do problema;
+* Impacto no ambiente remoto.
+
+### Correções realizadas
+
+Informe:
+
+* Arquivo alterado;
+* O que foi alterado;
+* Por que foi alterado.
+
+### Pendências
+
+Caso algum problema não possa ser resolvido sem alterar infraestrutura, Nginx, DNS, SSL, servidor ou configuração externa, informe claramente.
+
+## Regra fundamental
+
+**Não considere que a aplicação está pronta apenas porque funciona em `localhost`.**
+
+O teste final deve considerar o ambiente real:
+
+**https://marciofernandomaia.com.br/**
+
+A aplicação deve funcionar corretamente quando acessada por usuários externos, sem depender de `localhost`, `127.0.0.1`, portas locais ou caminhos específicos da máquina de desenvolvimento.
+
+### Escopo final
+
+**AUDITAR E CORRIGIR SOMENTE O NECESSÁRIO PARA TORNAR LINKS, ROTAS, URLs, CAMINHOS E REFERÊNCIAS FUNCIONAIS NO AMBIENTE REMOTO ATRAVÉS DO DOMÍNIO `https://marciofernandomaia.com.br/`.**
+
+**Não alterar funcionalidades, cálculos, regras de negócio ou características da aplicação que não estejam diretamente relacionadas a esse objetivo.**
+
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+
+
+----------------------------------------------------------------------------------------
+# Auditoria e Limpeza Segura de Arquivos da Aplicação
+
+## Objetivo
+
+Realizar uma **limpeza técnica e extremamente conservadora** na aplicação, removendo **somente arquivos comprovadamente desnecessários, temporários ou lixo**, sem comprometer de nenhuma forma o funcionamento atual do sistema.
+
+O objetivo NÃO é reorganizar o projeto, refatorar o código ou modificar a estrutura da aplicação.
+
+O único objetivo é:
+
+> **Identificar e remover arquivos que realmente não são utilizados pela aplicação e que podem ser eliminados com segurança.**
+
+---
+
+# REGRA PRINCIPAL — NÃO ARRISCAR O FUNCIONAMENTO
+
+A prioridade absoluta é:
+
+**PRESERVAR O FUNCIONAMENTO DA APLICAÇÃO.**
+
+Se existir qualquer dúvida sobre determinado arquivo, **NÃO EXCLUA**.
+
+É preferível deixar um arquivo possivelmente desnecessário no projeto do que excluir um arquivo que possa ser necessário para a aplicação.
+
+Não faça exclusões baseadas apenas no nome do arquivo.
+
+Antes de remover qualquer arquivo, analise se ele é:
+
+* Importado;
+* Referenciado;
+* Executado;
+* Carregado;
+* Utilizado por alguma rota;
+* Utilizado por algum template;
+* Utilizado por JavaScript;
+* Utilizado por CSS;
+* Utilizado por configuração;
+* Utilizado por outro módulo;
+* Necessário durante a inicialização da aplicação;
+* Necessário durante o deploy;
+* Necessário pelo Nginx;
+* Necessário por alguma biblioteca ou framework.
+
+---
+
+# O QUE PODE SER CONSIDERADO LIXO
+
+Procure arquivos que sejam claramente descartáveis, como:
+
+* Arquivos temporários;
+* Arquivos de backup antigos;
+* Cópias duplicadas;
+* Arquivos criados automaticamente por editores;
+* Arquivos de cache;
+* Arquivos temporários de execução;
+* Logs antigos, quando comprovadamente não necessários;
+* Arquivos `.tmp`;
+* Arquivos `.bak`;
+* Arquivos `.old`;
+* Arquivos `.swp`;
+* Arquivos de editor/IDE que não sejam necessários;
+* Arquivos duplicados com nomes como `arquivo_copia`, `arquivo_backup`, `arquivo_old`, quando comprovadamente não utilizados;
+* Diretórios temporários;
+* Artefatos gerados automaticamente que possam ser recriados com segurança.
+
+Porém:
+
+**NÃO presuma que uma extensão significa automaticamente que o arquivo é lixo.**
+
+Faça uma análise antes de excluir.
+
+---
+
+# ARQUIVOS QUE DEVEM SER TRATADOS COM EXTREMA CAUTELA
+
+Não exclua automaticamente:
+
+* `.py`;
+* `.js`;
+* `.css`;
+* `.html`;
+* `.json`;
+* `.yaml`;
+* `.yml`;
+* `.env`;
+* `.conf`;
+* `requirements.txt`;
+* `package.json`;
+* `package-lock.json`;
+* arquivos de configuração;
+* arquivos de banco de dados;
+* templates;
+* arquivos estáticos;
+* arquivos utilizados pelo Nginx;
+* arquivos utilizados pelo servidor;
+* arquivos de inicialização;
+* arquivos relacionados ao deploy;
+* arquivos utilizados por bibliotecas;
+* arquivos que tenham referências indiretas.
+
+Se houver dúvida:
+
+**MANTENHA O ARQUIVO.**
+
+---
+
+# NÃO ALTERAR A APLICAÇÃO
+
+Esta tarefa NÃO deve:
+
+* Refatorar código;
+* Alterar funções;
+* Alterar cálculos;
+* Alterar regras de negócio;
+* Alterar banco de dados;
+* Alterar APIs;
+* Alterar rotas;
+* Alterar URLs;
+* Alterar funcionalidades;
+* Alterar layout;
+* Alterar UX;
+* Alterar responsividade;
+* Alterar configurações do Nginx;
+* Alterar DNS;
+* Alterar domínio;
+* Alterar infraestrutura.
+
+Apenas arquivos comprovadamente desnecessários devem ser removidos.
+
+---
+
+# PROCEDIMENTO OBRIGATÓRIO
+
+## 1. Fazer uma análise antes de excluir
+
+Primeiro faça um levantamento completo da estrutura do projeto.
+
+Identifique:
+
+* Diretórios;
+* Arquivos;
+* Arquivos de configuração;
+* Arquivos utilizados pela aplicação;
+* Arquivos temporários;
+* Possíveis duplicidades;
+* Possíveis arquivos de backup.
+
+**Não exclua nada nessa primeira etapa.**
+
+---
+
+## 2. Criar uma lista de candidatos
+
+Crie uma lista dos arquivos que aparentemente podem ser lixo.
+
+Para cada candidato, informe:
+
+* Caminho;
+* Nome;
+* Tipo;
+* Motivo pelo qual parece desnecessário;
+* Se possui alguma referência;
+* Se possui alguma dependência;
+* Grau de segurança para exclusão.
+
+Classifique como:
+
+**SEGURO PARA EXCLUIR**
+
+ou
+
+**NÃO EXCLUIR — EXISTE RISCO**
+
+Somente os classificados como **SEGURO PARA EXCLUIR** poderão ser removidos.
+
+---
+
+# 3. Verificar referências
+
+Antes de excluir cada arquivo, procure referências ao seu nome ou caminho em todo o projeto.
+
+Verifique referências em:
+
+* Python;
+* JavaScript;
+* HTML;
+* CSS;
+* Templates;
+* JSON;
+* Configurações;
+* Scripts;
+* Arquivos de inicialização;
+* Nginx;
+* Docker, se existir;
+* Scripts de deploy;
+* Outros arquivos do projeto.
+
+Se existir qualquer referência, **não exclua sem analisar o contexto**.
+
+---
+
+# 4. Exclusão conservadora
+
+Remova somente os arquivos que tenham evidências suficientes de que são lixo.
+
+**NÃO FAÇA LIMPEZA AGRESSIVA.**
+
+Não tente "deixar o projeto bonito".
+
+Não reorganize pastas.
+
+Não renomeie arquivos.
+
+Não mova arquivos.
+
+Não altere estrutura.
+
+Apenas elimine lixo comprovado.
+
+---
+
+# 5. Verificação após a limpeza
+
+Depois da exclusão, faça uma nova verificação da aplicação.
+
+Confirme:
+
+* Se todos os arquivos essenciais continuam presentes;
+* Se as importações continuam funcionando;
+* Se não existem referências quebradas;
+* Se não existem erros de inicialização;
+* Se as rotas continuam disponíveis;
+* Se os arquivos estáticos continuam sendo carregados.
+
+---
+
+# 6. TESTE OBRIGATÓRIO DA APLICAÇÃO
+
+Depois da limpeza, **NÃO considere o trabalho concluído imediatamente**.
+
+É obrigatório testar se a aplicação continua subindo normalmente.
+
+Primeiro teste o ambiente local.
+
+Verifique se a aplicação:
+
+**inicia sem erros**
+
+e permanece funcionando normalmente.
+
+Analise especialmente:
+
+* Erros no terminal;
+* Exceções;
+* `ModuleNotFoundError`;
+* Arquivos não encontrados;
+* Erros de importação;
+* Erros de configuração;
+* Erros de templates;
+* Erros de JavaScript;
+* Erros HTTP;
+* Falhas de conexão.
+
+---
+
+# 7. Teste do ambiente remoto
+
+Depois de confirmar que o ambiente local está funcionando, teste também o acesso remoto, quando disponível:
+
+**https://marciofernandomaia.com.br/**
+
+Verifique se:
+
+* O domínio responde;
+* A aplicação está acessível;
+* A página inicial abre;
+* Os principais links funcionam;
+* Não existem erros HTTP inesperados;
+* A aplicação não apresenta erro após o deploy.
+
+---
+
+# 8. Critério de aprovação
+
+A limpeza somente será considerada concluída se:
+
+**ANTES:**
+
+Aplicação funcionando.
+
+↓
+
+**LIMPEZA:**
+
+Somente arquivos comprovadamente inúteis removidos.
+
+↓
+
+**DEPOIS:**
+
+Aplicação continua iniciando normalmente.
+
+↓
+
+**TESTE:**
+
+Páginas principais funcionando.
+
+↓
+
+**AMBIENTE REMOTO:**
+
+Domínio funcionando normalmente.
+
+---
+
+# SE OCORRER QUALQUER ERRO
+
+Se após a limpeza surgir qualquer erro que possa estar relacionado à exclusão:
+
+**PARE imediatamente.**
+
+Identifique qual arquivo foi removido.
+
+Restaure o arquivo.
+
+Teste novamente.
+
+Não tente resolver o problema fazendo novas exclusões ou alterações aleatórias.
+
+---
+
+# RELATÓRIO FINAL
+
+Ao terminar, apresente um relatório contendo:
+
+## Arquivos removidos
+
+Liste:
+
+* Arquivo;
+* Caminho;
+* Motivo da exclusão.
+
+## Arquivos analisados e mantidos
+
+Informe arquivos que pareciam lixo, mas foram mantidos por existir algum risco.
+
+## Teste local
+
+Informe:
+
+* Aplicação iniciou: SIM/NÃO;
+* Erros encontrados;
+* Rotas principais testadas;
+* Resultado geral.
+
+## Teste remoto
+
+Informe:
+
+* Domínio acessível: SIM/NÃO;
+* Página inicial: OK/ERRO;
+* Principais rotas: OK/ERRO;
+* Resultado geral.
+
+## Resultado final
+
+Classifique a aplicação como:
+
+### ✅ APROVADA
+
+Se a aplicação continuar funcionando normalmente.
+
+### ⚠️ APROVADA COM OBSERVAÇÕES
+
+Se funcionar, mas houver algum ponto que mereça atenção.
+
+### ❌ NÃO APROVADA
+
+Se algum problema de funcionamento tiver sido identificado.
+
+---
+
+# REGRA FINAL E ABSOLUTA
+
+**NÃO EXCLUA NADA SE HOUVER DÚVIDA.**
+
+O objetivo não é reduzir o número de arquivos.
+
+O objetivo é **eliminar somente lixo comprovado sem colocar em risco absolutamente nenhuma funcionalidade da aplicação**.
+
+Após a limpeza, **é obrigatório iniciar e testar a aplicação para confirmar que ela continua subindo normalmente**.
+
+**Preservar o funcionamento da aplicação é mais importante do que remover qualquer arquivo.**
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+“não avance para a próxima etapa até concluir e testar a atual.”
+
+
+----------------------------------------
+# Auditoria Completa de Responsividade e UX — Mobile First					Executando
+# Auditoria Completa de Links, Rotas e Caminhos para Ambiente Remoto		
+# Auditoria e Limpeza Segura de Arquivos da Aplicação						
+

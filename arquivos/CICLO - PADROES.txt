@@ -1,0 +1,48 @@
+PROMPT PROFISSIONAL 2 - ARQUITETURA DE PADRÕES
+Revise a arquitetura da geração de apostas e aplique separação rigorosa de responsabilidades entre: padrões, núcleos (ciclos) e desdobramentos.
+
+REGRAS OBRIGATÓRIAS:
+
+1. GERAÇÃO DE PADRÕES:
+   - Deve trabalhar EXCLUSIVAMENTE com padrões estruturais (ex.: 0,0,0,1,1,2,2)
+   - Interpretar padrões como quantidade de dezenas por faixa inicial (0→01-09, 1→10-19, 2→20-29, 3→30-31)
+   - Selecionar automaticamente dezenas possíveis dentro de cada faixa
+   - NÃO utilizar núcleos nessa rota (gera conflito lógico)
+   - Permitir múltiplos padrões selecionados diretamente no grid
+   - Sugerir automaticamente quantidade de dezenas conforme padrões escolhidos
+
+2. NÚCLEOS (CICLOS):
+   - Realocar para fora da rota de geração de padrões
+   - Local adequado: Configurações, Análises ou módulo de Estratégia
+   - Função: sugerir 3 dezenas fixas baseadas em análises estruturais
+   - Aplicação global via toggle (ligado/desligado)
+   - Quando ligado: adiciona dezenas sugeridas SEM quebrar padrão ou lógica da aba
+
+3. DESDOBRAMENTO:
+   - PODE coexistir com padrões
+   - Garante repetição mínima do concurso anterior (ex.: 2 dezenas)
+   - NÃO deve violar estrutura do padrão selecionado
+   - Implementar validação no grid (alertas visuais em caso de conflito)
+   - Ampliar lógica de 21 jogos para múltiplos ciclos: 21, 42, 63, 84, etc.
+   - Manter coerência estrutural em cada ciclo
+   - Campo de seleção: "Quantidade de ciclos" (mínimo 1, escalável dinamicamente)
+
+4. VALIDAÇÕES OBRIGATÓRIAS:
+   - Jogos gerados por padrão DEVEM respeitar os padrões selecionados
+   - Se impossível gerar apostas válidas, sistema deve bloquear ou avisar usuário
+   - Não duplicar apostas entre ciclos
+   - Avisar quando espaço combinatório estiver próximo do esgotamento
+
+OBJETIVO FINAL:
+Transformar o sistema em ferramenta estratégica automatizada onde o usuário apenas escolhe estratégia e quantidade, gerando/exportando jogos prontos sem ajustes manuais ou improvisações.
+
+
+Assunto 2 (Arquitetura):
+
+Separação de responsabilidades
+Núcleos fora da rota de padrões
+Desdobramento pode ficar (com validação)
+Padrões têm prioridade absoluta
+Múltiplos ciclos de geração
+
+Os dois prompts estão prontos para colar diretamente no Copilot no VS Code.

@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}Números que Saem Juntos - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+        <i class="bi bi-link-45deg"></i> Números que Saem Juntos
+    </h2>
+        <a href="/" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">📊 Análise de Combinações</h5>
+            <p class="card-text">
+                Identifique quais duplas de números aparecem juntas com mais frequência nos sorteios.
+                <br><strong>Útil para:</strong> Montar jogos baseados em padrões históricos.
+            </p>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="top-tab" data-bs-toggle="tab" data-bs-target="#top" type="button" role="tab">
+                🏆 Top Combinações
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="buscar-tab" data-bs-toggle="tab" data-bs-target="#buscar" type="button" role="tab">
+                🔍 Buscar por Número
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="top" role="tabpanel">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="selectTopQtd" class="form-label">Quantidade:</label>
+                    <select class="form-select" id="selectTopQtd">
+                        <option value="10">Top 10</option>
+                        <option value="20" selected>Top 20</option>
+                        <option value="30">Top 30</option>
+                        <option value="50">Top 50</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="buscarTopCombinacoes()">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+            <div id="resultadoTop"></div>
+        </div>
+
+        <div class="tab-pane fade" id="buscar" role="tabpanel">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="inputNumero" class="form-label">Número (1-31):</label>
+                    <input type="number" class="form-control" id="inputNumero" min="1" max="31" value="10">
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button class="btn btn-success w-100" onclick="buscarComNumero()">
+                        <i class="bi bi-search"></i> Buscar Combinações
+                    </button>
+                </div>
+            </div>
+            <div id="resultadoBusca"></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="insightsContent"></div>
+        </div>
+    </div>
+
+    <div id="loading" class="text-center d-none mt-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+function buscarTopCombinacoes() {
+    const top = document.getElementById('selectTopQtd').value;
+    
+    document.getElementById('loading').classList.remove('d-none');
+    document.getElementById('resultadoTop').innerHTML = '';
+    
+    fetch(`/api/analise/combinacoes/top?top=${top}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').classList.add('d-none');
+            mostrarTopCombinacoes(data);
+        })
+        .catch(error => {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('resultadoTop').innerHTML = '<div class="alert alert-danger">Erro ao carregar dados.</div>';
+        });
+}
+
+function mostrarTopCombinacoes(data) {
+    let html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Top ${data.top_combinacoes.length} Combinações Mais Frequentes</h5>
+                <small>Total de sorteios: ${data.total_sorteios} | Combinações únicas: ${data.total_combinacoes}</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Dupla</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+    
+    data.top_combinacoes.forEach((item, index) => {
+        const medalha = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+        const badgeClass = item.percentual >= 6 ? 'bg-success' : item.percentual >= 5 ? 'bg-primary' : 'bg-secondary';
+        
+        html += `
+            <tr>
+                <td>${medalha} ${index + 1}</td>
+                <td><strong class="fs-5">${item.numero1} + ${item.numero2}</strong></td>
+                <td><span class="badge ${badgeClass}">${item.frequencia}x</span></td>
+                <td>${item.percentual}%</td>
+                <td>${item.ultimo_concurso}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('resultadoTop').innerHTML = html;
+    gerarInsights(data.top_combinacoes);
+}
+
+function buscarComNumero() {
+    const numero = document.getElementById('inputNumero').value;
+    
+    if (numero < 1 || numero > 31) {
+        document.getElementById('resultadoBusca').innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i> Digite um número entre 1 e 31
+            </div>`;
+        return;
+    }
+    
+    document.getElementById('loading').classList.remove('d-none');
+    document.getElementById('resultadoBusca').innerHTML = '';
+    
+    fetch(`/api/analise/combinacoes/com-numero/${numero}?top=15`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').classList.add('d-none');
+            mostrarCombinacoesNumero(data);
+        })
+        .catch(error => {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('resultadoBusca').innerHTML = '<div class="alert alert-danger">Erro ao carregar dados.</div>';
+        });
+}
+
+function mostrarCombinacoesNumero(data) {
+    let html = `
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Números que Mais Saem com o ${data.numero_base}</h5>
+                <small>Total de sorteios: ${data.total_sorteios}</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Combinação</th>
+                                <th>Frequência</th>
+                                <th>Percentual</th>
+                                <th>Último Concurso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+    
+    data.combinacoes.forEach((item, index) => {
+        const badgeClass = item.percentual >= 5 ? 'bg-success' : item.percentual >= 4 ? 'bg-primary' : 'bg-secondary';
+        
+        html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td><strong class="fs-5">${data.numero_base} + ${item.numero_par}</strong></td>
+                <td><span class="badge ${badgeClass}">${item.frequencia}x</span></td>
+                <td>${item.percentual}%</td>
+                <td>${item.ultimo_concurso}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('resultadoBusca').innerHTML = html;
+    document.getElementById('insightsCard').style.display = 'none';
+}
+
+function gerarInsights(dados) {
+    if (!dados || dados.length === 0) return;
+
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+    
+    const top3 = dados.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+    
+    let htmlTop3 = '<div class="mb-4">';
+    htmlTop3 += '<h6 class="fw-bold text-primary mb-3">🏆 Top 3 Duplas Campeãs:</h6>';
+    
+    top3.forEach((dupla, index) => {
+        const destaque = index === 0 ? 'text-success fw-bold' : '';
+        const comentario = index === 0 ? ' - A dupla mais frequente!' : '';
+        
+        htmlTop3 += `<div class="${destaque} mb-2">
+            ${medalhas[index]} ${dupla.numero1} + ${dupla.numero2}: 
+            ${dupla.frequencia} aparições (${dupla.percentual}%)${comentario}
+        </div>`;
+    });
+    
+    htmlTop3 += '</div>';
+    
+    const contagemNumeros = {};
+    dados.slice(0, 10).forEach(dupla => {
+        contagemNumeros[dupla.numero1] = (contagemNumeros[dupla.numero1] || 0) + 1;
+        contagemNumeros[dupla.numero2] = (contagemNumeros[dupla.numero2] || 0) + 1;
+    });
+    
+    let numeroSociavel = null;
+    let maxAparicoes = 0;
+    
+    for (const [numero, aparicoes] of Object.entries(contagemNumeros)) {
+        if (aparicoes > maxAparicoes) {
+            maxAparicoes = aparicoes;
+            numeroSociavel = numero;
+        }
+    }
+    
+    let htmlSociavel = '';
+    if (numeroSociavel && maxAparicoes >= 3) {
+        const parceiros = dados
+            .slice(0, 10)
+            .filter(d => d.numero1 == numeroSociavel || d.numero2 == numeroSociavel)
+            .map(d => d.numero1 == numeroSociavel ? d.numero2 : d.numero1)
+            .slice(0, 4);
+        
+        htmlSociavel = '<div class="mb-4">';
+        htmlSociavel += `<h6 class="fw-bold text-primary mb-3">👥 O número ${numeroSociavel} é muito "sociável":</h6>`;
+        htmlSociavel += `<div class="text-muted">
+            ✓ Aparece em ${maxAparicoes} das top 10 combinações!<br>
+            ✓ Parceiros favoritos: ${parceiros.join(', ')}
+        </div>`;
+        htmlSociavel += '</div>';
+    }
+    
+    const top1 = dados[0];
+    const primeiroDupla = dados.find(d => d.frequencia >= 60 && d !== top1);
+    
+    let htmlEstrategico = '<div class="mb-2">';
+    htmlEstrategico += '<h6 class="fw-bold text-primary mb-3">💡 Insights Estratégicos:</h6>';
+    
+    if (primeiroDupla) {
+        htmlEstrategico += `<div class="alert alert-success py-2 mb-2">
+            <i class="bi bi-check-circle-fill"></i> 
+            Se você aposta no ${primeiroDupla.numero1}, considere adicionar o ${primeiroDupla.numero2} 
+            (aparecem juntos ${primeiroDupla.frequencia}x)
+        </div>`;
+    }
+    
+    htmlEstrategico += `<div class="alert alert-info py-2 mb-2">
+        <i class="bi bi-star-fill"></i> 
+        A dupla ${top1.numero1} + ${top1.numero2} aparece juntos em ~${top1.percentual}% de TODOS os sorteios!
+    </div>`;
+    
+    if (dados.length >= 5) {
+        const top5Media = dados.slice(0, 5).reduce((acc, d) => acc + d.frequencia, 0) / 5;
+        htmlEstrategico += `<div class="alert alert-warning py-2">
+            <i class="bi bi-graph-up-arrow"></i> 
+            As top 5 duplas têm média de ${Math.round(top5Media)} aparições cada
+        </div>`;
+    }
+    
+    htmlEstrategico += '</div>';
+    
+    insightsContent.innerHTML = htmlTop3 + htmlSociavel + htmlEstrategico;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    buscarTopCombinacoes();
+};
+</script>
+{% endblock %}

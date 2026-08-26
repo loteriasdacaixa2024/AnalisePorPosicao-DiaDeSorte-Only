@@ -1,0 +1,2051 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Padrões - Dígitos Inicial e Final - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ds-dourado: #D4B31A;
+        --ds-dourado-light: #f9f2d2;
+        --ds-dourado-dark: #b69816;
+    }
+
+    body {
+        background: linear-gradient(135deg, #fcf9e8 0%, #ffffff 50%, #fcf9e8 100%);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .alert-tutorial {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid #2196F3;
+        color: #0d47a1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-export-group {
+        display: flex;
+        gap: 5px;
+    }
+
+    .btn-export {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-export.txt {
+        background: #607d8b;
+    }
+
+    .btn-export.html {
+        background: #ff9800;
+    }
+
+    .btn-export.xlsx {
+        background: #4caf50;
+    }
+
+    .btn-export:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+
+    .card-custom {
+        border: 2px solid var(--ds-dourado-light);
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--ds-dourado) 0%, var(--ds-dourado-dark) 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        font-weight: bold;
+    }
+
+    .top3-item {
+        background: white;
+        border-left: 5px solid var(--ds-dourado);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .top3-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(212, 179, 26, 0.2);
+    }
+
+    .pattern-display {
+        font-family: 'Courier New', monospace;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--ds-dourado);
+        background: var(--ds-dourado-light);
+        padding: 15px;
+        border-radius: 10px;
+        letter-spacing: 8px;
+        text-align: center;
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid #2196F3;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .recommendation-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4CAF50;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .cross-link {
+        background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+        border-left: 5px solid #03a9f4;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-decoration: none;
+        display: block;
+        transition: all 0.3s;
+    }
+
+    .cross-link:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(3, 169, 244, 0.3);
+    }
+
+    .nav-tabs-custom {
+        border-bottom: 3px solid var(--ds-dourado);
+        margin-bottom: 25px;
+    }
+
+    .nav-tabs-custom .nav-link {
+        color: var(--ds-dourado-dark);
+        font-weight: bold;
+        border: none;
+        padding: 15px 25px;
+        margin-right: 5px;
+        background: var(--ds-dourado-light);
+        border-radius: 10px 10px 0 0;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs-custom .nav-link:hover {
+        background: #eed877;
+    }
+
+    .nav-tabs-custom .nav-link.active {
+        background: var(--ds-dourado);
+        color: white;
+        border: none;
+    }
+
+    .faltante-card {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-left: 5px solid #ff9800;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .faltante-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+
+    .frequente-card {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 5px solid #4caf50;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+
+    .atrasado-card {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        border-left: 5px solid #f44336;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+
+    .padrao-badge {
+        font-family: 'Courier New', monospace;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: white;
+        background: var(--ds-dourado);
+        padding: 8px 15px;
+        border-radius: 8px;
+        letter-spacing: 4px;
+    }
+
+    .padrao-badge-sm {
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+        background: var(--ds-dourado);
+        padding: 5px 10px;
+        border-radius: 6px;
+        letter-spacing: 3px;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-box h3 {
+        margin: 0;
+        color: var(--ds-dourado);
+        font-size: 2rem;
+    }
+
+    .stat-box p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .resumo-geral {
+        background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(26, 35, 126, 0.3);
+    }
+
+    .resumo-geral h4 {
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .resumo-item {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .resumo-item h2 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .resumo-item p {
+        margin: 5px 0 0 0;
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .resumo-item.teoricos h2 {
+        color: #90caf9;
+    }
+
+    .resumo-item.viaveis h2 {
+        color: #80deea;
+    }
+
+    .resumo-item.sairam h2 {
+        color: #a5d6a7;
+    }
+
+    .resumo-item.faltantes h2 {
+        color: #ffab91;
+    }
+
+    .resumo-item.concursos h2 {
+        color: #fff59d;
+    }
+
+    .accordion-custom .accordion-button {
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        color: #333;
+        font-weight: bold;
+        border-radius: 8px !important;
+    }
+
+    .accordion-custom .accordion-button:not(.collapsed) {
+        background: linear-gradient(135deg, var(--ds-dourado-light) 0%, #eed877 100%);
+        color: var(--ds-dourado-dark);
+    }
+
+    .accordion-custom .accordion-button::after {
+        filter: none;
+    }
+
+    .accordion-custom .accordion-body {
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .tabela-padroes {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tabela-padroes th {
+        background: var(--ds-dourado);
+        color: white;
+        padding: 10px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .tabela-padroes td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+    }
+
+    .tabela-padroes tr:hover {
+        background: var(--ds-dourado-light);
+    }
+
+    .tabela-padroes .padrao-cell {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        color: var(--ds-dourado-dark);
+        letter-spacing: 3px;
+    }
+
+    .badge-nunca {
+        background: #f44336;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    .badge-atrasado {
+        background: #ff9800;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    .badge-quente {
+        background: #4caf50;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    /* =============================================
+       🆕 ESTILOS PARA BUSCA INTELIGENTE
+       ============================================= */
+
+    .busca-container {
+        background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(123, 31, 162, 0.3);
+    }
+
+    .busca-container h4 {
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    .busca-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .busca-input {
+        flex: 1;
+        min-width: 200px;
+        padding: 15px 20px;
+        font-size: 1.3rem;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 5px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        text-align: center;
+    }
+
+    .busca-input:focus {
+        outline: none;
+        border-color: #fff;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .busca-input::placeholder {
+        color: #999;
+        letter-spacing: 2px;
+    }
+
+    .btn-buscar {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        background: white;
+        color: #7b1fa2;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-buscar:hover {
+        background: #e1bee7;
+        transform: scale(1.05);
+    }
+
+    .faixa-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .faixa-buttons span {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+    }
+
+    .btn-faixa {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-faixa:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+    }
+
+    .btn-faixa.faixa-0 {
+        border-color: #90caf9;
+    }
+
+    .btn-faixa.faixa-1 {
+        border-color: #a5d6a7;
+    }
+
+    .btn-faixa.faixa-2 {
+        border-color: #fff59d;
+    }
+
+    .btn-faixa.faixa-3 {
+        border-color: #ffab91;
+    }
+
+    .btn-limpar {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        background: rgba(244, 67, 54, 0.8);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .btn-limpar:hover {
+        background: #f44336;
+    }
+
+    .btn-backspace {
+        padding: 10px 15px;
+        font-size: 1rem;
+        background: rgba(255, 152, 0, 0.8);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-backspace:hover {
+        background: #ff9800;
+    }
+
+    /* Resultado da busca */
+    .resultado-busca {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 12px;
+        display: none;
+    }
+
+    .resultado-busca.encontrado {
+        display: block;
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border: 2px solid #4caf50;
+    }
+
+    .resultado-busca.faltante {
+        display: block;
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border: 2px solid #ff9800;
+    }
+
+    .resultado-busca.invalido {
+        display: block;
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        border: 2px solid #f44336;
+    }
+
+    .resultado-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .resultado-header .icone {
+        font-size: 2.5rem;
+    }
+
+    .resultado-header h5 {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+
+    .resultado-info {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .resultado-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .resultado-info-item {
+        text-align: center;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 8px;
+    }
+
+    .resultado-info-item .valor {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--ds-dourado-dark);
+    }
+
+    .resultado-info-item .label {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .resultado-localizacao {
+        margin-top: 15px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .resultado-localizacao .badge-secao {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .badge-secao.frequentes {
+        background: #4caf50;
+        color: white;
+    }
+
+    .badge-secao.atrasados {
+        background: #f44336;
+        color: white;
+    }
+
+    .badge-secao.faltantes {
+        background: #ff9800;
+        color: white;
+    }
+
+    .btn-ir-padrao {
+        margin-left: auto;
+        padding: 8px 15px;
+        background: var(--ds-dourado);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-ir-padrao:hover {
+        background: var(--ds-dourado-dark);
+    }
+
+    /* Histórico de concursos */
+    .historico-concursos {
+        margin-top: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .historico-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: #f9f9f9;
+        border-radius: 6px;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+
+    .historico-item .concurso {
+        font-weight: bold;
+        color: var(--ds-dourado-dark);
+    }
+
+    .historico-item .numeros {
+        font-family: 'Courier New', monospace;
+        color: #666;
+    }
+
+    /* Highlight do padrão encontrado */
+    .padrao-highlight {
+        animation: pulseHighlight 2s ease-in-out;
+        background: #fff59d !important;
+        border: 3px solid #ffc107 !important;
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.5) !important;
+    }
+
+    @keyframes pulseHighlight {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.02);
+        }
+    }
+
+    /* Sugestões de busca */
+    .sugestoes-container {
+        position: relative;
+    }
+
+    .sugestoes-lista {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+    }
+
+    .sugestoes-lista.show {
+        display: block;
+    }
+
+    .sugestao-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.2s;
+    }
+
+    .sugestao-item:hover {
+        background: var(--ds-dourado-light);
+    }
+
+    .sugestao-item .padrao {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        letter-spacing: 3px;
+    }
+
+    .sugestao-item .info {
+        font-size: 0.85rem;
+        color: #666;
+        margin-left: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="page-header">
+        <h1>🔢 Análise de Padrões - Dígitos Inicial e Final</h1>
+        <p class="mb-0">Descubra os padrões campeões que dominam o Dia de Sorte</p>
+    </div>
+
+    <a href="/analise/dezenas-faixas" class="cross-link">
+        <i class="bi bi-arrow-left-right"></i> <strong>Prefere visualização simplificada?</strong><br>
+        <small>Ver Análise por Faixas Numéricas (Baixa/Média/Alta) →</small>
+    </a>
+
+    <!-- SISTEMA DE ABAS -->
+    <ul class="nav nav-tabs nav-tabs-custom" id="analiseAbas" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="digitos-tab" data-bs-toggle="tab" data-bs-target="#digitos"
+                type="button" role="tab">
+                🔢 Dígitos Inicial/Final
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="dezenas-tab" data-bs-toggle="tab" data-bs-target="#dezenas" type="button"
+                role="tab">
+                🎯 Padrões por Dezenas (Faltantes)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="analiseAbasContent">
+        <!-- ABA 1: Dígitos Inicial/Final (conteúdo original) -->
+        <div class="tab-pane fade show active" id="digitos" role="tabpanel">
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3 loading-text">Analisando padrões e frequências...</p>
+            </div>
+
+            <div id="conteudo" style="display: none;">
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </div>
+                    <div class="card-body" id="insightsConteudo"></div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        🏆 Top 3 Padrões de Dígitos Iniciais - Ranking por Frequência
+                    </div>
+                    <div class="card-body" id="topPadroesIniciaisRanking"></div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        <i class="bi bi-stars"></i> Recomendações Estratégicas
+                    </div>
+                    <div class="card-body" id="recomendacoesContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: Padrões por Dezenas -->
+        <div class="tab-pane fade" id="dezenas" role="tabpanel">
+            <div id="loadingDezenas" class="text-center py-5">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3">Calculando padrões possíveis e faltantes...</p>
+            </div>
+
+            <div id="conteudoDezenas" style="display: none;">
+
+                <!-- =============================================
+                     🆕 TUTORIAL
+                     ============================================= -->
+                <div class="alert-tutorial">
+                    <h4><i class="bi bi-info-circle-fill"></i> Como ler os padrões?</h4>
+                    <p class="mb-3">
+                        O padrão "<strong>0:2 | 1:3 | 2:1 | 3:1</strong>" significa:
+                    </p>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            • <strong>0:2</strong> → 2 números na faixa 01-09
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            • <strong>1:3</strong> → 3 números na faixa 10-19
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            • <strong>2:1</strong> → 1 número na faixa 20-29
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            • <strong>3:1</strong> → 1 número na faixa 30-31
+                        </div>
+                    </div>
+                    <small class="d-block mt-2">Dica: Use a busca abaixo para encontrar um padrão específico.</small>
+                </div>
+
+                <!-- =============================================
+                     🆕 BUSCA INTELIGENTE DE PADRÕES
+                     ============================================= -->
+                <div class="busca-container">
+                    <h4><i class="bi bi-search"></i> 🔍 BUSCAR PADRÃO</h4>
+
+                    <div class="sugestoes-container">
+                        <div class="busca-input-group">
+                            <input type="text" id="buscaPadrao" class="busca-input" placeholder="0 1 1 2 2 2 3"
+                                maxlength="20" autocomplete="off">
+                            <button class="btn-buscar" onclick="buscarPadrao()">
+                                <i class="bi bi-search"></i> Buscar
+                            </button>
+                        </div>
+
+                        <!-- Sugestões -->
+                        <div class="sugestoes-lista" id="sugestoesLista"></div>
+                    </div>
+
+                    <div class="faixa-buttons">
+                        <span>Montar padrão:</span>
+                        <button class="btn-faixa faixa-0" onclick="adicionarFaixa('0')" title="Faixa 01-09">0</button>
+                        <button class="btn-faixa faixa-1" onclick="adicionarFaixa('1')" title="Faixa 10-19">1</button>
+                        <button class="btn-faixa faixa-2" onclick="adicionarFaixa('2')" title="Faixa 20-29">2</button>
+                        <button class="btn-faixa faixa-3" onclick="adicionarFaixa('3')" title="Faixa 30-31">3</button>
+                        <button class="btn-backspace" onclick="removerUltimo()" title="Apagar último">⌫</button>
+                        <button class="btn-limpar" onclick="limparBusca()">Limpar</button>
+                    </div>
+
+                    <!-- Resultado da Busca -->
+                    <div id="resultadoBusca" class="resultado-busca"></div>
+                </div>
+
+                <!-- Resumo Geral -->
+                <div class="resumo-geral">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0"><i class="bi bi-pie-chart-fill"></i> 📊 RESUMO GERAL DOS PADRÕES</h4>
+                        <div class="btn-export-group">
+                            <span class="text-white me-2">Exportar Tudo:</span>
+                            <button class="btn-export txt" onclick="exportarPadroes('todos', 'txt')"
+                                title="Exportar Tudo TXT">TXT</button>
+                            <button class="btn-export html" onclick="exportarPadroes('todos', 'html')"
+                                title="Exportar Tudo HTML">HTML</button>
+                            <button class="btn-export xlsx" onclick="exportarPadroes('todos', 'xlsx')"
+                                title="Exportar Tudo Excel">XLSX</button>
+                        </div>
+                    </div>
+                    <div class="row" id="resumoGeral"></div>
+                </div>
+
+                <!-- Insights -->
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </div>
+                    <div class="card-body" id="insightsDezenas"></div>
+                </div>
+
+                <!-- Padrões Faltantes -->
+                <div class="card-custom" id="secaoFaltantes">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center"
+                        style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
+                        <span>🎯 PADRÕES FALTANTES - Nunca Saíram!</span>
+                        <div class="btn-export-group">
+                            <button class="btn-export txt" onclick="exportarPadroes('faltantes', 'txt')"
+                                title="Exportar TXT">TXT</button>
+                            <button class="btn-export html" onclick="exportarPadroes('faltantes', 'html')"
+                                title="Exportar HTML">HTML</button>
+                            <button class="btn-export xlsx" onclick="exportarPadroes('faltantes', 'xlsx')"
+                                title="Exportar Excel">XLSX</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Estes padrões NUNCA apareceram em nenhum sorteio.
+                            <strong id="totalFaltantesInfo"></strong>
+                        </p>
+                        <div id="padroesFaltantesTop"></div>
+                        <div class="accordion accordion-custom mt-3" id="accordionFaltantes">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFaltantes">
+                                        📋 Ver TODOS os padrões faltantes (<span id="countFaltantes">0</span>)
+                                    </button>
+                                </h2>
+                                <div id="collapseFaltantes" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionFaltantes">
+                                    <div class="accordion-body">
+                                        <table class="tabela-padroes" id="tabelaFaltantes">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Padrão</th>
+                                                    <th>Distribuição</th>
+                                                    <th>Jogos Possíveis</th>
+                                                    <th>% Universo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top 10 Frequentes -->
+                <div class="card-custom" id="secaoFrequentes">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center"
+                        style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);">
+                        <span>🏆 Top 10 Padrões Mais Frequentes</span>
+                        <div class="btn-export-group">
+                            <button class="btn-export txt" onclick="exportarPadroes('frequentes', 'txt')"
+                                title="Exportar TXT">TXT</button>
+                            <button class="btn-export html" onclick="exportarPadroes('frequentes', 'html')"
+                                title="Exportar HTML">HTML</button>
+                            <button class="btn-export xlsx" onclick="exportarPadroes('frequentes', 'xlsx')"
+                                title="Exportar Excel">XLSX</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Padrões que mais apareceram nos sorteios.
+                            <strong id="totalFrequentesInfo"></strong>
+                        </p>
+                        <div id="padroesFrequentes"></div>
+                        <div class="accordion accordion-custom mt-3" id="accordionFrequentes">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFrequentes">
+                                        📋 Ver TODOS os padrões que já saíram (<span id="countFrequentes">0</span>) -
+                                        ordenados por frequência
+                                    </button>
+                                </h2>
+                                <div id="collapseFrequentes" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionFrequentes">
+                                    <div class="accordion-body">
+                                        <table class="tabela-padroes" id="tabelaFrequentes">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Padrão</th>
+                                                    <th>Frequência</th>
+                                                    <th>%</th>
+                                                    <th>Atraso</th>
+                                                    <th>Último Conc.</th>
+                                                    <th>Jogos Possíveis</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top 10 Atrasados -->
+                <div class="card-custom" id="secaoAtrasados">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center"
+                        style="background: linear-gradient(135deg, #f44336 0%, #c62828 100%);">
+                        <span>⏰ Top 10 Padrões Mais Atrasados</span>
+                        <div class="btn-export-group">
+                            <button class="btn-export txt" onclick="exportarPadroes('atrasados', 'txt')"
+                                title="Exportar TXT">TXT</button>
+                            <button class="btn-export html" onclick="exportarPadroes('atrasados', 'html')"
+                                title="Exportar HTML">HTML</button>
+                            <button class="btn-export xlsx" onclick="exportarPadroes('atrasados', 'xlsx')"
+                                title="Exportar Excel">XLSX</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Padrões que estão há mais tempo sem aparecer.</p>
+                        <div id="padroesAtrasados"></div>
+                        <div class="accordion accordion-custom mt-3" id="accordionAtrasados">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseAtrasados">
+                                        📋 Ver TODOS ordenados por atraso (<span id="countAtrasados">0</span>)
+                                    </button>
+                                </h2>
+                                <div id="collapseAtrasados" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionAtrasados">
+                                    <div class="accordion-body">
+                                        <table class="tabela-padroes" id="tabelaAtrasados">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Padrão</th>
+                                                    <th>Atraso</th>
+                                                    <th>Frequência</th>
+                                                    <th>%</th>
+                                                    <th>Último Conc.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recomendações -->
+                <div class="card-custom">
+                    <div class="card-header-custom">
+                        <i class="bi bi-stars"></i> Recomendações Estratégicas
+                    </div>
+                    <div class="card-body" id="recomendacoesDezenas"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =========================================================================
+    // ABA 1: DÍGITOS INICIAL/FINAL
+    // =========================================================================
+
+    async function carregarAnalise() {
+        try {
+            const response = await fetch('/api/analise/digito-padrao-inicial-final');
+            const data = await response.json();
+
+            exibirInsights(data);
+            exibirTop3ComFrequencia(data.campea_inicial, 'topPadroesIniciaisRanking', 'inicial');
+            exibirRecomendacoes(data);
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('conteudo').style.display = 'block';
+
+        } catch (error) {
+            console.error('Erro ao carregar análise:', error);
+            document.getElementById('loading').innerHTML =
+                '<p class="text-danger fs-5">❌ Erro ao carregar dados. Tente novamente.</p>';
+        }
+    }
+
+    function exibirInsights(data) {
+        const insights = data.campea_inicial.insights || [];
+        let html = '';
+        insights.forEach(insight => {
+            html += `
+                <div class="insight-box">
+                    <h6>${insight.icone} ${insight.titulo}</h6>
+                    <p class="mb-0">${insight.texto}</p>
+                </div>
+            `;
+        });
+        document.getElementById('insightsConteudo').innerHTML = html;
+    }
+
+    function exibirTop3ComFrequencia(campeaData, containerId, tipo) {
+        const posicoes = campeaData.posicoes;
+        const medals = ['🥇', '🥈', '🥉'];
+        const cards = [
+            { key: 'primeiro', rank: 1 },
+            { key: 'segundo', rank: 2 },
+            { key: 'terceiro', rank: 3 }
+        ];
+
+        let html = '';
+        cards.forEach(({ key, rank }) => {
+            const pos = posicoes[key];
+            if (!pos || !pos.padrao) return;
+
+            html += `
+                <div class="top3-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <span style="font-size: 2.5em;">${medals[rank - 1]}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="pattern-display">${pos.padrao}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="mb-0">${pos.freq}</h4>
+                            <small class="text-muted">Vezes</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="mb-0" style="color: var(--ds-dourado);">${pos.porc}%</h4>
+                            <small class="text-muted">Frequência</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById(containerId).innerHTML = html;
+    }
+
+    function exibirRecomendacoes(data) {
+        const padroes = data.campea_inicial.posicoes;
+        let html = '';
+        if (padroes.primeiro && padroes.primeiro.padrao) {
+            html += `
+                <div class="recommendation-box">
+                    <i class="bi bi-check-circle-fill"></i> O padrão <strong>${padroes.primeiro.padrao}</strong> é o campeão absoluto com ${padroes.primeiro.freq} aparições (${padroes.primeiro.porc}%)
+                </div>
+            `;
+        }
+        html += `
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> Priorize padrões que aparecem no Top 3 para maior probabilidade de acerto
+            </div>
+            <div class="recommendation-box">
+                <i class="bi bi-check-circle-fill"></i> Combine padrões de dígitos iniciais com outras análises para otimizar suas apostas
+            </div>
+        `;
+        document.getElementById('recomendacoesContainer').innerHTML = html;
+    }
+
+    carregarAnalise();
+
+    // =========================================================================
+    // ABA 2: PADRÕES POR DEZENAS
+    // =========================================================================
+
+    let dadosDezenas = null;
+
+    document.getElementById('dezenas-tab').addEventListener('click', function () {
+        if (!dadosDezenas) {
+            carregarPadroesDezenas();
+        }
+    });
+
+    async function carregarPadroesDezenas() {
+        try {
+            const response = await fetch('/api/analise/padroes-dezenas');
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById('loadingDezenas').innerHTML =
+                    '<p class="text-danger fs-5">❌ Erro: ' + data.error + '</p>';
+                return;
+            }
+
+            dadosDezenas = data;
+
+            exibirResumoGeral(data);
+            exibirInsightsDezenas(data.insights);
+            exibirPadroesFaltantesComAccordion(data);
+            exibirPadroesFrequentesComAccordion(data);
+            exibirPadroesAtrasadosComAccordion(data);
+            exibirRecomendacoesDezenas(data.recomendacoes);
+
+            document.getElementById('loadingDezenas').style.display = 'none';
+            document.getElementById('conteudoDezenas').style.display = 'block';
+
+        } catch (error) {
+            console.error('Erro:', error);
+            document.getElementById('loadingDezenas').innerHTML =
+                '<p class="text-danger fs-5">❌ Erro ao carregar dados.</p>';
+        }
+    }
+
+    function exibirResumoGeral(data) {
+        const html = `
+            <div class="col-6 col-md-2">
+                <div class="resumo-item teoricos">
+                    <h2>${data.total_padroes_teoricos || 120}</h2>
+                    <p>Padrões Teóricos</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="resumo-item viaveis">
+                    <h2>${data.total_padroes_viaveis || data.total_padroes_possiveis}</h2>
+                    <p>Padrões Viáveis</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="resumo-item sairam">
+                    <h2>${data.total_padroes_que_sairam}</h2>
+                    <p>Já Saíram</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="resumo-item faltantes">
+                    <h2>${data.total_padroes_faltantes}</h2>
+                    <p>FALTANTES</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="resumo-item concursos">
+                    <h2>${data.total_concursos}</h2>
+                    <p>Concursos</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="resumo-item" style="background: rgba(255,255,255,0.1);">
+                    <h2 style="color: #e1bee7; font-size: 1.5rem;">${data.total_jogos_universo?.toLocaleString() || '2.629.575'}</h2>
+                    <p>Jogos no Universo</p>
+                </div>
+            </div>
+        `;
+        document.getElementById('resumoGeral').innerHTML = html;
+    }
+
+    function exibirInsightsDezenas(insights) {
+        let html = '';
+        const corClass = {
+            'success': '#e8f5e9', 'danger': '#ffebee', 'warning': '#fff3e0',
+            'info': '#e3f2fd', 'primary': '#f3e5f5'
+        };
+        const borderColor = {
+            'success': '#4caf50', 'danger': '#f44336', 'warning': '#ff9800',
+            'info': '#2196f3', 'primary': '#9c27b0'
+        };
+
+        insights.forEach(insight => {
+            html += `
+                <div class="insight-box" style="background: ${corClass[insight.cor] || '#e3f2fd'}; border-left-color: ${borderColor[insight.cor] || '#2196f3'};">
+                    <h6>${insight.icone} ${insight.titulo}</h6>
+                    <p class="mb-0">${insight.texto}</p>
+                </div>
+            `;
+        });
+        document.getElementById('insightsDezenas').innerHTML = html;
+    }
+
+    function exibirPadroesFaltantesComAccordion(data) {
+        const padroes = data.todos_padroes_faltantes || data.padroes_faltantes || [];
+
+        if (!padroes || padroes.length === 0) {
+            document.getElementById('padroesFaltantesTop').innerHTML =
+                '<p class="text-success text-center">🎉 Todos os padrões possíveis já saíram!</p>';
+            return;
+        }
+
+        document.getElementById('totalFaltantesInfo').textContent =
+            `Total: ${padroes.length} padrões que nunca apareceram.`;
+        document.getElementById('countFaltantes').textContent = padroes.length;
+
+        const top10 = padroes.slice(0, 10);
+        let html = '';
+
+        top10.forEach((p, index) => {
+            html += `
+                <div class="faltante-card" id="faltante-${p.padrao.replace(/ /g, '-')}">
+                    <div class="row align-items-center">
+                        <div class="col-md-1 text-center">
+                            <span class="badge bg-warning text-dark">#${index + 1}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="padrao-badge">${p.padrao}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Distribuição:</small><br>
+                            <strong>${p.descricao}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Jogos possíveis:</small><br>
+                            <strong>${p.jogos_possiveis.toLocaleString()}</strong>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted">% do universo:</small><br>
+                            <strong>${p.percentual_universo}%</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('padroesFaltantesTop').innerHTML = html;
+
+        let tabelaHtml = '';
+        padroes.forEach((p, index) => {
+            tabelaHtml += `
+                <tr id="tabela-faltante-${p.padrao.replace(/ /g, '-')}">
+                    <td>${index + 1}</td>
+                    <td class="padrao-cell">${p.padrao}</td>
+                    <td>${p.descricao}</td>
+                    <td>${p.jogos_possiveis.toLocaleString()}</td>
+                    <td>${p.percentual_universo}%</td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tabelaFaltantes tbody').innerHTML = tabelaHtml;
+    }
+
+    function exibirPadroesFrequentesComAccordion(data) {
+        const todosFrequentes = data.todos_padroes_que_sairam || data.padroes_que_sairam || [];
+        const top10 = data.top_10_frequentes || todosFrequentes.slice(0, 10);
+
+        document.getElementById('totalFrequentesInfo').textContent =
+            `Total: ${todosFrequentes.length} padrões diferentes já apareceram.`;
+        document.getElementById('countFrequentes').textContent = todosFrequentes.length;
+
+        const medals = ['🥇', '🥈', '🥉'];
+        let html = '';
+
+        top10.forEach((p, index) => {
+            const medal = index < 3 ? medals[index] : `#${index + 1}`;
+            html += `
+                <div class="frequente-card" id="frequente-${p.padrao.replace(/ /g, '-')}">
+                    <div class="row align-items-center">
+                        <div class="col-md-1 text-center">
+                            <span style="font-size: 1.5em;">${medal}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="padrao-badge">${p.padrao}</span>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">${p.frequencia}x</h5>
+                            <small class="text-muted">Vezes</small>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0" style="color: var(--ds-dourado);">${p.percentual_historico}%</h5>
+                            <small class="text-muted">Frequência</small>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="badge bg-secondary">${p.atraso} conc.</span><br>
+                            <small class="text-muted">Atraso</small>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <small class="text-muted">Último:</small><br>
+                            <strong>#${p.ultimo_concurso}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('padroesFrequentes').innerHTML = html;
+
+        let tabelaHtml = '';
+        todosFrequentes.forEach((p, index) => {
+            const statusBadge = p.atraso <= 5 ? '<span class="badge-quente">QUENTE</span>' :
+                p.atraso > 50 ? '<span class="badge-atrasado">ATRASADO</span>' : '';
+            tabelaHtml += `
+                <tr id="tabela-frequente-${p.padrao.replace(/ /g, '-')}">
+                    <td>${index + 1}</td>
+                    <td class="padrao-cell">${p.padrao}</td>
+                    <td><strong>${p.frequencia}x</strong></td>
+                    <td>${p.percentual_historico}%</td>
+                    <td>${p.atraso} ${statusBadge}</td>
+                    <td>#${p.ultimo_concurso}</td>
+                    <td>${p.jogos_possiveis.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tabelaFrequentes tbody').innerHTML = tabelaHtml;
+    }
+
+    function exibirPadroesAtrasadosComAccordion(data) {
+        const todosAtrasados = data.todos_por_atraso || [];
+        const top10 = data.top_10_atrasados || todosAtrasados.slice(0, 10);
+
+        document.getElementById('countAtrasados').textContent = todosAtrasados.length;
+
+        let html = '';
+        top10.forEach((p, index) => {
+            const badgeClass = p.atraso > 100 ? 'danger' : p.atraso > 50 ? 'warning' : 'secondary';
+            html += `
+                <div class="atrasado-card" id="atrasado-${p.padrao.replace(/ /g, '-')}">
+                    <div class="row align-items-center">
+                        <div class="col-md-1 text-center">
+                            <span class="badge bg-${badgeClass}">#${index + 1}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="padrao-badge">${p.padrao}</span>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h4 class="mb-0 text-danger">${p.atraso}</h4>
+                            <small class="text-muted">Concursos</small>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">${p.frequencia}x</h5>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <small class="text-muted">Último:</small><br>
+                            <strong>#${p.ultimo_concurso}</strong>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <small class="text-muted">% Histórico:</small><br>
+                            <strong>${p.percentual_historico}%</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('padroesAtrasados').innerHTML = html;
+
+        let tabelaHtml = '';
+        todosAtrasados.forEach((p, index) => {
+            const statusBadge = p.atraso > 100 ? '<span class="badge-atrasado">MUITO ATRASADO</span>' :
+                p.atraso > 50 ? '<span class="badge-atrasado">ATRASADO</span>' : '';
+            tabelaHtml += `
+                <tr id="tabela-atrasado-${p.padrao.replace(/ /g, '-')}">
+                    <td>${index + 1}</td>
+                    <td class="padrao-cell">${p.padrao}</td>
+                    <td><strong class="text-danger">${p.atraso}</strong> ${statusBadge}</td>
+                    <td>${p.frequencia}x</td>
+                    <td>${p.percentual_historico}%</td>
+                    <td>#${p.ultimo_concurso}</td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tabelaAtrasados tbody').innerHTML = tabelaHtml;
+    }
+
+    function exibirRecomendacoesDezenas(recomendacoes) {
+        const tipoClass = {
+            'sucesso': 'recommendation-box', 'alerta': 'faltante-card',
+            'perigo': 'atrasado-card', 'info': 'insight-box', 'especial': 'faltante-card'
+        };
+
+        let html = '';
+        recomendacoes.forEach(rec => {
+            html += `
+                <div class="${tipoClass[rec.tipo] || 'recommendation-box'}">
+                    <h6>${rec.icone} ${rec.titulo}</h6>
+                    <p class="mb-0">${rec.texto}</p>
+                </div>
+            `;
+        });
+        document.getElementById('recomendacoesDezenas').innerHTML = html;
+    }
+
+    // =========================================================================
+    // 🆕 BUSCA INTELIGENTE DE PADRÕES
+    // =========================================================================
+
+    const inputBusca = document.getElementById('buscaPadrao');
+    const sugestoesLista = document.getElementById('sugestoesLista');
+
+    // Adicionar dígito ao padrão
+    function adicionarFaixa(faixa) {
+        const input = document.getElementById('buscaPadrao');
+        const atual = input.value.trim();
+        const digitos = atual.split(' ').filter(d => d !== '');
+
+        if (digitos.length < 7) {
+            digitos.push(faixa);
+            input.value = digitos.join(' ');
+            mostrarSugestoes();
+        }
+    }
+
+    // Remover último dígito
+    function removerUltimo() {
+        const input = document.getElementById('buscaPadrao');
+        const atual = input.value.trim();
+        const digitos = atual.split(' ').filter(d => d !== '');
+        digitos.pop();
+        input.value = digitos.join(' ');
+        mostrarSugestoes();
+    }
+
+    // Limpar busca
+    function limparBusca() {
+        document.getElementById('buscaPadrao').value = '';
+        document.getElementById('resultadoBusca').className = 'resultado-busca';
+        document.getElementById('resultadoBusca').innerHTML = '';
+        sugestoesLista.classList.remove('show');
+        removerHighlights();
+    }
+
+    // Remover highlights
+    function removerHighlights() {
+        document.querySelectorAll('.padrao-highlight').forEach(el => {
+            el.classList.remove('padrao-highlight');
+        });
+    }
+
+    // Mostrar sugestões enquanto digita
+    function mostrarSugestoes() {
+        if (!dadosDezenas) return;
+
+        const termo = inputBusca.value.trim().toLowerCase();
+        if (termo.length === 0) {
+            sugestoesLista.classList.remove('show');
+            return;
+        }
+
+        const todosFrequentes = dadosDezenas.todos_padroes_que_sairam || [];
+        const todosFaltantes = dadosDezenas.todos_padroes_faltantes || [];
+
+        const sugestoes = [];
+
+        // Buscar nos frequentes
+        todosFrequentes.forEach(p => {
+            if (p.padrao.startsWith(termo) || p.padrao.includes(termo)) {
+                sugestoes.push({
+                    padrao: p.padrao,
+                    tipo: 'frequente',
+                    info: `${p.frequencia}x | Atraso: ${p.atraso}`
+                });
+            }
+        });
+
+        // Buscar nos faltantes
+        todosFaltantes.forEach(p => {
+            if (p.padrao.startsWith(termo) || p.padrao.includes(termo)) {
+                sugestoes.push({
+                    padrao: p.padrao,
+                    tipo: 'faltante',
+                    info: `NUNCA SAIU | ${p.jogos_possiveis.toLocaleString()} jogos`
+                });
+            }
+        });
+
+        if (sugestoes.length === 0) {
+            sugestoesLista.classList.remove('show');
+            return;
+        }
+
+        // Limitar a 10 sugestões
+        const top10Sugestoes = sugestoes.slice(0, 10);
+
+        let html = '';
+        top10Sugestoes.forEach(s => {
+            const corBadge = s.tipo === 'frequente' ? '#4caf50' : '#ff9800';
+            html += `
+                <div class="sugestao-item" onclick="selecionarSugestao('${s.padrao}')">
+                    <span class="badge" style="background: ${corBadge}; color: white;">${s.tipo === 'frequente' ? '✓' : '✗'}</span>
+                    <span class="padrao">${s.padrao}</span>
+                    <span class="info">${s.info}</span>
+                </div>
+            `;
+        });
+
+        sugestoesLista.innerHTML = html;
+        sugestoesLista.classList.add('show');
+    }
+
+    // Selecionar sugestão
+    function selecionarSugestao(padrao) {
+        inputBusca.value = padrao;
+        sugestoesLista.classList.remove('show');
+        buscarPadrao();
+    }
+
+    // Buscar padrão
+    function buscarPadrao() {
+        if (!dadosDezenas) {
+            showToast('Aguarde os dados carregarem...', 'warning');
+            return;
+        }
+
+        const termo = inputBusca.value.trim();
+        if (termo.length === 0) {
+            showToast('Digite um padrão para buscar', 'warning');
+            return;
+        }
+
+        // Normalizar o padrão (garantir espaços entre dígitos)
+        const padraoNormalizado = termo.split('').filter(c => /[0-3]/.test(c)).join(' ');
+
+        if (padraoNormalizado.split(' ').length !== 7) {
+            exibirResultadoInvalido(`O padrão deve ter exatamente 7 dígitos (0, 1, 2 ou 3). Você digitou: "${termo}"`);
+            return;
+        }
+
+        // Validar se o padrão é viável
+        const contagem = { '0': 0, '1': 0, '2': 0, '3': 0 };
+        padraoNormalizado.split(' ').forEach(d => contagem[d]++);
+
+        const limites = { '0': 9, '1': 10, '2': 10, '3': 2 };
+        let invalido = false;
+        let motivoInvalido = '';
+
+        for (const [faixa, qtd] of Object.entries(contagem)) {
+            if (qtd > limites[faixa]) {
+                invalido = true;
+                motivoInvalido = `A faixa ${faixa} (${faixa === '0' ? '01-09' : faixa === '1' ? '10-19' : faixa === '2' ? '20-29' : '30-31'}) só tem ${limites[faixa]} números, mas você pediu ${qtd}.`;
+                break;
+            }
+        }
+
+        if (invalido) {
+            exibirResultadoInvalido(motivoInvalido);
+            return;
+        }
+
+        removerHighlights();
+        sugestoesLista.classList.remove('show');
+
+        // Buscar nos dados
+        const todosFrequentes = dadosDezenas.todos_padroes_que_sairam || [];
+        const todosFaltantes = dadosDezenas.todos_padroes_faltantes || [];
+        const todosAtrasados = dadosDezenas.todos_por_atraso || [];
+
+        // Procurar nos frequentes
+        let encontrado = todosFrequentes.find(p => p.padrao === padraoNormalizado);
+        if (encontrado) {
+            const posicaoFreq = todosFrequentes.findIndex(p => p.padrao === padraoNormalizado) + 1;
+            const posicaoAtraso = todosAtrasados.findIndex(p => p.padrao === padraoNormalizado) + 1;
+            exibirResultadoEncontrado(encontrado, posicaoFreq, posicaoAtraso);
+            return;
+        }
+
+        // Procurar nos faltantes
+        encontrado = todosFaltantes.find(p => p.padrao === padraoNormalizado);
+        if (encontrado) {
+            const posicao = todosFaltantes.findIndex(p => p.padrao === padraoNormalizado) + 1;
+            exibirResultadoFaltante(encontrado, posicao);
+            return;
+        }
+
+        exibirResultadoInvalido(`Padrão "${padraoNormalizado}" não encontrado na base de dados.`);
+    }
+
+    // Exibir resultado encontrado (frequente)
+    function exibirResultadoEncontrado(padrao, posicaoFreq, posicaoAtraso) {
+        const resultadoDiv = document.getElementById('resultadoBusca');
+
+        const status = padrao.atraso <= 5 ? '🟢 QUENTE' :
+            padrao.atraso > 50 ? '🟠 ATRASADO' : '🔵 NORMAL';
+
+        let html = `
+            <div class="resultado-header">
+                <span class="icone">✅</span>
+                <div>
+                    <h5>PADRÃO ENCONTRADO!</h5>
+                    <span class="padrao-badge">${padrao.padrao}</span>
+                </div>
+            </div>
+
+            <div class="resultado-localizacao">
+                <span>📍 Localização:</span>
+                <span class="badge-secao frequentes">🏆 Frequentes #${posicaoFreq}</span>
+                <span class="badge-secao atrasados">⏰ Atrasados #${posicaoAtraso}</span>
+                <button class="btn-ir-padrao" onclick="irParaPadrao('frequente', '${padrao.padrao}')">
+                    Ir para o padrão ↓
+                </button>
+            </div>
+
+            <div class="resultado-info">
+                <div class="resultado-info-grid">
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.frequencia}x</div>
+                        <div class="label">Frequência</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.percentual_historico}%</div>
+                        <div class="label">% Histórico</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.atraso}</div>
+                        <div class="label">Atraso (conc.)</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">#${padrao.ultimo_concurso}</div>
+                        <div class="label">Último Concurso</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.jogos_possiveis.toLocaleString()}</div>
+                        <div class="label">Jogos Possíveis</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${status}</div>
+                        <div class="label">Status</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Histórico de concursos
+        if (padrao.concursos && padrao.concursos.length > 0) {
+            html += `
+                <div class="historico-concursos">
+                    <h6 class="mt-3 mb-2">📋 Últimos concursos com este padrão:</h6>
+            `;
+            padrao.concursos.slice(0, 5).forEach(c => {
+                html += `
+                    <div class="historico-item">
+                        <span class="concurso">#${c.concurso}</span>
+                        <span class="data">${c.data}</span>
+                        <span class="numeros">${c.numeros.map(n => n.toString().padStart(2, '0')).join(' - ')}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        resultadoDiv.className = 'resultado-busca encontrado';
+        resultadoDiv.innerHTML = html;
+    }
+
+    // Exibir resultado faltante
+    function exibirResultadoFaltante(padrao, posicao) {
+        const resultadoDiv = document.getElementById('resultadoBusca');
+
+        const html = `
+            <div class="resultado-header">
+                <span class="icone">🎯</span>
+                <div>
+                    <h5>PADRÃO FALTANTE!</h5>
+                    <span class="padrao-badge">${padrao.padrao}</span>
+                </div>
+            </div>
+
+            <div class="resultado-localizacao">
+                <span>📍 Localização:</span>
+                <span class="badge-secao faltantes">🎯 Faltantes #${posicao}</span>
+                <button class="btn-ir-padrao" onclick="irParaPadrao('faltante', '${padrao.padrao}')">
+                    Ir para o padrão ↓
+                </button>
+            </div>
+
+            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ff9800;">
+                <strong>⚠️ Este padrão NUNCA saiu em nenhum concurso!</strong>
+            </div>
+
+            <div class="resultado-info">
+                <div class="resultado-info-grid">
+                    <div class="resultado-info-item">
+                        <div class="valor" style="color: #f44336;">0x</div>
+                        <div class="label">Frequência</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.jogos_possiveis.toLocaleString()}</div>
+                        <div class="label">Jogos Possíveis</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.percentual_universo}%</div>
+                        <div class="label">% do Universo</div>
+                    </div>
+                    <div class="resultado-info-item">
+                        <div class="valor">${padrao.descricao}</div>
+                        <div class="label">Distribuição</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        resultadoDiv.className = 'resultado-busca faltante';
+        resultadoDiv.innerHTML = html;
+    }
+
+    // Exibir resultado inválido
+    function exibirResultadoInvalido(motivo) {
+        const resultadoDiv = document.getElementById('resultadoBusca');
+
+        const html = `
+            <div class="resultado-header">
+                <span class="icone">❌</span>
+                <div>
+                    <h5>PADRÃO INVÁLIDO</h5>
+                </div>
+            </div>
+            <p class="mt-2 mb-0">${motivo}</p>
+            <p class="mt-2 mb-0"><small>💡 Dica: Use os botões [0] [1] [2] [3] para montar um padrão válido de 7 dígitos.</small></p>
+        `;
+
+        resultadoDiv.className = 'resultado-busca invalido';
+        resultadoDiv.innerHTML = html;
+    }
+
+    // Ir para o padrão na lista
+    function irParaPadrao(tipo, padrao) {
+        removerHighlights();
+
+        const padraoId = padrao.replace(/ /g, '-');
+        let elemento = null;
+        let secao = null;
+
+        if (tipo === 'frequente') {
+            // Primeiro verifica no top 10
+            elemento = document.getElementById(`frequente-${padraoId}`);
+            secao = 'secaoFrequentes';
+
+            // Se não encontrar, abrir accordion e buscar na tabela
+            if (!elemento) {
+                const collapse = document.getElementById('collapseFrequentes');
+                const bsCollapse = new bootstrap.Collapse(collapse, { show: true });
+
+                setTimeout(() => {
+                    const tr = document.getElementById(`tabela-frequente-${padraoId}`);
+                    if (tr) {
+                        tr.classList.add('padrao-highlight');
+                        tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 500);
+                return;
+            }
+        } else if (tipo === 'faltante') {
+            elemento = document.getElementById(`faltante-${padraoId}`);
+            secao = 'secaoFaltantes';
+
+            if (!elemento) {
+                const collapse = document.getElementById('collapseFaltantes');
+                const bsCollapse = new bootstrap.Collapse(collapse, { show: true });
+
+                setTimeout(() => {
+                    const tr = document.getElementById(`tabela-faltante-${padraoId}`);
+                    if (tr) {
+                        tr.classList.add('padrao-highlight');
+                        tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 500);
+                return;
+            }
+        } else if (tipo === 'atrasado') {
+            elemento = document.getElementById(`atrasado-${padraoId}`);
+            secao = 'secaoAtrasados';
+        }
+
+        if (elemento) {
+            elemento.classList.add('padrao-highlight');
+            elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // Toast simples
+    function showToast(message, type = 'info') {
+        const colors = { info: '#2196f3', warning: '#ff9800', success: '#4caf50', error: '#f44336' };
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed; bottom: 20px; right: 20px; padding: 15px 25px;
+            background: ${colors[type]}; color: white; border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Event listeners
+    inputBusca.addEventListener('input', mostrarSugestoes);
+    inputBusca.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            buscarPadrao();
+        }
+    });
+
+    // Fechar sugestões ao clicar fora
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.sugestoes-container')) {
+            sugestoesLista.classList.remove('show');
+        }
+    });
+    // =========================================================================
+    // 🆕 EXPORTAÇÃO DE DADOS
+    // =========================================================================
+
+    function exportarPadroes(tipo, formato) {
+        if (!dadosDezenas) {
+            showToast('Aguarde os dados carregarem...', 'warning');
+            return;
+        }
+
+        let dados = [];
+        let nomeArquivo = '';
+
+        if (tipo === 'faltantes') {
+            dados = dadosDezenas.todos_padroes_faltantes || [];
+            nomeArquivo = 'padroes_faltantes_dia_de_sorte';
+        } else if (tipo === 'frequentes') {
+            dados = dadosDezenas.top_10_frequentes || []; // Export only Top 10 as per UI section
+            nomeArquivo = 'top10_padroes_frequentes_dia_de_sorte';
+        } else if (tipo === 'atrasados') {
+            dados = dadosDezenas.top_10_atrasados || []; // Export only Top 10 as per UI section
+            nomeArquivo = 'top10_padroes_atrasados_dia_de_sorte';
+        } else if (tipo === 'todos') {
+            // Prepare data for "all" export
+            dados = {
+                faltantes: dadosDezenas.todos_padroes_faltantes || [],
+                frequentes: dadosDezenas.top_10_frequentes || [],
+                atrasados: dadosDezenas.top_10_atrasados || []
+            };
+            nomeArquivo = 'analise_completa_padroes_dia_de_sorte';
+        }
+
+        if (tipo !== 'todos' && dados.length === 0) {
+            showToast('Nenhum dado para exportar.', 'warning');
+            return;
+        }
+
+        if (formato === 'txt') {
+            exportarTXT(dados, nomeArquivo, tipo);
+        } else if (formato === 'html') {
+            exportarHTML(dados, nomeArquivo, tipo);
+        } else if (formato === 'xlsx') {
+            exportarXLSX(dados, nomeArquivo, tipo);
+        }
+    }
+
+    function exportarTXT(dados, nomeArquivo, tipo) {
+        let conteudo = '';
+
+        if (tipo === 'todos') {
+            conteudo += '=== PADRÕES FALTANTES ===\n';
+            dados.faltantes.forEach(item => conteudo += `${item.padrao}\n`);
+
+            conteudo += '\n=== TOP 10 FREQUENTES ===\n';
+            dados.frequentes.forEach(item => conteudo += `${item.padrao}\n`);
+
+            conteudo += '\n=== TOP 10 ATRASADOS ===\n';
+            dados.atrasados.forEach(item => conteudo += `${item.padrao}\n`);
+        } else {
+            dados.forEach((item) => {
+                conteudo += `${item.padrao}\n`;
+            });
+        }
+
+        baixarArquivo(conteudo, nomeArquivo + '.txt', 'text/plain');
+    }
+
+    function exportarHTML(dados, nomeArquivo, tipo) {
+        let html = `
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <title>Análise de Padrões - Dia de Sorte</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    h1, h2 { color: #333; }
+                    .header { margin-bottom: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Análise de Padrões - Dia de Sorte</h1>
+                    <p>Gerado em: ${new Date().toLocaleString()}</p>
+                </div>
+        `;
+
+        if (tipo === 'todos') {
+            html += gerarTabelaHTML(dados.faltantes, 'Padrões Faltantes', 'faltantes');
+            html += gerarTabelaHTML(dados.frequentes, 'Top 10 Frequentes', 'frequentes');
+            html += gerarTabelaHTML(dados.atrasados, 'Top 10 Atrasados', 'atrasados');
+        } else {
+            html += gerarTabelaHTML(dados, `Padrões ${tipo.toUpperCase()}`, tipo);
+        }
+
+        html += `</body></html>`;
+        baixarArquivo(html, nomeArquivo + '.html', 'text/html');
+    }
+
+    function gerarTabelaHTML(lista, titulo, tipo) {
+        if (!lista || lista.length === 0) return `<p>Sem dados para ${titulo}</p>`;
+
+        let html = `<h2>${titulo}</h2><table><thead><tr>
+            <th>#</th>
+            <th>Padrão</th>
+            ${tipo !== 'faltantes' ? '<th>Frequência</th><th>Atraso</th><th>Último Concurso</th>' : ''}
+            <th>Jogos Possíveis</th>
+            <th>% Universo</th>
+        </tr></thead><tbody>`;
+
+        lista.forEach((item, index) => {
+            html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.padrao}</td>
+                ${tipo !== 'faltantes' ? `<td>${item.frequencia}</td><td>${item.atraso}</td><td>${item.ultimo_concurso}</td>` : ''}
+                <td>${item.jogos_possiveis.toLocaleString()}</td>
+                <td>${item.percentual_universo}%</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        return html;
+    }
+
+    function exportarXLSX(dados, nomeArquivo, tipo) {
+        const wb = XLSX.utils.book_new();
+
+        if (tipo === 'todos') {
+            adicionarPlanilhaXLSX(wb, dados.faltantes, 'Faltantes', 'faltantes');
+            adicionarPlanilhaXLSX(wb, dados.frequentes, 'Frequentes', 'frequentes');
+            adicionarPlanilhaXLSX(wb, dados.atrasados, 'Atrasados', 'atrasados');
+        } else {
+            adicionarPlanilhaXLSX(wb, dados, 'Padrões', tipo);
+        }
+
+        XLSX.writeFile(wb, nomeArquivo + '.xlsx');
+    }
+
+    function adicionarPlanilhaXLSX(wb, lista, nomePlanilha, tipo) {
+        if (!lista || lista.length === 0) return;
+
+        const dadosFormatados = lista.map((item, index) => {
+            let obj = {
+                'Rank': index + 1,
+                'Padrão': item.padrao,
+                'Jogos Possíveis': item.jogos_possiveis,
+                '% Universo': item.percentual_universo + '%'
+            };
+
+            if (tipo !== 'faltantes') {
+                obj['Frequência'] = item.frequencia;
+                obj['Atraso'] = item.atraso;
+                obj['Último Concurso'] = item.ultimo_concurso;
+                obj['% Histórico'] = item.percentual_historico + '%';
+            }
+            return obj;
+        });
+
+        const ws = XLSX.utils.json_to_sheet(dadosFormatados);
+        XLSX.utils.book_append_sheet(wb, ws, nomePlanilha);
+    }
+
+    function baixarArquivo(conteudo, nomeArquivo, mimeType) {
+        const blob = new Blob([conteudo], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomeArquivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}

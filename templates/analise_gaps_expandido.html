@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Gaps Expandida - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    .analise-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .analise-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #D4B31A;
+    }
+    .top-item {
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border-left: 4px solid #D4B31A;
+    }
+    .top-item.medalha-ouro { border-left-color: #FFD700; }
+    .top-item.medalha-prata { border-left-color: #C0C0C0; }
+    .top-item.medalha-bronze { border-left-color: #CD7F32; }
+    .badge-recente {
+        background: #dc3545;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        margin-left: 10px;
+    }
+    .numero-circulo {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        text-align: center;
+        border-radius: 50%;
+        background: #D4B31A;
+        color: white;
+        font-weight: bold;
+        margin: 3px;
+    }
+    .interpretacao-card {
+        background: #e3f2fd;
+        border-left: 4px solid #2196F3;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 6px;
+    }
+    .palpite-card {
+        background: #f1f8e9;
+        border: 2px solid #8BC34A;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 8px;
+    }
+    .toggle-checkbox {
+        transform: scale(1.3);
+        margin-right: 10px;
+    }
+    .analise-toggle-item {
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 6px;
+        background: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .analise-toggle-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    .analise-toggle-item.ativo {
+        background: #d1ecf1;
+        border-left: 4px solid #0c5460;
+    }
+    .btn-copiar {
+        font-size: 0.85rem;
+        padding: 4px 12px;
+    }
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+    .loading-spinner.show {
+        display: block;
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .analise-section {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+        .top-item {
+            background: #3d3d3d;
+            color: #e0e0e0;
+        }
+        .analise-toggle-item {
+            background: #3d3d3d;
+            color: #e0e0e0;
+        }
+        .analise-toggle-item:hover {
+            background: #4d4d4d;
+        }
+        .interpretacao-card {
+            background: #1e3a5f;
+            color: #e0e0e0;
+        }
+        .palpite-card {
+            background: #2d3d2d;
+            color: #e0e0e0;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center mb-2">
+                <i class="fas fa-chart-line me-2" style="color: #D4B31A;"></i>
+                Análise de Gaps Expandida
+            </h1>
+            <p class="text-center text-muted">
+                Sistema inteligente de análise de padrões com múltiplas dimensões
+            </p>
+        </div>
+    </div>
+
+    <!-- Painel de Seleção de Análises -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="analise-section">
+                <h5 class="mb-3">
+                    <i class="fas fa-toggle-on me-2"></i>
+                    Selecione as Análises
+                </h5>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('digitos')">
+                    <input type="checkbox" id="check-digitos" class="toggle-checkbox" checked>
+                    <label for="check-digitos" style="cursor: pointer; margin: 0;">
+                        <strong>Dígitos Iniciais</strong>
+                        <small class="d-block text-muted">Padrão 0-3 (01-09, 10-19, 20-29, 30+)</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('gaps')">
+                    <input type="checkbox" id="check-gaps" class="toggle-checkbox" checked>
+                    <label for="check-gaps" style="cursor: pointer; margin: 0;">
+                        <strong>Gaps (Distâncias)</strong>
+                        <small class="d-block text-muted">Intervalos entre números consecutivos</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('quadrantes')">
+                    <input type="checkbox" id="check-quadrantes" class="toggle-checkbox">
+                    <label for="check-quadrantes" style="cursor: pointer; margin: 0;">
+                        <strong>Quadrantes</strong>
+                        <small class="d-block text-muted">Q1=01-08, Q2=09-16, Q3=17-24, Q4=25-31</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('pares_impares')">
+                    <input type="checkbox" id="check-pares_impares" class="toggle-checkbox">
+                    <label for="check-pares_impares" style="cursor: pointer; margin: 0;">
+                        <strong>Pares/Ímpares</strong>
+                        <small class="d-block text-muted">Distribuição par vs ímpar</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('altos_baixos')">
+                    <input type="checkbox" id="check-altos_baixos" class="toggle-checkbox">
+                    <label for="check-altos_baixos" style="cursor: pointer; margin: 0;">
+                        <strong>Altos/Baixos</strong>
+                        <small class="d-block text-muted">Altos (16-31) vs Baixos (01-15)</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('quentes_frios')">
+                    <input type="checkbox" id="check-quentes_frios" class="toggle-checkbox">
+                    <label for="check-quentes_frios" style="cursor: pointer; margin: 0;">
+                        <strong>Quentes/Frios</strong>
+                        <small class="d-block text-muted">Últimos 10 concursos vs anteriores</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('duplas_trincas')">
+                    <input type="checkbox" id="check-duplas_trincas" class="toggle-checkbox">
+                    <label for="check-duplas_trincas" style="cursor: pointer; margin: 0;">
+                        <strong>Duplas/Trincas Recorrentes</strong>
+                        <small class="d-block text-muted">Combinações que se repetem</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('repetidos_anterior')">
+                    <input type="checkbox" id="check-repetidos_anterior" class="toggle-checkbox">
+                    <label for="check-repetidos_anterior" style="cursor: pointer; margin: 0;">
+                        <strong>Repetidos do Anterior</strong>
+                        <small class="d-block text-muted">Números que repetiram do último</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('faixas_esquecidas')">
+                    <input type="checkbox" id="check-faixas_esquecidas" class="toggle-checkbox">
+                    <label for="check-faixas_esquecidas" style="cursor: pointer; margin: 0;">
+                        <strong>Faixas Esquecidas</strong>
+                        <small class="d-block text-muted">Números sem sair há muito tempo</small>
+                    </label>
+                </div>
+
+                <div class="analise-toggle-item" onclick="toggleAnalise('perfil_mes_sorte')">
+                    <input type="checkbox" id="check-perfil_mes_sorte" class="toggle-checkbox">
+                    <label for="check-perfil_mes_sorte" style="cursor: pointer; margin: 0;">
+                        <strong>Perfil Mês da Sorte</strong>
+                        <small class="d-block text-muted">Padrões do mês mais sorteado</small>
+                    </label>
+                </div>
+
+                <hr>
+
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-success btn-lg" onclick="executarAnalises()" id="btnAtualizar">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Atualizar Análise
+                    </button>
+                    <button class="btn btn-primary" onclick="gerarPalpites()" id="btnPalpites">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Gerar Palpites Inteligentes
+                    </button>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <span id="contador-analises">2</span> análise(s) selecionada(s)
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Resultados -->
+        <div class="col-lg-8 col-md-6">
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-warning" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3 text-muted">Processando análises...</p>
+            </div>
+
+            <!-- Container de Resultados -->
+            <div id="resultadosContainer"></div>
+
+            <!-- Container de Interpretações -->
+            <div id="interpretacoesContainer"></div>
+
+            <!-- Container de Palpites -->
+            <div id="palpitesContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let analisesAtivas = ['digitos', 'gaps']; // Padrão: 2 primeiras ativas
+let analisesJaExecutadas = new Set(); // Para evitar repetição na mesma sessão
+
+// Toggle de análise individual
+function toggleAnalise(nome) {
+    const checkbox = document.getElementById(`check-${nome}`);
+    const item = checkbox.closest('.analise-toggle-item');
+
+    // Toggle checkbox
+    checkbox.checked = !checkbox.checked;
+
+    // Atualizar array de análises ativas
+    if (checkbox.checked) {
+        if (!analisesAtivas.includes(nome)) {
+            analisesAtivas.push(nome);
+        }
+        item.classList.add('ativo');
+    } else {
+        analisesAtivas = analisesAtivas.filter(a => a !== nome);
+        item.classList.remove('ativo');
+    }
+
+    // Atualizar contador
+    document.getElementById('contador-analises').textContent = analisesAtivas.length;
+
+    // Prevenir propagação do evento
+    event.stopPropagation();
+}
+
+// Inicializar checkboxes ativos
+document.addEventListener('DOMContentLoaded', function() {
+    // Marcar as 2 primeiras como ativas visualmente
+    document.getElementById('check-digitos').closest('.analise-toggle-item').classList.add('ativo');
+    document.getElementById('check-gaps').closest('.analise-toggle-item').classList.add('ativo');
+
+    // Executar automaticamente na abertura da página
+    executarAnalises();
+});
+
+// Executar análises selecionadas
+async function executarAnalises() {
+    if (analisesAtivas.length === 0) {
+        mostrarMensagem('Selecione ao menos uma análise!', 'warning');
+        return;
+    }
+
+    // Filtrar análises já executadas nesta sessão (evitar repetição)
+    const analisesParaExecutar = analisesAtivas.filter(a => !analisesJaExecutadas.has(a));
+
+    if (analisesParaExecutar.length === 0) {
+        mostrarMensagem('Todas as análises selecionadas já foram executadas nesta sessão!', 'info');
+        return;
+    }
+
+    // Mostrar loading
+    document.getElementById('loadingSpinner').classList.add('show');
+    document.getElementById('resultadosContainer').innerHTML = '';
+    document.getElementById('interpretacoesContainer').innerHTML = '';
+
+    const btnAtualizar = document.getElementById('btnAtualizar');
+    btnAtualizar.disabled = true;
+    btnAtualizar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+
+    try {
+        const response = await fetch('/api/analise-gaps-expandido/executar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                analises: analisesParaExecutar
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            // Marcar como executadas
+            analisesParaExecutar.forEach(a => analisesJaExecutadas.add(a));
+
+            // Exibir resultados
+            exibirResultados(data.resultados);
+
+            // Exibir interpretações (cruzamento)
+            if (data.interpretacoes && data.interpretacoes.length > 0) {
+                exibirInterpretacoes(data.interpretacoes);
+            }
+        } else {
+            mostrarMensagem(data.mensagem || 'Erro ao executar análises', 'danger');
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao executar análises: ' + error.message, 'danger');
+    } finally {
+        // Ocultar loading
+        document.getElementById('loadingSpinner').classList.remove('show');
+        btnAtualizar.disabled = false;
+        btnAtualizar.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Atualizar Análise';
+    }
+}
+
+// Gerar palpites inteligentes
+async function gerarPalpites() {
+    if (analisesAtivas.length === 0) {
+        mostrarMensagem('Selecione ao menos uma análise antes de gerar palpites!', 'warning');
+        return;
+    }
+
+    const btnPalpites = document.getElementById('btnPalpites');
+    btnPalpites.disabled = true;
+    btnPalpites.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Gerando...';
+
+    try {
+        const response = await fetch('/api/analise-gaps-expandido/palpites', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                analises: analisesAtivas
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            exibirPalpites(data.palpites, data.mensagem);
+        } else {
+            mostrarMensagem(data.mensagem || 'Erro ao gerar palpites', 'danger');
+        }
+
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao gerar palpites: ' + error.message, 'danger');
+    } finally {
+        btnPalpites.disabled = false;
+        btnPalpites.innerHTML = '<i class="fas fa-lightbulb me-2"></i>Gerar Palpites Inteligentes';
+    }
+}
+
+// Exibir resultados das análises
+function exibirResultados(resultados) {
+    const container = document.getElementById('resultadosContainer');
+    container.innerHTML = '';
+
+    // Mapeamento de cores por tipo de análise
+    const coresAnalise = {
+        'digitos': '#FF6B6B',
+        'gaps': '#4ECDC4',
+        'quadrantes': '#95E1D3',
+        'pares_impares': '#F38181',
+        'altos_baixos': '#AA96DA',
+        'quentes_frios': '#FCBAD3',
+        'duplas_trincas': '#FFFFD2',
+        'repetidos_anterior': '#A8E6CF',
+        'faixas_esquecidas': '#FFD3B6',
+        'perfil_mes_sorte': '#FFAAA5'
+    };
+
+    const titulosAnalise = {
+        'digitos': 'Dígitos Iniciais',
+        'gaps': 'Gaps (Distâncias)',
+        'quadrantes': 'Quadrantes',
+        'pares_impares': 'Pares/Ímpares',
+        'altos_baixos': 'Altos/Baixos',
+        'quentes_frios': 'Quentes/Frios',
+        'duplas_trincas': 'Duplas/Trincas Recorrentes',
+        'repetidos_anterior': 'Repetidos do Anterior',
+        'faixas_esquecidas': 'Faixas Esquecidas',
+        'perfil_mes_sorte': 'Perfil Mês da Sorte'
+    };
+
+    for (const [tipo, dados] of Object.entries(resultados)) {
+        const corAnalise = coresAnalise[tipo] || '#D4B31A';
+        const tituloAnalise = titulosAnalise[tipo] || tipo;
+
+        let html = `
+            <div class="analise-section" style="border-left: 4px solid ${corAnalise};">
+                <div class="analise-header">
+                    <h5 style="margin: 0;">
+                        <i class="fas fa-chart-bar me-2" style="color: ${corAnalise};"></i>
+                        ${tituloAnalise}
+                    </h5>
+                    <span class="badge bg-secondary">${dados.total_analisado} concursos</span>
+                </div>
+        `;
+
+        // Top 3 padrões
+        if (dados.top_padroes && dados.top_padroes.length > 0) {
+            html += '<div class="mb-3">';
+            dados.top_padroes.forEach((padrao, index) => {
+                const classes = ['medalha-ouro', 'medalha-prata', 'medalha-bronze'];
+                const medalhas = ['🥇', '🥈', '🥉'];
+
+                html += `
+                    <div class="top-item ${classes[index]}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${medalhas[index]} ${padrao.padrao_str || padrao.padrao}</strong>
+                                ${padrao.reapareceu_recentemente ? '<span class="badge-recente">🔥 Reapareceu</span>' : ''}
+                                <div class="text-muted small mt-1">
+                                    Frequência: ${padrao.frequencia} vezes (${padrao.percentual}%)
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted small">Último: #${padrao.ultimo_concurso}</div>
+                            </div>
+                        </div>
+                        ${padrao.exemplo ? `
+                            <div class="mt-2">
+                                <small class="text-muted">Exemplo:</small>
+                                <div class="mt-1">
+                                    ${padrao.exemplo.map(n => `<span class="numero-circulo">${String(n).padStart(2, '0')}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        html += '</div>';
+        container.innerHTML += html;
+    }
+}
+
+// Exibir interpretações (cruzamento inteligente)
+function exibirInterpretacoes(interpretacoes) {
+    const container = document.getElementById('interpretacoesContainer');
+
+    let html = `
+        <div class="analise-section">
+            <div class="analise-header">
+                <h5 style="margin: 0;">
+                    <i class="fas fa-brain me-2" style="color: #2196F3;"></i>
+                    Interpretações Inteligentes (Cruzamento)
+                </h5>
+                <span class="badge bg-info">${interpretacoes.length} insight(s)</span>
+            </div>
+    `;
+
+    interpretacoes.forEach(interp => {
+        html += `
+            <div class="interpretacao-card">
+                <h6 class="mb-2">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    ${interp.titulo}
+                </h6>
+                <p class="mb-0">${interp.interpretacao}</p>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// Exibir palpites gerados
+function exibirPalpites(palpites, mensagem) {
+    const container = document.getElementById('palpitesContainer');
+
+    let html = `
+        <div class="analise-section">
+            <div class="analise-header">
+                <h5 style="margin: 0;">
+                    <i class="fas fa-star me-2" style="color: #8BC34A;"></i>
+                    Palpites Inteligentes
+                </h5>
+                <span class="badge bg-success">${palpites.length} palpite(s)</span>
+            </div>
+            <p class="text-muted"><small>${mensagem}</small></p>
+    `;
+
+    palpites.forEach((palpite, index) => {
+        const numerosHtml = palpite.numeros.map(n =>
+            `<span class="numero-circulo">${String(n).padStart(2, '0')}</span>`
+        ).join('');
+
+        html += `
+            <div class="palpite-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Palpite ${index + 1}: ${palpite.tipo}</h6>
+                    <button class="btn btn-sm btn-outline-success btn-copiar" onclick="copiarPalpite(${JSON.stringify(palpite.numeros).replace(/"/g, '&quot;')})">
+                        <i class="fas fa-copy me-1"></i>Copiar
+                    </button>
+                </div>
+                <div class="mb-2">${numerosHtml}</div>
+                <small class="text-muted">${palpite.raciocinio}</small>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// Copiar palpite para clipboard
+function copiarPalpite(numeros) {
+    const texto = numeros.map(n => String(n).padStart(2, '0')).join(' - ');
+    navigator.clipboard.writeText(texto).then(() => {
+        mostrarMensagem('Palpite copiado!', 'success');
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+    });
+}
+
+// Mostrar mensagem de feedback
+function mostrarMensagem(mensagem, tipo) {
+    const alertHtml = `
+        <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    // Inserir no topo da página
+    const container = document.querySelector('.container-fluid');
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = alertHtml;
+    container.insertBefore(tempDiv.firstElementChild, container.firstChild);
+
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

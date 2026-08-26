@@ -1,0 +1,1166 @@
+{% extends "base.html" %}
+{% block title %}Conferência Pós-Apostas - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    .card { margin-bottom: 20px; }
+
+    .jogo-input {
+        display: inline-block;
+        width: 70px;
+        height: 50px;
+        margin: 4px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px !important;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .loading-text {
+        color: #dc3545 !important;
+        font-weight: bold !important;
+        animation: pulse 1.5s infinite;
+    }
+
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .mes-select {
+        width: 140px !important;
+        font-size: 16px !important;
+        height: 50px;
+        margin-left: 10px;
+        border: 2px solid #D4B31A;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+
+    .jogo-container {
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        position: relative;
+        background: white;
+    }
+
+    .dark .jogo-container {
+        background: #1f2937;
+        border-color: #4b5563;
+    }
+
+    .jogo-container.valid {
+        border-color: #28a745;
+        background-color: #f8fff9;
+    }
+
+    .dark .jogo-container.valid {
+        border-color: #22c55e;
+        background-color: #14532d;
+    }
+
+    .jogo-container.invalid {
+        border-color: #dc3545;
+        background-color: #fff8f8;
+    }
+
+    .dark .jogo-container.invalid {
+        border-color: #ef4444;
+        background-color: #7f1d1d;
+    }
+
+    .numero-acertado {
+        background-color: #28a745 !important;
+        color: #FFFFFF !important;
+        font-weight: 900 !important;
+        border-color: #155724 !important;
+    }
+
+    .numero-errado {
+        background-color: #dc3545 !important;
+        color: #FFFFFF !important;
+        font-weight: 900 !important;
+        border-color: #721c24 !important;
+    }
+
+    /* Sequencias - CORES CORRIGIDAS */
+    .seq-2 {
+        background-color: #4ade80;
+        border: 2px solid #16a34a;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        font-weight: bold;
+    }
+    .seq-3 {
+        background-color: #60a5fa;
+        border: 2px solid #2563eb;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        font-weight: bold;
+    }
+    .seq-4 {
+        background-color: #c084fc;
+        border: 2px solid #9333ea;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        font-weight: bold;
+    }
+    .repetition {
+        background-color: #fbbf24;
+        border: 2px solid #d97706;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        font-weight: bold;
+    }
+
+    .dark .seq-2 { background-color: #1e3a8a; border-color: #3b82f6; color: #fff; }
+    .dark .seq-3 { background-color: #581c87; border-color: #a855f7; color: #fff; }
+    .dark .seq-4 { background-color: #14532d; border-color: #22c55e; color: #fff; }
+    .dark .repetition { background-color: #ea580c; border-color: #f97316; color: #fff; }
+
+    /* Meses - CORES DO indexV25.html (0-11 = Jan-Dez) */
+    .mes-cor-0  { background-color: #f0e9ee; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-1  { background-color: #f0c282; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-2  { background-color: #686b69; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-3  { background-color: #ce3500; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-4  { background-color: #457725; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-5  { background-color: #a2a7ad; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-6  { background-color: #98ddde; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-7  { background-color: #2c8587; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-8  { background-color: #0d00f2; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-9  { background-color: #ffff66; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-10 { background-color: #cc99ff; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .mes-cor-11 { background-color: #99ff33; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+
+    .btn-remover-jogo {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .resultado-resumo {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 15px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        margin: 5px;
+    }
+
+    #dropZone {
+        border: 3px dashed #D4B31A;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background-color: #fffef8;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    #dropZone.drag-over {
+        background-color: #fff9e6;
+        border-color: #b8960f;
+        transform: scale(1.02);
+    }
+
+    .dark #dropZone {
+        background-color: #1f2937;
+        border-color: #D4B31A;
+    }
+
+    .dark #dropZone.drag-over {
+        background-color: #374151;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+
+    .concurso-input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .concurso-input-group input,
+    .concurso-input-group select {
+        font-size: 16px !important;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-check-circle"></i> Conferência Pós-Apostas</h1>
+    <p class="text-muted">Confira seus jogos com resultados de concursos anteriores e analise padrões</p>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5> Selecionar Concurso para Conferência</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Concurso:</label>
+                            <div class="concurso-input-group">
+                                <select id="selectConcurso" class="form-select" style="flex: 1;">
+                                    <option value="" class="loading-text">Carregando...</option>
+                                </select>
+                                <input type="number" id="inputConcurso" class="form-control" placeholder="ou digite o número" style="flex: 0 0 200px;" min="1">
+                            </div>
+                            <small class="text-muted">Mostrando do primeiro ao último concurso</small>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Valor da Aposta (R$):</label>
+                            <input type="number" id="valorAposta" class="form-control" value="2.50" step="0.01" min="0" style="font-size: 16px !important;">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Total de Jogos:</label>
+                            <input type="text" id="totalJogos" class="form-control" readonly value="0" style="font-size: 16px !important;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-gamepad"></i> Meus Jogos</h5>
+                    <div>
+                        <button class="btn btn-light btn-sm me-2" onclick="adicionarJogoManual()">
+                            <i class="fas fa-plus"></i> Adicionar Jogo
+                        </button>
+                        <button class="btn btn-warning btn-sm me-2" onclick="limparTodosJogos()">
+                            <i class="fas fa-eraser"></i> Limpar Tudo
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="conferirJogos()">
+                            <i class="fas fa-check"></i> Conferir Jogos
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="dropZone" class="mb-4">
+                        <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-warning"></i>
+                        <h5>Arraste e solte arquivo aqui</h5>
+                        <p class="text-muted">ou clique para selecionar arquivo (TXT, CSV)<br>
+                        <small>Aceita formatos: "1 2 3 4 5 6 7 Jan", "01,02,03,04,05,06,07,Janeiro", "1-2-3-4-5-6-7-jan", etc.</small></p>
+                        <input type="file" id="fileInput" accept=".txt,.csv" style="display: none;">
+                    </div>
+
+                    <div id="listaJogos"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultadoConferencia" style="display: none;">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="resultado-resumo">
+                    <h4 class="mb-4"><i class="fas fa-trophy"></i> Resultado da Conferência</h4>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="stat-box">
+                                <h6>Total Gasto</h6>
+                                <h3 id="resGasto">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-box">
+                                <h6>Total Ganho</h6>
+                                <h3 id="resGanho">R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-box" id="boxLucro" style="display: none; background-color: rgba(40,167,69,0.4);">
+                                <h6>💰 LUCRO</h6>
+                                <h3 id="resLucroPositivo">R$ 0,00</h3>
+                            </div>
+                            <div class="stat-box" id="boxPrejuizo" style="display: none; background-color: rgba(220,53,69,0.4);">
+                                <h6>📉 PREJUÍZO</h6>
+                                <h3 id="resPrejuizo">R$ 0,00</h3>
+                            </div>
+                            <div class="stat-box" id="boxNeutro" style="display: none; background-color: rgba(108,117,125,0.3);">
+                                <h6>⚖️ EMPATE</h6>
+                                <h3>R$ 0,00</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-box">
+                                <h6>Jogos Premiados</h6>
+                                <h3 id="resPremiados">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-box">
+                                <h6>Total de Jogos</h6>
+                                <h3 id="resTotalJogos">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-chart-bar"></i> Gasto vs Ganho</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartGastoGanho"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="fas fa-chart-pie"></i> Distribuição de Acertos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartAcertos"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5><i class="fas fa-list"></i> Detalhes dos Jogos Conferidos</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- LEGENDA DE CORES E SIGNIFICADOS -->
+                        <div class="alert alert-info mb-3">
+                            <h6><i class="fas fa-info-circle"></i> Cores e Significados:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>📊 Cores Simples (1 condição):</strong>
+                                    <div class="mt-2">
+                                        <span class="seq-2 me-2">2</span> Sequência de 2
+                                        <span class="seq-3 ms-3 me-2">3</span> Sequência de 3
+                                        <span class="seq-4 ms-3 me-2">4+</span> Sequência de 4+
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="repetition me-2">R</span> Repetição
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>🎨 Gradientes (múltiplas condições):</strong>
+                                    <div class="mt-2">
+                                        <span style="background: linear-gradient(135deg, #4ade80 0%, #4ade80 50%, #fbbf24 50%, #fbbf24 100%); padding: 4px 8px; border-radius: 4px; border: 2px solid #000; font-weight: bold;">2+R</span> Seq. 2 + Repetição
+                                    </div>
+                                    <div class="mt-2">
+                                        <span style="background: linear-gradient(135deg, #c084fc 0%, #c084fc 25%, #60a5fa 25%, #60a5fa 50%, #4ade80 50%, #4ade80 75%, #fbbf24 75%, #fbbf24 100%); padding: 4px 8px; border-radius: 4px; border: 2px solid #000; font-weight: bold;">4+3+2+R</span> Seq. 4+ + Seq. 3 + Seq. 2 + Repetição
+                                    </div>
+                                    <small class="text-muted"><i class="fas fa-mouse-pointer"></i> Passe o mouse sobre os números para ver todas as condições</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>1°</th>
+                                        <th>2°</th>
+                                        <th>3°</th>
+                                        <th>4°</th>
+                                        <th>5°</th>
+                                        <th>6°</th>
+                                        <th>7°</th>
+                                        <th>Acertos</th>
+                                        <th>P/I</th>
+                                        <th>SEQ</th>
+                                        <th>FINAIS</th>
+                                        <th>REPT</th>
+                                        <th>SOMA</th>
+                                        <th>PADRÕES</th>
+                                        <th>MÊS</th>
+                                        <th>DIG.ÚNICOS</th>
+                                        <th>Prêmio</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaDetalhes"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let jogos = [];
+let chartGastoGanho, chartAcertos;
+let jogoIdCounter = 0; // ✅ FIX: Contador único para IDs de jogos
+
+// ✅ FUNÇÃO PARA FORMATAÇÃO BRASILEIRA DE MOEDA
+function formatarMoedaBR(valor) {
+    if (valor === null || valor === undefined || isNaN(valor)) {
+        return 'R$ 0,00';
+    }
+
+    const sinal = valor < 0 ? '-' : '';
+    const valorAbs = Math.abs(valor);
+
+    // Formata com 2 casas decimais e separadores brasileiros
+    const valorFormatado = valorAbs.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    return `${sinal}R$ ${valorFormatado}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    carregarConcursos();
+    configurarDropZone();
+    sincronizarConcursoInputs();
+});
+
+function sincronizarConcursoInputs() {
+    const select = document.getElementById('selectConcurso');
+    const input = document.getElementById('inputConcurso');
+
+    select.addEventListener('change', () => {
+        input.value = select.value;
+    });
+
+    input.addEventListener('input', () => {
+        select.value = input.value;
+    });
+}
+
+async function carregarConcursos() {
+    try {
+        const response = await fetch('/api/conferencia/concursos');
+        const concursos = await response.json();
+
+        const select = document.getElementById('selectConcurso');
+        const input = document.getElementById('inputConcurso');
+
+        // Remove loading text and class after concursos are loaded
+        select.innerHTML = '<option value="">Selecione um concurso</option>';
+
+        concursos.forEach(c => {
+            select.innerHTML += `<option value="${c.numero}">Concurso ${c.numero} - ${c.data} (${c.mes_nome})</option>`;
+        });
+
+        // AUTO-SELECT LAST CONTEST (SEMPRE E SEMPRE)
+        if (concursos.length > 0) {
+            const ultimoConcurso = concursos[concursos.length - 1].numero;
+            select.value = ultimoConcurso;
+            input.value = ultimoConcurso;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar concursos:', error);
+        // Show error in select
+        const select = document.getElementById('selectConcurso');
+        select.innerHTML = '<option value="">Erro ao carregar concursos</option>';
+    }
+}
+
+function configurarDropZone() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) processarArquivo(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) processarArquivo(e.target.files[0]);
+    });
+}
+
+async function processarArquivo(file) {
+    const texto = await file.text();
+    const linhas = texto.split(/\r?\n/).filter(l => l.trim());
+
+    let jogosProcessados = 0;
+    linhas.forEach(linha => {
+        const regex = /(\d{1,2})[\s,.\-+/|]*(\d{1,2})[\s,.\-+/|]*(\d{1,2})[\s,.\-+/|]*(\d{1,2})[\s,.\-+/|]*(\d{1,2})[\s,.\-+/|]*(\d{1,2})[\s,.\-+/|]*(\d{1,2})[\s,.\-+/|]*(Jan(?:eiro)?|Fev(?:ereiro)?|Mar(?:ço)?|Abr(?:il)?|Mai(?:o)?|Jun(?:ho)?|Jul(?:ho)?|Ago(?:sto)?|Set(?:embro)?|Out(?:ubro)?|Nov(?:embro)?|Dez(?:embro)?)?/i;
+
+        const match = linha.match(regex);
+        if (match) {
+            const numeros = [1,2,3,4,5,6,7].map(i => parseInt(match[i]));
+            const mesTexto = match[8];
+
+            let mesNumero = null;
+            if (mesTexto) {
+                const mesesMap = {
+                    'jan': 1, 'janeiro': 1,
+                    'fev': 2, 'fevereiro': 2,
+                    'mar': 3, 'março': 3,
+                    'abr': 4, 'abril': 4,
+                    'mai': 5, 'maio': 5,
+                    'jun': 6, 'junho': 6,
+                    'jul': 7, 'julho': 7,
+                    'ago': 8, 'agosto': 8,
+                    'set': 9, 'setembro': 9,
+                    'out': 10, 'outubro': 10,
+                    'nov': 11, 'novembro': 11,
+                    'dez': 12, 'dezembro': 12
+                };
+                mesNumero = mesesMap[mesTexto.toLowerCase().substring(0,3)];
+            }
+
+            if (numeros.every(n => !isNaN(n) && n >= 1 && n <= 31)) {
+                adicionarJogo(numeros, mesNumero);
+                jogosProcessados++;
+            }
+        }
+    });
+
+    mostrarSucesso(`${jogosProcessados} jogo(s) importado(s) com sucesso!`);
+    atualizarContadorJogos();
+}
+
+function adicionarJogoManual() {
+    adicionarJogo([], null);
+}
+
+function adicionarJogo(numerosIniciais = [], mesInicial = null) {
+    // ✅ FIX: Usar contador incrementado para garantir IDs únicos (não Date.now())
+    // Date.now() pode gerar IDs duplicados quando chamado rapidamente em loop
+    jogoIdCounter++;
+    const jogoId = jogoIdCounter;
+    jogos.push({id: jogoId, numeros: numerosIniciais, mes: mesInicial});
+
+    const container = document.createElement('div');
+    container.className = 'jogo-container';
+    container.id = `jogo-${jogoId}`;
+
+    let inputsHTML = '';
+    for (let i = 0; i < 7; i++) {
+        const valor = numerosIniciais[i] || '';
+        inputsHTML += `<input type="number" class="form-control jogo-input" min="1" max="31" value="${valor}" oninput="validarJogo(${jogoId})">`;
+    }
+
+    const mesesOptions = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    let mesSelectHTML = '<select class="form-select mes-select" onchange="atualizarMesJogo(' + jogoId + ', this.value)">';
+    mesesOptions.forEach((mes, idx) => {
+        const selected = idx === mesInicial ? 'selected' : '';
+        mesSelectHTML += `<option value="${idx}" ${selected}>${mes || 'Mês'}</option>`;
+    });
+    mesSelectHTML += '</select>';
+
+    container.innerHTML = `
+        <button class="btn btn-sm btn-danger btn-remover-jogo" onclick="removerJogo(${jogoId})">
+            <i class="fas fa-times"></i>
+        </button>
+        <strong>Jogo #${jogos.length}:</strong>
+        <div class="mt-2">
+            ${inputsHTML}
+            ${mesSelectHTML}
+        </div>
+        <small class="text-muted mt-2 d-block" id="status-${jogoId}">Preencha os 7 números e selecione o mês (opcional)</small>
+    `;
+
+    document.getElementById('listaJogos').appendChild(container);
+
+    if (numerosIniciais.length === 7) validarJogo(jogoId);
+    atualizarContadorJogos();
+}
+
+function atualizarMesJogo(jogoId, mesValue) {
+    const jogoObj = jogos.find(j => j.id === jogoId);
+    if (jogoObj) {
+        jogoObj.mes = mesValue ? parseInt(mesValue) : null;
+    }
+    validarJogo(jogoId);
+}
+
+function validarJogo(jogoId) {
+    const container = document.getElementById(`jogo-${jogoId}`);
+    const inputs = container.querySelectorAll('.jogo-input');
+    const numeros = Array.from(inputs).map(inp => parseInt(inp.value)).filter(n => !isNaN(n));
+
+    const jogoObj = jogos.find(j => j.id === jogoId);
+    if (jogoObj) jogoObj.numeros = numeros;
+
+    const status = document.getElementById(`status-${jogoId}`);
+
+    if (numeros.length !== 7) {
+        container.classList.remove('valid', 'invalid');
+        status.textContent = `Preencha os 7 números (${numeros.length}/7)`;
+        status.className = 'text-muted mt-2 d-block';
+        return;
+    }
+
+    // Normalizar números (remover leading zeros comparando valores numéricos)
+    // Isso detecta duplicatas como "02" e "2"
+    if (new Set(numeros).size !== 7) {
+        container.classList.add('invalid');
+        container.classList.remove('valid');
+        status.textContent = 'Números não podem repetir! (números como "02" e "2" são considerados duplicados)';
+        status.className = 'text-danger mt-2 d-block';
+        return;
+    }
+
+    container.classList.add('valid');
+    container.classList.remove('invalid');
+    const mesTexto = jogoObj.mes ? ` + Mês: ${['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][jogoObj.mes]}` : '';
+    status.textContent = `Jogo válido ✓${mesTexto}`;
+    status.className = 'text-success mt-2 d-block';
+}
+
+function removerJogo(jogoId) {
+    document.getElementById(`jogo-${jogoId}`).remove();
+    jogos = jogos.filter(j => j.id !== jogoId);
+    atualizarContadorJogos();
+}
+
+function limparTodosJogos() {
+    if (jogos.length === 0) return;
+
+    const confirmDiv = document.createElement('div');
+    confirmDiv.className = 'modal fade show d-block';
+    confirmDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    confirmDiv.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5>Confirmar</h5>
+                </div>
+                <div class="modal-body">Deseja realmente limpar todos os ${jogos.length} jogos?</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancelar</button>
+                    <button class="btn btn-danger" onclick="confirmarLimpar()">Limpar Tudo</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(confirmDiv);
+}
+
+function confirmarLimpar() {
+    document.querySelector('.modal').remove();
+
+    // Clear manual inputs
+    document.getElementById('listaJogos').innerHTML = '';
+    jogos = [];
+
+    // Clear file input
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) fileInput.value = '';
+
+    // Clear drag & drop area
+    const dropZone = document.getElementById('dropZone');
+    if (dropZone) {
+        dropZone.classList.remove('drag-over');
+    }
+
+    atualizarContadorJogos();
+    document.getElementById('resultadoConferencia').style.display = 'none';
+
+    // Show success notification
+    mostrarSucesso('Todos os jogos foram removidos!');
+}
+
+function atualizarContadorJogos() {
+    document.getElementById('totalJogos').value = jogos.length;
+}
+
+async function conferirJogos() {
+    const concursoSelect = document.getElementById('selectConcurso').value;
+    const concursoInput = document.getElementById('inputConcurso').value;
+    const concurso = concursoInput || concursoSelect;
+    const valorAposta = parseFloat(document.getElementById('valorAposta').value);
+
+    if (!concurso) {
+        mostrarErro('Selecione ou digite um número de concurso');
+        return;
+    }
+
+    const jogosValidos = jogos.filter(j => j.numeros.length === 7 && new Set(j.numeros).size === 7);
+
+    if (jogosValidos.length === 0) {
+        mostrarErro('Adicione pelo menos um jogo válido');
+        return;
+    }
+
+    // Detectar jogos duplicados (comparar arrays normalizados)
+    const jogosUnicos = new Map();
+    const duplicados = [];
+
+    jogosValidos.forEach((jogo, index) => {
+        const chave = jogo.numeros.slice().sort((a, b) => a - b).join(',');
+        if (jogosUnicos.has(chave)) {
+            duplicados.push(index + 1);
+        } else {
+            jogosUnicos.set(chave, index + 1);
+        }
+    });
+
+    if (duplicados.length > 0) {
+        // Mostrar modal de confirmação personalizado
+        const confirmDiv = document.createElement('div');
+        confirmDiv.className = 'modal fade show d-block';
+        confirmDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        confirmDiv.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Jogos Duplicados Detectados</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Atenção!</strong> Foram detectados ${duplicados.length} jogo(s) duplicado(s).</p>
+                        <p>Deseja continuar mesmo assim?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancelar</button>
+                        <button class="btn btn-warning" onclick="this.closest('.modal').remove(); prosseguirConferencia()">Continuar Mesmo Assim</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmDiv);
+        return;
+    }
+
+    prosseguirConferencia();
+}
+
+async function prosseguirConferencia() {
+    const concursoSelect = document.getElementById('selectConcurso').value;
+    const concursoInput = document.getElementById('inputConcurso').value;
+    const concurso = concursoInput || concursoSelect;
+    const valorAposta = parseFloat(document.getElementById('valorAposta').value);
+    const jogosValidos = jogos.filter(j => j.numeros.length === 7 && new Set(j.numeros).size === 7);
+
+    try {
+        const response = await fetch('/api/conferencia/conferir', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                jogos: jogosValidos.map(j => ({numeros: j.numeros, mes: j.mes})),
+                concurso: parseInt(concurso),
+                valor_aposta: valorAposta
+            })
+        });
+
+        const resultado = await response.json();
+
+        if (resultado.erro) {
+            mostrarErro(resultado.erro);
+            return;
+        }
+
+        exibirResultado(resultado);
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarErro('Erro ao processar conferência');
+    }
+}
+
+function exibirResultado(resultado) {
+    // ✅ FORMATAÇÃO BRASILEIRA aplicada em TODOS os valores
+    document.getElementById('resGasto').textContent = formatarMoedaBR(resultado.total_gasto);
+    document.getElementById('resGanho').textContent = formatarMoedaBR(resultado.total_ganho);
+
+    // Controle de exibição dos cards de Lucro/Prejuízo/Empate
+    const lucro = resultado.lucro;
+    const boxLucro = document.getElementById('boxLucro');
+    const boxPrejuizo = document.getElementById('boxPrejuizo');
+    const boxNeutro = document.getElementById('boxNeutro');
+
+    // Esconder todos primeiro
+    boxLucro.style.display = 'none';
+    boxPrejuizo.style.display = 'none';
+    boxNeutro.style.display = 'none';
+
+    // Mostrar o card apropriado com formatação BR
+    if (lucro > 0) {
+        boxLucro.style.display = 'block';
+        document.getElementById('resLucroPositivo').textContent = formatarMoedaBR(lucro);
+    } else if (lucro < 0) {
+        boxPrejuizo.style.display = 'block';
+        document.getElementById('resPrejuizo').textContent = formatarMoedaBR(Math.abs(lucro));
+    } else {
+        boxNeutro.style.display = 'block';
+    }
+
+    document.getElementById('resPremiados').textContent = resultado.jogos_premiados;
+    document.getElementById('resTotalJogos').textContent = resultado.resultados.length;
+
+    criarGraficoGastoGanho(resultado.total_gasto, resultado.total_ganho);
+    criarGraficoAcertos(resultado.acertos_por_faixa);
+    preencherTabelaDetalhes(resultado.resultados);
+
+    destacarAcertosNosJogos(resultado.resultados);
+
+    document.getElementById('resultadoConferencia').style.display = 'block';
+    document.getElementById('resultadoConferencia').scrollIntoView({behavior: 'smooth'});
+}
+
+function criarGraficoGastoGanho(gasto, ganho) {
+    const ctx = document.getElementById('chartGastoGanho');
+    if (chartGastoGanho) chartGastoGanho.destroy();
+
+    chartGastoGanho = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Gasto', 'Ganho'],
+            datasets: [{
+                label: 'Valor (R$)',
+                data: [gasto, ganho],
+                backgroundColor: ['#dc3545', '#28a745']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+function criarGraficoAcertos(acertos) {
+    const ctx = document.getElementById('chartAcertos');
+    if (chartAcertos) chartAcertos.destroy();
+
+    const labels = Object.keys(acertos).sort().map(k => `${k} acertos`);
+    const valores = Object.keys(acertos).sort().map(k => acertos[k]);
+
+    chartAcertos = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: valores,
+                backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745', '#6f42c1', '#fd7e14', '#20c997']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// Helper function to detect all conditions for a number
+function detectarTodasCondicoes(numero, analise) {
+    const condicoes = [];
+
+    // Check if in sequence
+    if (analise.numeros_em_sequencias && analise.numeros_em_sequencias.includes(numero)) {
+        if (analise.sequencias_classe === 'seq-4') condicoes.push('seq4');
+        else if (analise.sequencias_classe === 'seq-3') condicoes.push('seq3');
+        else if (analise.sequencias_classe === 'seq-2') condicoes.push('seq2');
+    }
+
+    // Check if repeated from previous
+    if (analise.repeticoes_numeros && analise.repeticoes_numeros.includes(numero)) {
+        condicoes.push('repeticao');
+    }
+
+    // ❌ REMOVIDO: Check if has equal ending - NÃO APLICAR COR PARA FINAIS IGUAIS
+    // if (analise.numeros_finais_iguais && analise.numeros_finais_iguais.includes(numero)) {
+    //     condicoes.push('finais');
+    // }
+
+    return condicoes;
+}
+
+// Helper function to create gradient styles for multiple conditions
+function criarEstiloComGradiente(condicoes) {
+    if (condicoes.length === 0) {
+        // No special conditions - simple border, no background
+        return {
+            style: 'border: 1px solid #dee2e6; background: transparent; padding: 4px 8px; border-radius: 4px; display: inline-block; font-weight: bold;',
+            title: 'Número sem condições especiais'
+        };
+    }
+
+    if (condicoes.length === 1) {
+        // Single condition - solid color (APENAS 4 CORES: seq2, seq3, seq4, repeticao)
+        const cores = {
+            'seq2': { cor: '#4ade80', borda: '#16a34a', nome: 'Sequência de 2' },
+            'seq3': { cor: '#60a5fa', borda: '#2563eb', nome: 'Sequência de 3' },
+            'seq4': { cor: '#c084fc', borda: '#9333ea', nome: 'Sequência de 4+' },
+            'repeticao': { cor: '#fbbf24', borda: '#d97706', nome: 'Repetição' }
+            // ❌ REMOVIDO: 'finais' - NÃO APLICAR COR
+        };
+        const c = cores[condicoes[0]];
+        return {
+            style: `background-color: ${c.cor}; border: 2px solid ${c.borda}; padding: 4px 8px; border-radius: 4px; display: inline-block; font-weight: bold; color: #000;`,
+            title: c.nome
+        };
+    }
+
+    // MULTIPLE CONDITIONS - CREATE GRADIENT (APENAS 4 CORES)
+    const cores = [];
+    const nomes = [];
+    const ordemPrioridade = ['seq4', 'seq3', 'seq2', 'repeticao']; // ❌ REMOVIDO 'finais'
+
+    ordemPrioridade.forEach(tipo => {
+        if (condicoes.includes(tipo)) {
+            switch(tipo) {
+                case 'seq2':
+                    cores.push('#4ade80');
+                    nomes.push('Seq.2');
+                    break;
+                case 'seq3':
+                    cores.push('#60a5fa');
+                    nomes.push('Seq.3');
+                    break;
+                case 'seq4':
+                    cores.push('#c084fc');
+                    nomes.push('Seq.4+');
+                    break;
+                case 'repeticao':
+                    cores.push('#fbbf24');
+                    nomes.push('Repetição');
+                    break;
+                // ❌ REMOVIDO: case 'finais'
+            }
+        }
+    });
+
+    let gradient;
+    if (cores.length === 2) {
+        gradient = `linear-gradient(135deg, ${cores[0]} 0%, ${cores[0]} 50%, ${cores[1]} 50%, ${cores[1]} 100%)`;
+    } else if (cores.length === 3) {
+        gradient = `linear-gradient(135deg, ${cores[0]} 0%, ${cores[0]} 33%, ${cores[1]} 33%, ${cores[1]} 66%, ${cores[2]} 66%, ${cores[2]} 100%)`;
+    } else {
+        gradient = `linear-gradient(135deg, ${cores[0]} 0%, ${cores[0]} 25%, ${cores[1]} 25%, ${cores[1]} 50%, ${cores[2]} 50%, ${cores[2]} 75%, ${cores[3]} 75%, ${cores[3]} 100%)`;
+    }
+
+    return {
+        style: `background: ${gradient}; border: 2px solid #000; padding: 4px 8px; border-radius: 4px; display: inline-block; font-weight: bold; color: #000;`,
+        title: `MÚLTIPLAS: ${nomes.join(' + ')}`
+    };
+}
+
+function preencherTabelaDetalhes(resultados) {
+    const tbody = document.getElementById('tabelaDetalhes');
+    tbody.innerHTML = '';
+
+    resultados.forEach(r => {
+        const analise = r.analise;
+
+        // DEBUG: Verificar valores que vêm do backend
+        console.log('=== ANÁLISE COMPLETA ===', analise);
+
+        // SEQ com emoji e tooltip - MOSTRA OS NÚMEROS NA SEQUÊNCIA
+        const seqEmoji = analise.sequencias_emoji || '❌0';
+        const numerosSeq = analise.numeros_em_sequencias && analise.numeros_em_sequencias.length > 0
+            ? analise.numeros_em_sequencias.map(n => String(n).padStart(2, '0')).join(' | ')
+            : '';
+        const seqTooltip = numerosSeq
+            ? `${numerosSeq}`
+            : `Sequências: ${analise.sequencias} número(s) em sequência`;
+        const seqTexto = `<span title="${seqTooltip}">${seqEmoji}</span>`;
+
+        // FINAIS com emoji e tooltip - MOSTRA AGRUPADO POR FINAL
+        const finaisEmoji = analise.finais_emoji || '❌0';
+
+        // Agrupar números por final
+        let finaisTooltip = '';
+        if (analise.numeros_finais_iguais && analise.numeros_finais_iguais.length > 0) {
+            const grupos = {};
+            analise.numeros_finais_iguais.forEach(n => {
+                const final = n % 10;
+                if (!grupos[final]) grupos[final] = [];
+                grupos[final].push(String(n).padStart(2, '0'));
+            });
+
+            const gruposTexto = Object.keys(grupos)
+                .sort((a, b) => a - b)
+                .map((final, idx) => `${grupos[final].join(',')}`)
+                .join(' | ');
+
+            finaisTooltip = gruposTexto;
+        } else {
+            finaisTooltip = `Finais iguais: ${analise.finais_iguais} grupo(s)`;
+        }
+
+        const finaisTexto = `<span title="${finaisTooltip}">${finaisEmoji}</span>`;
+
+        // REPT com emoji e tooltip - MOSTRA OS NÚMEROS REPETIDOS
+        const reptEmoji = analise.repeticoes_emoji || '❌0';
+        const numerosRept = analise.repeticoes_numeros && analise.repeticoes_numeros.length > 0
+            ? analise.repeticoes_numeros.map(n => String(n).padStart(2, '0')).join(' | ')
+            : '';
+        const reptTooltip = numerosRept
+            ? `${numerosRept}`
+            : `Repetições: ${analise.repeticoes} número(s) repetido(s) do concurso anterior`;
+        const reptTexto = `<span title="${reptTooltip}">${reptEmoji}</span>`;
+
+        // Render each number individually with gradient support
+        const numerosHTML = r.jogo.map(num => {
+            const condicoes = detectarTodasCondicoes(num, analise);
+            const estilo = criarEstiloComGradiente(condicoes);
+            const numStr = String(num).padStart(2, '0');
+
+            // Debug: Log para verificar condições detectadas
+            if (condicoes.length > 0) {
+                console.log(`Número ${numStr}: condições =`, condicoes, 'estilo =', estilo);
+            }
+
+            return `<span style="${estilo.style}" title="${estilo.title}">${numStr}</span>`;
+        });
+
+        // PADRÕES column (todos os dígitos iniciais e finais em 2 linhas)
+        const padroesTexto = analise.padroes_iniciais && analise.padroes_finais
+            ? `<div style="line-height: 1.4; font-size: 0.85em;"><div><strong>I:</strong> ${analise.padroes_iniciais}</div><div><strong>F:</strong> ${analise.padroes_finais}</div></div>`
+            : '-';
+
+        // DIG.ÚNICOS column (qtde | digits)
+        const digUnicosTexto = analise.digitos_unicos_qtde && analise.digitos_unicos_str
+            ? `${analise.digitos_unicos_qtde} | ${analise.digitos_unicos_str}`
+            : '-';
+
+        const mesClasse = analise.mes_classe || '';
+        const mesTexto = r.jogo_mes
+            ? `<span class="${mesClasse}" title="Mês da Sorte: ${r.jogo_mes_nome}">${analise.mes_nome_abrev}</span>`
+            : '-';
+        const mesAcerto = r.acertou_mes ? ' ✓' : '';
+
+        // Prize calculation with pulsing animation for 7 acertos
+        const premio7Acertos = r.quantidade_acertos_numeros === 7;
+        const valorPremio = r.premio.valor_7_acertos_real || r.premio.valor;
+
+        // ✅ SEMPRE mostrar quando 7 acertos, mesmo que valor = 0 (ACUMULOU!)
+        let premioTexto = '';
+        let classePulsar = '';
+        let acumulouAlert = '';
+
+        if (premio7Acertos) {
+            // 7 ACERTOS!
+            if (valorPremio > 0) {
+                premioTexto = formatarMoedaBR(valorPremio);  // ✅ FORMATO BR
+                classePulsar = 'animate-pulse';
+            } else {
+                // ACUMULOU! (valor = 0)
+                premioTexto = formatarMoedaBR(0);  // ✅ FORMATO BR
+                classePulsar = 'animate-pulse';
+                acumulouAlert = '<br><span style="background-color: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-weight: bold;">🎰 ACUMULOU!</span>';
+            }
+        } else if (r.premio.valor > 0) {
+            premioTexto = formatarMoedaBR(valorPremio);  // ✅ FORMATO BR
+        } else {
+            premioTexto = '-';
+        }
+
+        tbody.innerHTML += `
+            <tr class="${r.premio.valor > 0 ? 'table-success' : ''}">
+                <td><strong>${r.numero_jogo}</strong></td>
+                <td>${numerosHTML[0]}</td>
+                <td>${numerosHTML[1]}</td>
+                <td>${numerosHTML[2]}</td>
+                <td>${numerosHTML[3]}</td>
+                <td>${numerosHTML[4]}</td>
+                <td>${numerosHTML[5]}</td>
+                <td>${numerosHTML[6]}</td>
+                <td><strong>${r.quantidade_acertos_numeros}</strong> de 7</td>
+                <td>${analise.pares}P/${analise.impares}I</td>
+                <td>${seqTexto}</td>
+                <td>${finaisTexto}</td>
+                <td>${reptTexto}</td>
+                <td>${analise.soma}</td>
+                <td>${padroesTexto}</td>
+                <td>${mesTexto}${mesAcerto}</td>
+                <td>${digUnicosTexto}</td>
+                <td class="text-success ${classePulsar}"><strong>${premioTexto}</strong>${acumulouAlert}<br><small>${r.premio.descricao}</small></td>
+            </tr>
+        `;
+    });
+}
+
+function destacarAcertosNosJogos(resultados) {
+    resultados.forEach(r => {
+        const jogo = jogos.find(j => j.numeros.join(',') === r.jogo.join(','));
+        if (!jogo) return;
+
+        const container = document.getElementById(`jogo-${jogo.id}`);
+        if (!container) return;
+
+        const inputs = container.querySelectorAll('.jogo-input');
+        inputs.forEach((inp) => {
+            const num = parseInt(inp.value);
+            if (r.acertos_numeros.includes(num)) {
+                inp.classList.add('numero-acertado');
+            } else {
+                inp.classList.add('numero-errado');
+            }
+        });
+    });
+}
+
+function mostrarErro(mensagem) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+    errorDiv.style.zIndex = '9999';
+    errorDiv.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    document.body.appendChild(errorDiv);
+    setTimeout(() => errorDiv.remove(), 5000);
+}
+
+function mostrarSucesso(mensagem) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+    successDiv.style.zIndex = '9999';
+    successDiv.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    document.body.appendChild(successDiv);
+    setTimeout(() => successDiv.remove(), 3000);
+}
+</script>
+{% endblock %}

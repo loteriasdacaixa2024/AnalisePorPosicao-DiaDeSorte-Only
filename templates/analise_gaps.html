@@ -1,0 +1,565 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-arrows-expand"></i> Análise Profissional de Gaps/Distâncias
+                </h2>
+                <div>
+                    <a href="/" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button class="btn btn-primary" onclick="carregarAnalise()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted">
+                <i class="bi bi-info-circle"></i> Análise das distâncias (gaps) entre números consecutivos nos sorteios.
+                <strong>Exemplo:</strong> [01, 05, 12] → gaps: <span class="badge bg-primary">4</span> <span class="badge bg-primary">7</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 fw-bold">Carregando análise completa de gaps...</p>
+    </div>
+
+    <!-- Resultado -->
+    <div id="resultado" style="display: none;">
+
+        <!-- Resumo Estatístico -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart-fill"></i> Resumo Estatístico Geral
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="resumoEstatistico"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Gaps + Distribuição -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy-fill"></i> Top 10 Gaps Mais Frequentes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="topGaps"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart-fill"></i> Padrões de Distribuição
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="padroes"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABELA COMPLETA DE TODOS OS SORTEIOS -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table"></i> 📊 TODOS OS SORTEIOS COM GAPS DETALHADOS
+                        </h5>
+                        <small>Tabela completa com todos os concursos e seus respectivos gaps</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Filtros e busca -->
+                        <div class="p-3 bg-light border-bottom">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="text" id="filtroConc" class="form-control form-control-sm"
+                                           placeholder="🔍 Buscar concurso..." onkeyup="filtrarTabela()">
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="filtroClassif" class="form-select form-select-sm" onchange="filtrarTabela()">
+                                        <option value="">Todas as classificações</option>
+                                        <option value="equilibrado">Equilibrado</option>
+                                        <option value="concentrado_pequenos">Concentrado Pequenos</option>
+                                        <option value="concentrado_medios">Concentrado Médios</option>
+                                        <option value="concentrado_grandes">Concentrado Grandes</option>
+                                        <option value="misto">Misto</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="ordenacao" class="form-select form-select-sm" onchange="ordenarTabela()">
+                                        <option value="concurso_desc">Concurso (mais recente)</option>
+                                        <option value="concurso_asc">Concurso (mais antigo)</option>
+                                        <option value="gap_medio_desc">Gap Médio (maior)</option>
+                                        <option value="gap_medio_asc">Gap Médio (menor)</option>
+                                        <option value="gap_max_desc">Gap Máximo (maior)</option>
+                                        <option value="gap_min_asc">Gap Mínimo (menor)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="resetarFiltros()">
+                                        <i class="bi bi-arrow-clockwise"></i> Limpar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela responsiva com scroll -->
+                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                            <table class="table table-striped table-hover table-sm mb-0" id="tabelaSorteios">
+                                <thead class="table-dark sticky-top">
+                                    <tr>
+                                        <th class="text-center" style="width: 80px;">Concurso</th>
+                                        <th class="text-center" style="width: 100px;">Data</th>
+                                        <th class="text-center" style="width: 60px;">Mês</th>
+                                        <th style="min-width: 280px;">Números Sorteados</th>
+                                        <th style="min-width: 200px;">Gaps Detalhados</th>
+                                        <th class="text-center" style="width: 70px;">Min</th>
+                                        <th class="text-center" style="width: 70px;">Máx</th>
+                                        <th class="text-center" style="width: 70px;">Médio</th>
+                                        <th class="text-center" style="width: 70px;">Soma</th>
+                                        <th class="text-center" style="width: 100px;">P/M/G</th>
+                                        <th class="text-center" style="width: 150px;">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpoTabela">
+                                    <!-- Preenchido via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightbulb-fill"></i> Insights Estratégicos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="insights"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.badge-gap {
+    font-size: 0.85em;
+    padding: 4px 8px;
+    margin: 2px;
+}
+
+.numero-sorteado {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 6px 10px;
+    margin: 2px;
+    border-radius: 6px;
+    font-weight: bold;
+    min-width: 35px;
+    text-align: center;
+}
+
+.gap-arrow {
+    color: #6c757d;
+    margin: 0 3px;
+    font-size: 0.9em;
+}
+
+.classificacao-badge {
+    font-size: 0.8em;
+    padding: 4px 8px;
+}
+
+/* Cores para classificação */
+.badge-equilibrado {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.badge-concentrado_pequenos {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.badge-concentrado_medios {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.badge-concentrado_grandes {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.badge-misto {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #333;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let dadosCompletos = null;
+let dadosFiltrados = null;
+
+function carregarAnalise() {
+    const loading = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    loading.style.display = 'block';
+    resultado.style.display = 'none';
+
+    fetch('/api/analise/gaps-distancias')
+        .then(response => response.json())
+        .then(data => {
+            dadosCompletos = data;
+            dadosFiltrados = data.detalhes_sorteios;
+            exibirResultado(data);
+            loading.style.display = 'none';
+            resultado.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            loading.style.display = 'none';
+            resultado.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Erro ao Carregar Análise</h5>
+                    <p class="mb-0">${error.message}</p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            resultado.style.display = 'block';
+        });
+}
+
+function exibirResultado(data) {
+    exibirResumoEstatistico(data);
+    exibirTopGaps(data);
+    exibirPadroes(data);
+    exibirTabelaCompleta(data.detalhes_sorteios);
+    exibirInsights(data);
+}
+
+function exibirResumoEstatistico(data) {
+    const html = `
+        <div class="row text-center">
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-primary mb-1">${data.total_concursos}</h3>
+                    <small class="text-muted">Concursos</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-success mb-1">${data.gap_minimo_geral}</h3>
+                    <small class="text-muted">Gap Mín Geral</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-danger mb-1">${data.gap_maximo_geral}</h3>
+                    <small class="text-muted">Gap Máx Geral</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-info mb-1">${data.media_gap_medio}</h3>
+                    <small class="text-muted">Média dos Gaps</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-warning mb-1">${data.mediana_gaps}</h3>
+                    <small class="text-muted">Mediana</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border rounded p-3 bg-light">
+                    <h3 class="text-secondary mb-1">${data.moda_gaps}</h3>
+                    <small class="text-muted">Moda (mais comum)</small>
+                </div>
+            </div>
+        </div>
+        <div class="row text-center mt-3">
+            <div class="col-md-3">
+                <div class="alert alert-info mb-0">
+                    <strong>Desvio Padrão:</strong> ${data.desvio_padrao_gaps}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-secondary mb-0">
+                    <strong>Q1 (25%):</strong> ${data.quartil_1}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-secondary mb-0">
+                    <strong>Q3 (75%):</strong> ${data.quartil_3}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-primary mb-0">
+                    <strong>Total de Gaps:</strong> ${data.total_gaps_analisados}
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('resumoEstatistico').innerHTML = html;
+}
+
+function exibirTopGaps(data) {
+    const medalhas = ['🥇', '🥈', '🥉'];
+    let html = '<div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Pos</th><th>Gap</th><th>Frequência</th><th>%</th></tr></thead><tbody>';
+
+    data.top_gaps.forEach((item, idx) => {
+        const pos = idx < 3 ? medalhas[idx] : `${idx + 1}º`;
+        const destaque = idx < 3 ? 'table-success' : '';
+        html += `
+            <tr class="${destaque}">
+                <td><strong>${pos}</strong></td>
+                <td><span class="badge bg-primary">${item.gap}</span></td>
+                <td>${item.frequencia}x</td>
+                <td>${item.porcentagem}%</td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table></div>';
+    document.getElementById('topGaps').innerHTML = html;
+}
+
+function exibirPadroes(data) {
+    const p = data.padroes;
+    const html = `
+        <div class="mb-3">
+            <h6 class="fw-bold">Distribuição de Gaps por Sorteio:</h6>
+            <div class="progress mb-2" style="height: 25px;">
+                <div class="progress-bar bg-info" style="width: ${p.perc_gaps_pequenos}%"
+                     title="Pequenos (1-3): ${p.perc_gaps_pequenos}%">
+                    ${p.perc_gaps_pequenos}%
+                </div>
+                <div class="progress-bar bg-warning" style="width: ${p.perc_gaps_medios}%"
+                     title="Médios (4-7): ${p.perc_gaps_medios}%">
+                    ${p.perc_gaps_medios}%
+                </div>
+                <div class="progress-bar bg-danger" style="width: ${p.perc_gaps_grandes}%"
+                     title="Grandes (8+): ${p.perc_gaps_grandes}%">
+                    ${p.perc_gaps_grandes}%
+                </div>
+            </div>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between">
+                <span><i class="bi bi-circle-fill text-info"></i> Gaps Pequenos (1-3)</span>
+                <span><strong>${p.sorteios_gaps_pequenos}</strong> sorteios (${p.perc_gaps_pequenos}%)</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span><i class="bi bi-circle-fill text-warning"></i> Gaps Médios (4-7)</span>
+                <span><strong>${p.sorteios_gaps_medios}</strong> sorteios (${p.perc_gaps_medios}%)</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span><i class="bi bi-circle-fill text-danger"></i> Gaps Grandes (8+)</span>
+                <span><strong>${p.sorteios_gaps_grandes}</strong> sorteios (${p.perc_gaps_grandes}%)</span>
+            </li>
+        </ul>
+    `;
+    document.getElementById('padroes').innerHTML = html;
+}
+
+function exibirTabelaCompleta(sorteios) {
+    const tbody = document.getElementById('corpoTabela');
+    let html = '';
+
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    sorteios.forEach(s => {
+        // Números sorteados
+        const numerosHTML = s.numeros.map(n => `<span class="numero-sorteado">${String(n).padStart(2, '0')}</span>`).join('');
+
+        // Gaps detalhados com setas
+        const gapsHTML = s.gaps_detalhados
+            .map(g => `<span class="badge badge-gap bg-secondary" title="${g.de} → ${g.para}">${g.gap}</span>`)
+            .join(' ');
+
+        // P/M/G (Pequenos/Médios/Grandes)
+        const pmg = `<span class="badge bg-info">${s.gaps_pequenos}</span>/<span class="badge bg-warning">${s.gaps_medios}</span>/<span class="badge bg-danger">${s.gaps_grandes}</span>`;
+
+        // Classificação
+        const classifTexto = s.classificacao.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const classifBadge = `<span class="badge classificacao-badge badge-${s.classificacao}">${classifTexto}</span>`;
+
+        // Mês da sorte
+        const mesTexto = s.mes_sorte ? meses[s.mes_sorte - 1] : '-';
+
+        html += `
+            <tr data-concurso="${s.concurso}" data-classificacao="${s.classificacao}">
+                <td class="text-center fw-bold">${s.concurso}</td>
+                <td class="text-center text-muted small">${s.data}</td>
+                <td class="text-center"><span class="badge bg-purple">${mesTexto}</span></td>
+                <td>${numerosHTML}</td>
+                <td>${gapsHTML}</td>
+                <td class="text-center"><span class="badge bg-success">${s.gap_minimo}</span></td>
+                <td class="text-center"><span class="badge bg-danger">${s.gap_maximo}</span></td>
+                <td class="text-center"><span class="badge bg-info">${s.gap_medio}</span></td>
+                <td class="text-center"><span class="badge bg-secondary">${s.soma_gaps}</span></td>
+                <td class="text-center">${pmg}</td>
+                <td class="text-center">${classifBadge}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function exibirInsights(data) {
+    const top3 = data.top_gaps.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    const html = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="alert alert-success">
+                    <h6 class="fw-bold"><i class="bi bi-trophy-fill"></i> Gaps Mais Frequentes:</h6>
+                    <ul class="mb-0">
+                        ${top3.map((g, i) => `<li>${medalhas[i]} Gap <strong>${g.gap}</strong>: ${g.frequencia}x (${g.porcentagem}%)</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-info">
+                    <h6 class="fw-bold"><i class="bi bi-graph-up-arrow"></i> Métricas Centrais:</h6>
+                    <ul class="mb-0">
+                        <li>Média: <strong>${data.media_gap_medio}</strong></li>
+                        <li>Mediana: <strong>${data.mediana_gaps}</strong></li>
+                        <li>Moda: <strong>${data.moda_gaps}</strong> (mais comum)</li>
+                        <li>Desvio Padrão: <strong>${data.desvio_padrao_gaps}</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-warning">
+            <h6 class="fw-bold"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas:</h6>
+            <ul class="mb-0">
+                <li>Priorize jogos com gaps entre <strong>${top3[0].gap}</strong> e <strong>${top3[2].gap}</strong> (mais frequentes)</li>
+                <li>Gap médio ideal próximo de <strong>${Math.round(data.media_gap_medio)}</strong></li>
+                <li>Evite jogos com todos os gaps muito grandes (acima de ${data.gap_maximo_geral - 5})</li>
+                <li>Mantenha pelo menos ${Math.round(data.padroes.perc_gaps_pequenos / 20)} gap(s) pequeno(s) (1-3) no seu jogo</li>
+                <li>A moda é <strong>${data.moda_gaps}</strong> - o gap que mais aparece historicamente</li>
+            </ul>
+        </div>
+    `;
+
+    document.getElementById('insights').innerHTML = html;
+}
+
+function filtrarTabela() {
+    const filtroConc = document.getElementById('filtroConc').value.toLowerCase();
+    const filtroClassif = document.getElementById('filtroClassif').value;
+    const linhas = document.querySelectorAll('#tabelaSorteios tbody tr');
+
+    linhas.forEach(linha => {
+        const concurso = linha.getAttribute('data-concurso').toLowerCase();
+        const classificacao = linha.getAttribute('data-classificacao');
+
+        const matchConc = concurso.includes(filtroConc);
+        const matchClassif = !filtroClassif || classificacao === filtroClassif;
+
+        if (matchConc && matchClassif) {
+            linha.style.display = '';
+        } else {
+            linha.style.display = 'none';
+        }
+    });
+}
+
+function ordenarTabela() {
+    const ordenacao = document.getElementById('ordenacao').value;
+    const tbody = document.getElementById('corpoTabela');
+    const linhas = Array.from(tbody.querySelectorAll('tr'));
+
+    linhas.sort((a, b) => {
+        const concA = parseInt(a.getAttribute('data-concurso'));
+        const concB = parseInt(b.getAttribute('data-concurso'));
+
+        switch(ordenacao) {
+            case 'concurso_desc':
+                return concB - concA;
+            case 'concurso_asc':
+                return concA - concB;
+            case 'gap_medio_desc':
+                const medioA = parseFloat(a.cells[7].textContent);
+                const medioB = parseFloat(b.cells[7].textContent);
+                return medioB - medioA;
+            case 'gap_medio_asc':
+                const medioA2 = parseFloat(a.cells[7].textContent);
+                const medioB2 = parseFloat(b.cells[7].textContent);
+                return medioA2 - medioB2;
+            case 'gap_max_desc':
+                const maxA = parseInt(a.cells[6].textContent);
+                const maxB = parseInt(b.cells[6].textContent);
+                return maxB - maxA;
+            case 'gap_min_asc':
+                const minA = parseInt(a.cells[5].textContent);
+                const minB = parseInt(b.cells[5].textContent);
+                return minA - minB;
+            default:
+                return 0;
+        }
+    });
+
+    linhas.forEach(linha => tbody.appendChild(linha));
+}
+
+function resetarFiltros() {
+    document.getElementById('filtroConc').value = '';
+    document.getElementById('filtroClassif').value = '';
+    document.getElementById('ordenacao').value = 'concurso_desc';
+    filtrarTabela();
+    ordenarTabela();
+}
+
+window.onload = function() {
+    carregarAnalise();
+};
+</script>
+
+<style>
+.bg-purple {
+    background-color: #6f42c1 !important;
+    color: white;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block title %}Análise Posição Mínima × Máxima - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #D4B31A;
+        --primary-light: #E5C942;
+        --primary-dark: #B89615;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .pos-badge {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 25px;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(212, 179, 26, 0.3);
+        font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .loading-spinner {
+        border: 4px solid #f3f4f6;
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .ball-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: #fff;
+        border: 2px solid #cbd5e1;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #334155;
+        margin: 0 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .ball-number.highlight {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary-dark);
+        transform: scale(1.15);
+        z-index: 2;
+        box-shadow: 0 0 8px rgba(212, 179, 26, 0.6);
+    }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    table thead th { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 1rem; }
+    table tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid #e2e8f0; }
+    table tbody tr:hover { background-color: #f8fafc; }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: #475569;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+        transform: translateY(-2px);
+    }
+    
+    .action-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary-dark);
+    }
+
+    /* Cores dos Meses Nativa do Sistema */
+    .mes-badge {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: inline-block;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    /* Import automático das classes .mes-cor-1 ate .mes-cor-12 está no colors.css do base.html, 
+       mas por garantia, adicionei a classe mes-badge para estruturar. */
+
+    #painel-historico {
+        scroll-margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-2" style="color: var(--primary-dark);">
+            <i class="fas fa-chart-line me-2"></i> Análise Posição Mínima × Máxima
+        </h1>
+        <p class="text-muted">Análise exploratória avançada do histórico estrutural por posição.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 fw-bold opacity-75">Total de Concursos</p>
+                        <h3 class="fs-1 fw-bold mb-0" id="total-concursos">-</h3>
+                    </div>
+                    <i class="fas fa-database fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 fw-bold opacity-75">Posições Monitoradas</p>
+                        <h3 class="fs-1 fw-bold mb-0">7</h3>
+                    </div>
+                    <i class="fas fa-list-ol fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Análise de Posições -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-table text-primary me-2"></i> Tabela Principal: Extremos</h5>
+            <button onclick="carregarAnalise()" class="btn btn-sm btn-outline-success">
+                <i class="fas fa-sync-alt me-1"></i> Atualizar Dados
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">Posição</th>
+                        <th class="text-center">Mínimo Histórico</th>
+                        <th class="text-center">Máximo Histórico</th>
+                        <th class="text-center">Média</th>
+                        <th class="text-center">Intervalo</th>
+                        <th class="text-center">+ Frequente</th>
+                        <th class="text-center"><i class="fas fa-search-plus"></i> Explorar Eventos</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-analise">
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <div class="loading-spinner mb-3"></div>
+                            <p class="fw-bold mb-0">Escaneando banco de dados...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAINEL EXPLORATÓRIO NA PRÓPRIA PÁGINA -->
+    <div id="painel-historico" class="card shadow-sm border-0 mb-4" style="display: none;">
+        <div class="card-header bg-dark text-white py-3 d-flex flex-wrap align-items-center justify-content-between">
+            <div id="header-titulos-inline" class="d-flex align-items-center flex-wrap gap-2">
+                <h5 class="mb-0 fw-bold" id="historico-titulo"><i class="fas fa-search"></i> Explorador de Ocorrências</h5>
+                <!-- Subtítulo In-line injetado pelo JS -->
+            </div>
+            
+            <div class="d-flex gap-2 align-items-center mt-2 mt-md-0">
+                <select id="ordem-historico" class="form-select form-select-sm bg-secondary text-white border-0 w-auto" onchange="renderizarTabelaHistorico()">
+                    <option value="desc">Ordenar Decrescente (Mais Recentes)</option>
+                    <option value="asc">Ordenar Crescente (Mais Antigos)</option>
+                </select>
+                
+                <button onclick="exportarTxtAtual()" class="btn btn-sm btn-primary d-flex align-items-center gap-1 border-0 fw-bold" style="background: var(--primary);">
+                    <i class="fas fa-file-alt"></i> TXT
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="text-center text-dark bg-light" width="15%">Concurso / Data</th>
+                        <th class="text-center text-dark bg-light" width="15%">Mês da Sorte</th>
+                        <th class="text-center text-dark bg-light px-4" width="70%">Combinação Sorteada Completa</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-historico-eventos">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white text-muted text-center py-3" id="historico-rodape">
+            -
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let dadosPosicoes = {};
+let estadoHistoricoAncorado = {
+    dados: [],
+    alvo: null,
+    posicao: null,
+    tipo: null // 'minimo' ou 'maximo'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    carregarAnalise();
+});
+
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/posicao-minima-maxima/analise');
+        const data = await response.json();
+
+        if (data.error) {
+            alert('Erro: ' + data.error);
+            return;
+        }
+
+        document.getElementById('total-concursos').textContent = data.total_concursos || 0;
+
+        const tbody = document.getElementById('tbody-analise');
+        tbody.innerHTML = '';
+
+        if (!data.analise_posicoes || data.analise_posicoes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Nenhuma análise disponível</td></tr>';
+            return;
+        }
+
+        data.analise_posicoes.forEach((pos) => {
+            dadosPosicoes[pos.posicao] = pos;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center">
+                    <span class="pos-badge">Pos ${pos.posicao}</span>
+                </td>
+                <td class="text-center fw-bold text-dark fs-5">${pos.minimo}</td>
+                <td class="text-center fw-bold text-dark fs-5">${pos.maximo}</td>
+                <td class="text-center text-muted fw-semibold">${pos.media}</td>
+                <td class="text-center">
+                    <span class="badge bg-light text-dark border p-2">${pos.intervalo}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-success p-2">
+                        ${String(pos.mais_frequente).padStart(2, '0')} (${pos.frequencia_max}x)
+                    </span>
+                </td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center gap-2">
+                        <button onclick="explorar(this, ${pos.posicao}, 'minimo')" class="action-btn">
+                            <i class="fas fa-arrow-down text-success me-1"></i> Ver Min
+                        </button>
+                        <button onclick="explorar(this, ${pos.posicao}, 'maximo')" class="action-btn">
+                            <i class="fas fa-arrow-up text-danger me-1"></i> Ver Max
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao carregar análise. Verifique a conexão com a API.');
+    }
+}
+
+// Quando o usuário clica em algum botão VER MIN ou VER MAX
+function explorar(btnElement, posicao, tipo) {
+    // Reseta botões ativos
+    document.querySelectorAll('.action-btn.active').forEach(b => b.classList.remove('active'));
+    btnElement.classList.add('active');
+
+    const dados = dadosPosicoes[posicao];
+    const alvo = tipo === 'minimo' ? dados.minimo : dados.maximo;
+    const historico = tipo === 'minimo' ? dados.detalhes_minimo : dados.detalhes_maximo;
+    
+    estadoHistoricoAncorado = {
+        dados: historico,
+        alvo: alvo,
+        posicao: posicao,
+        tipo: tipo
+    };
+
+    // Montar os títulos do painel (tudo in-line)
+    document.getElementById('header-titulos-inline').innerHTML = `
+        <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+            <i class="fas ${tipo === 'minimo' ? 'fa-arrow-down text-success' : 'fa-arrow-up text-danger'}"></i>
+            ${tipo === 'minimo' ? 'Mínimo' : 'Máximo'} Absoluto da Posição ${posicao} 
+            <span class="text-white-50 fw-normal ms-1 fs-6">|</span>
+            <span class="fw-normal fs-6 text-white-50 ms-1">Valor Foco:</span>
+            <span class="badge bg-warning text-dark fs-5">${alvo}</span>
+            <span class="text-white-50 fw-normal ms-1 fs-6">|</span>
+            <span class="fw-normal fs-6 text-white-50 ms-1">
+                Listando as <strong class="badge bg-danger text-white fs-6 mx-1">${historico.length}</strong> ocorrências exatas onde este ${tipo === 'minimo' ? 'abismo' : 'topo'} foi atingido.
+            </span>
+        </h5>
+    `;
+    
+    document.getElementById('historico-rodape').innerHTML = `Fim das <strong class="text-dark">${historico.length}</strong> ocorrências.`;
+
+    // Exibir painel e renderizar a tabela
+    const painel = document.getElementById('painel-historico');
+    painel.style.display = 'block';
+    
+    // Rolar suavemente até o painel
+    painel.scrollIntoView({ behavior: 'smooth' });
+
+    renderizarTabelaHistorico();
+}
+
+function renderizarTabelaHistorico() {
+    const tbody = document.getElementById('tbody-historico-eventos');
+    tbody.innerHTML = '';
+
+    const { dados, alvo } = estadoHistoricoAncorado;
+    if (!dados || dados.length === 0) return;
+
+    // Fazer uma cópia para ordenar sem mutar o original
+    let listaFinal = [...dados];
+    const ordem = document.getElementById('ordem-historico').value;
+
+    if (ordem === 'desc') {
+        listaFinal.sort((a, b) => b.concurso - a.concurso);
+    } else {
+        listaFinal.sort((a, b) => a.concurso - b.concurso);
+    }
+
+    listaFinal.forEach(oc => {
+        let bolasHtml = '';
+        oc.combinacao.forEach(num => {
+            const isTarget = num === alvo;
+            bolasHtml += `<span class="ball-number ${isTarget ? 'highlight' : ''}">${String(num).padStart(2, '0')}</span>`;
+        });
+        
+        // Assegurar cores do sistema para o Mês. Pega a classe mes-cor-{id} que vem via config universal
+        let mesBadgeHtml = `<span class="mes-badge mes-cor-${oc.mes_sorte_id}">${oc.mes_sorte}</span>`;
+        
+        const tr = document.createElement('tr');
+        tr.className = 'fade-in';
+        tr.innerHTML = `
+            <td class="text-center">
+                <div class="fw-bold text-dark fs-6">Concurso ${oc.concurso}</div>
+            </td>
+            <td class="text-center">
+                ${mesBadgeHtml}
+            </td>
+            <td class="text-center px-4 py-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                    ${bolasHtml}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function exportarTxtAtual() {
+    const { dados } = estadoHistoricoAncorado;
+    if (!dados || dados.length === 0) {
+        alert("Não há dados em exibição para exportar.");
+        return;
+    }
+    
+    // O usuário solicitou exportação TXT "(apenas o numero)"
+    // Vamos gerar apenas a linha nua ex: 03050812152231
+    // Ou com espaço: 03 05 08 12 15 22 31
+    // Adotando formato com espaço para padronizar "apenas o numero"
+    
+    // Respeitar a ordenação atual da tabela
+    let listaFinal = [...dados];
+    const ordem = document.getElementById('ordem-historico').value;
+    if (ordem === 'desc') {
+        listaFinal.sort((a, b) => b.concurso - a.concurso);
+    } else {
+        listaFinal.sort((a, b) => a.concurso - b.concurso);
+    }
+    
+    let conteudoTxt = "";
+    listaFinal.forEach(oc => {
+        let numsFormatados = oc.combinacao.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudoTxt += numsFormatados + "\\n";
+    });
+
+    // Disparar download
+    const blob = new Blob([conteudoTxt], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    
+    const { tipo, posicao, alvo } = estadoHistoricoAncorado;
+    a.href = url;
+    a.download = `Ocorrencias_Posicao${posicao}_${tipo.toUpperCase()}_Alvo${alvo}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+}
+</script>
+{% endblock %}

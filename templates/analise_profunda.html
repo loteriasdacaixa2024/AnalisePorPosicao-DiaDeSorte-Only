@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+
+{% block title %}Análise Profunda de Técnicas | Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+
+<style>
+        :root {
+            --primary-color: #5D5CDE;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            padding: 2rem 0;
+        }
+
+        .header-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .dezena-card {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dezena-card.sem-tecnica {
+            border-left-color: var(--danger-color);
+            background: #fff3f3;
+        }
+
+        .dezena-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .badge-categoria {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .badge-basica { background-color: #17a2b8; }
+        .badge-matematica { background-color: #6f42c1; }
+        .badge-combinacao { background-color: #fd7e14; }
+        .badge-avancada { background-color: #e83e8c; }
+        .badge-data { background-color: #20c997; }
+        .badge-inversao { background-color: #6610f2; }
+
+        .badge-campo {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .badge-concurso { background-color: #007bff; }
+        .badge-premio { background-color: #28a745; }
+        .badge-data-campo { background-color: #17a2b8; }
+
+        .tecnica-item {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .formula-code {
+            font-family: 'Courier New', monospace;
+            background: #263238;
+            color: #aed581;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 1rem 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 0 4px white;
+        }
+
+        .progress-custom {
+            height: 30px;
+            font-size: 1rem;
+            border-radius: 15px;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .spinner-custom {
+            width: 4rem;
+            height: 4rem;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #3d3cbd 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(93, 92, 222, 0.4);
+        }
+
+        .alert-custom {
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .alert-sem-tecnica {
+            background: #fff3cd;
+            border-left-color: var(--warning-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-value {
+                font-size: 1.5rem;
+            }
+
+            .header-section {
+                padding: 1rem;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: #e0e0e0;
+            }
+
+            .header-section,
+            .stats-card,
+            .dezena-card {
+                background: #2a2a3e;
+                color: #e0e0e0;
+            }
+
+            .stats-label {
+                color: #b0b0b0;
+            }
+
+            .tecnica-item {
+                background: #3a3a4e;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-custom"></div>
+            <h5>Analisando Concurso...</h5>
+            <p class="text-muted">Aplicando 55+ técnicas matemáticas</p>
+            <div class="progress mt-3" style="width: 300px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="bi bi-lightbulb-fill text-warning"></i> Análise Profunda de Técnicas</h1>
+                    <p class="lead mb-0">
+                        Descubra os padrões matemáticos que geram as dezenas sorteadas usando 55+ técnicas avançadas
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#infoModal">
+                        <i class="bi bi-info-circle"></i> Como Funciona
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Análise -->
+        <div class="row mb-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-3">
+                            <i class="bi bi-search"></i> Analisar Concurso
+                        </h5>
+                        <form id="formAnalisar">
+                            <div class="mb-3">
+                                <label for="numeroConcurso" class="form-label">Número do Concurso</label>
+                                <input type="number" class="form-control form-control-lg text-center" id="numeroConcurso"
+                                       placeholder="Ex: 1134" min="1" required>
+                                <div class="form-text">Digite o número do concurso para análise</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">
+                                <i class="bi bi-play-circle-fill"></i> Iniciar Análise Profunda
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Resultados -->
+        <div id="resultadosArea" style="display: none;">
+
+            <!-- Estatísticas Gerais -->
+            <div class="row mb-4" id="statsCards">
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="bi bi-trophy-fill stats-icon text-warning"></i>
+                        <div class="stats-value" id="statConcurso">-</div>
+                        <div class="stats-label">Concurso Analisado</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="bi bi-gear-fill stats-icon text-primary"></i>
+                        <div class="stats-value" id="statTecnicas">-</div>
+                        <div class="stats-label">Técnicas Testadas</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="bi bi-check-circle-fill stats-icon text-success"></i>
+                        <div class="stats-value" id="statAcertos">-</div>
+                        <div class="stats-label">Técnicas Acertaram</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="bi bi-speedometer2 stats-icon text-info"></i>
+                        <div class="stats-value" id="statEficacia">-</div>
+                        <div class="stats-label">Taxa de Eficácia</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress de Cobertura -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h6 class="card-title">Cobertura de Dezenas</h6>
+                            <div class="progress progress-custom">
+                                <div id="progressCobertura" class="progress-bar bg-success progress-bar-striped"
+                                     role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            <div class="mt-2 text-muted small">
+                                <span id="coberturaTexto">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações Gatilho -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-database-fill"></i> Dados Gatilho (Números Usados na Análise)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-hash fs-3 text-primary me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Concurso Próximo</small>
+                                            <div class="fw-bold fs-5" id="gatilhoConcurso">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-calendar-event fs-3 text-info me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Data Próximo Concurso</small>
+                                            <div class="fw-bold fs-5" id="gatilhoData">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-cash-coin fs-3 text-success me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Prêmio Estimado</small>
+                                            <div class="fw-bold fs-5" id="gatilhoPremio">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dezenas Sorteadas -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-bullseye"></i> Dezenas Sorteadas</h5>
+                        </div>
+                        <div class="card-body text-center" id="dezenasSorteadas">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análise Dezena por Dezena (Accordion) -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="mb-3"><i class="bi bi-list-check"></i> Análise Detalhada por Dezena</h4>
+                    <div class="accordion" id="accordionDezenas">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <button type="button" class="btn btn-success btn-lg me-2" id="btnSalvar">
+                        <i class="bi bi-save-fill"></i> Salvar Análise no Banco
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-lg" id="btnNovaAnalise">
+                        <i class="bi bi-arrow-clockwise"></i> Nova Análise
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h4>Nenhuma Análise Realizada</h4>
+            <p>Digite um número de concurso acima para começar</p>
+        </div>
+
+    </div>
+
+    <!-- Modal de Informações -->
+    <div class="modal fade" id="infoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-info-circle-fill"></i> Como Funciona a Análise Profunda</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="text-primary">📊 O que é?</h6>
+                    <p>
+                        Sistema que faz <strong>engenharia reversa</strong> dos concursos do Dia de Sorte,
+                        descobrindo quais técnicas matemáticas podem ter gerado cada dezena sorteada.
+                    </p>
+
+                    <h6 class="text-primary mt-4">🔢 Números Gatilho Usados</h6>
+                    <ul>
+                        <li><strong>Número do Concurso Próximo</strong> - Número do concurso seguinte</li>
+                        <li><strong>Data do Próximo Concurso</strong> - Data da próxima apuração</li>
+                        <li><strong>Valor Estimado do Prêmio</strong> - Prêmio estimado para o próximo concurso</li>
+                    </ul>
+
+                    <h6 class="text-primary mt-4">🎯 Categorias de Técnicas (55 no total)</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="badge badge-basica">BÁSICA</span> 10 técnicas<br>
+                            <span class="badge badge-matematica">MATEMÁTICA</span> 15 técnicas<br>
+                            <span class="badge badge-combinacao">COMBINAÇÃO</span> 10 técnicas
+                        </div>
+                        <div class="col-md-6">
+                            <span class="badge badge-avancada">AVANÇADA</span> 20 técnicas<br>
+                            <span class="badge badge-data">DATA</span> 10 técnicas
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary mt-4">💡 Exemplo Prático</h6>
+                    <div class="bg-light p-3 rounded">
+                        <strong>Concurso 1134:</strong><br>
+                        • Data próximo: <code>28/10/2025</code><br>
+                        • Dezena sorteada: <code>28</code><br>
+                        • <strong>Técnica TEC-E-01 acertou:</strong> Dia do Mês (28) = <strong>28</strong> ✅
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-lightbulb-fill"></i> <strong>Dica:</strong>
+                        Quanto mais técnicas acertarem uma dezena, maior a probabilidade de ser um padrão real!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastNotificacao" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMensagem">
+                Mensagem aqui
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+        // Estado da aplicação
+        let resultadoAtual = null;
+
+        // Elementos DOM
+        const formAnalisar = document.getElementById('formAnalisar');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const resultadosArea = document.getElementById('resultadosArea');
+        const emptyState = document.getElementById('emptyState');
+        const btnSalvar = document.getElementById('btnSalvar');
+        const btnNovaAnalise = document.getElementById('btnNovaAnalise');
+
+        // Event Listeners
+        formAnalisar.addEventListener('submit', analisarConcurso);
+        btnSalvar.addEventListener('click', salvarAnalise);
+        btnNovaAnalise.addEventListener('click', () => {
+            resultadosArea.style.display = 'none';
+            emptyState.style.display = 'block';
+            formAnalisar.reset();
+            resultadoAtual = null;
+        });
+
+        // Função: Mostrar Toast
+        function mostrarToast(mensagem, tipo = 'success') {
+            const toastEl = document.getElementById('toastNotificacao');
+            const toastMensagem = document.getElementById('toastMensagem');
+            const toastHeader = toastEl.querySelector('.toast-header i');
+
+            toastMensagem.textContent = mensagem;
+
+            if (tipo === 'success') {
+                toastHeader.className = 'bi bi-check-circle-fill text-success me-2';
+            } else if (tipo === 'error') {
+                toastHeader.className = 'bi bi-exclamation-triangle-fill text-danger me-2';
+            }
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        // Função: Analisar Concurso
+        async function analisarConcurso(e) {
+            e.preventDefault();
+
+            const concurso = document.getElementById('numeroConcurso').value;
+
+            if (!concurso) {
+                mostrarToast('Por favor, digite um número de concurso', 'error');
+                return;
+            }
+
+            // Mostrar loading
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                const response = await fetch(`/analise-profunda/analisar/${concurso}`);
+                const data = await response.json();
+
+                if (!data.sucesso) {
+                    throw new Error(data.erro || 'Erro ao analisar concurso');
+                }
+
+                resultadoAtual = data;
+                renderizarResultado(data);
+                mostrarToast('Análise concluída com sucesso!', 'success');
+
+            } catch (error) {
+                mostrarToast(error.message, 'error');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Função: Renderizar Resultado
+        function renderizarResultado(data) {
+            emptyState.style.display = 'none';
+            resultadosArea.style.display = 'block';
+
+            // Stats
+            document.getElementById('statConcurso').textContent = data.concurso_analisado;
+            document.getElementById('statTecnicas').textContent = data.resumo.total_tecnicas_testadas;
+            document.getElementById('statAcertos').textContent = data.resumo.total_tecnicas_acertaram;
+            document.getElementById('statEficacia').textContent = data.resumo.percentual_eficacia.toFixed(1) + '%';
+
+            // Progress
+            const cobertura = data.resumo.percentual_cobertura;
+            const progressBar = document.getElementById('progressCobertura');
+            progressBar.style.width = cobertura + '%';
+            progressBar.textContent = cobertura.toFixed(0) + '%';
+
+            document.getElementById('coberturaTexto').textContent =
+                `${data.resumo.dezenas_com_tecnica} de 7 dezenas possuem técnicas descobertas`;
+
+            // Dados Gatilho
+            document.getElementById('gatilhoConcurso').textContent = data.dados_gatilho.numero_concurso_proximo || 'N/A';
+            document.getElementById('gatilhoData').textContent = data.dados_gatilho.data_proximo_concurso || 'N/A';
+
+            const premio = data.dados_gatilho.valor_estimado_proximo_concurso;
+            document.getElementById('gatilhoPremio').textContent = premio ?
+                'R$ ' + premio.toLocaleString('pt-BR', {minimumFractionDigits: 2}) : 'N/A';
+
+            // Dezenas Sorteadas
+            const dezenasSorteadasHtml = data.dezenas_sorteadas.map((dez, idx) => {
+                const analise = data.analise_por_dezena[idx];
+                const temTecnica = analise.total_tecnicas_encontradas > 0;
+                const corBg = temTecnica ? 'bg-success' : 'bg-danger';
+
+                return `
+                    <div class="d-inline-block m-2">
+                        <div class="dezena-number ${corBg}" title="${temTecnica ? analise.total_tecnicas_encontradas + ' técnicas' : 'Sem técnica'}">
+                            ${dez}
+                        </div>
+                        <div class="small text-muted mt-1">
+                            ${temTecnica ? '✅ ' + analise.total_tecnicas_encontradas : '❌ 0'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('dezenasSorteadas').innerHTML = dezenasSorteadasHtml;
+
+            // Accordion de Dezenas
+            renderizarAccordion(data.analise_por_dezena);
+
+            // Scroll suave para resultados
+            resultadosArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Função: Renderizar Accordion
+        function renderizarAccordion(analises) {
+            const accordion = document.getElementById('accordionDezenas');
+
+            const html = analises.map((analise, idx) => {
+                const temTecnica = analise.total_tecnicas_encontradas > 0;
+                const cardClass = temTecnica ? 'dezena-card' : 'dezena-card sem-tecnica';
+
+                let tecnicasHtml = '';
+
+                if (temTecnica) {
+                    tecnicasHtml = analise.tecnicas.map((tec, tecIdx) => {
+                        const badgeCat = getBadgeCategoria(tec.categoria);
+                        const badgeCampo = getBadgeCampo(tec.campo);
+
+                        return `
+                            <div class="tecnica-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>${tec.id}</strong> - ${tec.nome}
+                                        <span class="badge ${badgeCat} ms-2">${tec.categoria}</span>
+                                        <span class="badge ${badgeCampo} ms-1">${tec.campo}</span>
+                                    </div>
+                                    <span class="badge bg-success">✓ Acertou</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Fórmula:</small>
+                                        <div class="formula-code">${tec.formula}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Cálculo:</small>
+                                        <div class="formula-code">${tec.calculo}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    tecnicasHtml = `
+                        <div class="alert alert-sem-tecnica">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <strong>Atenção:</strong> Nenhuma das 55 técnicas implementadas conseguiu gerar esta dezena.
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="accordion-item ${cardClass}">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button ${idx === 0 ? '' : 'collapsed'}" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse${idx}">
+                                <div class="d-flex align-items-center w-100">
+                                    <div class="dezena-number me-3" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                                        ${analise.dezena}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <strong>Dezena ${analise.dezena}</strong> - Posição ${analise.posicao}
+                                        <br>
+                                        <small class="text-muted">
+                                            ${temTecnica ?
+                                                `${analise.total_tecnicas_encontradas} técnica(s) encontrada(s)` :
+                                                'Nenhuma técnica encontrada'}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <span class="badge ${temTecnica ? 'bg-success' : 'bg-danger'}">
+                                            ${temTecnica ? '✓ Com Técnica' : '✗ Sem Técnica'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="collapse${idx}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}"
+                             data-bs-parent="#accordionDezenas">
+                            <div class="accordion-body">
+                                ${tecnicasHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            accordion.innerHTML = html;
+        }
+
+        // Função: Get Badge Categoria
+        function getBadgeCategoria(categoria) {
+            const map = {
+                'Básica': 'badge-basica',
+                'Matemática': 'badge-matematica',
+                'Combinação': 'badge-combinacao',
+                'Avançada': 'badge-avancada',
+                'Data': 'badge-data',
+                'Inversão': 'badge-inversao'
+            };
+            return map[categoria] || 'bg-secondary';
+        }
+
+        // Função: Get Badge Campo
+        function getBadgeCampo(campo) {
+            if (campo === 'CONCURSO') return 'badge-concurso';
+            if (campo === 'PRÊMIO') return 'badge-premio';
+            if (campo === 'DATA') return 'badge-data-campo';
+            return 'bg-secondary';
+        }
+
+        // Função: Salvar Análise
+        async function salvarAnalise() {
+            if (!resultadoAtual) {
+                mostrarToast('Nenhuma análise para salvar', 'error');
+                return;
+            }
+
+            btnSalvar.disabled = true;
+            btnSalvar.innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando...';
+
+            try {
+                const response = await fetch('/analise-profunda/salvar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        concurso: resultadoAtual.concurso_analisado,
+                        resultado_analise: resultadoAtual
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.sucesso) {
+                    throw new Error(data.erro || 'Erro ao salvar análise');
+                }
+
+                mostrarToast('Análise salva com sucesso no banco de dados!', 'success');
+
+            } catch (error) {
+                mostrarToast(error.message, 'error');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerHTML = '<i class="bi bi-save-fill"></i> Salvar Análise no Banco';
+            }
+        }
+    </script>
+{% endblock %}

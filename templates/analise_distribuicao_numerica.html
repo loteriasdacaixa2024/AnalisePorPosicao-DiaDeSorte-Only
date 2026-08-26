@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Distribuição Numérica - Análise Avançada{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    .card { margin-bottom: 20px; }
+    .numero-badge {
+        display: inline-block;
+        min-width: 35px;
+        padding: 6px 10px;
+        margin: 3px;
+        background-color: #D4B31A;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-chart-bar"></i> Distribuição Numérica</h1>
+    <p class="text-muted">Análise de padrões de distribuição numérica</p>
+
+    <div id="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Carregando análise...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-balance-scale"></i> Distribuição Pares/Ímpares</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-striped">
+                            <thead><tr><th>Padrão</th><th>Freq</th><th>%</th></tr></thead>
+                            <tbody id="tabelaParesImpares"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-layer-group"></i> Distribuição por Faixas</h5>
+                    </div>
+                    <div class="card-body" id="distribuicaoFaixas"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="fas fa-calculator"></i> Análise de Somas</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Soma Mínima:</strong> <span id="somaMin">-</span></p>
+                        <p><strong>Soma Máxima:</strong> <span id="somaMax">-</span></p>
+                        <p><strong>Soma Média:</strong> <span id="somaMedia">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-arrows-alt-h"></i> Números Extremos</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Amplitude Média:</strong> <span id="amplitudeMedia">-</span></p>
+                        <p><strong>Menor mais frequente:</strong> <span id="menorFreq">-</span></p>
+                        <p><strong>Maior mais frequente:</strong> <span id="maiorFreq">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/analise/distribuicao-numerica');
+        const data = await response.json();
+
+        if (data.erro) {
+            console.error('Erro:', data.erro);
+            return;
+        }
+
+        // Pares/Ímpares
+        const tabela = document.getElementById('tabelaParesImpares');
+        tabela.innerHTML = '';
+        (data.distribuicao_pares_impares?.distribuicao_completa || []).slice(0, 10).forEach(item => {
+            tabela.innerHTML += `<tr><td>${item.padrao}</td><td>${item.frequencia}</td><td>${item.percentual}%</td></tr>`;
+        });
+
+        // Faixas
+        const divFaixas = document.getElementById('distribuicaoFaixas');
+        divFaixas.innerHTML = '';
+        (data.distribuicao_por_faixas?.distribuicao_por_faixa || []).forEach(item => {
+            divFaixas.innerHTML += `<p><strong>${item.faixa}:</strong> ${item.total_aparicoes} (Média: ${item.media_por_sorteio})</p>`;
+        });
+
+        // Somas
+        const somas = data.distribuicao_soma_dezenas || {};
+        document.getElementById('somaMin').textContent = somas.soma_minima || '-';
+        document.getElementById('somaMax').textContent = somas.soma_maxima || '-';
+        document.getElementById('somaMedia').textContent = somas.soma_media || '-';
+
+        // Extremos
+        const extremos = data.dezenas_extremas || {};
+        document.getElementById('amplitudeMedia').textContent = extremos.amplitude_media || '-';
+        document.getElementById('menorFreq').textContent = extremos.menor_numero_mais_frequente?.[0]?.numero || '-';
+        document.getElementById('maiorFreq').textContent = extremos.maior_numero_mais_frequente?.[0]?.numero || '-';
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+carregarAnalise();
+</script>
+{% endblock %}

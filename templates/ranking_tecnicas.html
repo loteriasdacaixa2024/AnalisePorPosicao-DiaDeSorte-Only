@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Ranking de Técnicas | Dia de Sorte</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            /* Cores Dia de Sorte */
+            --cor-principal: #D4B31A;
+            --cor-clara-95: #fcf9e8;
+            --cor-clara-90: #f9f2d2;
+            --cor-clara-80: #f4e5a4;
+            --cor-media-40: #b69816;
+            --cor-escura-10: #2d2606;
+            --cor-escura-5: #171303;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--cor-clara-95) 0%, var(--cor-clara-90) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--cor-escura-10);
+        }
+
+        .header-dia-sorte {
+            background: linear-gradient(135deg, var(--cor-principal) 0%, var(--cor-media-40) 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .trophy-icon {
+            font-size: 4rem;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--cor-principal);
+            transition: transform 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(212, 179, 26, 0.2);
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--cor-principal);
+        }
+
+        .ranking-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--cor-principal);
+            transition: all 0.3s;
+        }
+
+        .ranking-card:hover {
+            box-shadow: 0 6px 20px rgba(212, 179, 26, 0.25);
+            transform: translateX(5px);
+        }
+
+        .ranking-position {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 1rem;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%); }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%); }
+        .rank-other { background: linear-gradient(135deg, var(--cor-principal) 0%, var(--cor-media-40) 100%); }
+
+        .tecnica-id {
+            background: var(--cor-clara-90);
+            color: var(--cor-escura-10);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 2px solid var(--cor-principal);
+        }
+
+        .badge-categoria {
+            background: var(--cor-principal);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #fff 0%, var(--cor-clara-95) 100%);
+            border-left: 5px solid var(--cor-principal);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .insight-icon {
+            font-size: 2rem;
+            color: var(--cor-principal);
+        }
+
+        .literal-badge {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-custom {
+            height: 30px;
+            border-radius: 15px;
+            background: var(--cor-clara-90);
+        }
+
+        .progress-bar-custom {
+            background: linear-gradient(90deg, var(--cor-principal) 0%, var(--cor-media-40) 100%);
+            border-radius: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-dia-sorte {
+            background: linear-gradient(135deg, var(--cor-principal) 0%, var(--cor-media-40) 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(212, 179, 26, 0.3);
+        }
+
+        .btn-dia-sorte:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(212, 179, 26, 0.5);
+            color: white;
+        }
+
+        .section-title {
+            color: var(--cor-escura-10);
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 2rem 0 1rem 0;
+            padding-left: 1rem;
+            border-left: 5px solid var(--cor-principal);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--cor-clara-80);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header-dia-sorte">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="bi bi-trophy-fill trophy-icon"></i> Ranking de Técnicas</h1>
+                    <p class="lead mb-0">Descubra quais técnicas matemáticas são mais eficazes no Dia de Sorte</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/analise-profunda/v2" class="btn btn-light btn-lg">
+                        <i class="bi bi-arrow-left-circle"></i> Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+
+        {% if dados.top_tecnicas|length == 0 %}
+
+        <!-- Estado Vazio -->
+        <div class="empty-state">
+            <i class="bi bi-inbox empty-icon"></i>
+            <h3>Nenhuma análise encontrada</h3>
+            <p class="text-muted">{{ dados.mensagem or 'Analise alguns concursos primeiro para ver o ranking.' }}</p>
+            <a href="/analise-profunda/v2" class="btn btn-dia-sorte mt-3">
+                <i class="bi bi-plus-circle"></i> Fazer Análise em Massa
+            </a>
+        </div>
+
+        {% else %}
+
+        <!-- Estatísticas Gerais -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-database-fill" style="font-size: 2rem; color: var(--cor-principal);"></i>
+                    <div class="stats-number">{{ dados.total_analises_base }}</div>
+                    <div class="text-muted">Análises no Banco</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-star-fill" style="font-size: 2rem; color: var(--cor-principal);"></i>
+                    <div class="stats-number">{{ dados.top_tecnicas|length }}</div>
+                    <div class="text-muted">TOP Técnicas</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-lightbulb-fill" style="font-size: 2rem; color: var(--cor-principal);"></i>
+                    <div class="stats-number">{{ dados.insights|length }}</div>
+                    <div class="text-muted">Insights</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="bi bi-bookmark-fill" style="font-size: 2rem; color: var(--cor-principal);"></i>
+                    <div class="stats-number">{{ dados.dezenas_literais|length }}</div>
+                    <div class="text-muted">Dezenas Literais</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Automáticos -->
+        {% if dados.insights %}
+        <h2 class="section-title"><i class="bi bi-lightbulb"></i> Insights Inteligentes</h2>
+        <div class="row mb-4">
+            {% for insight in dados.insights %}
+            <div class="col-md-6 mb-3">
+                <div class="insight-card">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-graph-up-arrow insight-icon me-3"></i>
+                        <div>
+                            <h5 class="mb-2">{{ insight.titulo }}</h5>
+                            <p class="text-muted mb-2">{{ insight.descricao }}</p>
+                            <div class="progress progress-custom mt-2">
+                                <div class="progress-bar progress-bar-custom" style="width: {{ (insight.metrica / dados.total_analises_base * 100) if dados.total_analises_base > 0 else 0 }}%">
+                                    {{ insight.metrica }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- TOP Técnicas -->
+        <h2 class="section-title"><i class="bi bi-trophy"></i> TOP {{ dados.top_tecnicas|length }} Técnicas Mais Eficazes</h2>
+
+        {% for tecnica in dados.top_tecnicas %}
+        <div class="ranking-card">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="ranking-position rank-{% if tecnica.rank <= 3 %}{{ tecnica.rank }}{% else %}other{% endif %}">
+                        {% if tecnica.rank == 1 %}🥇
+                        {% elif tecnica.rank == 2 %}🥈
+                        {% elif tecnica.rank == 3 %}🥉
+                        {% else %}{{ tecnica.rank }}º
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="tecnica-id">{{ tecnica.tecnica_id }}</span>
+                            <h5 class="d-inline ms-2 mb-0">{{ tecnica.tecnica_nome }}</h5>
+                        </div>
+                        <span class="badge-categoria">{{ tecnica.categoria }}</span>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <small class="text-muted">Total de Acertos</small>
+                            <div class="fw-bold fs-5 text-success">{{ tecnica.total_acertos }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Concursos Diferentes</small>
+                            <div class="fw-bold fs-5 text-primary">{{ tecnica.concursos_diferentes }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Dezenas Diferentes</small>
+                            <div class="fw-bold fs-5 text-info">{{ tecnica.dezenas_diferentes }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Campo Usado</small>
+                            <div class="fw-bold fs-6">
+                                <i class="bi bi-tag-fill" style="color: var(--cor-principal);"></i> {{ tecnica.campo }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if tecnica.dezenas_acertadas %}
+                    <div class="mt-2">
+                        <small class="text-muted">Dezenas acertadas:</small>
+                        <span class="ms-2">{{ tecnica.dezenas_acertadas }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Dezenas Literais -->
+        {% if dados.dezenas_literais %}
+        <h2 class="section-title"><i class="bi bi-bookmark-star"></i> Dezenas Literais (Aparecem Diretamente nos Dados)</h2>
+
+        <div class="row">
+            {% for literal in dados.dezenas_literais %}
+            <div class="col-md-6 mb-3">
+                <div class="ranking-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="literal-badge">
+                                <i class="bi bi-check-circle-fill"></i> Literal
+                            </span>
+                            <span class="ms-2 fw-bold">Concurso {{ literal.concurso }}</span>
+                        </div>
+                        <span class="badge bg-info">{{ literal.tipo }}</span>
+                    </div>
+
+                    <div class="mt-3">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: var(--cor-principal); color: white; border-radius: 50%; font-size: 1.8rem; font-weight: bold;">
+                                    {{ literal.dezena }}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-1">
+                                    <strong>{{ literal.tecnica_nome }}</strong>
+                                </div>
+                                <div class="text-muted">
+                                    <i class="bi bi-calculator"></i> {{ literal.formula }}
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    {{ literal.calculo }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Ações -->
+        <div class="text-center mt-5 mb-4">
+            <a href="/analise-profunda/v2" class="btn btn-dia-sorte btn-lg me-2">
+                <i class="bi bi-arrow-left-circle"></i> Voltar para Análise
+            </a>
+            <a href="#" onclick="window.print(); return false;" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-printer"></i> Imprimir Ranking
+            </a>
+        </div>
+
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Animação de entrada dos cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.ranking-card, .insight-card, .stats-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,2918 @@
+{% extends 'base.html' %}
+
+{% block title %}Filtrador Inteligente de Combinações - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<!-- noUI Slider (para sliders bonitos) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mes_da_sorte.css') }}">
+
+<style>
+    :root {
+        /* Paleta Oficial Dia de Sorte - Baseada em #D4B31A */
+        --cor-principal: #D4B31A;
+        /* 47% - Cor principal */
+        --cor-clara-95: #fcf9e8;
+        /* 95% - Muito clara */
+        --cor-clara-80: #f4e5a4;
+        /* 80% - Clara */
+        --cor-clara-60: #e9cb49;
+        /* 60% - Média clara */
+        --cor-media-50: #e3be1c;
+        /* 50% - Média */
+        --cor-escura-30: #887211;
+        /* 30% - Escura */
+        --cor-escura-20: #5b4c0b;
+        /* 20% - Muito escura */
+        --cor-escura-10: #2d2606;
+        /* 10% - Quase preta */
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--cor-principal) 0%, var(--cor-clara-80) 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .main-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 20px;
+        border: none;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--cor-principal), var(--cor-escura-30));
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 20px;
+    }
+
+    .card-header h1 {
+        margin: 0;
+        font-size: 1.8em;
+    }
+
+    .btn-dia-sorte {
+        background: linear-gradient(135deg, var(--cor-principal), var(--cor-escura-30));
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .btn-dia-sorte:hover {
+        background: linear-gradient(135deg, var(--cor-escura-30), var(--cor-principal));
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(212, 179, 26, 0.4);
+        color: white;
+    }
+
+    .btn-amarelo {
+        background: linear-gradient(135deg, var(--cor-clara-80), var(--cor-clara-60));
+        color: var(--cor-escura-20);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .btn-amarelo:hover {
+        background: linear-gradient(135deg, var(--cor-clara-60), var(--cor-clara-80));
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(244, 229, 164, 0.4);
+        color: var(--cor-escura-20);
+    }
+
+    .btn-laranja {
+        background: linear-gradient(135deg, var(--cor-media-50), var(--cor-clara-60));
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+    .btn-laranja:hover {
+        background: linear-gradient(135deg, var(--cor-clara-60), var(--cor-media-50));
+        color: white;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-box .valor {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: var(--cor-principal);
+    }
+
+    .stat-box .label {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    .filtro-group {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 5px solid var(--cor-principal);
+    }
+
+    .filtro-group h5 {
+        color: var(--cor-principal);
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--cor-principal);
+        border-color: var(--cor-principal);
+    }
+
+    .form-range::-webkit-slider-thumb {
+        background: var(--cor-principal);
+    }
+
+    .form-range::-moz-range-thumb {
+        background: var(--cor-principal);
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        height: 40px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--cor-clara-80);
+        transition: 0.4s;
+        border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 32px;
+        width: 32px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.toggle-slider {
+        background-color: var(--cor-principal);
+    }
+
+    input:checked+.toggle-slider:before {
+        transform: translateX(80px);
+    }
+
+    .toggle-label {
+        position: absolute;
+        top: 10px;
+        font-size: 0.8em;
+        font-weight: bold;
+        color: #333;
+        pointer-events: none;
+    }
+
+    .toggle-label.manual {
+        left: 10px;
+    }
+
+    .toggle-label.auto {
+        right: 10px;
+    }
+
+    input:checked~.toggle-label.manual {
+        color: white;
+    }
+
+    input:not(:checked)~.toggle-label.auto {
+        color: white;
+    }
+
+    .numero-badge {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        background: var(--cor-principal);
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        margin: 3px;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+
+    .mes-badge {
+        background: var(--cor-media-50);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .progress {
+        height: 25px;
+        border-radius: 15px;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, var(--cor-principal), var(--cor-clara-80));
+        font-weight: bold;
+    }
+
+    #resultadoTabela {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: var(--cor-clara-95);
+    }
+
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .loading-spinner.active {
+        display: block;
+    }
+
+    .combinacao-row {
+        transition: all 0.3s;
+    }
+
+    .combinacao-row:hover {
+        transform: scale(1.02);
+        box-shadow: 0 3px 10px rgba(212, 179, 26, 0.3);
+    }
+
+    .filtro-stats {
+        background: linear-gradient(135deg, var(--cor-clara-95), var(--cor-clara-80));
+        padding: 15px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    .badge-filtro {
+        background: var(--cor-principal);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        margin: 5px;
+        display: inline-block;
+    }
+
+    .numero-seletor {
+        display: inline-block;
+        width: 45px;
+        height: 45px;
+        line-height: 45px;
+        text-align: center;
+        border: 2px solid var(--cor-principal);
+        border-radius: 50%;
+        margin: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+    }
+
+    .numero-seletor:hover {
+        background: var(--cor-clara-80);
+        transform: scale(1.1);
+    }
+
+    .numero-seletor.selecionado {
+        background: #198754;
+        border-color: #198754;
+        color: white;
+    }
+
+    .numero-seletor.excluido {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+
+    /* Modais Customizados */
+    .modal-custom {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s;
+    }
+
+    .modal-custom.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-custom-content {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s;
+    }
+
+    .modal-custom-header {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: var(--cor-principal);
+    }
+
+    .modal-custom-body {
+        margin-bottom: 20px;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .modal-custom-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Paginação */
+    .card-footer {
+        background-color: var(--cor-clara-95);
+        border-top: 2px solid var(--cor-principal);
+    }
+
+    #paginacaoControles .btn-dia-sorte {
+        padding: 8px 15px;
+    }
+
+    #paginacaoControles .btn-dia-sorte:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    #inputPagina {
+        border: 2px solid var(--cor-principal);
+    }
+
+    #inputPagina:focus {
+        border-color: var(--cor-escura-30);
+        box-shadow: 0 0 0 0.2rem rgba(212, 179, 26, 0.25);
+    }
+
+    /* Loading spinner */
+    .fa-spinner {
+        color: var(--cor-principal) !important;
+    }
+
+    .loading-page {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    /* Estilo atualizado para não escurecer no hover */
+    .btn-estrategia {
+        background-color: white;
+        border: 1px solid #ced4da;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-estrategia:hover {
+        background-color: #fcf9e8;
+        border-color: var(--cor-principal);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <!-- Cabeçalho -->
+    <div class="card mb-4">
+        <div class="card-header text-center">
+            <h1 class="m-0"><i class="fas fa-clover me-2"></i> Filtrador Inteligente de Combinações - Dia de Sorte</h1>
+            <p class="mb-0 mt-2">Sistema avançado de filtragem com 2.629.575 combinações possíveis</p>
+        </div>
+        <div class="card-body bg-white" style="padding-bottom: 0;">
+            <!-- DICA RÁPIDA FIXA -->
+            <div class="alert shadow-sm mb-4"
+                style="background-color: #fcf9e8; border-left: 4px solid #d4b31a; color: #5b4c0b; font-size: 14px; text-align: left;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong><i class="fas fa-crown text-warning"></i> A Rota "A Batedeira Global" (Filtrador
+                        Pesado)</strong>
+                    <div>
+                        <button class="btn btn-sm fw-bold shadow-sm me-2" data-bs-toggle="modal"
+                            data-bs-target="#modalEstrategiaLetal" title="Estratégia Sniper Econômico"
+                            style="background-color: #dc3545; color: white; border: 2px solid #a71d2a; border-radius: 8px;">
+                            <i class="fas fa-crosshairs"></i> ESTRATÉGIA LETAL
+                        </button>
+                        <button class="btn btn-sm rounded-circle fw-bold shadow-sm" data-bs-toggle="modal"
+                            data-bs-target="#modalMaceteFiltrador" title="Ver Dica de Estratégia"
+                            style="background-color: #fcf9e8; color: #b69816; border: 2px solid #b69816; width: 34px; height: 34px; line-height: 1;">
+                            <i class="fas fa-question"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="mb-2"><strong>O que ele faz:</strong> A batedeira atua no universo inteiro de matrizes
+                    filtrando lixo (tira as que dão Sequências excessivas, Números frios, Somas irreais, etc),
+                    devolvendo um TXT puro e o Excel colorido apontando o que sobrou após as restrições brutais de
+                    pares/faixas matemáticas.</p>
+                <hr style="border-top: 1px dashed #d4b31a; opacity: 0.5;">
+                <ul class="mb-0 mt-2 ps-3">
+                    <li><strong>1.</strong> Clique no botão central <em>"AUTO"</em> no painel de filtros se não for um
+                        veterano dos bloqueios avançados.</li>
+                    <li><strong>2.</strong> Ative o <em>Núcleo Estratégico</em> no lado esquerdo da tela para injetar
+                        precisão se houver padrões óbvios mapeados.</li>
+                    <li><strong>3.</strong> Pressione <em>"Filtrar Combinações"</em>. O sistema triturará todas as vias
+                        possíveis, sobrando apenas as apostas Ouro!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MACETE DE OURO - FILTRADOR -->
+    <div class="modal fade" id="modalMaceteFiltrador" tabindex="-1" aria-labelledby="modalMaceteLabelFiltrador"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content text-start"
+                style="border: 2px solid #d4b31a; border-radius: 12px; overflow: hidden;">
+                <div class="modal-header shadow-sm" style="background-color: #d4b31a; color: white;">
+                    <h5 class="modal-title fw-bold" id="modalMaceteLabelFiltrador"><i
+                            class="fas fa-crown text-warning"></i> Configuração Ouro - Filtrador Inteligente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body bg-light" style="font-size: 15px; color: #333; line-height: 1.6; padding: 25px;">
+                    <p>Para extrair o <strong>máximo poder de fogo</strong> do Filtrador Inteligente, a melhor
+                        configuração segue o princípio da <strong>Escultura Bruta</strong>.</p>
+
+                    <p class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> Atenção: Modificar o Modo
+                        AUTO sem dominar os conceitos estatísticos vai destruir as suas métricas e secar as opções da
+                        matriz inteira de 2.629.575 apostas.</p>
+
+                    <p>A configuração ouro para o Filtrador é esta:</p>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #9f8514;"><i
+                            class="fas fa-crosshairs"></i> 1. A Matriz Base e o Arquivo Ouro</h6>
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Ação de
+                                Inicialização:</strong> Sempre clique em "Gerar Arquivo" antes de qualquer jogada pesada
+                            para garantir que o espelho de 2 milhões de combinações esteja atualizado com o seu núcleo
+                            de hardware local.</li>
+                        <li><i class="fas fa-check text-success"></i> <strong>O Modo Auto:</strong> Quando esse toggle
+                            está ligado nas posições, o próprio motor calibrou as margens da paridade e da frequência
+                            usando as curvas Gaussianas da loteria Dia de Sorte. Deixe a matemática fluir sozinha!</li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #9f8514;"><i class="fas fa-filter"></i> 2.
+                        Ajustes Finos (Cirurgia Leve)</h6>
+                    <p>O Modo AUTO já corta 90% do lixo invisível. Mas se você quiser afiar a faca por conta própria:
+                    </p>
+                    <ul class="mb-3">
+                        <li class="mb-2"><strong>Paridade:</strong> Travando em [3~4] pares a fatia da pizza de apostas
+                            impossíveis evapora num toque.</li>
+                        <li class="mb-2"><strong>Faixas (Curva de Sino):</strong> Somas restritas no centro absoluto
+                            (100 a 150) jogam fora bilhetes aberrativos como [1,2,3,4,5,6,7] que desafiam as leis de
+                            probabilidade.</li>
+                    </ul>
+
+                    <div class="alert mt-4 shadow-sm"
+                        style="background-color: #fcf9e8; border-color: #d4b31a; border-left: 5px solid #d4b31a; color: #5b4c0b;">
+                        <strong><i class="fas fa-bolt text-warning"></i> Dica Master:</strong><br>
+                        Use a aba de <strong>Números Específicos</strong> como seu sniper de elite! Após o modo Auto
+                        rodar, trave 2 números na zona VERDE (Obrigatórios) e 3 números na zona VERMELHA (Excluídos).
+                        Isso faz com que você não pague por nenhum bilhete cego: você caça exatamente a anomalia
+                        estatística daquele dia com a mira travada no prêmio principal!
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #f8f9fa;">
+                    <button type="button" class="btn btn-dark fw-bold px-4" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ESTRATÉGIA LETAL (SNIPER) -->
+    <div class="modal fade" id="modalEstrategiaLetal" tabindex="-1" aria-labelledby="modalLabelLetal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content text-start"
+                style="border: 2px solid #dc3545; border-radius: 12px; overflow: hidden;">
+                <div class="modal-header shadow-sm" style="background-color: #dc3545; color: white;">
+                    <h5 class="modal-title fw-bold" id="modalLabelLetal"><i class="fas fa-crosshairs text-warning"></i>
+                        Estratégia Letal - Sniper Econômico</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body bg-light" style="font-size: 15px; color: #333; line-height: 1.6; padding: 25px;">
+                    <p>Como espremer o TXT para poucas apostas fortíssimas buscando os 7 pontos sem ter que investir
+                        muito.</p>
+
+                    <h6 class="fw-bold mt-3 border-bottom pb-2" style="color: #a71d2a;"><i class="fas fa-anchor"></i> 1.
+                        A Âncora do Concurso Anterior (O pulo do gato)</h6>
+                    <p>Como há quase certeza estatística de que 1 a 2 dezenas vão se repetir do concurso passado, use a
+                        aba de Números Específicos.</p>
+                    <ul class="mb-3" style="list-style-type: none; padding-left: 0;">
+                        <li><i class="fas fa-arrow-right text-danger"></i> <strong>O que fazer:</strong> Selecione suas
+                            1 ou 2 dezenas favoritas do último sorteio e marque-as na cor <strong>VERDE
+                                (Obrigatórias)</strong>. Automaticamente a inteligência da Batedeira vai destruir
+                            milhares de milhão de apostas do universo que NÃO contenham essas 2 dezenas, despencando
+                            absurdamente o seu custo de impressão do bilhete.</li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #a71d2a;"><i class="fas fa-cut"></i> 2. A
+                        Guilhotina das Frias (Menos é Mais)</h6>
+                    <p>Investir pouco significa apostar em menos números. Você não precisa acertar quem vai sair, só
+                        precisa ter certeza de quem <strong>NÃO VAI</strong>.</p>
+                    <ul class="mb-3" style="list-style-type: none; padding-left: 0;">
+                        <li><i class="fas fa-arrow-right text-danger"></i> <strong>O que fazer:</strong> Ainda nos
+                            Números Específicos, escolha entre 3 a 5 dezenas que estão extremamente esgotadas ou mortas
+                            segundo as suas análises de ciclo, e marque-as de <strong>VERMELHO (Excluídas)</strong>.
+                            Excluir com segurança é melhor do que escolher com dúvida.</li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #a71d2a;"><i class="fas fa-lock"></i> 3.
+                        Travar a "Gordura Absurda" (Limites Intransigentes)</h6>
+                    <p>O modo AUTO é ótimo, mas "abraça" as pontas da estatística. Se o bolso apertar, ligue o Manual e
+                        seja agressivo:</p>
+                    <ul class="mb-3">
+                        <li class="mb-2"><strong>Sequências Consecutivas:</strong> Trave em MÁXIMO 2. É raríssimo sair
+                            um (12, 13, 14). Se travar em máximo 2, a Batedeira derrete as teias de aranha matemáticas e
+                            afina seu lote.</li>
+                        <li><strong>Soma dos Números:</strong> Ao invés da faixa ampla, estrangule o funil pegando só a
+                            miolo de ouro: <strong>Trave entre 100 e 130</strong> (O sorteio 1197 bateu 115). Isso corta
+                            todo aquele oceano irreal de números baixos e altos.</li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #a71d2a;"><i
+                            class="fas fa-balance-scale"></i> 4. O Equilíbrio Clássico da Paridade</h6>
+                    <p>Nunca gere centenas de bilhetes para acertar a anomalia (ex: 6 pares e 1 ímpar).</p>
+                    <ul class="mb-3" style="list-style-type: none; padding-left: 0;">
+                        <li><i class="fas fa-arrow-right text-danger"></i> <strong>O que fazer:</strong> Trave seu
+                            filtro de Pares/Ímpares estritamente no cruzamento de <code>3 Pares / 4 Ímpares</code> ou
+                            <code>4 Pares / 3 Ímpares</code>.
+                        </li>
+                    </ul>
+
+                    <div class="alert mt-4 shadow"
+                        style="background-color: #fff1f2; border-color: #dc3545; border-left: 5px solid #dc3545; color: #721c24;">
+                        <strong><i class="fas fa-list-check text-danger"></i> Resumo do Workflow de Ouro:</strong><br>
+                        1. Ative o <strong>Modo Manual</strong> para ter liberdade cirúrgica.<br>
+                        2. Trave <strong>2 Obrigatórias</strong> (Vindas do sorteio anterior).<br>
+                        3. Trave <strong>4 Excluídas</strong> (A sua Análise indicará as fugas).<br>
+                        4. Restrinja Sequências a <strong>máx 2</strong>.<br>
+                        5. Trave a Soma em <strong>100~130</strong>.<br>
+                        6. Trave a Paridade no eixo <strong>3x4 ou 4x3</strong>.<br><br>
+                        O Filtrador cuspirá provavelmente um lote enxuto e brutal de <strong>menos de 80 bilhetes
+                            Ouro!</strong> Você cria uma isca fechada que só se ativa SE o padrão daquela semana de fato
+                        ocorrer.
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #f8f9fa;">
+                    <button type="button" class="btn btn-dark fw-bold px-4" data-bs-dismiss="modal">Alvo
+                        Travado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RESUMO ESTRATÉGIAS -->
+    <div class="modal fade" id="modalResumoEstrategias" tabindex="-1" aria-labelledby="modalLabelResumoEstrategias"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content text-start"
+                style="border: 2px solid #887211; border-radius: 12px; overflow: hidden;">
+                <div class="modal-header shadow-sm" style="background-color: #887211; color: white;">
+                    <h5 class="modal-title fw-bold" id="modalLabelResumoEstrategias"><i
+                            class="fas fa-crown text-warning"></i>
+                        Colinha: Matrizes Validadas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body bg-light" style="font-size: 15px; color: #333; line-height: 1.6; padding: 25px;">
+                    <p class="mb-4 text-secondary">Aqui está o resumo objetivo, direto ao ponto e sem firulas, pronto
+                        para você usar como "colinha" na hora de configurar o sistema.</p>
+
+                    <h6 class="fw-bold mt-3 border-bottom pb-2" style="color: #0d6efd;"><i
+                            class="fas fa-shield-alt"></i> Matriz 1: "A Faca Simétrica"</h6>
+                    <p class="small text-muted mb-2"><em>(Joga onde 90% dos resultados acontecem)</em></p>
+                    <ul class="mb-3">
+                        <li><strong>Pares/Ímpares:</strong> 3 Pares e 4 Ímpares (ou 4 Pares e 3 Ímpares).</li>
+                        <li><strong>Soma dos Números:</strong> Entre 95 e 130.</li>
+                        <li><strong>Sequências Consecutivas:</strong> Máximo de 2.</li>
+                        <li><strong>Nome para Salvar:</strong> <em>Faca Simétrica - Estatística Geral.txt</em></li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #dc3545;"><i
+                            class="fas fa-crosshairs"></i> Matriz 2: "O Ataque Cirúrgico" SNIPER</h6>
+                    <p class="small text-muted mb-2"><em>(Usa estatística pura para baratear o jogo acertando quem NÃO
+                            sai)</em></p>
+                    <ul class="mb-3">
+                        <li><strong>Números Específicos (<span class="text-success">VERDE</span>):</strong> Escolha 2
+                            dezenas bem atrasadas (olhe seu painel de Ciclos).</li>
+                        <li><strong>Números Específicos (<span class="text-danger">VERMELHO</span>):</strong> Exclua 4
+                            dezenas "Frias" (do Top Escapes).</li>
+                        <li><strong>Números Primos:</strong> De 2 a 4 primos.</li>
+                        <li><strong>Nome para Salvar:</strong> <em>Ataque Cirúrgico - Frias x Ciclos.txt</em></li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #6c757d;"><i
+                            class="fas fa-border-all"></i> Matriz 3: "A Muralha de Bordas"</h6>
+                    <p class="small text-muted mb-2"><em>(Trava as bordas do volante e espreme o miolo para não deixar a
+                            aposta vazar)</em></p>
+                    <ul class="mb-3">
+                        <li><strong>Muralha de Bordas (Inicial):</strong> Coloque em 05 (Garante que a Bola 1 comece até
+                            o 5).</li>
+                        <li><strong>Muralha de Bordas (Final):</strong> Coloque em 26 (Garante que a Bola 7 termine a
+                            partir do 26).</li>
+                        <li><strong>Sequências Consecutivas:</strong> Máximo de 2 (Espalha o Miolo).</li>
+                        <li><strong>Controle de Espelhos:</strong> Máximo de 1 (Bloqueia dezenas tipo 12/21 ou 13/31
+                            juntas).</li>
+                        <li><strong>Nome para Salvar:</strong> <em>Muralha Bordas – Extremos.txt</em></li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: #e0a800;"><i
+                            class="fas fa-balance-scale"></i> Matriz 4: "A Balança de Ouro"</h6>
+                    <p class="small text-muted mb-2"><em>(Espalha os quadrantes uniformemente e busca a frequência pura
+                            para prêmios consistentes)</em></p>
+                    <ul class="mb-3">
+                        <li><strong>Faixas de Números:</strong> 1 a 3 Baixos, 2 a 4 Médios, 2 a 3 Altos, 0 a 1 Muito
+                            Altos.</li>
+                        <li><strong>Números Quentes:</strong> Usa o top Mais Sorteadas (Garante mínimo de 3 pedras da
+                            panela).</li>
+                        <li><strong>Nome para Salvar:</strong> <em>Balanca de Ouro - Faixas e Frequencia.txt</em></li>
+                    </ul>
+
+                    <div class="alert mt-4 shadow"
+                        style="background-color: #fff8e1; border-color: #ffc107; border-left: 5px solid #ffc107; color: #856404;">
+                        <strong><i class="fas fa-fire text-warning"></i> Como finalizar a estratégia:</strong><br>
+                        <ol class="mb-0 mt-2 ps-3 fw-bold">
+                            <li>Configure uma matriz por vez no Filtrador Inteligente e clique em <strong>Iniciar
+                                    Filtragem</strong>.</li>
+                            <li>Gere o arquivo e renomeie-o com o nome sugerido.</li>
+                            <li>Arraste-os (um a um) no <strong>Modo 2 (Backtest Global)</strong> e mande verificar.
+                            </li>
+                            <li>Salve no <strong>Hall da Fama</strong> e compare: A matriz que der mais prêmios de 7
+                                pontos no histórico é a que merece o seu dinheiro amanhã!</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #f8f9fa;">
+                    <button type="button" class="btn btn-dark fw-bold px-4" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status do Arquivo -->
+    <div class="card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5><i class="fas fa-file-alt"></i> Status do Arquivo de Combinações</h5>
+                    <p id="statusArquivo" class="mb-0 text-muted">Verificando...</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-dia-sorte" id="btnGerarArquivo">
+                        <i class="fas fa-cog"></i> Gerar Arquivo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Painel de Filtros -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-filter"></i> Filtros</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Toggle Dinâmico/Manual -->
+                    <div class="text-center mb-4">
+                        <label class="toggle-switch mb-2">
+                            <input type="checkbox" id="toggleModo">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label manual">MANUAL</span>
+                            <span class="toggle-label auto">AUTO</span>
+                        </label>
+                        <p class="mt-1 text-muted small" id="descricaoModo">
+                            Modo Manual: Ajuste cada filtro individualmente
+                        </p>
+
+                        <!-- Estratégias dos Mestres -->
+                        <div class="mt-3 p-3 border rounded shadow-sm text-start"
+                            style="background-color: #fcf9e8; border-color: #d4b31a !important;">
+                            <h6 class="fw-bold text-center position-relative mb-2" style="color: #887211;">
+                                <i class="fas fa-crown"></i> Estratégias dos Mestres
+                                <button type="button"
+                                    class="btn btn-sm rounded-circle fw-bold shadow-sm position-absolute"
+                                    data-bs-toggle="modal" data-bs-target="#modalResumoEstrategias"
+                                    title="Ver Resumo das Estratégias"
+                                    style="right: 5px; top: -5px; background-color: white; color: #887211; border: 1px solid #887211; width: 28px; height: 28px; padding: 0; line-height: 1;">
+                                    <i class="fas fa-question" style="font-size: 13px;"></i>
+                                </button>
+                            </h6>
+                            <p class="small text-muted text-center mb-3">Selecione uma estratégia da "Matriz Validada"
+                                para configurar os filtros automaticamente.</p>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-center mb-2 px-1"
+                                    id="btnLimparEstrategias"
+                                    title="Limpa as configurações aplicadas para reiniciar ou escolher outra estratégia">
+                                    <i class="fas fa-undo-alt"></i> Limpar Matrizes Aplicadas
+                                </button>
+                                <button class="btn btn-sm text-start btn-estrategia"
+                                    title="📌 A FACA SIMÉTRICA&#10;&#10;Esta estratégia ativa o Modo Manual e ajusta os seguintes filtros automaticamente:&#10;• Pares/Ímpares: Entre 3 e 4 pares&#10;• Soma dos Números: De 95 a 130&#10;• Sequências Consecutivas: Máximo de 2"
+                                    id="btnEstrategiaFaca">
+                                    <i class="fas fa-shield-alt" style="color: #0d6efd; width: 20px;"></i> <strong
+                                        style="color: #333;">A Faca Simétrica</strong><br>
+                                    <span class="text-muted" style="font-size: 0.75rem;">(Soma 95-130, Pares 3-4, Seq
+                                        máx 2)</span>
+                                </button>
+
+                                <button class="btn btn-sm text-start btn-estrategia"
+                                    title="📌 O ATAQUE CIRÚRGICO (SNIPER)&#10;&#10;Esta estratégia ajuda você a reduzir os custos operacionais com:&#10;• Números Primos: Entre 2 e 4&#10;• Necessidade de escolher 2 obrigatórias (verde) e excluir 4 frias (vermelho).&#10;&#10;--- DICA DE OURO (Opcional) ---&#10;Para não perder o balanço do volante, cruze os filtros:&#10;• Ative 'Faixas de Números' -> Baixos (01-09) máx de 3.&#10;• Ative 'Sequências Consecutivas' -> Máx de 2 (igual faz a Faca)."
+                                    id="btnEstrategiaSniper">
+                                    <i class="fas fa-crosshairs" style="width: 20px;"></i> <strong
+                                        style="color: #dc3545;">O Ataque Cirúrgico (SNIPER)</strong><br>
+                                    <span class="text-secondary" style="font-size: 0.75rem;">(Primos 2-4, Pede 2 Verdes
+                                        e 4 Vermelhas)</span>
+                                </button>
+
+                                <button class="btn btn-sm text-start btn-estrategia"
+                                    title="📌 A MURALHA DE BORDAS&#10;&#10;Esta estratégia prende a aposta nos extremos com os seguintes filtros:&#10;• Borda Inicial: 05&#10;• Borda Final: 26&#10;• Sequências Consecutivas: Máximo de 2&#10;• Espelhos Duplos: Máximo de 1"
+                                    id="btnEstrategiaBordas">
+                                    <i class="fas fa-border-all" style="color: #6c757d; width: 20px;"></i> <strong
+                                        style="color: #333;">A Muralha de Bordas</strong><br>
+                                    <span class="text-muted" style="font-size: 0.75rem;">(Bordas 05-26, Seq máx 2,
+                                        Espelho máx 1)</span>
+                                </button>
+
+                                <button class="btn btn-sm text-start btn-estrategia"
+                                    title="📌 A BALANÇA DE OURO (Matriz 4)&#10;&#10;Estratégia avançada que cruza quadrantes e frequência:&#10;• Faixas Uniformes: Mix entre as 4 partes do volante.&#10;• Quentes: Força mín. 3 Mais Sorteadas."
+                                    id="btnEstrategiaBalanca">
+                                    <i class="fas fa-balance-scale" style="width: 20px; color: #e0a800;"></i> <strong
+                                        style="color: #856404;">A Balança de Ouro (Matriz 4)</strong><br>
+                                    <span class="text-secondary" style="font-size: 0.75rem;">(Distribui Faixas + 3
+                                        Quentes Mínimas)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTROLES AUXILIARES DO SISTEMA -->
+                    <div class="p-3 mb-4 rounded shadow-sm"
+                        style="background-color: #ededed; border: 1px solid #ced4da;">
+                        <h6 class="fw-bold text-center mb-3 text-uppercase"
+                            style="color: #6c757d; font-size: 0.85rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-cogs"></i> Painel Operacional
+                        </h6>
+
+                        <!-- Seletor de Mês da Sorte -->
+                        <div class="mb-3 mes-da-sorte-field">
+                            <label class="mes-da-sorte-label d-block mb-1" for="mesSorte"><i
+                                        class="fas fa-calendar"></i> Mês da Sorte:</label>
+                            <select class="form-select form-select-sm mes-da-sorte-select mt-1" id="mesSorte"
+                                style="background-color: #fff;">
+                                <option value="Jan">Janeiro</option>
+                                <option value="Fev">Fevereiro</option>
+                                <option value="Mar">Março</option>
+                                <option value="Abr">Abril</option>
+                                <option value="Mai">Maio</option>
+                                <option value="Jun">Junho</option>
+                                <option value="Jul">Julho</option>
+                                <option value="Ago">Agosto</option>
+                                <option value="Set">Setembro</option>
+                                <option value="Out">Outubro</option>
+                                <option value="Nov">Novembro</option>
+                                <option value="Dez">Dezembro</option>
+                            </select>
+                        </div>
+
+                        <!-- NÚCLEO ESTRATÉGICO -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-secondary" style="font-size: 0.9rem;"><i
+                                        class="fas fa-bullseye"></i> Núcleo Estratégico</span>
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="chk-usar-nucleo-filtrador"
+                                        style="cursor: pointer;">
+                                </div>
+                            </div>
+                            <div id="info-nucleo-filtrador" class="alert alert-warning py-1 mt-2 mb-0"
+                                style="display: none; font-size: 0.8rem;">
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                <strong>Núcleo:</strong> <span id="nucleo-numeros-filtrador">--</span>
+                            </div>
+                        </div>
+
+                        <!-- Limite de Resultados -->
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-secondary" style="font-size: 0.9rem;"><i
+                                        class="fas fa-list"></i> Limite Visual <small>(Segurança)</small></span>
+                                <span class="badge bg-secondary" id="valorLimite">1000</span>
+                            </div>
+                            <input type="range" class="form-range mt-1" id="limiteResultados" min="10" max="10000"
+                                step="10" value="1000">
+                        </div>
+                    </div>
+
+                    <div id="painelFiltrosManual">
+                        <!-- Filtro: Pares/Ímpares -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroParesImpares">
+                                <label class="form-check-label" for="filtroParesImpares">
+                                    <h5><i class="fas fa-divide"></i> Pares/Ímpares</h5>
+                                </label>
+                            </div>
+                            <div id="configParesImpares" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Filtra combinações pela exata estrutura de Pares e
+                                    Ímpares. Combinações diferentes não são aglutinadas (3P4I ≠ 4P3I).
+                                </p>
+                                <div class="row g-2 mt-2">
+                                    <div class="col-12 col-md-6 form-check">
+                                        <input class="form-check-input check-pares-impares fs-5 me-1" type="checkbox"
+                                            id="pi_2" value="2">
+                                        <label class="form-check-label pt-1" for="pi_2">2 Pares e 5 Ímpares</label>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-check">
+                                        <input class="form-check-input check-pares-impares fs-5 me-1" type="checkbox"
+                                            id="pi_3" value="3" checked>
+                                        <label class="form-check-label fw-bold text-primary pt-1" for="pi_3">3 Pares e 4
+                                            Ímpares (3P4I)</label>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-check">
+                                        <input class="form-check-input check-pares-impares fs-5 me-1" type="checkbox"
+                                            id="pi_4" value="4" checked>
+                                        <label class="form-check-label fw-bold text-danger pt-1" for="pi_4">4 Pares e 3
+                                            Ímpares (4P3I)</label>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-check">
+                                        <input class="form-check-input check-pares-impares fs-5 me-1" type="checkbox"
+                                            id="pi_5" value="5">
+                                        <label class="form-check-label pt-1" for="pi_5">5 Pares e 2 Ímpares</label>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-check">
+                                        <input class="form-check-input check-pares-impares fs-5 me-1" type="checkbox"
+                                            id="pi_1" value="1">
+                                        <label class="form-check-label text-muted small pt-1" for="pi_1">1 Par e 6
+                                            Ímpares</label>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-check">
+                                        <input class="form-check-input check-pares-impares fs-5 me-1" type="checkbox"
+                                            id="pi_6" value="6">
+                                        <label class="form-check-label text-muted small pt-1" for="pi_6">6 Pares e 1
+                                            Ímpar</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Faixas de Números (Baixos/Médios/Altos) -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroFaixasNumeros">
+                                <label class="form-check-label" for="filtroFaixasNumeros">
+                                    <h5><i class="fas fa-layer-group"></i> Faixas de Números</h5>
+                                </label>
+                            </div>
+                            <div id="configFaixasNumeros" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Divide os 31 números em 4 faixas e permite controlar
+                                    quantos números de cada faixa devem aparecer na combinação (mínimo e máximo).
+                                </p>
+
+                                <!-- Baixos (01-09) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-success">Baixos (01-09)</span> - <span
+                                            id="valorBaixos">0 a 2</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minBaixos" min="0" max="7"
+                                                value="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxBaixos" min="0" max="7"
+                                                value="2">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Médios (10-19) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-primary">Médios (10-19)</span> - <span
+                                            id="valorMedios">0 a 2</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minMedios" min="0" max="7"
+                                                value="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxMedios" min="0" max="7"
+                                                value="2">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Altos (20-29) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-warning text-dark">Altos (20-29)</span> - <span
+                                            id="valorAltos">2 a 3</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minAltos" min="0" max="7"
+                                                value="2">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxAltos" min="0" max="7"
+                                                value="3">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Muito Altos (30-31) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-danger">Muito Altos (30-31)</span> - <span
+                                            id="valorMuitoAltos">0 a 2</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minMuitoAltos" min="0" max="2"
+                                                value="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxMuitoAltos" min="0" max="2"
+                                                value="2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Números Quentes -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroNumerosQuentes">
+                                <label class="form-check-label" for="filtroNumerosQuentes">
+                                    <h5><i class="fas fa-fire"></i> Números Quentes</h5>
+                                </label>
+                            </div>
+                            <div id="configNumerosQuentes" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Números que aparecem com maior frequência nos sorteios
+                                    históricos. Use este filtro para privilegiar números "na moda".
+                                </p>
+                                <label>Mínimo presente: <span id="valorQuentes">3</span></label>
+                                <input type="range" class="form-range" id="minQuentes" min="0" max="7" value="3">
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Soma -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroSoma">
+                                <label class="form-check-label" for="filtroSoma">
+                                    <h5><i class="fas fa-plus"></i> Soma dos Números</h5>
+                                </label>
+                            </div>
+                            <div id="configSoma" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Filtra pela soma total dos 7 números. Análises mostram
+                                    que somas entre 100-150 são mais comuns.
+                                    Soma mínima: 28 (01+02+03+04+05+06+07) | Soma máxima: 217 (25+26+27+28+29+30+31)
+                                </p>
+                                <label>Faixa de soma: <span id="valorSoma">100 a 150</span></label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="small">Mínima</label>
+                                        <input type="range" class="form-range" id="minSoma" min="28" max="217"
+                                            value="100">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small">Máxima</label>
+                                        <input type="range" class="form-range" id="maxSoma" min="28" max="217"
+                                            value="150">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Sequências -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroSequencias">
+                                <label class="form-check-label" for="filtroSequencias">
+                                    <h5><i class="fas fa-list-ol"></i> Sequências Consecutivas</h5>
+                                </label>
+                            </div>
+                            <div id="configSequencias" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Controla quantos números seguidos (ex: 12-13-14) podem
+                                    aparecer. Sequências longas são raras em sorteios reais.
+                                </p>
+                                <label>Máximo de consecutivos: <span id="valorSequencias">2</span></label>
+                                <input type="range" class="form-range" id="maxSequencias" min="0" max="7" value="2">
+                                <p class="small text-muted">Exemplo: Valor 2 permite duplas como 05-06, mas evita
+                                    triplas como 12-13-14</p>
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Números Primos -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroPrimos">
+                                <label class="form-check-label" for="filtroPrimos">
+                                    <h5><i class="fas fa-atom"></i> Números Primos</h5>
+                                </label>
+                            </div>
+                            <div id="configPrimos" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Números primos são divisíveis apenas por 1 e por eles
+                                    mesmos (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31). Use para equilibrar a combinação.
+                                </p>
+                                <p class="small text-muted">Total de primos de 1 a 31: 11 números</p>
+                                <label>Quantidade: <span id="valorPrimos">2 a 4</span></label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="small">Mínimo</label>
+                                        <input type="range" class="form-range" id="minPrimos" min="0" max="7" value="2">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small">Máximo</label>
+                                        <input type="range" class="form-range" id="maxPrimos" min="0" max="7" value="4">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Dígitos Iniciais -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroDigitosIniciais">
+                                <label class="form-check-label" for="filtroDigitosIniciais">
+                                    <h5 class="d-inline-block mb-0"><i class="fas fa-hashtag"></i> Dígitos Iniciais</h5>
+                                    <span class="badge bg-secondary ms-2 align-middle"
+                                        style="font-size: 0.55em; letter-spacing: 1px;">O LOBO SOLITÁRIO</span>
+                                </label>
+                            </div>
+                            <div id="configDigitosIniciais" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Controla quantos números começam com cada dígito
+                                    (0=01-09, 1=10-19, 2=20-29, 3=30-31).
+                                </p>
+                                <div class="alert p-2 mb-3 shadow-none"
+                                    style="background-color: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d; font-size: 0.85rem;">
+                                    <i class="fas fa-lightbulb text-warning"></i> <strong>A 10ª Regra (Manual):</strong>
+                                    Diferente dos outros 9 filtros, este é o único que <strong>NÃO</strong> é invocado
+                                    pelas Estratégias Mestre. <br>
+                                    <strong>Dica de Emparelhamento:</strong> Acione este filtro de forma isolada
+                                    cruzando-o <strong>junto com a Regra da SOMA</strong>. Se você matar completamente a
+                                    linha "0", a sua soma final deverá obrigatoriamente ir para o Teto Máximo; se você
+                                    forçar a barra na linha "1", a soma tende a descer. Ele funciona como uma alavanca
+                                    tática seletiva!
+                                </div>
+
+                                <!-- Dígito 0 (01-09) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-info">0 (01-09)</span> - <span id="valorDigito0">0 a
+                                            3</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minDigito0" min="0" max="7"
+                                                value="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxDigito0" min="0" max="7"
+                                                value="3">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dígito 1 (10-19) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-primary">1 (10-19)</span> - <span id="valorDigito1">1 a
+                                            3</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minDigito1" min="0" max="7"
+                                                value="1">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxDigito1" min="0" max="7"
+                                                value="3">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dígito 2 (20-29) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-warning text-dark">2 (20-29)</span> - <span
+                                            id="valorDigito2">2 a 4</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minDigito2" min="0" max="7"
+                                                value="2">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxDigito2" min="0" max="7"
+                                                value="4">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dígito 3 (30-31) -->
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-danger">3 (30-31)</span> - <span id="valorDigito3">0 a
+                                            2</span></label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="small">Mínimo</label>
+                                            <input type="range" class="form-range" id="minDigito3" min="0" max="2"
+                                                value="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small">Máximo</label>
+                                            <input type="range" class="form-range" id="maxDigito3" min="0" max="2"
+                                                value="2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Números Específicos -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroEspecificos">
+                                <label class="form-check-label" for="filtroEspecificos">
+                                    <h5><i class="fas fa-star"></i> Números Específicos</h5>
+                                </label>
+                            </div>
+                            <div id="configEspecificos" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Fixe números que DEVEM aparecer (obrigatórios em verde)
+                                    ou que NÃO podem aparecer (excluídos em vermelho). Clique nos números abaixo para
+                                    selecionar.
+                                </p>
+                                <p class="small"><strong>Obrigatórios (verde)</strong> - devem estar na combinação:</p>
+                                <div id="seletorObrigatorios" class="mb-3"></div>
+
+                                <p class="small"><strong>Excluídos (vermelho)</strong> - não podem estar na combinação:
+                                </p>
+                                <div id="seletorExcluidos"></div>
+
+                                <!-- NOVO ALERTA DINÂMICO DOS CICLOS -->
+                                <div id="alertaCicloDinamico" class="alert p-2 mt-3 d-none shadow-sm"
+                                    style="background: linear-gradient(135deg, rgba(212,179,26,0.1), rgba(136,114,17,0.1)); border: 1px solid #D4B31A; border-radius: 8px;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-radar text-warning"></i> <strong
+                                                style="color: #5b4c0b;">Radar de Ciclo:</strong> Faltam Sair:
+                                            <div id="spanDezenasCiclo" class="mt-1"></div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm fw-bold shadow-sm"
+                                            style="background-color: #198754; color: white; border-radius: 20px;"
+                                            id="btnPuxarCiclo" title="Definir ciclo como Obrigatórias">
+                                            <i class="fas fa-magic"></i> Puxar
+                                        </button>
+                                    </div>
+                                    <small class="text-muted d-block mt-2" style="font-size: 0.7rem;"><i
+                                            class="fas fa-info-circle"></i> O botão captura as dezenas e as colore de
+                                        Verde (Obrigatórias).</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 Filtro: Muralha de Bordas -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroBordas">
+                                <label class="form-check-label" for="filtroBordas">
+                                    <h5><i class="fas fa-border-all"></i> Muralha de Bordas</h5>
+                                </label>
+                            </div>
+                            <div id="configBordas" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Geometria Avancada:</strong> Força a aposta a começar exatamente logo no
+                                    início e terminar no limite máximo.
+                                </p>
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-dark">Borda Inicial</span> - O primeiro número sorteado
+                                        deve ser no máximo o escolhido.</label>
+                                    <input type="range" class="form-range mt-1" id="valBordaIn" min="1" max="10"
+                                        value="5">
+                                    <div class="text-center small fw-bold">Bola 1 deve ser menor ou igual a: <span
+                                            class="badge bg-danger fs-6 text-white px-2"
+                                            style="display:inline-block; min-width:30px;" id="labelBordaIn">05</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 p-2 border rounded">
+                                    <label><span class="badge bg-dark">Borda Final</span> - O último número sorteado
+                                        deve ser no mínimo o escolhido.</label>
+                                    <input type="range" class="form-range mt-1" id="valBordaFim" min="20" max="31"
+                                        value="26">
+                                    <div class="text-center small fw-bold">Bola 7 deve ser maior ou igual a: <span
+                                            class="badge bg-success fs-6 text-white px-2"
+                                            style="display:inline-block; min-width:30px;" id="labelBordaFim">26</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 Filtro: Mistério do Espelho -->
+                        <div class="filtro-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filtroEspelho">
+                                <label class="form-check-label" for="filtroEspelho">
+                                    <h5><i class="fas fa-compress-arrows-alt"></i> Controle de Espelhos</h5>
+                                </label>
+                            </div>
+                            <div id="configEspelho" style="display: none;">
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Limita apostas viciadas que invertem dezenas na cara da
+                                    outra. (ex: 12 e 21, 13 e 31, 02 e 20).
+                                </p>
+                                <label>Quantidade Máxima de Invertidos: <span id="labelEspelho">1</span></label>
+                                <input type="range" class="form-range" id="limiteEspelho" min="0" max="3" value="1">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Botões de Controle -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-dia-sorte btn-lg" id="btnIniciar">
+                            <i class="fas fa-play"></i> Iniciar Filtragem
+                        </button>
+                        <button class="btn btn-amarelo" id="btnPausar" disabled>
+                            <i class="fas fa-pause"></i> Pausar
+                        </button>
+                        <button class="btn btn-outline-danger" id="btnResetar">
+                            <i class="fas fa-redo"></i> Resetar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Resultados -->
+        <div class="col-lg-8 d-flex flex-column">
+            <!-- Estatísticas -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="valor" id="statOriginal">0</div>
+                        <div class="label">Originais</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="valor" id="statFiltrado">0</div>
+                        <div class="label">Filtradas</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="valor" id="statReducao">0%</div>
+                        <div class="label">Redução</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="valor" id="statTempo">0s</div>
+                        <div class="label">Tempo</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Progresso -->
+            <div class="card mb-3" id="progressoCard" style="display: none;">
+                <div class="card-body">
+                    <h6>Processando filtros...</h6>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="barraProgresso"
+                            role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas dos Filtros -->
+            <div class="card mb-3" id="estatisticasFiltros" style="display: none;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Estatísticas dos Filtros</h5>
+                </div>
+                <div class="card-body" id="listaEstatisticasFiltros"></div>
+            </div>
+
+            <!-- Botões de Download -->
+            <div class="card mb-3" id="botoesDownload" style="display: none;">
+                <div class="card-body">
+                    <h5><i class="fas fa-download"></i> Downloads</h5>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <button class="btn btn-dia-sorte w-100" id="btnDownloadTxt" title="Baixa como texto limpo">
+                                <i class="fas fa-file-alt"></i> .TXT
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-dia-sorte w-100" id="btnDownloadXlsx"
+                                title="Baixa pintado para o Excel">
+                                <i class="fas fa-file-excel"></i> .XLSX
+                            </button>
+                        </div>
+                        <div class="col-md-3" style="display: none;">
+                            <button class="btn btn-dia-sorte w-100" id="btnDownloadHtml">
+                                <i class="fas fa-file-code"></i> .HTML
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Injeção direta na Conferência -->
+                            <button onclick="mandarParaConferencia()" class="btn btn-dark fw-bold w-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #198754 0%, #20c997 100%); border: none;">
+                                <i class="fas fa-check-double"></i> Mandar para o Backtest Oficial (Conferência Histórica)
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Aviso de Download Automático -->
+                    <div class="mt-3 p-2 border rounded bg-light shadow-sm"
+                        style="font-size: 0.85rem; border-left: 4px solid #198754 !important;">
+                        <i class="fas fa-info-circle text-success me-2"></i>
+                        <span class="text-muted">Além de ser direcionado para a <strong>Conferência Histórica</strong>,
+                            o sistema também salva uma cópia automática na pasta:</span><br>
+                        <code
+                            class="ms-4 fw-bold text-dark">[drive]\AnalisePorPosicao-DiaDeSorte-Only\conferencia_filtros-baixados</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Resultados -->
+            <div class="card flex-grow-1 d-flex flex-column mb-0" style="min-height: 400px;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-table"></i> Combinações Filtradas (<span
+                            id="totalCombinacoes">0</span>)</h5>
+                    <span id="infoVisualizacao" class="small text-white-50"></span>
+                </div>
+                <div class="card-body p-0 flex-grow-1 position-relative" style="overflow-y: auto;">
+                    <div id="resultadoTabela">
+                        <div class="text-center p-5 text-muted">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <p>Configure os filtros e clique em "Iniciar Filtragem"</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controles de Paginação -->
+                <div class="card-footer" id="paginacaoControles" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center">
+                            <button class="btn btn-dia-sorte btn-sm" id="btnPrimeiraPagina">
+                                <i class="fas fa-angle-double-left"></i> Primeira
+                            </button>
+                            <button class="btn btn-dia-sorte btn-sm" id="btnPaginaAnterior">
+                                <i class="fas fa-angle-left"></i> Anterior
+                            </button>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <span class="small">Página</span>
+                                <input type="number" id="inputPagina" class="form-control form-control-sm"
+                                    style="width: 80px; text-align: center;" min="1" value="1">
+                                <span class="small">de <strong id="totalPaginas">1</strong></span>
+                                <button class="btn btn-dia-sorte btn-sm" id="btnIrParaPagina">Ir</button>
+                            </div>
+                            <div class="small text-muted mt-2">
+                                <span id="infoPaginacao">Mostrando 0-0 de 0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <button class="btn btn-dia-sorte btn-sm" id="btnProximaPagina">
+                                Próxima <i class="fas fa-angle-right"></i>
+                            </button>
+                            <button class="btn btn-dia-sorte btn-sm" id="btnUltimaPagina">
+                                Última <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+
+<script>
+    // Estado global
+    let modoAutomatico = false;
+    let processandoFiltros = false;
+    let numerosObrigatorios = new Set();
+    let numerosExcluidos = new Set();
+    let numerosFriosGlobais = [];
+
+    // Paginação
+    let paginaAtual = 1;
+    let combinacoesPorPagina = 100;
+    let totalPaginas = 1;
+    let totalCombinacoesFiltradas = 0;
+    let carregandoPagina = false;
+
+    // Funções de Modal Customizado
+    function showAlert(mensagem, titulo = 'Aviso') {
+        return new Promise(resolve => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-custom show';
+            modal.innerHTML = `
+                    <div class="modal-custom-content">
+                        <div class="modal-custom-header">${titulo}</div>
+                        <div class="modal-custom-body">${mensagem}</div>
+                        <div class="modal-custom-footer">
+                            <button class="btn btn-dia-sorte" onclick="this.closest('.modal-custom').remove()">OK</button>
+                        </div>
+                    </div>
+                `;
+            modal.querySelector('button').addEventListener('click', () => resolve(true));
+            document.body.appendChild(modal);
+        });
+    }
+
+    function showConfirm(mensagem, titulo = 'Confirmar') {
+        return new Promise(resolve => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-custom show';
+            modal.innerHTML = `
+                    <div class="modal-custom-content">
+                        <div class="modal-custom-header">${titulo}</div>
+                        <div class="modal-custom-body">${mensagem}</div>
+                        <div class="modal-custom-footer">
+                            <button class="btn btn-outline-secondary" id="btnCancelar">Cancelar</button>
+                            <button class="btn btn-dia-sorte" id="btnConfirmar">Confirmar</button>
+                        </div>
+                    </div>
+                `;
+            const btnCancelar = modal.querySelector('#btnCancelar');
+            const btnConfirmar = modal.querySelector('#btnConfirmar');
+
+            btnCancelar.addEventListener('click', () => {
+                modal.remove();
+                resolve(false);
+            });
+
+            btnConfirmar.addEventListener('click', () => {
+                modal.remove();
+                resolve(true);
+            });
+
+            document.body.appendChild(modal);
+        });
+    }
+
+    function showOpcoesPares(titulo) {
+        return new Promise(resolve => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-custom show';
+            modal.style.zIndex = '9999';
+            modal.innerHTML = `
+                    <div class="modal-custom-content text-start">
+                        <div class="modal-custom-header text-center bg-danger"><i class="fas fa-crosshairs"></i> ${titulo}</div>
+                        <div class="modal-custom-body">
+                            <p class="small text-muted mb-3">O Modo Sniper exige máxima coerência. Escolha explicitamente a estrutura desejada (Apenas 1 opção):</p>
+                            <div class="form-check border p-2 mb-2 rounded bg-light">
+                                <input class="form-check-input ms-1" type="radio" name="radioSniperPar" id="par3" value="3" checked>
+                                <label class="form-check-label w-100 fw-bold" for="par3" style="cursor: pointer;">
+                                    3 Pares e 4 Ímpares <span class="badge bg-primary float-end">3P4I</span>
+                                </label>
+                            </div>
+                            <div class="form-check border p-2 mb-2 rounded bg-light">
+                                <input class="form-check-input ms-1" type="radio" name="radioSniperPar" id="par4" value="4">
+                                <label class="form-check-label w-100 fw-bold" for="par4" style="cursor: pointer;">
+                                    4 Pares e 3 Ímpares <span class="badge bg-danger float-end">4P3I</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-custom-footer">
+                            <button class="btn btn-outline-secondary" id="btnPular">Não aplicar no momento</button>
+                            <button class="btn btn-danger text-white" id="btnConfirmarPar">Confirmar Tiro (Filtrar)</button>
+                        </div>
+                    </div>
+                `;
+            const btnPular = modal.querySelector('#btnPular');
+            const btnConfirmar = modal.querySelector('#btnConfirmarPar');
+
+            btnPular.addEventListener('click', () => {
+                modal.remove();
+                resolve(null);
+            });
+
+            btnConfirmar.addEventListener('click', () => {
+                const checkedEl = document.querySelector('input[name="radioSniperPar"]:checked');
+                const val = checkedEl ? checkedEl.value : null;
+                modal.remove();
+                if (val) resolve([parseInt(val)]);
+                else resolve(null);
+            });
+
+            document.body.appendChild(modal);
+        });
+    }
+
+    async function mandarParaConferencia() {
+        const selectMes = document.getElementById('mesSorte');
+        if (!selectMes) {
+            alert("Erro: Campo de Mes da Sorte não encontrado.");
+            return;
+        }
+
+        console.log("Abduzindo matriz: abrindo conferência e disparando download...");
+
+        // 1. Abre a página de conferência IMEDIATAMENTE (mais seguro contra bloqueadores de pop-up)
+        window.open('/central-conferencias#conferencia-filtro', '_blank');
+
+        // 2. Dispara o download (que também faz o espelhamento no servidor)
+        setTimeout(() => {
+            const downloadUrl = obterUrlDownload('txt');
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }, 300);
+    }
+
+    // Inicialização do Filtrador
+    document.addEventListener('DOMContentLoaded', function () {
+        verificarArquivo();
+        inicializarEventos();
+        gerarSeletoresNumeros();
+        atualizarLabelsRanges();
+        carregarNumerosQuentesFrios();
+        inicializarEstrategiasMestres();
+        configurarSeletorMesPremium(); // 🌟 Injetando Mês Premium no Seletor
+    });
+
+    // Funções das Estratégias dos Mestres
+    function inicializarEstrategiasMestres() {
+        function ativarModoManual() {
+            const toggleModo = document.getElementById('toggleModo');
+            if (toggleModo.checked) {
+                toggleModo.click();
+            }
+        }
+
+        function ativarFiltroCheckbox(id) {
+            const chk = document.getElementById(id);
+            if (!chk.checked) {
+                chk.click();
+            }
+        }
+
+        // A Faca Simétrica
+        document.getElementById('btnEstrategiaFaca')?.addEventListener('click', function () {
+            window.estrategiaDownloadAtiva = 'Faca Simetrica - Estatistica Geral';
+            ativarModoManual();
+            ativarFiltroCheckbox('filtroParesImpares');
+            document.querySelectorAll('.check-pares-impares').forEach(chk => {
+                chk.checked = (chk.value === '3' || chk.value === '4');
+            });
+
+            ativarFiltroCheckbox('filtroSoma');
+            document.getElementById('minSoma').value = 95;
+            document.getElementById('maxSoma').value = 130;
+            document.getElementById('minSoma').dispatchEvent(new Event('input'));
+
+            ativarFiltroCheckbox('filtroSequencias');
+            document.getElementById('maxSequencias').value = 2;
+            document.getElementById('maxSequencias').dispatchEvent(new Event('input'));
+
+            // Força a rolagem para o topo do painel
+            document.getElementById('painelFiltrosManual').scrollIntoView({ behavior: 'smooth' });
+
+            showAlert('Filtros configurados para "A Faca Simétrica".<br>Nome para Salvar: <b>Faca Simétrica - Estatística Geral.txt</b>', 'Estratégia Ativada');
+        });
+
+        // O Ataque Cirúrgico (SNIPER)
+        document.getElementById('btnEstrategiaSniper')?.addEventListener('click', async function () {
+            window.estrategiaDownloadAtiva = 'Ataque Cirurgico - Frias x Ciclos';
+            ativarModoManual();
+            ativarFiltroCheckbox('filtroPrimos');
+            document.getElementById('minPrimos').value = 2;
+            document.getElementById('maxPrimos').value = 4;
+            document.getElementById('minPrimos').dispatchEvent(new Event('input'));
+
+            // 1.5 Pergunta explícita de Pares/Ímpares OBRIGATÓRIA (Regra 2) no Sniper
+            const escolhaParidade = await showOpcoesPares('Paridade Cirúrgica Mínima');
+            if (escolhaParidade) {
+                ativarFiltroCheckbox('filtroParesImpares');
+                document.querySelectorAll('.check-pares-impares').forEach(chk => {
+                    chk.checked = escolhaParidade.includes(parseInt(chk.value));
+                });
+            }
+
+            ativarFiltroCheckbox('filtroEspecificos');
+            document.getElementById('configEspecificos').scrollIntoView({ behavior: 'smooth' });
+
+            // Limpa seleções anteriores do painel
+            numerosObrigatorios.clear();
+            numerosExcluidos.clear();
+            document.querySelectorAll('#seletorObrigatorios .numero-seletor').forEach(el => el.classList.remove('selecionado'));
+            document.querySelectorAll('#seletorExcluidos .numero-seletor').forEach(el => el.classList.remove('excluido'));
+
+            try {
+                const btn = document.getElementById('btnEstrategiaSniper');
+                const btnHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+
+                // 1. Pega as 4 mais frequentes nos escapes (Frias reais) = VERMELHAS
+                const resAusentes = await fetch('/api/analise-ausentes/historico');
+                const dataAusentes = await resAusentes.json();
+                let friasMarcadas = 0;
+                if (dataAusentes && dataAusentes.frequencia_escapes) {
+                    const topFrias = dataAusentes.frequencia_escapes.slice(0, 4);
+                    topFrias.forEach(obj => {
+                        const num = obj.dezena;
+                        const seletor = document.querySelector(`#seletorExcluidos .numero-seletor[data-numero="${num}"]`);
+                        if (seletor && !seletor.classList.contains('excluido')) {
+                            seletor.click();
+                            friasMarcadas++;
+                        }
+                    });
+                }
+
+                // 2. Pega as atrasadas do ciclo (Obrigatórias) = VERDES
+                const resCiclo = await fetch('/api/ciclos-dezenas/ciclo-atual');
+                const dataCiclo = await resCiclo.json();
+                let verdesMarcadas = 0;
+                if (dataCiclo && dataCiclo.sucesso && dataCiclo.dados && dataCiclo.dados.dezenas_pendentes) {
+                    // Filtramos das pendentes aquelas que já não foram capturadas como Frias (excluidas) para evitar bloqueio!
+                    const pendentesDisponiveis = dataCiclo.dados.dezenas_pendentes.filter(num => !numerosExcluidos.has(num));
+                    const topAtrasadas = pendentesDisponiveis.slice(0, 2);
+                    topAtrasadas.forEach(num => {
+                        const seletor = document.querySelector(`#seletorObrigatorios .numero-seletor[data-numero="${num}"]`);
+                        if (seletor && !seletor.classList.contains('selecionado')) {
+                            seletor.click();
+                            verdesMarcadas++;
+                        }
+                    });
+                }
+
+                btn.innerHTML = btnHtml;
+
+                showAlert(`Filtros configurados para "O Ataque Cirúrgico (SNIPER)".<br><br><b>🎯 Ações automáticas cirúrgicas realizadas:</b><br>- <b>(${friasMarcadas}) Frias do Top Escapes</b> preenchidas em <strong class="text-danger">Vermelho</strong>.<br>- <b>(${verdesMarcadas}) Atrasadas do Ciclo Atual</b> preenchidas em <strong class="text-success">Verde</strong>.<br><br>Nome para Salvar: <b>Ataque Cirúrgico - Frias x Ciclos.txt</b>`, 'Estratégia Sniper Ativada');
+            } catch (err) {
+                console.error("Erro na carga do Sniper:", err);
+                showAlert('Erro offline ao buscar as Frias/Atrasadas em tempo real. Configure-as manualmente.', 'Aviso');
+            }
+        });
+
+        // A Muralha de Bordas
+        document.getElementById('btnEstrategiaBordas')?.addEventListener('click', function () {
+            window.estrategiaDownloadAtiva = 'Muralha Bordas - Extremos';
+            ativarModoManual();
+            ativarFiltroCheckbox('filtroBordas');
+            document.getElementById('valBordaIn').value = 5;
+            document.getElementById('valBordaFim').value = 26;
+            document.getElementById('valBordaIn').dispatchEvent(new Event('input'));
+            document.getElementById('valBordaFim').dispatchEvent(new Event('input'));
+
+            ativarFiltroCheckbox('filtroSequencias');
+            document.getElementById('maxSequencias').value = 2;
+            document.getElementById('maxSequencias').dispatchEvent(new Event('input'));
+
+            ativarFiltroCheckbox('filtroEspelho');
+            document.getElementById('limiteEspelho').value = 1;
+            document.getElementById('limiteEspelho').dispatchEvent(new Event('input'));
+
+            document.getElementById('configBordas').scrollIntoView({ behavior: 'smooth' });
+
+            showAlert('Filtros configurados para "A Muralha de Bordas".<br>Nome para Salvar: <b>Muralha Bordas – Extremos.txt</b>', 'Estratégia Ativada');
+        });
+
+        // A Balança de Ouro (Matriz 4)
+        document.getElementById('btnEstrategiaBalanca')?.addEventListener('click', function () {
+            window.estrategiaDownloadAtiva = 'Balanca de Ouro - Faixas e Frequencia';
+            ativarModoManual();
+
+            ativarFiltroCheckbox('filtroFaixasNumeros');
+            document.getElementById('minBaixos').value = 1;
+            document.getElementById('maxBaixos').value = 3;
+            document.getElementById('minBaixos').dispatchEvent(new Event('input'));
+
+            document.getElementById('minMedios').value = 2;
+            document.getElementById('maxMedios').value = 4;
+            document.getElementById('minMedios').dispatchEvent(new Event('input'));
+
+            document.getElementById('minAltos').value = 2;
+            document.getElementById('maxAltos').value = 3;
+            document.getElementById('minAltos').dispatchEvent(new Event('input'));
+
+            document.getElementById('minMuitoAltos').value = 0;
+            document.getElementById('maxMuitoAltos').value = 1;
+            document.getElementById('minMuitoAltos').dispatchEvent(new Event('input'));
+
+            ativarFiltroCheckbox('filtroNumerosQuentes');
+            document.getElementById('minQuentes').value = 3;
+            document.getElementById('minQuentes').dispatchEvent(new Event('input'));
+
+            document.getElementById('configFaixasNumeros').scrollIntoView({ behavior: 'smooth' });
+
+            showAlert('Filtros configurados para "A Balança de Ouro (Matriz 4)".<br>Nome para Salvar: <b>Balanca de Ouro - Faixas e Frequencia.txt</b>', 'Estratégia Ativada');
+        });
+
+        // Limpar Estratégias
+        document.getElementById('btnLimparEstrategias')?.addEventListener('click', function () {
+            const checkboxes = document.querySelectorAll('.form-check-input[id^="filtro"]');
+            checkboxes.forEach(chk => {
+                if (chk.checked) {
+                    chk.click(); // desmarca e engatilha o sumiço dos painéis
+                }
+            });
+            numerosObrigatorios.clear();
+            numerosExcluidos.clear();
+            document.querySelectorAll('#seletorObrigatorios .numero-seletor').forEach(el => el.classList.remove('selecionado'));
+            document.querySelectorAll('#seletorExcluidos .numero-seletor').forEach(el => el.classList.remove('excluido'));
+        });
+    }
+
+    // Carrega TODAS as análises reais do banco de dados
+    function carregarNumerosQuentesFrios() {
+        fetch('/filtrador-combinacoes/api/analises-reais')
+            .then(res => res.json())
+            .then(data => {
+                if (data.sucesso) {
+                    // Números Quentes/Frios
+                    const quentes = data.numeros_quentes;
+                    const frios = data.numeros_frios;
+                    numerosFriosGlobais = frios || [];
+                    const elementoQuentes = document.querySelector('#configNumerosQuentes .small.text-muted');
+                    if (elementoQuentes && quentes.length > 0) {
+                        elementoQuentes.textContent = `Números mais sorteados (dados reais do banco): ${quentes.join(', ')}`;
+                    }
+
+                    // Pares/Ímpares
+                    const padrãoPares = data.padrao_pares;
+                    const mediaPares = data.media_pares;
+                    if (padrãoPares) {
+                        // Atualiza valores padrão dos sliders
+                        document.getElementById('minPares').value = padrãoPares.min;
+                        document.getElementById('maxPares').value = padrãoPares.max;
+                        document.getElementById('valorPares').textContent = `${padrãoPares.min} a ${padrãoPares.max}`;
+
+                        // Atualiza explicação
+                        const explicacaoPares = document.querySelector('#configParesImpares .small.text-muted');
+                        if (explicacaoPares) {
+                            explicacaoPares.innerHTML = `
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Filtra combinações pela quantidade de números pares.
+                                    <strong style="color: var(--cor-principal);">Dados reais:</strong> Padrão mais comum é ${padrãoPares.min} a ${padrãoPares.max} pares (média: ${mediaPares.toFixed(1)}).
+                                `;
+                        }
+                    }
+
+                    // Soma
+                    const somaMin = data.soma_minima_ideal;
+                    const somaMax = data.soma_maxima_ideal;
+                    const somaMedia = data.soma_media;
+                    if (somaMin && somaMax) {
+                        // Atualiza valores padrão dos sliders
+                        document.getElementById('minSoma').value = somaMin;
+                        document.getElementById('maxSoma').value = somaMax;
+                        document.getElementById('valorSoma').textContent = `${somaMin} a ${somaMax}`;
+
+                        // Atualiza explicação
+                        const explicacaoSoma = document.querySelector('#configSoma .small.text-muted');
+                        if (explicacaoSoma) {
+                            explicacaoSoma.innerHTML = `
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Filtra pela soma total dos 7 números.
+                                    <strong style="color: var(--cor-principal);">Dados reais:</strong> Faixa ideal é ${somaMin}-${somaMax} (média histórica: ${somaMedia.toFixed(1)}).
+                                    Soma mínima possível: 28 | Soma máxima possível: 217
+                                `;
+                        }
+                    }
+
+                    // Faixas (Baixa/Média/Alta)
+                    const padraoFaixas = data.padrao_faixas;
+                    if (padraoFaixas) {
+                        // Atualiza explicação de Faixas
+                        const explicacaoFaixas = document.querySelector('#configFaixasNumeros .small.text-muted');
+                        if (explicacaoFaixas) {
+                            explicacaoFaixas.innerHTML = `
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Divide os 31 números em 4 faixas e permite controlar quantos números de cada faixa devem aparecer na combinação.
+                                    <strong style="color: var(--cor-principal);">Dados reais:</strong> Padrão mais comum é ${padraoFaixas.descricao} (${padraoFaixas.percentual}% dos sorteios).
+                                `;
+                        }
+                    }
+
+                    // Primos (Top 3)
+                    const top3Primos = data.top_3_primos;
+                    if (top3Primos && top3Primos.length > 0) {
+                        // Atualiza explicação de Primos
+                        const explicacaoPrimos = document.querySelector('#configPrimos .small.text-muted');
+                        if (explicacaoPrimos) {
+                            const emoji = ['🥇', '🥈', '🥉'];
+                            const top3Text = top3Primos.map((p, i) =>
+                                `${emoji[i]} ${p.padrao}: ${p.frequencia}x (${p.percentual}%)`
+                            ).join(', ');
+
+                            explicacaoPrimos.innerHTML = `
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Números primos são divisíveis apenas por 1 e por eles mesmos (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31).
+                                    <br><strong style="color: var(--cor-principal);">Top 3 padrões mais comuns:</strong> ${top3Text}
+                                `;
+                        }
+                    }
+
+                    // Dígitos Iniciais (Top 3)
+                    const top3Digitos = data.top_3_digitos_iniciais;
+                    if (top3Digitos && top3Digitos.length > 0) {
+                        // Atualiza explicação de Dígitos Iniciais
+                        const explicacaoDigitos = document.querySelector('#configDigitosIniciais .small.text-muted');
+                        if (explicacaoDigitos) {
+                            const emoji = ['🥇', '🥈', '🥉'];
+                            const top3Text = top3Digitos.map((p, i) =>
+                                `${emoji[i]} ${p.padrao}: ${p.frequencia}x (${p.percentual}%)`
+                            ).join('<br>                                    ');
+
+                            explicacaoDigitos.innerHTML = `
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Explicação:</strong> Controla quantos números começam com cada dígito (0=01-09, 1=10-19, 2=20-29, 3=30-31).
+                                    <br><strong style="color: var(--cor-principal);">Top 3 padrões mais frequentes:</strong>
+                                    <br>${top3Text}
+                                `;
+                        }
+                    }
+
+                    console.log('✅ Análises reais carregadas do banco:');
+                    console.log('  - Números quentes:', quentes);
+                    console.log('  - Números frios:', frios);
+                    console.log(`  - Padrão pares: ${padrãoPares.min}-${padrãoPares.max} (média: ${mediaPares})`);
+                    console.log(`  - Soma ideal: ${somaMin}-${somaMax} (média: ${somaMedia})`);
+                    if (padraoFaixas) console.log(`  - Padrão faixas: ${padraoFaixas.descricao} (${padraoFaixas.percentual}%)`);
+                    if (top3Primos) console.log('  - Top 3 primos:', top3Primos.map(p => p.padrao).join(', '));
+                    if (top3Digitos) console.log('  - Top 3 dígitos iniciais:', top3Digitos.map(p => p.padrao).join(', '));
+                } else {
+                    console.warn('⚠️ Erro ao carregar análises:', data.erro);
+                }
+            })
+            .catch(err => console.error('Erro ao carregar análises:', err));
+    }
+
+    // Verifica se arquivo de combinações existe
+    function verificarArquivo() {
+        fetch('/filtrador-combinacoes/api/verificar-arquivo')
+            .then(res => res.json())
+            .then(data => {
+                if (data.existe) {
+                    document.getElementById('statusArquivo').innerHTML = `
+                            <i class="fas fa-check-circle text-success"></i>
+                            Arquivo encontrado: ${data.total_combinacoes.toLocaleString('pt-BR')} combinações
+                            (${data.tamanho_mb} MB)
+                        `;
+                    document.getElementById('btnGerarArquivo').textContent = 'Regerar Arquivo';
+                    document.getElementById('statOriginal').textContent = data.total_combinacoes.toLocaleString('pt-BR');
+                } else {
+                    document.getElementById('statusArquivo').innerHTML = `
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            ${data.mensagem}
+                        `;
+                }
+            })
+            .catch(err => console.error('Erro ao verificar arquivo:', err));
+    }
+
+    // Gera arquivo de combinações
+    async function gerarArquivo() {
+        const confirmado = await showConfirm('Gerar arquivo com 2.629.575 combinações? Isso pode levar alguns minutos.', 'Gerar Arquivo');
+        if (!confirmado) {
+            return;
+        }
+
+        const btn = document.getElementById('btnGerarArquivo');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+
+        fetch('/filtrador-combinacoes/api/gerar-arquivo', { method: 'POST' })
+            .then(res => res.json())
+            .then(async data => {
+                if (data.sucesso) {
+                    await showAlert(`Arquivo gerado com sucesso!<br>${data.total_combinacoes.toLocaleString('pt-BR')} combinações<br>Tempo: ${data.tempo_geracao}s`, 'Sucesso');
+                    verificarArquivo();
+                } else {
+                    await showAlert('Erro: ' + data.erro, 'Erro');
+                }
+            })
+            .catch(async err => {
+                await showAlert('Erro ao gerar arquivo: ' + err, 'Erro');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cog"></i> Regerar Arquivo';
+            });
+    }
+
+    // Inicializa eventos
+    function inicializarEventos() {
+        // Toggle modo dinâmico/manual
+        document.getElementById('toggleModo').addEventListener('change', function () {
+            modoAutomatico = this.checked;
+            document.getElementById('descricaoModo').textContent = modoAutomatico
+                ? 'Modo Automático: Filtros pré-configurados inteligentes'
+                : 'Modo Manual: Ajuste cada filtro individualmente';
+
+            document.getElementById('painelFiltrosManual').style.display = modoAutomatico ? 'none' : 'block';
+        });
+
+        // Checkboxes de filtros
+        const filtros = ['ParesImpares', 'FaixasNumeros', 'NumerosQuentes', 'Soma', 'Sequencias', 'Primos', 'DigitosIniciais', 'Especificos', 'Bordas', 'Espelho'];
+        filtros.forEach(filtro => {
+            const chkNode = document.getElementById('filtro' + filtro);
+            if (chkNode) {
+                chkNode.addEventListener('change', function () {
+                    document.getElementById('config' + filtro).style.display = this.checked ? 'block' : 'none';
+
+                    // Se abriu a aba de Específicos, tenta carregar o ciclo
+                    if (filtro === 'Especificos' && this.checked) {
+                        carregarRadarCiclo();
+                    }
+                });
+            }
+        });
+
+        // Função para carregar as faltantes do ciclo da API
+        function carregarRadarCiclo() {
+            fetch('/api/ciclos-dezenas/ciclo-atual')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.sucesso && data.dados && data.dados.dezenas_pendentes) {
+                        const pendentes = data.dados.dezenas_pendentes;
+                        if (pendentes.length > 0) {
+                            document.getElementById('alertaCicloDinamico').classList.remove('d-none');
+                            const span = document.getElementById('spanDezenasCiclo');
+                            span.innerHTML = pendentes.map(n => `<span class="badge bg-warning text-dark mx-1 fs-6 shadow-sm" style="border: 1px solid #c9a227">${n.toString().padStart(2, '0')}</span>`).join('');
+
+                            // Armazenar no escopo global para o botão usar
+                            window.dezenasPendentesCiclo = pendentes;
+                        }
+                    }
+                })
+                .catch(err => console.error("Erro ao carregar radar de ciclos:", err));
+        }
+
+        // Lógica do Botão Puxar Ciclo
+        document.getElementById('btnPuxarCiclo')?.addEventListener('click', function () {
+            if (window.dezenasPendentesCiclo && window.dezenasPendentesCiclo.length > 0) {
+                let colhidas = 0;
+                window.dezenasPendentesCiclo.forEach(num => {
+                    // Não marca de verde se o usuário já marcou de vermelho (Excluído)
+                    if (!numerosExcluidos.has(num)) {
+                        const seletor = document.querySelector(`#seletorObrigatorios .numero-seletor[data-numero="${num}"]`);
+                        if (seletor && !seletor.classList.contains('selecionado')) {
+                            seletor.click();
+                            colhidas++;
+                        }
+                    }
+                });
+
+                // Feedback visual do botão
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> Fixadas!';
+                this.style.backgroundColor = '#212529'; // dark
+
+                showAlert(`<b>${colhidas} dezenas</b> do radar de ciclo foram marcadas como Obrigatórias (Verdes) com sucesso!<br/>A Batedeira Global agora as protegerá ativamente.`, 'Radar Integrado');
+
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.style.backgroundColor = '#198754';
+                }, 3000);
+            }
+        });
+
+        // Esvazia se mexer nas bolinhas de pares
+        // document.querySelectorAll('.check-pares-impares').forEach(el => {
+        //     el.addEventListener('change', () => { window.estrategiaDownloadAtiva = null; });
+        // });
+
+        // Botões
+        document.getElementById('btnGerarArquivo').addEventListener('click', gerarArquivo);
+        document.getElementById('btnIniciar').addEventListener('click', iniciarFiltragem);
+        document.getElementById('btnPausar').addEventListener('click', pausarFiltragem);
+        document.getElementById('btnResetar').addEventListener('click', resetarFiltragem);
+        document.getElementById('btnDownloadTxt').addEventListener('click', () => downloadResultado('txt'));
+        document.getElementById('btnDownloadXlsx').addEventListener('click', () => downloadResultado('xlsx'));
+        document.getElementById('btnDownloadHtml').addEventListener('click', () => downloadResultado('html'));
+
+        // Controles de paginação
+        document.getElementById('btnPrimeiraPagina').addEventListener('click', () => irParaPagina(1));
+        document.getElementById('btnPaginaAnterior').addEventListener('click', () => irParaPagina(paginaAtual - 1));
+        document.getElementById('btnProximaPagina').addEventListener('click', () => irParaPagina(paginaAtual + 1));
+        document.getElementById('btnUltimaPagina').addEventListener('click', () => irParaPagina(totalPaginas));
+        document.getElementById('btnIrParaPagina').addEventListener('click', () => {
+            const pagina = parseInt(document.getElementById('inputPagina').value);
+            if (pagina >= 1 && pagina <= totalPaginas) {
+                irParaPagina(pagina);
+            }
+        });
+        document.getElementById('inputPagina').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const pagina = parseInt(document.getElementById('inputPagina').value);
+                if (pagina >= 1 && pagina <= totalPaginas) {
+                    irParaPagina(pagina);
+                }
+            }
+        });
+    }
+
+    // 🌟 NOVO: Configura o seletor de Mês da Sorte Premium (estilo Imagem "esta me agrada")
+    function configurarSeletorMesPremium() {
+        const nomesMesesFull = {
+            1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+            5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+            9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+        };
+
+        const mesAbbrMap = {
+            1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr',
+            5: 'Mai', 6: 'Jun', 7: 'Jul', 8: 'Ago',
+            9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez'
+        };
+
+        fetch('/api/analise/meses')
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.meses) return;
+
+                const meses = data.meses;
+                // Mais Frequente: maior frequencia
+                const maisFrequente = [...meses].sort((a, b) => b.frequencia - a.frequencia)[0];
+                // Mais Atrasado: maior atraso
+                const maisAtrasado = [...meses].sort((a, b) => b.atraso - a.atraso)[0];
+
+                const select = document.getElementById('mesSorte');
+                if (!select) return;
+
+                // Salva o valor atual para tentar restaurar
+                const valorAtual = select.value;
+
+                // Limpa o select
+                select.innerHTML = '';
+
+                // 1. Sem mês
+                const optSem = document.createElement('option');
+                optSem.value = 'Sem';
+                optSem.textContent = 'Sem mês';
+                select.appendChild(optSem);
+
+                // 2. Mais Frequente
+                if (maisFrequente) {
+                    const optFreq = document.createElement('option');
+                    optFreq.value = mesAbbrMap[maisFrequente.mes];
+                    optFreq.textContent = `⭐ Mais Frequente (${nomesMesesFull[maisFrequente.mes]})`;
+                    select.appendChild(optFreq);
+                }
+
+                // 3. Mais Atrasado
+                if (maisAtrasado) {
+                    const optAtr = document.createElement('option');
+                    optAtr.value = mesAbbrMap[maisAtrasado.mes];
+                    optAtr.textContent = `⌛ Mais Atrasado (${nomesMesesFull[maisAtrasado.mes]})`;
+                    select.appendChild(optAtr);
+                }
+
+                // 4. Separador
+                const optSep = document.createElement('option');
+                optSep.disabled = true;
+                optSep.textContent = '────────────────────';
+                select.appendChild(optSep);
+
+                // 5. Restante dos meses (em ordem 1-12)
+                for (let i = 1; i <= 12; i++) {
+                    // Pular os que já estão no topo para não duplicar, conforme imagem "esta me agrada"
+                    if (maisFrequente && i === maisFrequente.mes) continue;
+                    if (maisAtrasado && i === maisAtrasado.mes) continue;
+
+                    const opt = document.createElement('option');
+                    opt.value = mesAbbrMap[i];
+                    opt.textContent = nomesMesesFull[i];
+                    select.appendChild(opt);
+                }
+
+                // Tenta restaurar valor ou seleciona "Sem mês" (como na imagem)
+                if (valorAtual && Array.from(select.options).some(o => o.value === valorAtual)) {
+                    select.value = valorAtual;
+                } else {
+                    select.value = 'Sem';
+                }
+            })
+            .catch(err => console.error("Erro ao carregar meses premium:", err));
+    }
+
+    // Atualiza labels dos ranges
+    function atualizarLabelsRanges() {
+        // Pares/Ímpares usam checkbooks desvinculados, removidos min/maxPares listeners
+
+        // Faixas de Números
+        const faixas = ['Baixos', 'Medios', 'Altos', 'MuitoAltos'];
+        faixas.forEach(faixa => {
+            const minInput = document.getElementById('min' + faixa);
+            const maxInput = document.getElementById('max' + faixa);
+
+            const atualizarFaixa = () => {
+                const min = minInput ? minInput.value : 0;
+                const max = maxInput ? maxInput.value : 7;
+                const elemento = document.getElementById('valor' + faixa);
+                if (elemento) {
+                    elemento.textContent = `${min} a ${max}`;
+                }
+            };
+
+            if (minInput) minInput.addEventListener('input', atualizarFaixa);
+            if (maxInput) maxInput.addEventListener('input', atualizarFaixa);
+        });
+
+        // Dígitos Iniciais
+        const digitos = ['Digito0', 'Digito1', 'Digito2', 'Digito3'];
+        digitos.forEach(digito => {
+            const minInput = document.getElementById('min' + digito);
+            const maxInput = document.getElementById('max' + digito);
+
+            const atualizarDigito = () => {
+                const min = minInput ? minInput.value : 0;
+                const max = maxInput ? maxInput.value : 7;
+                const elemento = document.getElementById('valor' + digito);
+                if (elemento) {
+                    elemento.textContent = `${min} a ${max}`;
+                }
+            };
+
+            if (minInput) minInput.addEventListener('input', atualizarDigito);
+            if (maxInput) maxInput.addEventListener('input', atualizarDigito);
+        });
+
+        // Números Quentes
+        document.getElementById('minQuentes').addEventListener('input', function () {
+            document.getElementById('valorQuentes').textContent = this.value;
+        });
+
+        // Soma
+        const minSoma = document.getElementById('minSoma');
+        const maxSoma = document.getElementById('maxSoma');
+        const atualizarSoma = () => {
+            document.getElementById('valorSoma').textContent = `${minSoma.value} a ${maxSoma.value}`;
+        };
+        minSoma.addEventListener('input', atualizarSoma);
+        maxSoma.addEventListener('input', atualizarSoma);
+
+        // Sequências
+        document.getElementById('maxSequencias').addEventListener('input', function () {
+            document.getElementById('valorSequencias').textContent = this.value;
+        });
+
+        // Espelhos
+        const limiteEspelho = document.getElementById('limiteEspelho');
+        if (limiteEspelho) {
+            limiteEspelho.addEventListener('input', function () {
+                document.getElementById('labelEspelho').textContent = this.value;
+            });
+        }
+
+        // Bordas
+        const valBordaIn = document.getElementById('valBordaIn');
+        const valBordaFim = document.getElementById('valBordaFim');
+        if (valBordaIn) {
+            valBordaIn.addEventListener('input', function () {
+                let v = parseInt(this.value);
+                document.getElementById('labelBordaIn').textContent = v < 10 ? '0' + v : v;
+            });
+        }
+        if (valBordaFim) {
+            valBordaFim.addEventListener('input', function () {
+                let v = parseInt(this.value);
+                document.getElementById('labelBordaFim').textContent = v < 10 ? '0' + v : v;
+            });
+        }
+
+        // Primos
+        const minPrimos = document.getElementById('minPrimos');
+        const maxPrimos = document.getElementById('maxPrimos');
+        const atualizarPrimos = () => {
+            document.getElementById('valorPrimos').textContent = `${minPrimos.value} a ${maxPrimos.value}`;
+        };
+        minPrimos.addEventListener('input', atualizarPrimos);
+        maxPrimos.addEventListener('input', atualizarPrimos);
+
+        // Limite
+        document.getElementById('limiteResultados').addEventListener('input', function () {
+            document.getElementById('valorLimite').textContent = this.value;
+        });
+    }
+
+    // Gera seletores de números específicos
+    function gerarSeletoresNumeros() {
+        const containerObrigatorios = document.getElementById('seletorObrigatorios');
+        const containerExcluidos = document.getElementById('seletorExcluidos');
+
+        for (let i = 1; i <= 31; i++) {
+            // Obrigatórios
+            const divObrig = document.createElement('div');
+            divObrig.className = 'numero-seletor';
+            divObrig.textContent = i;
+            divObrig.dataset.numero = i;
+            divObrig.onclick = function () {
+                if (numerosExcluidos.has(i)) return; // Não pode ser obrigatório e excluído
+
+                if (numerosObrigatorios.has(i)) {
+                    numerosObrigatorios.delete(i);
+                    this.classList.remove('selecionado');
+                } else {
+                    numerosObrigatorios.add(i);
+                    this.classList.add('selecionado');
+                }
+            };
+            containerObrigatorios.appendChild(divObrig);
+
+            // Excluídos
+            const divExcl = document.createElement('div');
+            divExcl.className = 'numero-seletor';
+            divExcl.textContent = i;
+            divExcl.dataset.numero = i;
+            divExcl.onclick = function () {
+                if (numerosObrigatorios.has(i)) return; // Não pode ser excluído e obrigatório
+
+                if (numerosExcluidos.has(i)) {
+                    numerosExcluidos.delete(i);
+                    this.classList.remove('excluido');
+                } else {
+                    numerosExcluidos.add(i);
+                    this.classList.add('excluido');
+                }
+            };
+            containerExcluidos.appendChild(divExcl);
+        }
+    }
+
+    // Inicia filtragem
+    function iniciarFiltragem() {
+        // Coleta filtros
+        const filtros = {};
+
+        // =============================================
+        // NÚCLEO ESTRATÉGICO
+        // =============================================
+        const usarNucleo = document.getElementById('chk-usar-nucleo-filtrador')?.checked;
+        if (usarNucleo) {
+            const nucleoData = localStorage.getItem('nucleoEstrategico');
+            if (nucleoData) {
+                try {
+                    const nucleo = JSON.parse(nucleoData);
+                    filtros.nucleo_estrategico = {
+                        numeros: nucleo.principal || []
+                    };
+                } catch (e) {
+                    console.warn('Erro ao carregar núcleo:', e);
+                }
+            }
+        }
+
+        if (modoAutomatico) {
+            // Modo automático: usa valores padrão inteligentes
+            filtros.pares_impares = { exatos: [3, 4] };
+            filtros.faixas_numeros = {
+                baixos: { min: 1, max: 3 },
+                medios: { min: 2, max: 4 },
+                altos: { min: 2, max: 4 },
+                muito_altos: { min: 0, max: 2 }
+            };
+            filtros.numeros_quentes = { min_presentes: 3 };
+            filtros.soma = { min: 100, max: 150 };
+            filtros.sequencias = { max_consecutivos: 2 };
+        } else {
+            // Modo manual: coleta valores dos inputs
+            if (document.getElementById('filtroParesImpares').checked) {
+                const exatos = Array.from(document.querySelectorAll('.check-pares-impares:checked')).map(el => parseInt(el.value));
+                filtros.pares_impares = {
+                    exatos: exatos
+                };
+            }
+
+            if (document.getElementById('filtroFaixasNumeros').checked) {
+                filtros.faixas_numeros = {
+                    baixos: {
+                        min: parseInt(document.getElementById('minBaixos').value),
+                        max: parseInt(document.getElementById('maxBaixos').value)
+                    },
+                    medios: {
+                        min: parseInt(document.getElementById('minMedios').value),
+                        max: parseInt(document.getElementById('maxMedios').value)
+                    },
+                    altos: {
+                        min: parseInt(document.getElementById('minAltos').value),
+                        max: parseInt(document.getElementById('maxAltos').value)
+                    },
+                    muito_altos: {
+                        min: parseInt(document.getElementById('minMuitoAltos').value),
+                        max: parseInt(document.getElementById('maxMuitoAltos').value)
+                    }
+                };
+            }
+
+            if (document.getElementById('filtroNumerosQuentes').checked) {
+                filtros.numeros_quentes = {
+                    min_presentes: parseInt(document.getElementById('minQuentes').value)
+                };
+            }
+
+            if (document.getElementById('filtroSoma').checked) {
+                filtros.soma = {
+                    min: parseInt(document.getElementById('minSoma').value),
+                    max: parseInt(document.getElementById('maxSoma').value)
+                };
+            }
+
+            if (document.getElementById('filtroSequencias').checked) {
+                filtros.sequencias = {
+                    max_consecutivos: parseInt(document.getElementById('maxSequencias').value)
+                };
+            }
+
+            if (document.getElementById('filtroPrimos').checked) {
+                filtros.primos = {
+                    min: parseInt(document.getElementById('minPrimos').value),
+                    max: parseInt(document.getElementById('maxPrimos').value)
+                };
+            }
+
+            if (document.getElementById('filtroDigitosIniciais').checked) {
+                filtros.digitos_iniciais = {
+                    digito_0: {
+                        min: parseInt(document.getElementById('minDigito0').value),
+                        max: parseInt(document.getElementById('maxDigito0').value)
+                    },
+                    digito_1: {
+                        min: parseInt(document.getElementById('minDigito1').value),
+                        max: parseInt(document.getElementById('maxDigito1').value)
+                    },
+                    digito_2: {
+                        min: parseInt(document.getElementById('minDigito2').value),
+                        max: parseInt(document.getElementById('maxDigito2').value)
+                    },
+                    digito_3: {
+                        min: parseInt(document.getElementById('minDigito3').value),
+                        max: parseInt(document.getElementById('maxDigito3').value)
+                    }
+                };
+            }
+
+            if (document.getElementById('filtroEspecificos').checked) {
+                filtros.numeros_especificos = {
+                    obrigatorios: Array.from(numerosObrigatorios),
+                    excluidos: Array.from(numerosExcluidos)
+                };
+            }
+
+            if (document.getElementById('filtroBordas').checked) {
+                filtros.muralha_bordas = {
+                    inicio_max: parseInt(document.getElementById('valBordaIn').value),
+                    final_min: parseInt(document.getElementById('valBordaFim').value)
+                };
+            }
+
+            if (document.getElementById('filtroEspelho').checked) {
+                filtros.espelhos = {
+                    max_espelhos: parseInt(document.getElementById('limiteEspelho').value)
+                };
+            }
+        }
+
+        const limiteVisualizacao = parseInt(document.getElementById('limiteResultados').value);
+
+        // Mostra progresso
+        document.getElementById('progressoCard').style.display = 'block';
+        document.getElementById('barraProgresso').style.width = '30%';
+        document.getElementById('barraProgresso').textContent = '30%';
+        document.getElementById('btnIniciar').disabled = true;
+        document.getElementById('btnPausar').disabled = false;
+
+        // Envia requisição
+        fetch('/filtrador-combinacoes/api/filtrar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                modo: modoAutomatico ? 'dinamico' : 'manual',
+                filtros: filtros,
+                limite_visualizacao: limiteVisualizacao
+            })
+        })
+            .then(res => res.json())
+            .then(async data => {
+                if (data.sucesso) {
+                    exibirResultados(data);
+                } else {
+                    await showAlert('Erro: ' + data.erro, 'Erro');
+                }
+            })
+            .catch(async err => {
+                await showAlert('Erro ao filtrar: ' + err, 'Erro');
+            })
+            .finally(() => {
+                document.getElementById('progressoCard').style.display = 'none';
+                document.getElementById('btnIniciar').disabled = false;
+                document.getElementById('btnPausar').disabled = true;
+            });
+    }
+
+    // Exibe resultados
+    function exibirResultados(data) {
+        // Atualiza estatísticas
+        document.getElementById('statOriginal').textContent = data.total_original.toLocaleString('pt-BR');
+        document.getElementById('statFiltrado').textContent = data.total_filtrado.toLocaleString('pt-BR');
+        document.getElementById('statReducao').textContent = data.percentual_reducao + '%';
+        document.getElementById('statTempo').textContent = data.tempo_processamento + 's';
+        document.getElementById('totalCombinacoes').textContent = data.total_filtrado.toLocaleString('pt-BR');
+
+        // Armazena total de combinações filtradas
+        totalCombinacoesFiltradas = data.total_filtrado;
+
+        // Atualiza info de visualização
+        document.getElementById('infoVisualizacao').textContent =
+            'Paginação dinâmica - Download contém todas as combinações';
+
+        // Exibe estatísticas dos filtros
+        const containerStats = document.getElementById('listaEstatisticasFiltros');
+        containerStats.innerHTML = '';
+        data.estatisticas_filtros.forEach(stat => {
+            containerStats.innerHTML += `
+                    <div class="filtro-stats mb-2">
+                        <strong>${stat.filtro}:</strong> ${stat.regra}<br>
+                        <small>
+                            Antes: ${stat.antes.toLocaleString('pt-BR')} |
+                            Depois: ${stat.depois.toLocaleString('pt-BR')} |
+                            Eliminadas: ${stat.eliminadas.toLocaleString('pt-BR')} (${(100 - stat.percentual).toFixed(1)}%)
+                        </small>
+                    </div>
+                `;
+        });
+        document.getElementById('estatisticasFiltros').style.display = 'block';
+
+        // Configura paginação
+        totalPaginas = Math.ceil(totalCombinacoesFiltradas / combinacoesPorPagina);
+        paginaAtual = 1;
+
+        // Mostra controles de paginação sempre (mesmo com 1 página)
+        document.getElementById('paginacaoControles').style.display = 'block';
+        document.getElementById('totalPaginas').textContent = totalPaginas;
+
+        // Carrega primeira página do backend
+        carregarPagina(1);
+
+        // Mostra botões de download
+        document.getElementById('botoesDownload').style.display = 'block';
+    }
+
+    // Carrega página do backend
+    async function carregarPagina(pagina) {
+        if (carregandoPagina) return;
+        if (pagina < 1 || pagina > totalPaginas) return;
+
+        carregandoPagina = true;
+        paginaAtual = pagina;
+
+        // Mostra loading
+        document.getElementById('resultadoTabela').innerHTML = `
+                <div class="text-center p-5">
+                    <i class="fas fa-spinner fa-spin fa-3x text-warning mb-3"></i>
+                    <p class="text-muted">Carregando página ${pagina} de ${totalPaginas}...</p>
+                </div>
+            `;
+
+        // Desabilita botões durante carregamento
+        desabilitarBotoesPaginacao(true);
+
+        try {
+            const response = await fetch(`/filtrador-combinacoes/api/obter-pagina?pagina=${pagina}&por_pagina=${combinacoesPorPagina}`);
+            const data = await response.json();
+
+            if (data.sucesso) {
+                renderizarPagina(data);
+            } else {
+                await showAlert('Erro ao carregar página: ' + data.erro, 'Erro');
+                // Se falhar, volta para página 1
+                if (pagina !== 1) {
+                    carregandoPagina = false;
+                    carregarPagina(1);
+                }
+            }
+        } catch (error) {
+            await showAlert('Erro ao carregar página: ' + error, 'Erro');
+        } finally {
+            carregandoPagina = false;
+            desabilitarBotoesPaginacao(false);
+        }
+    }
+
+    // Renderiza os dados da página recebidos do backend
+    function renderizarPagina(data) {
+        const mes = document.getElementById('mesSorte').value;
+        const combinacoes = data.combinacoes;
+
+        let html = '<table class="table table-hover">';
+        html += '<thead class="table-success"><tr><th>#</th><th>Números</th><th>Mês</th><th>Soma</th></tr></thead>';
+        html += '<tbody>';
+
+        combinacoes.forEach((comb, idx) => {
+            const numeroGlobal = data.inicio + idx;
+            const numerosHtml = comb.map(n => `<span class="numero-badge">${String(n).padStart(2, '0')}</span>`).join('');
+            const soma = comb.reduce((a, b) => a + b, 0);
+            html += `
+                    <tr class="combinacao-row">
+                        <td><strong>${numeroGlobal}</strong></td>
+                        <td>${numerosHtml}</td>
+                        <td><span class="mes-badge">${mes}</span></td>
+                        <td><strong>${soma}</strong></td>
+                    </tr>
+                `;
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('resultadoTabela').innerHTML = html;
+
+        // Atualiza info de paginação
+        document.getElementById('infoPaginacao').textContent =
+            `Mostrando ${data.inicio.toLocaleString('pt-BR')}-${data.fim.toLocaleString('pt-BR')} de ${data.total_combinacoes.toLocaleString('pt-BR')}`;
+
+        // Atualiza input de página
+        document.getElementById('inputPagina').value = data.pagina_atual;
+
+        // Atualiza estado dos botões
+        document.getElementById('btnPrimeiraPagina').disabled = data.pagina_atual === 1;
+        document.getElementById('btnPaginaAnterior').disabled = data.pagina_atual === 1;
+        document.getElementById('btnProximaPagina').disabled = data.pagina_atual === data.total_paginas;
+        document.getElementById('btnUltimaPagina').disabled = data.pagina_atual === data.total_paginas;
+
+        // Scroll suave para o topo da tabela
+        document.getElementById('resultadoTabela').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Desabilita/habilita botões de paginação
+    function desabilitarBotoesPaginacao(desabilitar) {
+        document.getElementById('btnPrimeiraPagina').disabled = desabilitar;
+        document.getElementById('btnPaginaAnterior').disabled = desabilitar;
+        document.getElementById('btnProximaPagina').disabled = desabilitar;
+        document.getElementById('btnUltimaPagina').disabled = desabilitar;
+        document.getElementById('btnIrParaPagina').disabled = desabilitar;
+        document.getElementById('inputPagina').disabled = desabilitar;
+    }
+
+    // Ir para uma página específica
+    function irParaPagina(pagina) {
+        if (pagina < 1 || pagina > totalPaginas) return;
+        carregarPagina(pagina);
+    }
+
+    // Obtém a URL de download com todos os parâmetros de nome
+    function obterUrlDownload(formato) {
+        const mes = document.getElementById('mesSorte').value;
+        let url = `/filtrador-combinacoes/api/download/${formato}?mes=${mes}`;
+
+        if (formato === 'txt') {
+            let nomeFinal = "";
+            const partes = [];
+
+            // 1. Identidade de Paridade Especial
+            if (document.getElementById('filtroParesImpares') && document.getElementById('filtroParesImpares').checked) {
+                const checks = Array.from(document.querySelectorAll('.check-pares-impares:checked'));
+                if (checks.length > 0) {
+                    const str = checks.map(c => `${parseInt(c.value)}P${7 - parseInt(c.value)}I`).join('_');
+                    partes.push(str);
+                } else { partes.push('ParesImpares'); }
+            }
+
+            // 2. Demais Painéis (Adiciona Tags)
+            if (document.getElementById('filtroSoma') && document.getElementById('filtroSoma').checked) partes.push('Soma');
+            if (document.getElementById('filtroFaixasNumeros') && document.getElementById('filtroFaixasNumeros').checked) partes.push('Faixas');
+            if (document.getElementById('filtroNumerosQuentes') && document.getElementById('filtroNumerosQuentes').checked) partes.push('Quentes');
+            if (document.getElementById('filtroSequencias') && document.getElementById('filtroSequencias').checked) partes.push('Seq');
+            if (document.getElementById('filtroPrimos') && document.getElementById('filtroPrimos').checked) partes.push('Primos');
+            if (document.getElementById('filtroDigitosIniciais') && document.getElementById('filtroDigitosIniciais').checked) partes.push('Digitos');
+            if (document.getElementById('filtroEspecificos') && document.getElementById('filtroEspecificos').checked) partes.push('Especif');
+            if (document.getElementById('filtroBordas') && document.getElementById('filtroBordas').checked) partes.push('Bordas');
+            if (document.getElementById('filtroEspelho') && document.getElementById('filtroEspelho').checked) partes.push('Espelhos');
+
+            // 3. Monta o nome Cruzando a Matriz de Ouro + Modificadores Ativos
+            if (window.estrategiaDownloadAtiva) {
+                // Veio de uma matriz base
+                nomeFinal = `${window.estrategiaDownloadAtiva} [${partes.join('-')}]`;
+            } else {
+                // Puramente Manual
+                if (partes.length > 0) {
+                    nomeFinal = `Manual [${partes.join('-')}]`;
+                } else {
+                    nomeFinal = 'Direto_Da_Fabrica_Sem_Filtros';
+                }
+            }
+
+            // Trava tamanho extremo do nome do arquivo Windows
+            if (nomeFinal.length > 120) nomeFinal = nomeFinal.substring(0, 120) + '...';
+            url += `&nome=${encodeURIComponent(nomeFinal)}`;
+        }
+        return url;
+    }
+
+    // Download de resultados
+    function downloadResultado(formato) {
+        window.location.href = obterUrlDownload(formato);
+    }
+
+    // Pausa filtragem
+    function pausarFiltragem() {
+        fetch('/filtrador-combinacoes/api/pausar', { method: 'POST' })
+            .then(res => res.json())
+            .then(async data => {
+                if (data.sucesso) {
+                    await showAlert('Processamento pausado', 'Pausado');
+                    document.getElementById('btnPausar').textContent = 'Continuar';
+                    document.getElementById('btnPausar').onclick = continuarFiltragem;
+                }
+            });
+    }
+
+    // Continua filtragem
+    function continuarFiltragem() {
+        fetch('/filtrador-combinacoes/api/continuar', { method: 'POST' })
+            .then(res => res.json())
+            .then(async data => {
+                if (data.sucesso) {
+                    await showAlert('Processamento retomado', 'Retomado');
+                    document.getElementById('btnPausar').textContent = 'Pausar';
+                    document.getElementById('btnPausar').onclick = pausarFiltragem;
+                }
+            });
+    }
+
+    // Reseta filtragem
+    async function resetarFiltragem() {
+        const confirmado = await showConfirm('Resetar todos os filtros e resultados?', 'Resetar');
+        if (confirmado) {
+            fetch('/filtrador-combinacoes/api/resetar', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        location.reload();
+                    }
+                });
+        }
+    }
+
+    // =============================================
+    // NÚCLEO ESTRATÉGICO
+    // =============================================
+    function verificarNucleoDisponivel() {
+        const nucleoData = localStorage.getItem('nucleoEstrategico');
+        const chk = document.getElementById('chk-usar-nucleo-filtrador');
+        const infoDiv = document.getElementById('info-nucleo-filtrador');
+        const numerosSpan = document.getElementById('nucleo-numeros-filtrador');
+
+        if (nucleoData) {
+            try {
+                const nucleo = JSON.parse(nucleoData);
+                const nucleoPrincipal = nucleo.principal || [];
+
+                chk.disabled = false;
+                numerosSpan.textContent = nucleoPrincipal.map(n => String(n).padStart(2, '0')).join(', ');
+
+                if (chk.checked) {
+                    infoDiv.style.display = 'block';
+                }
+            } catch (e) {
+                chk.disabled = true;
+                console.warn('Erro ao carregar núcleo:', e);
+            }
+        } else {
+            chk.disabled = true;
+            infoDiv.style.display = 'none';
+        }
+    }
+
+    // =============================================
+    // AUTOMAÇÃO - ESTRATÉGIA SNIPER LETAL
+    // =============================================
+    function ativarEstrategiaSniper(ativo) {
+        if (!ativo) return;
+
+        // 1. Liga o Modo Manual (Forçar toggleModo para unchecked = Manual)
+        const toggleModo = document.getElementById('toggleModo');
+        if (toggleModo.checked) {
+            toggleModo.click(); // Dispara evento pra trocar painéis se estava Auto
+        }
+
+        // 2. Trava Paridade 3x4 (Min 3 / Máx 4)
+        const chkPares = document.getElementById('filtroParesImpares');
+        if (!chkPares.checked) chkPares.click();
+        document.getElementById('minPares').value = 3;
+        document.getElementById('maxPares').value = 4;
+        document.getElementById('minPares').dispatchEvent(new Event('input'));
+        document.getElementById('maxPares').dispatchEvent(new Event('input'));
+
+        // 3. Trava Soma 100~130
+        const chkSoma = document.getElementById('filtroSoma');
+        if (!chkSoma.checked) chkSoma.click();
+        document.getElementById('minSoma').value = 100;
+        document.getElementById('maxSoma').value = 130;
+        document.getElementById('minSoma').dispatchEvent(new Event('input'));
+        document.getElementById('maxSoma').dispatchEvent(new Event('input'));
+
+        // 4. Trava Sequências Máx 2
+        const chkSeq = document.getElementById('filtroSequencias');
+        if (!chkSeq.checked) chkSeq.click();
+        document.getElementById('maxSequencias').value = 2;
+        document.getElementById('maxSequencias').dispatchEvent(new Event('input'));
+
+        // 5. Puxar Dinamicamente as dezenas!
+        Promise.all([
+            fetch('/api/analise-ausentes/historico').then(res => res.json()),
+            fetch('/api/ciclos-dezenas/ciclo-atual').then(res => res.json())
+        ])
+            .then(([dadosAusentes, dadosCiclo]) => {
+                if (dadosAusentes.frequencia_escapes && dadosCiclo.sucesso) {
+                    // 1. Puxa as top 4 Frias (Excluídas reais)
+                    const friasExtremas = dadosAusentes.frequencia_escapes.slice(0, 4).map(e => e.dezena);
+
+                    // 2. Puxa 2 do Ciclo (Obrigatórias)
+                    let cicloPendentes = dadosCiclo.dados.dezenas_pendentes || [];
+                    // Mistura pra pegar 2 aleatórias pendentes se tiver mais de 2, ou pega as que tiverem
+                    cicloPendentes.sort(() => 0.5 - Math.random());
+                    const verdesObrigatorias = cicloPendentes.slice(0, 2);
+
+                    // Reseta seleções da div Numeros Específicos
+                    const chkEspeciais = document.getElementById('filtroEspecificos');
+                    if (chkEspeciais && !chkEspeciais.checked) chkEspeciais.click();
+
+                    if (typeof numerosExcluidos !== 'undefined') numerosExcluidos.clear();
+                    if (typeof numerosObrigatorios !== 'undefined') numerosObrigatorios.clear();
+
+                    document.querySelectorAll('#seletorExcluidos .numero-seletor, #seletorObrigatorios .numero-seletor').forEach(btn => {
+                        btn.classList.remove('selecionado', 'excluido');
+                    });
+
+                    // Marca Frias de vermelho!
+                    friasExtremas.forEach(dez => {
+                        if (typeof numerosExcluidos !== 'undefined') numerosExcluidos.add(dez);
+                        const btn = document.querySelector('#seletorExcluidos .numero-seletor[data-numero="' + dez + '"]');
+                        if (btn) btn.classList.add('excluido');
+                    });
+
+                    // Marca Ciclos de verde (Obrigatórias)!
+                    verdesObrigatorias.forEach(dez => {
+                        if (typeof numerosObrigatorios !== 'undefined') numerosObrigatorios.add(dez);
+                        const btn = document.querySelector('#seletorObrigatorios .numero-seletor[data-numero="' + dez + '"]');
+                        if (btn) btn.classList.add('selecionado');
+                    });
+
+                    // 6. Joga o Alerta para o Usuário informando o que foi feito!
+                    showAlert(
+                        `<p class='text-start'>Matemática calibrada, alvos fáceis abatidos!</p>
+                    <p class='text-start mb-1 fw-bold text-danger'>🔪 As falhas "<strong>${friasExtremas.join(', ')}</strong>" (Top Escapes) foram descartadas e marcadas de vermelho.</p>
+                    <p class='text-start fw-bold text-success'>✅ As pendências do Ciclo "<strong>${verdesObrigatorias.join(', ')}</strong>" foram fixadas de verde.</p>
+                    <hr>
+                    <p class='text-start text-muted mb-0' style='line-height: 1.3;'><small>O sistema cruzou dados de duas bases analíticas em tempo real para montar a sua grade defensiva. Se desejar, sinta-se livre para ajustar a sua própria intuição nas caixinhas.</small></p>`,
+                        '🎯 GUILHOTINA SNIPER ATIVADA!'
+                    );
+                }
+            })
+            .catch(err => {
+                console.error("Erro na dupla inteligência:", err);
+                showAlert('Calibramos Paridade, Soma e Sequência. Mas a comunicação simultânea com o histórico ou ciclo falhou. Ajuste as dezenas manualmente!', 'Estratégia Incompleta');
+            });
+    }
+
+    // Adicionar event listener do núcleo no inicializarEventos
+    document.addEventListener('DOMContentLoaded', function () {
+        verificarNucleoDisponivel();
+
+        document.getElementById('chk-usar-nucleo-filtrador')?.addEventListener('change', function () {
+            const infoDiv = document.getElementById('info-nucleo-filtrador');
+            infoDiv.style.display = this.checked ? 'block' : 'none';
+        });
+
+        window.addEventListener('storage', verificarNucleoDisponivel);
+
+        // Disparo do Tiro de Sniper!
+        document.getElementById('toggleSniperLetal')?.addEventListener('change', function () {
+            if (this.checked) {
+                ativarEstrategiaSniper(true);
+            }
+        });
+    });
+</script>
+{% endblock %}

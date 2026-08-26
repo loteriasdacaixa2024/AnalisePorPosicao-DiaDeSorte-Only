@@ -1,0 +1,1521 @@
+<!-- MODELO E: REDUÇÃO INTELIGENTE DO ÚLTIMO SORTEIO -->
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Modelo E:</strong> Redução inteligente baseada no último sorteio (DESDOBRAMENTO DO RESULTADO)
+    <button type="button" class="btn btn-sm btn-dark float-end" data-bs-toggle="modal" data-bs-target="#modalExplicacaoE">
+        <i class="fas fa-question-circle me-1"></i>Como funciona?
+    </button>
+</div>
+
+<!-- Modal Explicativo -->
+<div class="modal fade" id="modalExplicacaoE" tabindex="-1" aria-labelledby="modalExplicacaoELabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalExplicacaoELabel">
+                    <i class="fas fa-lightbulb me-2"></i>Como funciona o Modelo E?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="fw-bold text-primary">📘 Conceito:</h6>
+                <p>O Modelo E utiliza os <strong>7 números do último sorteio</strong> como base, fazendo um <strong>desdobramento (redução)</strong> e complementando com números que NÃO saíram.</p>
+
+                <hr>
+
+                <h6 class="fw-bold text-primary">🎯 Níveis de Redução:</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-info">
+                            <tr>
+                                <th>Nível</th>
+                                <th>Fórmula</th>
+                                <th>Jogos</th>
+                                <th>Do Sorteio</th>
+                                <th>Complemento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>C(7,1)</td><td>7</td><td>1 número</td><td>6 números</td></tr>
+                            <tr class="table-warning"><td>2</td><td>C(7,2)</td><td>21</td><td>2 números</td><td>5 números</td></tr>
+                            <tr><td>3</td><td>C(7,3)</td><td>35</td><td>3 números</td><td>4 números</td></tr>
+                            <tr><td>4</td><td>C(7,4)</td><td>35</td><td>4 números</td><td>3 números</td></tr>
+                            <tr><td>5</td><td>C(7,5)</td><td>21</td><td>5 números</td><td>2 números</td></tr>
+                            <tr><td>6</td><td>C(7,6)</td><td>7</td><td>6 números</td><td>1 número</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h6 class="fw-bold text-success mt-3">📊 Exemplo Prático (Nível 2):</h6>
+                <div class="p-3 bg-light rounded mb-3">
+                    <p><strong>Último Sorteio:</strong> <code>03, 07, 12, 18, 22, 28, 31</code></p>
+                    <p><strong>Complementares (24 números):</strong> <code>01, 02, 04, 05, 06, 08, 09, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 23, 24, 25, 26, 27, 29, 30</code></p>
+                    <hr>
+                    <p><strong>C(7,2) = 21 pares do sorteio:</strong></p>
+                    <ul class="small">
+                        <li>Par [03, 07] + 5 complementares balanceados = <code>02, 03, 07, 11, 15, 25, 30</code></li>
+                        <li>Par [03, 12] + 5 complementares balanceados = <code>03, 05, 12, 14, 19, 27, 29</code></li>
+                        <li>... até Par [28, 31]</li>
+                    </ul>
+                </div>
+
+                <h6 class="fw-bold text-success mt-3">⚖️ Balanceamento por Faixas:</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="p-2 bg-primary bg-opacity-10 border border-primary rounded text-center">
+                            <strong>BAIXAS</strong><br>01 a 10
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-2 bg-warning bg-opacity-10 border border-warning rounded text-center">
+                            <strong>MÉDIAS</strong><br>11 a 20
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-2 bg-danger bg-opacity-10 border border-danger rounded text-center">
+                            <strong>ALTAS</strong><br>21 a 31
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>💡 Vantagem:</strong> Aproveita a "inércia estatística" - números do último sorteio têm chance de repetir parcialmente!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Último Sorteio -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-dice me-2"></i>Último Sorteio</h5>
+            <button onclick="carregarUltimoSorteioE()" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-sync-alt me-1"></i>Atualizar
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="loading-sorteio-e" class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 text-muted">Carregando último sorteio...</p>
+        </div>
+        <div id="info-sorteio-e" style="display: none;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-secondary me-2">Concurso</span>
+                        <span class="fw-bold fs-5" id="numero-concurso-e">-</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" id="numeros-sorteio-e">
+                        <!-- Números serão inseridos aqui -->
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        
+                        <span class="badge fs-6 px-3 py-2" id="mes-sorteio-e" style="min-width: 100px;">-</span>
+                    </div>
+                    <small class="text-muted" id="data-sorteio-e">-</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seletor de Modo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Modo de Seleção</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <button onclick="setModoE('automatico')" id="btn-modo-e-automatico" class="modo-btn btn btn-outline-info w-100 p-3 active">
+                    <div style="font-size: 2rem;">🤖</div>
+                    <div class="fw-bold">AUTOMÁTICO</div>
+                    <small class="text-muted">IA escolhe complementos</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoE('hibrido')" id="btn-modo-e-hibrido" class="modo-btn btn btn-outline-info w-100 p-3">
+                    <div style="font-size: 2rem;">🔀</div>
+                    <div class="fw-bold">HÍBRIDO</div>
+                    <small class="text-muted">IA sugere, você ajusta</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoE('manual')" id="btn-modo-e-manual" class="modo-btn btn btn-outline-info w-100 p-3">
+                    <div style="font-size: 2rem;">✋</div>
+                    <div class="fw-bold">MANUAL</div>
+                    <small class="text-muted">Você escolhe complementos</small>
+                </button>
+            </div>
+        </div>
+        <div id="modo-e-descricao" class="alert alert-light mt-3 mb-0">
+            <strong>💡 Modo Atual: AUTOMÁTICO</strong><br>
+            <small>Sistema escolhe os números complementares baseado em estatísticas (quentes, frios, balanceamento)</small>
+        </div>
+    </div>
+</div>
+
+<!-- Configuração -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuração da Redução</h5>
+    </div>
+    <div class="card-body">
+        <!-- Nível de Redução -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">📐 Nível de Redução:</label>
+            <div class="row g-2" id="niveis-reducao-e">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button onclick="setNivelReducaoE(1)" class="btn btn-outline-secondary w-100 nivel-btn" data-nivel="1">
+                        <div class="fw-bold">Nível 1</div>
+                        <small>C(7,1) = 7</small>
+                    </button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button onclick="setNivelReducaoE(2)" class="btn btn-outline-secondary w-100 nivel-btn active" data-nivel="2">
+                        <div class="fw-bold">Nível 2</div>
+                        <small>C(7,2) = 21</small>
+                    </button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button onclick="setNivelReducaoE(3)" class="btn btn-outline-secondary w-100 nivel-btn" data-nivel="3">
+                        <div class="fw-bold">Nível 3</div>
+                        <small>C(7,3) = 35</small>
+                    </button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button onclick="setNivelReducaoE(4)" class="btn btn-outline-secondary w-100 nivel-btn" data-nivel="4">
+                        <div class="fw-bold">Nível 4</div>
+                        <small>C(7,4) = 35</small>
+                    </button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button onclick="setNivelReducaoE(5)" class="btn btn-outline-secondary w-100 nivel-btn" data-nivel="5">
+                        <div class="fw-bold">Nível 5</div>
+                        <small>C(7,5) = 21</small>
+                    </button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button onclick="setNivelReducaoE(6)" class="btn btn-outline-secondary w-100 nivel-btn" data-nivel="6">
+                        <div class="fw-bold">Nível 6</div>
+                        <small>C(7,6) = 7</small>
+                    </button>
+                </div>
+            </div>
+            <div id="nivel-info-e" class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Nível 2:</strong> Cada jogo terá <strong>2 números do sorteio</strong> + <strong>5 complementares</strong> = 7 dezenas
+            </div>
+        </div>
+
+        <!-- Quantidade de Dezenas por Jogo -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">🎯 Dezenas por Jogo:</label>
+            <div class="row g-2" id="dezenas-por-jogo-e">
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(7)" class="btn btn-outline-primary w-100 dezenas-btn active" data-dezenas="7">7</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(8)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="8">8</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(9)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="9">9</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(10)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="10">10</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(11)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="11">11</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(12)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="12">12</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(13)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="13">13</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(14)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="14">14</button>
+                </div>
+                <div class="col-4 col-md-2 col-lg-1">
+                    <button onclick="setDezenasPorJogoE(15)" class="btn btn-outline-primary w-100 dezenas-btn" data-dezenas="15">15</button>
+                </div>
+            </div>
+            <div id="dezenas-info-e" class="alert alert-secondary mt-3">
+                <i class="fas fa-calculator me-2"></i>
+                <strong>Composição:</strong> <span id="dezenas-composicao-e">2 do sorteio + 5 complementares = 7 dezenas</span>
+            </div>
+        </div>
+
+        <!-- Painel Manual/Híbrido - Seleção de Complementares (SEMPRE VISÍVEL QUANDO NÃO É AUTOMÁTICO) -->
+        <div id="painel-e-complementares" class="mb-4" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label fw-bold mb-0">
+                    🟢 Números Complementares (selecione <strong id="complementares-necessarios-count">5</strong> - disponíveis: <span id="complementares-disponiveis-count">24</span>)
+                </label>
+                <div>
+                    <button onclick="sugerirComplementaresE()" id="btn-sugerir-complementares-e" class="btn btn-sm btn-info me-2" style="display:none;">
+                        💡 Sugerir
+                    </button>
+                    <button onclick="selecionarTodosComplementaresE()" class="btn btn-sm btn-success me-2">
+                        ✅ Todos
+                    </button>
+                    <button onclick="limparComplementaresE()" class="btn btn-sm btn-secondary">
+                        🔄 Limpar
+                    </button>
+                </div>
+            </div>
+
+            <!-- GRID DE NÚMEROS 1-31 -->
+            <div class="complementares-grid-container p-3 bg-light rounded border">
+                <div class="d-flex flex-wrap gap-2 justify-content-center" id="complementares-grid-e">
+                    <!-- Grid de números será inserido aqui via JavaScript -->
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="fas fa-lightbulb me-1"></i>
+                    Selecione os números que serão usados como complemento. Números do sorteio anterior estão desabilitados.
+                </small>
+                <span class="badge bg-success" id="complementares-selecionados-count">0 selecionados</span>
+            </div>
+        </div>
+
+        <!-- Mês da Sorte -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">📅 Mês da Sorte:</label>
+            <div class="row g-2 mb-2">
+                <div class="col-md-4">
+                    <button onclick="setMesTipoE('frequente')" id="btn-mes-frequente-e" class="btn btn-outline-success w-100 mes-tipo-btn active">
+                        <i class="fas fa-fire me-1"></i>Mais Frequente
+                        <span class="badge bg-success ms-1" id="badge-mes-frequente-e">-</span>
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button onclick="setMesTipoE('atrasado')" id="btn-mes-atrasado-e" class="btn btn-outline-warning w-100 mes-tipo-btn">
+                        <i class="fas fa-clock me-1"></i>Mais Atrasado
+                        <span class="badge bg-warning text-dark ms-1" id="badge-mes-atrasado-e">-</span>
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button onclick="setMesTipoE('manual')" id="btn-mes-manual-e" class="btn btn-outline-secondary w-100 mes-tipo-btn">
+                        <i class="fas fa-hand-pointer me-1"></i>Escolher
+                    </button>
+                </div>
+            </div>
+            <div id="select-mes-container-e" style="display: none;">
+                <select id="mes-select-e" class="form-select" onchange="onMesSelectChangeE()">
+                    <!-- Opções serão carregadas dinamicamente -->
+                </select>
+            </div>
+            <div class="mt-2">
+                <span class="fw-bold">Mês selecionado: </span>
+                <span class="badge fs-6 px-3 py-2" id="mes-selecionado-badge-e">-</span>
+            </div>
+        </div>
+
+        <!-- Preview -->
+        <div id="preview-e" class="alert alert-warning" style="display:none;">
+            <div class="fw-bold">📊 Preview</div>
+            <div id="preview-texto-e"></div>
+        </div>
+
+        <!-- Botão Gerar -->
+        <button onclick="gerarDesdobramentoE()" id="btn-gerar-e" class="btn btn-lg btn-info w-100 py-3 text-white">
+            <i class="fas fa-magic me-2"></i>GERAR DESDOBRAMENTO
+        </button>
+    </div>
+</div>
+
+<!-- Explicação da IA -->
+<div id="explicacao-section-e" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Estratégia Utilizada</h5>
+    </div>
+    <div class="card-body" id="explicacao-container-e"></div>
+</div>
+
+<!-- Resumo -->
+<div id="resumo-section-e" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resumo do Desdobramento</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded text-center">
+                    <small class="text-primary fw-bold">TOTAL DE JOGOS</small>
+                    <div class="fs-3 fw-bold text-primary" id="total-jogos-e">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-success bg-opacity-10 border border-success rounded text-center">
+                    <small class="text-success fw-bold">CUSTO TOTAL</small>
+                    <div class="fs-3 fw-bold text-success" id="custo-total-e">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-info bg-opacity-10 border border-info rounded text-center">
+                    <small class="text-info fw-bold">NÍVEL</small>
+                    <div class="fs-3 fw-bold text-info" id="nivel-info-resumo-e">2</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-secondary bg-opacity-10 border border-secondary rounded text-center">
+                    <small class="text-secondary fw-bold">MÊS</small>
+                    <div class="fs-4 fw-bold" id="mes-info-e">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Jogos com Botões de Exportação -->
+<div id="jogos-section-e" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-dark text-white">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Jogos Gerados</h5>
+            <div class="btn-group flex-wrap" id="export-buttons-e">
+                <button onclick="exportarTXTE()" class="btn btn-sm btn-success">
+                    <i class="fas fa-file-alt me-1"></i>TXT
+                </button>
+                <button onclick="exportarCSVE()" class="btn btn-sm btn-info">
+                    <i class="fas fa-file-csv me-1"></i>CSV
+                </button>
+                <button onclick="exportarHTMLE()" class="btn btn-sm btn-warning">
+                    <i class="fas fa-file-code me-1"></i>HTML
+                </button>
+                <button onclick="imprimirJogosE()" class="btn btn-sm btn-primary">
+                    <i class="fas fa-print me-1"></i>Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="game-table table table-sm table-hover">
+                <thead class="table-dark" id="jogos-thead-e">
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th colspan="7" class="text-center" id="th-dezenas-e">Dezenas</th>
+                        <th class="text-center">Mês</th>
+                    </tr>
+                </thead>
+                <tbody id="jogos-tbody-e"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- CSS Específico do Modelo E -->
+<style>
+    /* Grid de Complementares */
+    #complementares-grid-e .dezena-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    #complementares-grid-e .dezena-btn:not(:disabled):hover {
+        transform: scale(1.1);
+    }
+
+    #complementares-grid-e .dezena-btn.grupo-b {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-color: #28a745;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+    }
+
+    #complementares-grid-e .dezena-btn:disabled {
+        background-color: #dee2e6;
+        color: #6c757d;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    #complementares-grid-e .dezena-btn.sorteio-base {
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    /* Tabela de jogos */
+    .game-table .fixa-cell {
+        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+        color: white;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .game-table .variavel-cell {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    /* Modo botões */
+    .modo-btn.active {
+        background-color: #0dcaf0 !important;
+        color: white !important;
+        border-color: #0dcaf0 !important;
+    }
+
+    /* Nível botões */
+    .nivel-btn.active {
+        background-color: #0dcaf0 !important;
+        color: white !important;
+        border-color: #0dcaf0 !important;
+    }
+
+    /* Mês botões */
+    .mes-tipo-btn.active {
+        font-weight: bold;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    /* Print styles */
+    @media print {
+        .card-header, .btn, .alert, #painel-e-complementares {
+            display: none !important;
+        }
+        .game-table {
+            width: 100% !important;
+        }
+    }
+</style>
+
+<script>
+(function() {
+    'use strict';
+
+// ========================================================================
+// ESTADO GLOBAL MODELO E
+// ========================================================================
+let modoAtualE = 'automatico';
+let nivelReducaoE = 2;
+let dezenasPorJogoE = 7;  // Nova variável: 7 a 15 dezenas por jogo
+let sorteioBaseE = [];
+let complementaresE = [];
+let complementaresSelecionadosE = [];
+let jogosGeradosE = [];
+let mesSelecionadoE = '';
+let mesSelecionadoNumeroE = 1;
+let mesTipoE = 'frequente';
+let valorApostaE = 2.50;
+let ultimoSorteioDataE = null;
+
+// Dados carregados das APIs
+let CORES_MESES_E = {};
+let MESES_NOMES_E = {
+    1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+    5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+    9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+};
+let MESES_ABREV_E = {
+    1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr',
+    5: 'Mai', 6: 'Jun', 7: 'Jul', 8: 'Ago',
+    9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez'
+};
+let estatisticasMesesE = { frequente: null, atrasado: null };
+
+// Combinações por nível (C(7,n))
+const COMBINACOES_NIVEL = { 1: 7, 2: 21, 3: 35, 4: 35, 5: 21, 6: 7 };
+
+// Função para calcular complementares necessários
+// Complementares = dezenasPorJogo - nivelReducao
+function getComplementaresNecessarios() {
+    return dezenasPorJogoE - nivelReducaoE;
+}
+
+// ========================================================================
+// INICIALIZAÇÃO
+// ========================================================================
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[Modelo E] Inicializando...');
+
+    // Carregar cores e valor da aposta primeiro
+    await Promise.all([
+        carregarCoresMesesAPI_E(),
+        carregarValorApostaAPI_E()
+    ]);
+
+    // Carregar último sorteio ANTES das estatísticas de meses (para ter fallback)
+    await carregarUltimoSorteioE();
+
+    // Carregar estatísticas dos meses da API
+    await carregarEstatisticasMesesAPI_E();
+
+    // Inicializar interface
+    setModoE('automatico');
+    setNivelReducaoE(2);
+    setDezenasPorJogoE(7);
+    atualizarPreviewE();
+
+    console.log('[Modelo E] Inicialização completa!');
+});
+
+// ========================================================================
+// CARREGAMENTO DE APIs
+// ========================================================================
+async function carregarCoresMesesAPI_E() {
+    try {
+        const response = await fetch('/api/cores-meses/listar');
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.sucesso && data.cores) {
+            data.cores.forEach(cor => {
+                CORES_MESES_E[cor.mes] = cor.cor_hex;
+            });
+            console.log('[Modelo E] Cores carregadas:', CORES_MESES_E);
+        }
+    } catch (error) {
+        console.error('[Modelo E] Erro ao carregar cores dos meses:', error);
+        // SEM FALLBACK - cores ficam vazias, usará cor padrão cinza
+    }
+}
+
+async function carregarValorApostaAPI_E() {
+    try {
+        const response = await fetch('/api/configuracoes/valor-aposta');
+        const data = await response.json();
+
+        if (data.sucesso) {
+            valorApostaE = data.valor_aposta || 2.50;
+        }
+    } catch (error) {
+        console.error('[Modelo E] Erro ao carregar valor da aposta:', error);
+    }
+}
+
+async function carregarEstatisticasMesesAPI_E() {
+    try {
+        // Usar a API /api/analise/meses que retorna estatísticas completas
+        const response = await fetch('/api/analise/meses');
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        console.log('[Modelo E] Estatísticas dos meses:', data);
+
+        if (data) {
+            // A API pode retornar diferentes estruturas
+            let mesesData = data.meses || data.estatisticas || data;
+
+            // Se for um array, processar para encontrar mais frequente e mais atrasado
+            if (Array.isArray(mesesData) && mesesData.length > 0) {
+                // Ordenar por frequência (maior primeiro)
+                const porFrequencia = [...mesesData].sort((a, b) => (b.frequencia || 0) - (a.frequencia || 0));
+                if (porFrequencia.length > 0) {
+                    estatisticasMesesE.frequente = porFrequencia[0];
+                }
+
+                // Ordenar por atraso (maior primeiro)
+                const porAtraso = [...mesesData].sort((a, b) => (b.atraso || 0) - (a.atraso || 0));
+                if (porAtraso.length > 0) {
+                    estatisticasMesesE.atrasado = porAtraso[0];
+                }
+            } else if (data.ranking_frequencia || data.ranking_atraso) {
+                // Se for objeto com ranking_frequencia e ranking_atraso
+                if (data.ranking_frequencia && data.ranking_frequencia.length > 0) {
+                    estatisticasMesesE.frequente = data.ranking_frequencia[0];
+                }
+                if (data.ranking_atraso && data.ranking_atraso.length > 0) {
+                    estatisticasMesesE.atrasado = data.ranking_atraso[0];
+                }
+            }
+
+            console.log('[Modelo E] Mês frequente:', estatisticasMesesE.frequente);
+            console.log('[Modelo E] Mês atrasado:', estatisticasMesesE.atrasado);
+
+            // Atualizar badges
+            atualizarBadgesMesesE();
+        }
+    } catch (error) {
+        console.error('[Modelo E] Erro ao carregar estatísticas dos meses:', error);
+        // Mostrar erro nos badges - SEM FALLBACK
+        document.getElementById('badge-mes-frequente-e').textContent = 'Erro API';
+        document.getElementById('badge-mes-atrasado-e').textContent = 'Erro API';
+    }
+}
+
+async function carregarUltimoSorteioE() {
+    const loadingEl = document.getElementById('loading-sorteio-e');
+    const infoEl = document.getElementById('info-sorteio-e');
+
+    loadingEl.style.display = 'block';
+    infoEl.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/sorteios?limit=1');
+        const data = await response.json();
+
+        console.log('[Modelo E] Dados do último sorteio:', data);
+
+        // API retorna data.sorteios (sem data.sucesso)
+        if (data && data.sorteios && data.sorteios.length > 0) {
+            const sorteio = data.sorteios[0];
+            ultimoSorteioDataE = sorteio;
+
+            // Extrair números - usando a estrutura correta da API
+            // A API retorna: sorteio.posicoes.posicao_1, posicao_2, ..., posicao_7
+            const numeros = [
+                sorteio.posicoes.posicao_1,
+                sorteio.posicoes.posicao_2,
+                sorteio.posicoes.posicao_3,
+                sorteio.posicoes.posicao_4,
+                sorteio.posicoes.posicao_5,
+                sorteio.posicoes.posicao_6,
+                sorteio.posicoes.posicao_7
+            ];
+
+            console.log('[Modelo E] Números extraídos:', numeros);
+
+            sorteioBaseE = numeros.sort((a, b) => a - b);
+
+            // Calcular complementares (1-31 menos os sorteados)
+            complementaresE = [];
+            for (let i = 1; i <= 31; i++) {
+                if (!sorteioBaseE.includes(i)) {
+                    complementaresE.push(i);
+                }
+            }
+
+            // No modo automático, selecionar todos os complementares
+            if (modoAtualE === 'automatico') {
+                complementaresSelecionadosE = [...complementaresE];
+            }
+
+            // Atualizar interface
+            renderizarSorteioE(sorteio);
+            criarGridComplementaresE();
+
+            // Definir mês baseado na estatística
+            if (estatisticasMesesE.frequente) {
+                mesSelecionadoNumeroE = estatisticasMesesE.frequente.mes;
+                mesSelecionadoE = MESES_ABREV_E[mesSelecionadoNumeroE] || 'Jan';
+                atualizarMesSelecionadoE(estatisticasMesesE.frequente.mes);
+            }
+
+            atualizarPreviewE();
+        }
+    } catch (error) {
+        console.error('[Modelo E] Erro ao carregar último sorteio:', error);
+    } finally {
+        loadingEl.style.display = 'none';
+        infoEl.style.display = 'block';
+    }
+}
+
+function renderizarSorteioE(sorteio) {
+    // Número do concurso
+    document.getElementById('numero-concurso-e').textContent = sorteio.concurso || '-';
+
+    // Números
+    const numerosContainer = document.getElementById('numeros-sorteio-e');
+    numerosContainer.innerHTML = '';
+
+    if (sorteioBaseE.length > 0) {
+        sorteioBaseE.forEach(num => {
+            const span = document.createElement('span');
+            span.className = 'badge bg-primary fs-5 px-3 py-2 me-1';
+            span.textContent = String(num).padStart(2, '0');
+            numerosContainer.appendChild(span);
+        });
+    } else {
+        numerosContainer.innerHTML = '<span class="text-muted">Nenhum número encontrado</span>';
+    }
+
+    // Mês do sorteio - API retorna mes_sorte (número) e mes_sorte_nome (string)
+    const mesNumero = sorteio.mes_sorte;
+    const mesNome = sorteio.mes_sorte_nome || MESES_NOMES_E[mesNumero] || '-';
+
+    console.log('[Modelo E] Mês do sorteio:', mesNumero, mesNome);
+
+    const mesBadge = document.getElementById('mes-sorteio-e');
+    mesBadge.textContent = mesNome;
+    if (mesNumero) {
+        aplicarCorMesE(mesBadge, mesNumero);
+    }
+
+    // Data do sorteio - API retorna data_sorteio
+    if (sorteio.data_sorteio) {
+        document.getElementById('data-sorteio-e').textContent = sorteio.data_sorteio;
+    }
+}
+
+// ========================================================================
+// FUNÇÕES DE COR
+// ========================================================================
+function aplicarCorMesE(elemento, mesNumero) {
+    const cor = CORES_MESES_E[mesNumero] || '#6c757d';
+    elemento.style.backgroundColor = cor;
+    elemento.style.color = calcularContrasteE(cor);
+    elemento.style.border = 'none';
+}
+
+function calcularContrasteE(hexColor) {
+    if (!hexColor || hexColor.length < 7) return '#ffffff';
+    const r = parseInt(hexColor.substr(1, 2), 16);
+    const g = parseInt(hexColor.substr(3, 2), 16);
+    const b = parseInt(hexColor.substr(5, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+}
+
+// ========================================================================
+// MODO DE SELEÇÃO
+// ========================================================================
+function setModoE(modo) {
+    modoAtualE = modo;
+
+    document.querySelectorAll('[id^="btn-modo-e-"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-modo-e-${modo}`).classList.add('active');
+
+    const descricoes = {
+        automatico: {
+            titulo: 'AUTOMÁTICO',
+            texto: 'Sistema escolhe os números complementares baseado em estatísticas (quentes, frios, balanceamento)'
+        },
+        hibrido: {
+            titulo: 'HÍBRIDO',
+            texto: 'Sistema sugere os complementares, mas você pode ajustar clicando nos números'
+        },
+        manual: {
+            titulo: 'MANUAL',
+            texto: 'Você escolhe manualmente quais números complementares usar'
+        }
+    };
+
+    const desc = descricoes[modo];
+    document.getElementById('modo-e-descricao').innerHTML = `
+        <strong>💡 Modo Atual: ${desc.titulo}</strong><br>
+        <small>${desc.texto}</small>
+    `;
+
+    // Mostrar/ocultar painel de complementares
+    const painelComplementares = document.getElementById('painel-e-complementares');
+    const btnSugerir = document.getElementById('btn-sugerir-complementares-e');
+    const maxComplementares = getComplementaresNecessarios();
+
+    // Atualizar contador de necessários
+    const contadorNecessarios = document.getElementById('complementares-necessarios-count');
+    if (contadorNecessarios) {
+        contadorNecessarios.textContent = maxComplementares;
+    }
+
+    if (modo === 'automatico') {
+        painelComplementares.style.display = 'none';
+        complementaresSelecionadosE = [...complementaresE];
+    } else {
+        // MOSTRAR O PAINEL PARA HÍBRIDO E MANUAL
+        painelComplementares.style.display = 'block';
+        btnSugerir.style.display = modo === 'hibrido' ? 'inline-block' : 'none';
+
+        // Recriar o grid para garantir que está atualizado
+        criarGridComplementaresE();
+
+        if (modo === 'hibrido') {
+            sugerirComplementaresE();
+        } else if (modo === 'manual') {
+            // No manual, limpar seleção para usuário escolher
+            complementaresSelecionadosE = [];
+            atualizarVisualizacaoComplementaresE();
+        }
+    }
+
+    atualizarContadorSelecionadosE();
+    atualizarPreviewE();
+}
+
+// ========================================================================
+// NÍVEL DE REDUÇÃO
+// ========================================================================
+function setNivelReducaoE(nivel) {
+    nivelReducaoE = nivel;
+
+    document.querySelectorAll('.nivel-btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-info');
+        btn.classList.add('btn-outline-secondary');
+    });
+
+    const btnAtivo = document.querySelector(`.nivel-btn[data-nivel="${nivel}"]`);
+    if (btnAtivo) {
+        btnAtivo.classList.remove('btn-outline-secondary');
+        btnAtivo.classList.add('active', 'btn-info');
+    }
+
+    // Atualizar info e composição
+    atualizarInfoComposicaoE();
+
+    // Se estiver em modo manual/híbrido, truncar seleção se exceder o novo limite
+    const maxComplementares = getComplementaresNecessarios();
+    if (modoAtualE !== 'automatico') {
+        if (complementaresSelecionadosE.length > maxComplementares) {
+            complementaresSelecionadosE = complementaresSelecionadosE.slice(0, maxComplementares);
+            atualizarVisualizacaoComplementaresE();
+            atualizarContadorSelecionadosE();
+        }
+    }
+
+    atualizarPreviewE();
+}
+
+// Nova função para definir dezenas por jogo
+function setDezenasPorJogoE(dezenas) {
+    dezenasPorJogoE = dezenas;
+
+    document.querySelectorAll('.dezenas-btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-primary');
+        btn.classList.add('btn-outline-primary');
+    });
+
+    const btnAtivo = document.querySelector(`.dezenas-btn[data-dezenas="${dezenas}"]`);
+    if (btnAtivo) {
+        btnAtivo.classList.remove('btn-outline-primary');
+        btnAtivo.classList.add('active', 'btn-primary');
+    }
+
+    // Atualizar info e composição
+    atualizarInfoComposicaoE();
+
+    // Se estiver em modo manual/híbrido, truncar seleção se exceder o novo limite
+    const maxComplementares = getComplementaresNecessarios();
+    if (modoAtualE !== 'automatico') {
+        if (complementaresSelecionadosE.length > maxComplementares) {
+            complementaresSelecionadosE = complementaresSelecionadosE.slice(0, maxComplementares);
+            atualizarVisualizacaoComplementaresE();
+            atualizarContadorSelecionadosE();
+        }
+    }
+
+    atualizarPreviewE();
+}
+
+// Função para atualizar infos de composição
+function atualizarInfoComposicaoE() {
+    const complementoQtd = getComplementaresNecessarios();
+
+    // Info do nível
+    document.getElementById('nivel-info-e').innerHTML = `
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Nível ${nivelReducaoE}:</strong> Cada jogo terá <strong>${nivelReducaoE} número${nivelReducaoE > 1 ? 's' : ''} do sorteio</strong> +
+        <strong>${complementoQtd} complementar${complementoQtd > 1 ? 'es' : ''}</strong> = ${dezenasPorJogoE} dezenas
+    `;
+
+    // Info da composição
+    document.getElementById('dezenas-composicao-e').textContent =
+        `${nivelReducaoE} do sorteio + ${complementoQtd} complementares = ${dezenasPorJogoE} dezenas`;
+
+    // Atualizar contador de complementares necessários
+    const contadorNecessarios = document.getElementById('complementares-necessarios-count');
+    if (contadorNecessarios) {
+        contadorNecessarios.textContent = complementoQtd;
+    }
+}
+
+// ========================================================================
+// GRID DE COMPLEMENTARES
+// ========================================================================
+function criarGridComplementaresE() {
+    const grid = document.getElementById('complementares-grid-e');
+    if (!grid) {
+        console.error('[Modelo E] Grid de complementares não encontrado!');
+        return;
+    }
+
+    grid.innerHTML = '';
+
+    for (let i = 1; i <= 31; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dezena-btn btn btn-outline-secondary';
+        btn.textContent = String(i).padStart(2, '0');
+        btn.dataset.numero = i;
+
+        if (sorteioBaseE.includes(i)) {
+            // Número do sorteio anterior - desabilitado e com estilo diferente
+            btn.disabled = true;
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('sorteio-base');
+            btn.title = 'Número do sorteio anterior (base da redução)';
+        } else {
+            // Número complementar disponível
+            btn.onclick = () => toggleComplementarE(i);
+            if (complementaresSelecionadosE.includes(i)) {
+                btn.classList.add('grupo-b');
+            }
+        }
+
+        grid.appendChild(btn);
+    }
+
+    document.getElementById('complementares-disponiveis-count').textContent = complementaresE.length;
+    atualizarContadorSelecionadosE();
+
+    console.log('[Modelo E] Grid criado com', complementaresE.length, 'complementares disponíveis');
+}
+
+function toggleComplementarE(num) {
+    if (sorteioBaseE.includes(num)) return;
+
+    const btn = document.querySelector(`#complementares-grid-e button[data-numero="${num}"]`);
+    const maxComplementares = getComplementaresNecessarios();
+
+    if (complementaresSelecionadosE.includes(num)) {
+        // Remover seleção
+        complementaresSelecionadosE = complementaresSelecionadosE.filter(n => n !== num);
+        btn.classList.remove('grupo-b');
+    } else {
+        // Verificar limite antes de adicionar
+        if (complementaresSelecionadosE.length >= maxComplementares) {
+            mostrarAlertaE(`⚠️ Limite atingido! Nível ${nivelReducaoE} permite apenas ${maxComplementares} complementar(es).`, 'warning');
+            return;
+        }
+        complementaresSelecionadosE.push(num);
+        complementaresSelecionadosE.sort((a, b) => a - b);
+        btn.classList.add('grupo-b');
+    }
+
+    atualizarContadorSelecionadosE();
+    atualizarPreviewE();
+}
+
+function selecionarTodosComplementaresE() {
+    const maxComplementares = getComplementaresNecessarios();
+    // Limitar ao máximo permitido pelo nível
+    complementaresSelecionadosE = complementaresE.slice(0, maxComplementares);
+    atualizarVisualizacaoComplementaresE();
+    atualizarContadorSelecionadosE();
+    atualizarPreviewE();
+}
+
+function limparComplementaresE() {
+    complementaresSelecionadosE = [];
+    atualizarVisualizacaoComplementaresE();
+    atualizarContadorSelecionadosE();
+    atualizarPreviewE();
+}
+
+function atualizarVisualizacaoComplementaresE() {
+    document.querySelectorAll('#complementares-grid-e .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (!sorteioBaseE.includes(num)) {
+            if (complementaresSelecionadosE.includes(num)) {
+                btn.classList.add('grupo-b');
+            } else {
+                btn.classList.remove('grupo-b');
+            }
+        }
+    });
+}
+
+function atualizarContadorSelecionadosE() {
+    const contador = document.getElementById('complementares-selecionados-count');
+    const maxComplementares = getComplementaresNecessarios();
+    if (contador) {
+        contador.textContent = `${complementaresSelecionadosE.length}/${maxComplementares} selecionados`;
+        // Mudar cor se atingiu o limite
+        if (complementaresSelecionadosE.length === maxComplementares) {
+            contador.classList.remove('bg-warning', 'bg-danger');
+            contador.classList.add('bg-success');
+        } else if (complementaresSelecionadosE.length > 0) {
+            contador.classList.remove('bg-success', 'bg-danger');
+            contador.classList.add('bg-warning');
+        } else {
+            contador.classList.remove('bg-success', 'bg-warning');
+            contador.classList.add('bg-secondary');
+        }
+    }
+}
+
+async function sugerirComplementaresE() {
+    const maxComplementares = getComplementaresNecessarios();
+
+    try {
+        const response = await fetch('/api/desdobramento/sugestao-automatica');
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.grupoB && data.grupoB.length > 0) {
+            // Usar sugestão do grupo B como base, limitando ao máximo
+            const sugeridos = data.grupoB.filter(n => complementaresE.includes(n));
+            complementaresSelecionadosE = sugeridos.slice(0, maxComplementares);
+            atualizarVisualizacaoComplementaresE();
+            atualizarContadorSelecionadosE();
+            atualizarPreviewE();
+        } else {
+            // API não retornou sugestões válidas
+            mostrarAlertaE('⚠️ API não retornou sugestões. Selecione manualmente.', 'warning');
+        }
+    } catch (error) {
+        console.error('[Modelo E] Erro ao sugerir complementares:', error);
+        // SEM FALLBACK - mostrar erro
+        mostrarAlertaE('❌ Erro ao buscar sugestões da API. Selecione manualmente.', 'danger');
+    }
+}
+
+// ========================================================================
+// MÊS DA SORTE
+// ========================================================================
+function atualizarBadgesMesesE() {
+    if (estatisticasMesesE.frequente) {
+        const mesFreq = estatisticasMesesE.frequente;
+        const badge = document.getElementById('badge-mes-frequente-e');
+        const mesNome = MESES_NOMES_E[mesFreq.mes] || mesFreq.nome || '-';
+        badge.textContent = mesNome;
+        // Aplicar cor ao badge
+        if (mesFreq.mes) {
+            aplicarCorMesE(badge, mesFreq.mes);
+        }
+
+        // SELECIONAR AUTOMATICAMENTE o mês mais frequente como padrão
+        if (!mesSelecionadoE && mesFreq.mes) {
+            atualizarMesSelecionadoE(mesFreq.mes);
+        }
+    }
+
+    if (estatisticasMesesE.atrasado) {
+        const mesAtr = estatisticasMesesE.atrasado;
+        const badge = document.getElementById('badge-mes-atrasado-e');
+        const mesNome = MESES_NOMES_E[mesAtr.mes] || mesAtr.nome || '-';
+        badge.textContent = mesNome;
+        // Aplicar cor ao badge
+        if (mesAtr.mes) {
+            aplicarCorMesE(badge, mesAtr.mes);
+        }
+    }
+
+    // Popular select de meses
+    popularSelectMesesE();
+}
+
+function popularSelectMesesE() {
+    const select = document.getElementById('mes-select-e');
+    select.innerHTML = '';
+
+    for (let i = 1; i <= 12; i++) {
+        const option = document.createElement('option');
+        option.value = MESES_ABREV_E[i];
+        option.textContent = MESES_NOMES_E[i];
+        option.dataset.mesNumero = i;
+        select.appendChild(option);
+    }
+}
+
+function setMesTipoE(tipo) {
+    mesTipoE = tipo;
+
+    document.querySelectorAll('.mes-tipo-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-mes-${tipo}-e`).classList.add('active');
+
+    const selectContainer = document.getElementById('select-mes-container-e');
+
+    if (tipo === 'manual') {
+        selectContainer.style.display = 'block';
+        const select = document.getElementById('mes-select-e');
+        if (select.value) {
+            const mesNumero = parseInt(select.options[select.selectedIndex].dataset.mesNumero);
+            atualizarMesSelecionadoE(mesNumero);
+        }
+    } else {
+        selectContainer.style.display = 'none';
+
+        if (tipo === 'frequente' && estatisticasMesesE.frequente) {
+            atualizarMesSelecionadoE(estatisticasMesesE.frequente.mes);
+        } else if (tipo === 'atrasado' && estatisticasMesesE.atrasado) {
+            atualizarMesSelecionadoE(estatisticasMesesE.atrasado.mes);
+        }
+    }
+
+    atualizarPreviewE();
+}
+
+function onMesSelectChangeE() {
+    const select = document.getElementById('mes-select-e');
+    const mesNumero = parseInt(select.options[select.selectedIndex].dataset.mesNumero);
+    atualizarMesSelecionadoE(mesNumero);
+    atualizarPreviewE();
+}
+
+function atualizarMesSelecionadoE(mesNumero) {
+    mesSelecionadoNumeroE = mesNumero;
+    mesSelecionadoE = MESES_ABREV_E[mesNumero];
+
+    const badge = document.getElementById('mes-selecionado-badge-e');
+    badge.textContent = MESES_NOMES_E[mesNumero];
+    aplicarCorMesE(badge, mesNumero);
+}
+
+// ========================================================================
+// PREVIEW
+// ========================================================================
+function atualizarPreviewE() {
+    const preview = document.getElementById('preview-e');
+    const previewTexto = document.getElementById('preview-texto-e');
+
+    if (sorteioBaseE.length !== 7) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    const totalJogos = COMBINACOES_NIVEL[nivelReducaoE];
+    const complementaresNecessarios = getComplementaresNecessarios();
+    const custo = (totalJogos * valorApostaE).toFixed(2);
+
+    preview.style.display = 'block';
+    previewTexto.innerHTML = `
+        <strong>Base (sorteio anterior):</strong> ${sorteioBaseE.map(n => String(n).padStart(2, '0')).join(', ')}<br>
+        <strong>Nível:</strong> ${nivelReducaoE} (${nivelReducaoE} do sorteio + ${complementaresNecessarios} complementares)<br>
+        <strong>Dezenas por jogo:</strong> ${dezenasPorJogoE}<br>
+        <strong>Complementares selecionados:</strong> ${complementaresSelecionadosE.length}/${complementaresNecessarios}<br>
+        <strong>Total de jogos:</strong> C(7,${nivelReducaoE}) = ${totalJogos} jogos<br>
+        <strong>Custo:</strong> R$ ${custo}
+    `;
+}
+
+// ========================================================================
+// GERAR DESDOBRAMENTO
+// ========================================================================
+async function gerarDesdobramentoE() {
+    if (sorteioBaseE.length !== 7) {
+        mostrarAlertaE('Erro: Sorteio base não carregado corretamente', 'danger');
+        return;
+    }
+
+    const maxComplementares = getComplementaresNecessarios();
+
+    // No modo manual/híbrido, verificar se selecionou exatamente o número necessário
+    if (modoAtualE !== 'automatico') {
+        if (complementaresSelecionadosE.length !== maxComplementares) {
+            mostrarAlertaE(`⚠️ Selecione exatamente ${maxComplementares} número(s) complementar(es) para o Nível ${nivelReducaoE}. Você selecionou ${complementaresSelecionadosE.length}.`, 'warning');
+            return;
+        }
+    }
+
+    if (!mesSelecionadoE) {
+        mostrarAlertaE('Erro: Selecione um mês da sorte', 'danger');
+        return;
+    }
+
+    const btnGerar = document.getElementById('btn-gerar-e');
+    btnGerar.disabled = true;
+    btnGerar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Gerando...';
+
+    try {
+        const response = await fetch('/api/desdobramento/gerar-jogos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                modelo: 'E',
+                nivel: nivelReducaoE,
+                dezenas_por_jogo: dezenasPorJogoE,
+                sorteio_base: sorteioBaseE,
+                complementares: complementaresSelecionadosE,
+                mes: mesSelecionadoE
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.erro) {
+            mostrarAlertaE('Erro: ' + data.erro, 'danger');
+            return;
+        }
+
+        jogosGeradosE = data.jogos;
+        mostrarJogosE(data);
+        mostrarResumoE(data);
+        mostrarExplicacaoE(data);
+
+        // Scroll para os resultados
+        document.getElementById('resumo-section-e').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('[Modelo E] Erro:', error);
+        mostrarAlertaE('Erro ao gerar desdobramento', 'danger');
+    } finally {
+        btnGerar.disabled = false;
+        btnGerar.innerHTML = '<i class="fas fa-magic me-2"></i>GERAR DESDOBRAMENTO';
+    }
+}
+
+function mostrarAlertaE(mensagem, tipo) {
+    const container = document.getElementById('preview-e').parentNode;
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    container.insertBefore(alertDiv, document.getElementById('btn-gerar-e'));
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+
+function mostrarJogosE(data) {
+    const tbody = document.getElementById('jogos-tbody-e');
+    tbody.innerHTML = '';
+
+    // Atualizar colspan do header baseado em dezenasPorJogoE
+    const thDezenas = document.getElementById('th-dezenas-e');
+    if (thDezenas) {
+        thDezenas.setAttribute('colspan', dezenasPorJogoE);
+    }
+
+    data.jogos.forEach((jogo, idx) => {
+        const tr = document.createElement('tr');
+
+        let html = `<td class="fw-bold text-center">${jogo.numero || idx + 1}</td>`;
+
+        // Colorir números: azul = do sorteio, verde = complementar
+        const numerosCompletos = jogo.numeros_completos || jogo.numeros || [];
+        numerosCompletos.forEach(num => {
+            const isDoSorteio = sorteioBaseE.includes(num);
+            const cellClass = isDoSorteio ? 'fixa-cell' : 'variavel-cell';
+            html += `<td class="${cellClass}">${String(num).padStart(2, '0')}</td>`;
+        });
+
+        // Mês com cor
+        const mesJogo = jogo.mes || mesSelecionadoE;
+        const mesNumero = Object.keys(MESES_ABREV_E).find(k => MESES_ABREV_E[k] === mesJogo) || mesSelecionadoNumeroE;
+        const corMes = CORES_MESES_E[mesNumero] || '#6c757d';
+        html += `<td class="text-center"><span class="badge" style="background-color: ${corMes}; color: ${calcularContrasteE(corMes)}">${mesJogo}</span></td>`;
+
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('jogos-section-e').style.display = 'block';
+}
+
+function mostrarResumoE(data) {
+    document.getElementById('total-jogos-e').textContent = data.total_jogos;
+    document.getElementById('custo-total-e').textContent = `R$ ${(data.custo_total || data.total_jogos * valorApostaE).toFixed(2)}`;
+    document.getElementById('nivel-info-resumo-e').textContent = `${nivelReducaoE} (${dezenasPorJogoE} dez.)`;
+
+    // Mês com cor
+    const mesInfo = document.getElementById('mes-info-e');
+    mesInfo.textContent = MESES_NOMES_E[mesSelecionadoNumeroE] || data.mes;
+    aplicarCorMesE(mesInfo, mesSelecionadoNumeroE);
+    mesInfo.classList.add('badge');
+
+    document.getElementById('resumo-section-e').style.display = 'block';
+}
+
+function mostrarExplicacaoE(data) {
+    const container = document.getElementById('explicacao-container-e');
+    container.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="alert alert-primary mb-2">
+                    <i class="fas fa-dice me-2"></i>
+                    <strong>Base do Sorteio:</strong><br>
+                    ${sorteioBaseE.map(n => String(n).padStart(2, '0')).join(', ')}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-success mb-2">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    <strong>Complementares Usados:</strong><br>
+                    ${complementaresSelecionadosE.slice(0, 10).map(n => String(n).padStart(2, '0')).join(', ')}${complementaresSelecionadosE.length > 10 ? '...' : ''}
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info">
+            <i class="fas fa-lightbulb me-2"></i>
+            <strong>Estratégia:</strong> Nível ${nivelReducaoE} - Cada jogo contém ${nivelReducaoE} número(s) do sorteio anterior
+            combinado(s) com ${getComplementaresNecessarios()} número(s) complementar(es),
+            aproveitando a tendência de repetição parcial.
+        </div>
+    `;
+
+    document.getElementById('explicacao-section-e').style.display = 'block';
+}
+
+// ========================================================================
+// EXPORTAÇÃO
+// ========================================================================
+function exportarTXTE() {
+    if (jogosGeradosE.length === 0) {
+        mostrarAlertaE('Nenhum jogo gerado para exportar', 'warning');
+        return;
+    }
+
+    let conteudo = '';
+
+    jogosGeradosE.forEach(jogo => {
+        const numerosCompletos = jogo.numeros_completos || jogo.numeros || [];
+        const numeros = numerosCompletos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${numeros} ${jogo.mes || mesSelecionadoE}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `modelo-e-nivel${nivelReducaoE}-${dezenasPorJogoE}dez-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportarCSVE() {
+    if (jogosGeradosE.length === 0) {
+        mostrarAlertaE('Nenhum jogo gerado para exportar', 'warning');
+        return;
+    }
+
+    // Criar header dinâmico baseado em dezenasPorJogoE
+    let header = 'JOGO';
+    for (let i = 1; i <= dezenasPorJogoE; i++) {
+        header += `;D${i}`;
+    }
+    header += ';MES;DO_SORTEIO;COMPLEMENTARES\n';
+    let conteudo = header;
+
+    jogosGeradosE.forEach((jogo, idx) => {
+        const numerosCompletos = jogo.numeros_completos || jogo.numeros || [];
+        const doSorteio = numerosCompletos.filter(n => sorteioBaseE.includes(n)).map(n => String(n).padStart(2, '0')).join(' ');
+        const complementares = numerosCompletos.filter(n => !sorteioBaseE.includes(n)).map(n => String(n).padStart(2, '0')).join(' ');
+        const numeros = numerosCompletos.map(n => String(n).padStart(2, '0'));
+        conteudo += `${jogo.numero || idx + 1};${numeros.join(';')};${jogo.mes || mesSelecionadoE};${doSorteio};${complementares}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `modelo-e-nivel${nivelReducaoE}-${dezenasPorJogoE}dez-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportarHTMLE() {
+    if (jogosGeradosE.length === 0) {
+        mostrarAlertaE('Nenhum jogo gerado para exportar', 'warning');
+        return;
+    }
+
+    // Criar colunas dinâmicas baseado em dezenasPorJogoE
+    let colunasHeader = '';
+    for (let i = 1; i <= dezenasPorJogoE; i++) {
+        colunasHeader += `<th>D${i}</th>`;
+    }
+
+    let html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Modelo E - Redução Inteligente - Nível ${nivelReducaoE} (${dezenasPorJogoE} dezenas)</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #0dcaf0; }
+        .info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #343a40; color: white; padding: 10px; }
+        td { padding: 8px; text-align: center; border: 1px solid #dee2e6; }
+        .fixa { background: linear-gradient(135deg, #0d6efd, #6610f2); color: white; font-weight: bold; }
+        .variavel { background: linear-gradient(135deg, #198754, #20c997); color: white; font-weight: bold; }
+        .mes { padding: 5px 15px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Modelo E - Redução Inteligente</h1>
+    <div class="info">
+        <p><strong>Concurso Base:</strong> ${ultimoSorteioDataE?.concurso || '-'}</p>
+        <p><strong>Números Base:</strong> ${sorteioBaseE.map(n => String(n).padStart(2, '0')).join(', ')}</p>
+        <p><strong>Nível:</strong> ${nivelReducaoE} (${nivelReducaoE} do sorteio + ${getComplementaresNecessarios()} complementares)</p>
+        <p><strong>Dezenas por Jogo:</strong> ${dezenasPorJogoE}</p>
+        <p><strong>Total de Jogos:</strong> ${jogosGeradosE.length}</p>
+        <p><strong>Custo Total:</strong> R$ ${(jogosGeradosE.length * valorApostaE).toFixed(2)}</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                ${colunasHeader}
+                <th>Mês</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    jogosGeradosE.forEach((jogo, idx) => {
+        const numerosCompletos = jogo.numeros_completos || jogo.numeros || [];
+        html += `<tr><td>${jogo.numero || idx + 1}</td>`;
+        numerosCompletos.forEach(num => {
+            const classe = sorteioBaseE.includes(num) ? 'fixa' : 'variavel';
+            html += `<td class="${classe}">${String(num).padStart(2, '0')}</td>`;
+        });
+        const corMes = CORES_MESES_E[mesSelecionadoNumeroE] || '#6c757d';
+        html += `<td><span class="mes" style="background:${corMes};color:${calcularContrasteE(corMes)}">${jogo.mes || mesSelecionadoE}</span></td></tr>`;
+    });
+
+    html += `</tbody></table>
+    <p style="margin-top:20px;text-align:center;color:#6c757d;">
+        Gerado em ${new Date().toLocaleString('pt-BR')} | Dia de Sorte - Modelo E
+    </p>
+</body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `modelo-e-nivel${nivelReducaoE}-${dezenasPorJogoE}dez-${Date.now()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function imprimirJogosE() {
+    if (jogosGeradosE.length === 0) {
+        mostrarAlertaE('Nenhum jogo gerado para imprimir', 'warning');
+        return;
+    }
+    window.print();
+}
+
+// ========================================================================
+// EXPOR FUNÇÕES GLOBAIS
+// ========================================================================
+window.setModoE = setModoE;
+window.setNivelReducaoE = setNivelReducaoE;
+window.setDezenasPorJogoE = setDezenasPorJogoE;
+window.setMesTipoE = setMesTipoE;
+window.onMesSelectChangeE = onMesSelectChangeE;
+window.carregarUltimoSorteioE = carregarUltimoSorteioE;
+window.toggleComplementarE = toggleComplementarE;
+window.selecionarTodosComplementaresE = selecionarTodosComplementaresE;
+window.limparComplementaresE = limparComplementaresE;
+window.sugerirComplementaresE = sugerirComplementaresE;
+window.gerarDesdobramentoE = gerarDesdobramentoE;
+window.exportarTXTE = exportarTXTE;
+window.exportarCSVE = exportarCSVE;
+window.exportarHTMLE = exportarHTMLE;
+window.imprimirJogosE = imprimirJogosE;
+
+})(); // Fim do IIFE - Isolamento do Modelo E
+</script>

@@ -1,0 +1,668 @@
+<!-- MODELO A: 5 FIXAS + 2 VARIÁVEIS -->
+<div class="alert alert-primary">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Modelo A:</strong> Sistema de conjunto fixo + grupos variáveis (5 FIXAS + 2 VARIÁVEIS)
+</div>
+
+<!-- Seletor de Modo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Modo de Seleção</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <button onclick="setModoA('automatico')" id="btn-modo-a-automatico" class="modo-btn btn btn-outline-primary w-100 p-3 active">
+                    <div style="font-size: 2rem;">🤖</div>
+                    <div class="fw-bold">AUTOMÁTICO</div>
+                    <small class="text-muted">IA escolhe tudo</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoA('hibrido')" id="btn-modo-a-hibrido" class="modo-btn btn btn-outline-primary w-100 p-3">
+                    <div style="font-size: 2rem;">🔀</div>
+                    <div class="fw-bold">HÍBRIDO</div>
+                    <small class="text-muted">IA sugere, você ajusta</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="setModoA('manual')" id="btn-modo-a-manual" class="modo-btn btn btn-outline-primary w-100 p-3">
+                    <div style="font-size: 2rem;">✋</div>
+                    <div class="fw-bold">MANUAL</div>
+                    <small class="text-muted">Você escolhe tudo</small>
+                </button>
+            </div>
+        </div>
+        <div id="modo-a-descricao" class="alert alert-info mt-3 mb-0">
+            <strong>💡 Modo Atual: AUTOMÁTICO</strong><br>
+            <small>Sistema vai sugerir as dezenas baseado na análise dos últimos concursos</small>
+        </div>
+    </div>
+</div>
+
+<!-- Painel de Configuração -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuração</h5>
+    </div>
+    <div class="card-body">
+        <!-- Botão Automático -->
+        <div id="painel-a-automatico">
+            <button onclick="gerarAutomaticoA()" class="btn btn-lg btn-primary w-100 py-3">
+                <i class="fas fa-magic me-2"></i>GERAR AUTOMATICAMENTE
+            </button>
+        </div>
+
+        <!-- Painel Manual/Híbrido -->
+        <div id="painel-a-manual-hibrido" style="display: none;">
+            <!-- Grupo A -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold">
+                        🔵 GRUPO A - Dezenas Fixas (<span id="grupo-a-count">0</span>/5)
+                    </label>
+                    <div>
+                        <button onclick="sugerirGrupoAA()" id="btn-sugerir-a-a" class="btn btn-sm btn-info me-2" style="display:none;">
+                            💡 Sugerir
+                        </button>
+                        <button onclick="limparGrupoAA()" class="btn btn-sm btn-secondary">
+                            🔄 Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="grupo-a-grid"></div>
+            </div>
+
+            <!-- Grupo B -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold">
+                        🟢 GRUPO B - Pool de Variáveis (<span id="grupo-b-count">0</span>)
+                    </label>
+                    <div>
+                        <button onclick="sugerirGrupoBB()" id="btn-sugerir-b-b" class="btn btn-sm btn-success me-2" style="display:none;">
+                            💡 Sugerir
+                        </button>
+                        <button onclick="limparGrupoBB()" class="btn btn-sm btn-secondary">
+                            🔄 Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="grupo-b-grid"></div>
+                <small class="text-muted">💡 Recomendado: 8-10 dezenas para 28-45 jogos</small>
+            </div>
+
+            <!-- Preview -->
+            <div id="preview-jogos-a" class="alert alert-warning" style="display:none;">
+                <div class="fw-bold">📊 Preview</div>
+                <div id="preview-texto-a"></div>
+            </div>
+
+            <button onclick="gerarDesdobramentoA()" id="btn-gerar-a" class="btn btn-lg btn-primary w-100 py-3" disabled>
+                <i class="fas fa-play me-2"></i>GERAR DESDOBRAMENTO
+            </button>
+        </div>
+
+        <!-- Mês da Sorte -->
+        <div class="mt-4">
+            <label class="form-label fw-bold">📅 Mês da Sorte:</label>
+            <select id="mes-select-a" class="form-select">
+                {% if stats_mes %}
+                <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][stats_mes.atrasado] }}">+ Atrasado ({{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][stats_mes.atrasado] }})</option>
+                <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][stats_mes.frequente] }}">+ Frequente ({{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][stats_mes.frequente] }})</option>
+                {% endif %}
+                {% for m_idx in range(1, 13) %}
+                    {% if not stats_mes or (m_idx != stats_mes.atrasado and m_idx != stats_mes.frequente) %}
+                    <option value="{{ ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m_idx] }}">{{ ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][m_idx] }}</option>
+                    {% endif %}
+                {% endfor %}
+                <option value="aleatorio">+ Aleatório</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Explicação da IA -->
+<div id="explicacao-section-a" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Por que escolhi esses números?</h5>
+    </div>
+    <div class="card-body" id="explicacao-container-a"></div>
+</div>
+
+<!-- Resumo -->
+<div id="resumo-section-a" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resumo do Desdobramento</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded">
+                    <small class="text-primary fw-bold">TOTAL DE JOGOS</small>
+                    <div class="fs-3 fw-bold text-primary" id="total-jogos-a">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-success bg-opacity-10 border border-success rounded">
+                    <small class="text-success fw-bold">CUSTO TOTAL</small>
+                    <div class="fs-3 fw-bold text-success" id="custo-total-a">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-info bg-opacity-10 border border-info rounded">
+                    <small class="text-info fw-bold">MODELO</small>
+                    <div class="fs-3 fw-bold text-info">5+2</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                    <small class="text-warning fw-bold">MÊS DA SORTE</small>
+                    <div class="fs-3 fw-bold text-warning" id="mes-info-a">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Jogos -->
+<div id="jogos-section-a" class="card shadow-sm mb-4" style="display:none;">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Jogos Gerados</h5>
+        <div>
+            <button onclick="salvarDiarioA()" id="btn-diario-a" class="btn btn-sm btn-success fw-bold shadow-sm me-2" title="Salvar no Diário de Estratégias">
+                <i class="fas fa-save me-1"></i>Carimbar e Guardar Apostas
+            </button>
+            <button onclick="exportarTXTA()" class="btn btn-sm btn-success me-2">
+                <i class="fas fa-file-download me-1"></i>Exportar TXT
+            </button>
+            <button onclick="exportarExcelA()" class="btn btn-sm btn-info me-2">
+                <i class="fas fa-file-excel me-1"></i>Exportar Excel
+            </button>
+            <button onclick="window.print()" class="btn btn-sm btn-primary">
+                <i class="fas fa-print me-1"></i>Imprimir
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="game-table table table-sm">
+                <thead>
+                    <tr>
+                        <th>Jogo</th>
+                        <th colspan="5">Fixas</th>
+                        <th colspan="2">Variáveis</th>
+                        <th>Mês</th>
+                    </tr>
+                </thead>
+                <tbody id="jogos-tbody-a"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+// Estado Global Modelo A
+let modoAtualA = 'automatico';
+let grupoAA = [];
+let grupoBB = [];
+let jogosGeradosA = [];
+let explicacoesA = {};
+
+// Inicialização Modelo A
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('grupo-a-grid')) {
+        criarGridsDezenasA();
+        setModoA('automatico');
+    }
+});
+
+// Criar grids de dezenas
+function criarGridsDezenasA() {
+    const gridA = document.getElementById('grupo-a-grid');
+    const gridB = document.getElementById('grupo-b-grid');
+
+    for (let i = 1; i <= 31; i++) {
+        const num = String(i).padStart(2, '0');
+
+        // Botão Grupo A
+        const btnA = document.createElement('button');
+        btnA.className = 'dezena-btn btn';
+        btnA.textContent = num;
+        btnA.onclick = () => toggleGrupoAA(i);
+        btnA.dataset.numero = i;
+        gridA.appendChild(btnA);
+
+        // Botão Grupo B
+        const btnB = document.createElement('button');
+        btnB.className = 'dezena-btn btn';
+        btnB.textContent = num;
+        btnB.onclick = () => toggleGrupoBB(i);
+        btnB.dataset.numero = i;
+        gridB.appendChild(btnB);
+    }
+}
+
+// Alternar modo
+function setModoA(modo) {
+    modoAtualA = modo;
+
+    // Atualizar botões
+    document.querySelectorAll('[id^="btn-modo-a-"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-modo-a-${modo}`).classList.add('active');
+
+    // Atualizar descrição
+    const descricoes = {
+        automatico: {
+            titulo: 'AUTOMÁTICO',
+            texto: 'Sistema vai sugerir as dezenas baseado na análise dos últimos concursos'
+        },
+        hibrido: {
+            titulo: 'HÍBRIDO',
+            texto: 'Sistema sugere as dezenas, mas você pode ajustar clicando para adicionar/remover'
+        },
+        manual: {
+            titulo: 'MANUAL',
+            texto: 'Você tem controle total! Selecione manualmente as dezenas dos Grupos A e B'
+        }
+    };
+
+    const desc = descricoes[modo];
+    document.getElementById('modo-a-descricao').innerHTML = `
+        <strong>💡 Modo Atual: ${desc.titulo}</strong><br>
+        <small>${desc.texto}</small>
+    `;
+
+    // Mostrar/ocultar painéis
+    if (modo === 'automatico') {
+        document.getElementById('painel-a-automatico').style.display = 'block';
+        document.getElementById('painel-a-manual-hibrido').style.display = 'none';
+        document.getElementById('btn-sugerir-a-a').style.display = 'none';
+        document.getElementById('btn-sugerir-b-b').style.display = 'none';
+    } else {
+        document.getElementById('painel-a-automatico').style.display = 'none';
+        document.getElementById('painel-a-manual-hibrido').style.display = 'block';
+
+        if (modo === 'hibrido') {
+            document.getElementById('btn-sugerir-a-a').style.display = 'inline-block';
+            document.getElementById('btn-sugerir-b-b').style.display = 'inline-block';
+        } else {
+            document.getElementById('btn-sugerir-a-a').style.display = 'none';
+            document.getElementById('btn-sugerir-b-b').style.display = 'none';
+        }
+    }
+
+    limparTudoA();
+}
+
+// Gerar automaticamente
+async function gerarAutomaticoA() {
+    try {
+        const response = await fetch('/api/desdobramento/sugestao-automatica');
+        const data = await response.json();
+
+        if (data.erro) {
+            showError('Erro: ' + data.erro);
+            return;
+        }
+
+        grupoAA = data.grupoA;
+        grupoBB = data.grupoB;
+        explicacoesA = data.explicacoes;
+
+        gerarJogosA();
+        mostrarExplicacaoA();
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao gerar sugestão automática');
+    }
+}
+
+// Sugerir Grupo A
+async function sugerirGrupoAA() {
+    const response = await fetch('/api/desdobramento/sugestao-automatica');
+    const data = await response.json();
+    grupoAA = data.grupoA;
+    explicacoesA = data.explicacoes;
+    atualizarVisualizacaoGrupoAA();
+    mostrarExplicacaoA();
+    atualizarPreviewA();
+}
+
+// Sugerir Grupo B
+async function sugerirGrupoBB() {
+    const response = await fetch('/api/desdobramento/sugestao-automatica');
+    const data = await response.json();
+    grupoBB = data.grupoB;
+    atualizarVisualizacaoGrupoBB();
+    atualizarPreviewA();
+}
+
+// Toggle grupos
+function toggleGrupoAA(num) {
+    const btn = document.querySelector(`#grupo-a-grid button[data-numero="${num}"]`);
+
+    if (grupoAA.includes(num)) {
+        grupoAA = grupoAA.filter(n => n !== num);
+        btn.classList.remove('grupo-a');
+    } else {
+        if (grupoAA.length < 5) {
+            grupoAA.push(num);
+            grupoAA.sort((a, b) => a - b);
+            btn.classList.add('grupo-a');
+        }
+    }
+
+    atualizarContadoresA();
+    atualizarDisponibilidadeA();
+    atualizarPreviewA();
+}
+
+function toggleGrupoBB(num) {
+    const btn = document.querySelector(`#grupo-b-grid button[data-numero="${num}"]`);
+
+    if (grupoBB.includes(num)) {
+        grupoBB = grupoBB.filter(n => n !== num);
+        btn.classList.remove('grupo-b');
+    } else {
+        grupoBB.push(num);
+        grupoBB.sort((a, b) => a - b);
+        btn.classList.add('grupo-b');
+    }
+
+    atualizarContadoresA();
+    atualizarPreviewA();
+}
+
+// Atualizar visualizações
+function atualizarVisualizacaoGrupoAA() {
+    document.querySelectorAll('#grupo-a-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (grupoAA.includes(num)) {
+            btn.classList.add('grupo-a', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-a', 'sugerida');
+        }
+    });
+    atualizarContadoresA();
+    atualizarDisponibilidadeA();
+}
+
+function atualizarVisualizacaoGrupoBB() {
+    document.querySelectorAll('#grupo-b-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        if (grupoBB.includes(num)) {
+            btn.classList.add('grupo-b', 'sugerida');
+        } else {
+            btn.classList.remove('grupo-b', 'sugerida');
+        }
+    });
+    atualizarContadoresA();
+}
+
+function atualizarContadoresA() {
+    document.getElementById('grupo-a-count').textContent = grupoAA.length;
+    document.getElementById('grupo-b-count').textContent = grupoBB.length;
+
+    const btnGerar = document.getElementById('btn-gerar-a');
+    if (btnGerar) {
+        btnGerar.disabled = !(grupoAA.length === 5 && grupoBB.length >= 2);
+    }
+}
+
+function atualizarDisponibilidadeA() {
+    document.querySelectorAll('#grupo-b-grid .dezena-btn').forEach(btn => {
+        const num = parseInt(btn.dataset.numero);
+        btn.disabled = grupoAA.includes(num);
+    });
+}
+
+function atualizarPreviewA() {
+    if (grupoAA.length === 5 && grupoBB.length >= 2) {
+        const total = calcularCombinacao(grupoBB.length, 2);
+        const custo = (total * 2.50).toFixed(2);
+
+        document.getElementById('preview-jogos-a').style.display = 'block';
+        document.getElementById('preview-texto-a').innerHTML = `
+            <strong>Fixas:</strong> ${grupoAA.join(', ')}<br>
+            <strong>Pool B:</strong> ${grupoBB.join(', ')}<br>
+            <strong>Total de jogos:</strong> C(${grupoBB.length}, 2) = ${total} jogos<br>
+            <strong>Custo:</strong> R$ ${custo}
+        `;
+    } else {
+        document.getElementById('preview-jogos-a').style.display = 'none';
+    }
+}
+
+function calcularCombinacao(n, k) {
+    if (k > n) return 0;
+    if (k === 0 || k === n) return 1;
+    let result = 1;
+    for (let i = 1; i <= k; i++) {
+        result *= (n - k + i) / i;
+    }
+    return Math.round(result);
+}
+
+// Limpar
+function limparGrupoAA() {
+    grupoAA = [];
+    atualizarVisualizacaoGrupoAA();
+    atualizarPreviewA();
+}
+
+function limparGrupoBB() {
+    grupoBB = [];
+    atualizarVisualizacaoGrupoBB();
+    atualizarPreviewA();
+}
+
+function limparTudoA() {
+    grupoAA = [];
+    grupoBB = [];
+    jogosGeradosA = [];
+    atualizarVisualizacaoGrupoAA();
+    atualizarVisualizacaoGrupoBB();
+    atualizarPreviewA();
+    document.getElementById('resumo-section-a').style.display = 'none';
+    document.getElementById('jogos-section-a').style.display = 'none';
+    document.getElementById('explicacao-section-a').style.display = 'none';
+}
+
+// Gerar desdobramento
+async function gerarDesdobramentoA() {
+    if (grupoAA.length !== 5) {
+        showError('❌ Selecione exatamente 5 dezenas para o Grupo A');
+        return;
+    }
+
+    if (grupoBB.length < 2) {
+        showError('❌ Selecione pelo menos 2 dezenas para o Grupo B');
+        return;
+    }
+
+    await gerarJogosA();
+}
+
+async function gerarJogosA() {
+    const mes = document.getElementById('mes-select-a').value;
+
+    try {
+        const response = await fetch('/api/desdobramento/gerar-jogos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                grupoA: grupoAA,
+                grupoB: grupoBB,
+                mes,
+                modelo: 'A'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.erro) {
+            showError('Erro: ' + data.erro);
+            return;
+        }
+
+        jogosGeradosA = data.jogos;
+        mostrarJogosA(data);
+        mostrarResumoA(data);
+
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao gerar jogos');
+    }
+}
+
+function mostrarJogosA(data) {
+    const tbody = document.getElementById('jogos-tbody-a');
+    tbody.innerHTML = '';
+
+    data.jogos.forEach(jogo => {
+        const tr = document.createElement('tr');
+        let html = `<td class="fw-bold">${jogo.numero}</td>`;
+
+        jogo.fixas.forEach(num => {
+            html += `<td class="fixa-cell">${String(num).padStart(2, '0')}</td>`;
+        });
+
+        jogo.variaveis.forEach(num => {
+            html += `<td class="variavel-cell">${String(num).padStart(2, '0')}</td>`;
+        });
+
+        html += `<td class="fw-bold">${jogo.mes}</td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('jogos-section-a').style.display = 'block';
+}
+
+function mostrarResumoA(data) {
+    document.getElementById('total-jogos-a').textContent = data.total_jogos;
+    document.getElementById('custo-total-a').textContent = `R$ ${data.custo_total.toFixed(2)}`;
+    document.getElementById('mes-info-a').textContent = data.mes;
+    document.getElementById('resumo-section-a').style.display = 'block';
+}
+
+function mostrarExplicacaoA() {
+    const container = document.getElementById('explicacao-container-a');
+    container.innerHTML = '';
+
+    Object.keys(explicacoesA).forEach(num => {
+        const { emoji, motivo } = explicacoesA[num];
+        const div = document.createElement('div');
+        div.className = 'explicacao-item alert alert-info mb-2';
+        div.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div style="font-size: 2rem; margin-right: 1rem;">${emoji}</div>
+                <div>
+                    <div class="fw-bold">${String(num).padStart(2, '0')}</div>
+                    <small>${motivo}</small>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById('explicacao-section-a').style.display = 'block';
+}
+
+
+    async function salvarDiarioA() {
+        if (!jogosGeradosA || jogosGeradosA.length === 0) {
+            if(window.showError) showError('Não há apostas para salvar.'); 
+            else alert('Não há apostas para salvar.');
+            return;
+        }
+        const btn = document.getElementById('btn-diario-a');
+        const oriText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
+        btn.disabled = true;
+
+        try {
+            const apostasLimpo = jogosGeradosA.map(j => j.numeros_completos || j.numeros);
+            const response = await fetch('/api/diario-estrategia/salvar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apostas: apostasLimpo,
+                    estrategia: `Desdobramento Modelo A - ${jogosGeradosA.length} Jogos`,
+                    rota_origem: '/desdobramentos'
+                })
+            });
+            
+            const data = await response.json();
+            if (data.sucesso) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Salvo!';
+                btn.className = 'btn btn-sm btn-success me-2';
+            } else {
+                if(window.showError) showError('Erro: ' + data.mensagem); 
+                else alert('Erro: ' + data.mensagem);
+                btn.innerHTML = oriText;
+            }
+        } catch (e) {
+            if(window.showError) showError('Falha ao salvar no Diário.'); 
+            else alert('Falha ao salvar no Diário.');
+            btn.innerHTML = oriText;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+        function exportarTXTA() {
+    let conteudo = '';
+
+    jogosGeradosA.forEach(jogo => {
+        const numeros = jogo.numeros_completos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${numeros} ${jogo.mes}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `desdobramento-modelo-a-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportarExcelA() {
+    let conteudo = 'JOGO;FIXAS;VARIAVEIS;MES;NUMEROS COMPLETOS\n';
+
+    jogosGeradosA.forEach(jogo => {
+        const fixas = jogo.fixas.map(n => String(n).padStart(2, '0')).join(' ');
+        const variaveis = jogo.variaveis.map(n => String(n).padStart(2, '0')).join(' ');
+        const completos = jogo.numeros_completos.map(n => String(n).padStart(2, '0')).join(' ');
+        conteudo += `${jogo.numero};${fixas};${variaveis};${jogo.mes};${completos}\n`;
+    });
+
+    const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `desdobramento-modelo-a-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Expor funções no escopo global para uso pelos botões HTML
+window.setModoA = setModoA;
+window.gerarAutomaticoA = gerarAutomaticoA;
+window.sugerirGrupoAA = sugerirGrupoAA;
+window.limparGrupoAA = limparGrupoAA;
+window.sugerirGrupoBB = sugerirGrupoBB;
+window.limparGrupoBB = limparGrupoBB;
+window.gerarDesdobramentoA = gerarDesdobramentoA;
+window.salvarDiarioA = salvarDiarioA;
+        window.exportarTXTA = exportarTXTA;
+window.exportarExcelA = exportarExcelA;
+
+})(); // Fim do IIFE - Isolamento do Modelo A
+</script>

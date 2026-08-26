@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% block title %}Análise do Volante - Dia de Sorte{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: '#D4B31A',
+                'primary-light': '#E5C942',
+                'primary-dark': '#B89615'
+            }
+        }
+    },
+    darkMode: 'class'
+}
+</script>
+
+<style>
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #D4B31A;
+}
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #D4B31A;
+}
+
+.volante-cell {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.volante-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.volante-cell-quente {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.volante-cell-medio {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.volante-cell-frio {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.volante-cell-vazio {
+    background: #e5e7eb;
+    opacity: 0.3;
+}
+</style>
+
+<div class="max-w-7xl mx-auto p-6">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-primary via-primary-light to-primary-dark text-white p-8 rounded-xl shadow-2xl mb-8">
+        <h1 class="text-4xl font-bold mb-2">
+            <i class="fas fa-th"></i> Análise do Volante Dia de Sorte
+        </h1>
+        <p class="text-white opacity-90">Visualize o comportamento das dezenas no volante oficial por linha ou coluna</p>
+    </div>
+
+    <!-- Controles -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <!-- Toggle LINHA / COLUNA -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold mb-3">Modo de Análise:</label>
+            <div class="flex items-center justify-center gap-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <span class="text-xl font-semibold" id="labelLinha">
+                    <i class="fas fa-arrows-alt-h"></i> LINHA
+                </span>
+
+                <div class="relative inline-block w-20 align-middle select-none">
+                    <input type="checkbox" id="toggleModo" onchange="alternarModo()"
+                           class="toggle-checkbox absolute block w-10 h-10 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300">
+                    <label for="toggleModo" class="toggle-label block overflow-hidden h-10 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                </div>
+
+                <span class="text-xl font-semibold text-gray-400" id="labelColuna">
+                    <i class="fas fa-arrows-alt-v"></i> COLUNA
+                </span>
+            </div>
+        </div>
+
+        <!-- Filtros de Concursos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-semibold mb-2">Tipo de Filtro:</label>
+                <select id="tipoFiltro" onchange="atualizarFiltros()"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                    <option value="todos">Todos os Concursos</option>
+                    <option value="unico">Concurso Único</option>
+                    <option value="intervalo">Intervalo de Concursos</option>
+                    <option value="multiplos">Múltiplos Concursos</option>
+                </select>
+            </div>
+
+            <div id="filtroUnico" class="hidden">
+                <label class="block text-sm font-semibold mb-2">Número do Concurso:</label>
+                <input type="number" id="concursoUnico" placeholder="Ex: 1139"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            </div>
+
+            <div id="filtroIntervalo" class="hidden col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Concurso Inicial:</label>
+                    <input type="number" id="intervaloInicio" placeholder="Ex: 1"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Concurso Final:</label>
+                    <input type="number" id="intervaloFim" placeholder="Ex: 100"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                </div>
+            </div>
+
+            <div id="filtroMultiplos" class="hidden col-span-2">
+                <label class="block text-sm font-semibold mb-2">Concursos (separados por vírgula):</label>
+                <input type="text" id="concursosMultiplos" placeholder="Ex: 1, 5, 10, 25, 100"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            </div>
+        </div>
+
+        <!-- Botão Analisar -->
+        <button onclick="executarAnalise()"
+                class="mt-6 w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-chart-bar mr-2"></i> ANALISAR VOLANTE
+        </button>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultadosContainer" class="hidden">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+                <p class="text-sm opacity-90">Sorteios Analisados</p>
+                <p class="text-3xl font-bold" id="statTotalSorteios">0</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                <p class="text-sm opacity-90">Primeiro Concurso</p>
+                <p class="text-3xl font-bold" id="statPrimeiro">-</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                <p class="text-sm opacity-90">Último Concurso</p>
+                <p class="text-3xl font-bold" id="statUltimo">-</p>
+            </div>
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl p-6 shadow-lg">
+                <p class="text-sm opacity-90">Modo de Análise</p>
+                <p class="text-3xl font-bold" id="statModo">COLUNA</p>
+            </div>
+        </div>
+
+        <!-- Volante Visual -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-th-large"></i> Volante Visual
+            </h2>
+            <div id="volanteVisual" class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <!-- Renderizado dinamicamente -->
+            </div>
+            <div class="mt-4 flex justify-around text-sm">
+                <span class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded"></div> Baixa frequência
+                </span>
+                <span class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-orange-500 rounded"></div> Média frequência
+                </span>
+                <span class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-red-600 rounded"></div> Alta frequência
+                </span>
+            </div>
+        </div>
+
+        <!-- TOP 3 Posições -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <i class="fas fa-trophy"></i> TOP 3 <span id="tipoTop3">Colunas</span> Mais Utilizadas
+            </h2>
+            <div id="top3Container" class="space-y-6">
+                <!-- Renderizado dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Mais e Menos Destacadas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                <h3 class="text-xl font-bold text-green-700 dark:text-green-200 mb-4">
+                    🥇 Mais Destacada
+                </h3>
+                <div id="maisDestacada"></div>
+            </div>
+
+            <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+                <h3 class="text-xl font-bold text-red-700 dark:text-red-200 mb-4">
+                    ⚠️ Menos Destacada
+                </h3>
+                <div id="menosDestacada"></div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900 dark:to-yellow-800 border-l-4 border-yellow-500 rounded-xl p-6 shadow-lg">
+            <h2 class="text-xl font-bold text-yellow-800 dark:text-yellow-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-lightbulb"></i> Insights Inteligentes
+            </h2>
+            <div id="insightsContainer" class="space-y-2 text-yellow-900 dark:text-yellow-100">
+                <!-- Renderizado dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingContainer" class="hidden text-center py-12">
+        <div class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-gray-600">Analisando concursos...</p>
+    </div>
+</div>
+
+<script>
+let modoAtual = 'coluna';
+let dadosAnalise = null;
+
+function alternarModo() {
+    const toggle = document.getElementById('toggleModo');
+    const labelLinha = document.getElementById('labelLinha');
+    const labelColuna = document.getElementById('labelColuna');
+
+    if (toggle.checked) {
+        modoAtual = 'coluna';
+        labelLinha.classList.add('text-gray-400');
+        labelLinha.classList.remove('text-gray-700');
+        labelColuna.classList.remove('text-gray-400');
+        labelColuna.classList.add('text-gray-700');
+    } else {
+        modoAtual = 'linha';
+        labelColuna.classList.add('text-gray-400');
+        labelColuna.classList.remove('text-gray-700');
+        labelLinha.classList.remove('text-gray-400');
+        labelLinha.classList.add('text-gray-700');
+    }
+}
+
+function atualizarFiltros() {
+    const tipo = document.getElementById('tipoFiltro').value;
+
+    document.getElementById('filtroUnico').classList.add('hidden');
+    document.getElementById('filtroIntervalo').classList.add('hidden');
+    document.getElementById('filtroMultiplos').classList.add('hidden');
+
+    if (tipo === 'unico') {
+        document.getElementById('filtroUnico').classList.remove('hidden');
+    } else if (tipo === 'intervalo') {
+        document.getElementById('filtroIntervalo').classList.remove('hidden');
+    } else if (tipo === 'multiplos') {
+        document.getElementById('filtroMultiplos').classList.remove('hidden');
+    }
+}
+
+async function executarAnalise() {
+    const tipo = document.getElementById('tipoFiltro').value;
+    const payload = {
+        modo: modoAtual,
+        filtro_tipo: tipo
+    };
+
+    if (tipo === 'unico') {
+        payload.concurso_unico = parseInt(document.getElementById('concursoUnico').value);
+    } else if (tipo === 'intervalo') {
+        payload.intervalo_inicio = parseInt(document.getElementById('intervaloInicio').value);
+        payload.intervalo_fim = parseInt(document.getElementById('intervaloFim').value);
+    } else if (tipo === 'multiplos') {
+        const multiplosStr = document.getElementById('concursosMultiplos').value;
+        payload.concursos_ids = multiplosStr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    }
+
+    // Mostrar loading
+    document.getElementById('resultadosContainer').classList.add('hidden');
+    document.getElementById('loadingContainer').classList.remove('hidden');
+
+    try {
+        const response = await fetch('/api/analise/volante', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            dadosAnalise = data;
+            renderizarResultados(data);
+        } else {
+            showToast('error', 'Erro: ' + (data.erro || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        showToast('error', 'Erro ao executar análise: ' + error.message);
+    } finally {
+        document.getElementById('loadingContainer').classList.add('hidden');
+    }
+}
+
+function renderizarResultados(dados) {
+    // Stats
+    document.getElementById('statTotalSorteios').textContent = dados.total_sorteios_analisados;
+    document.getElementById('statPrimeiro').textContent = dados.primeiro_concurso || '-';
+    document.getElementById('statUltimo').textContent = dados.ultimo_concurso || '-';
+    document.getElementById('statModo').textContent = dados.modo.toUpperCase();
+
+    // Tipo TOP 3
+    document.getElementById('tipoTop3').textContent = dados.modo === 'linha' ? 'Linhas' : 'Colunas';
+
+    // Volante Visual
+    renderizarVolante(dados.volante_visual, dados.volante_frequencias);
+
+
+
+
+
+    // TOP 3
+    renderizarTop3(dados.top3_posicoes, dados.modo);
+
+    // Mais e Menos Destacadas
+    const tipoNome = dados.modo === 'linha' ? 'Linha' : 'Coluna';
+    document.getElementById('maisDestacada').innerHTML = `
+        <p class="text-3xl font-bold text-green-600">${tipoNome} ${dados.mais_destacada.posicao}</p>
+        <p class="text-gray-700 dark:text-gray-300">${dados.mais_destacada.frequencia} aparições (${dados.mais_destacada.percentual}%)</p>
+    `;
+
+    document.getElementById('menosDestacada').innerHTML = `
+        <p class="text-3xl font-bold text-red-600">${tipoNome} ${dados.menos_destacada.posicao}</p>
+        <p class="text-gray-700 dark:text-gray-300">${dados.menos_destacada.frequencia} aparições (${dados.menos_destacada.percentual}%)</p>
+    `;
+
+    // Insights
+    const insightsHTML = dados.insights.map(insight => `
+        <p class="flex items-start gap-2">
+            <span class="text-xl">💡</span>
+            <span>${insight}</span>
+        </p>
+    `).join('');
+    document.getElementById('insightsContainer').innerHTML = insightsHTML;
+
+    // Mostrar resultados
+    document.getElementById('resultadosContainer').classList.remove('hidden');
+}
+
+function renderizarVolante(volante_visual, frequencias) {
+    const maxFreq = Math.max(...Object.values(frequencias).filter(f => f > 0));
+    const minFreq = Math.min(...Object.values(frequencias).filter(f => f > 0));
+
+    const getColorClass = (freq) => {
+        if (freq === 0) return 'volante-cell-vazio';
+        const threshold_alto = maxFreq * 0.7;
+        const threshold_medio = maxFreq * 0.4;
+
+        if (freq >= threshold_alto) return 'volante-cell-quente';
+        if (freq >= threshold_medio) return 'volante-cell-medio';
+        return 'volante-cell-frio';
+    };
+
+    const html = volante_visual.map((linha, idxLinha) => `
+        <div class="grid grid-cols-10 gap-2 mb-2">
+            ${linha.map(celula => {
+                if (celula.numero === null) {
+                    return `<div class="volante-cell volante-cell-vazio h-16 rounded-lg"></div>`;
+                }
+
+                const colorClass = getColorClass(celula.frequencia);
+                return `
+                    <div class="volante-cell ${colorClass} h-16 rounded-lg shadow-lg flex flex-col items-center justify-center text-white font-bold">
+                        <span class="text-xl">${String(celula.numero).padStart(2, '0')}</span>
+                        <span class="text-xs opacity-80">${celula.frequencia}x</span>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `).join('');
+
+    document.getElementById('volanteVisual').innerHTML = html;
+}
+
+function renderizarTop3(top3, modo) {
+    const medalhas = ['🥇', '🥈', '🥉'];
+    const cores = ['from-yellow-400 to-yellow-500', 'from-gray-300 to-gray-400', 'from-orange-400 to-orange-500'];
+    const tipoNome = modo === 'linha' ? 'Linha' : 'Coluna';
+
+    const html = top3.map((item, idx) => `
+        <div class="bg-gradient-to-r ${cores[idx]} text-white rounded-lg p-6 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-5xl">${medalhas[idx]}</span>
+                    <div>
+                        <p class="text-2xl font-bold">${tipoNome} ${item.posicao}</p>
+                        <p class="text-sm opacity-90">${item.frequencia} aparições (${item.percentual}%)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white border-opacity-30 pt-4">
+                <p class="text-sm font-semibold mb-2">TOP 3 Dezenas desta ${tipoNome.toLowerCase()}:</p>
+                <div class="flex gap-2">
+                    ${item.top3_dezenas.map(dez => `
+                        <div class="bg-white bg-opacity-20 px-3 py-2 rounded-lg text-center">
+                            <div class="text-lg font-bold">${String(dez.dezena).padStart(2, '0')}</div>
+                            <div class="text-xs">${dez.frequencia}x</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    document.getElementById('top3Container').innerHTML = html;
+}
+
+function showToast(type, message) {
+    const toastContainer = document.createElement('div');
+    toastContainer.className = 'fixed top-4 right-4 z-50';
+
+    const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+    const icon = type === 'error' ? 'fa-times-circle' : 'fa-check-circle';
+
+    toastContainer.innerHTML = `
+        <div class="${bgColor} text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 min-w-[300px] animate-slide-in">
+            <i class="fas ${icon} text-2xl"></i>
+            <div class="flex-1">
+                <p class="font-semibold">${message}</p>
+            </div>
+            <button onclick="this.closest('.fixed').remove()" class="text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(toastContainer);
+
+    setTimeout(() => toastContainer.remove(), 5000);
+}
+</script>
+{% endblock %}

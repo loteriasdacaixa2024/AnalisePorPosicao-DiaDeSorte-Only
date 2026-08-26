@@ -1,0 +1,1669 @@
+{% extends "base.html" %}
+
+{% from 'components/mes_da_sorte_macros.html' import mes_da_sorte_label, mes_da_sorte_assets %}
+
+{% block title %}Sniper Vertical e Afinidade IA - Dia de Sorte{% endblock %}
+
+{% block content %}
+{{ mes_da_sorte_assets() }}
+<style>
+    .dds-theme {
+        --dds-100: #ffffff;
+        --dds-95: #fcf9e8;
+        --dds-90: #f9f2d2;
+        --dds-85: #f7ecbb;
+        --dds-80: #f4e5a4;
+        --dds-75: #f1df8e;
+        --dds-70: #eed877;
+        --dds-65: #ebd260;
+        --dds-60: #e9cb49;
+        --dds-55: #e6c533;
+        --dds-50: #e3be1c;
+        --dds-main: #d4b31a;
+        /* 47% principal */
+        --dds-45: #ccab19;
+        --dds-40: #b69816;
+        --dds-35: #9f8514;
+        --dds-30: #887211;
+        --dds-25: #715f0e;
+        --dds-20: #5b4c0b;
+        --dds-15: #443908;
+        --dds-10: #2d2606;
+        --dds-5: #171303;
+        --dds-0: #000000;
+    }
+
+    /* Sobrescrevendo o Bootstrap localmente */
+    .dds-theme .text-primary {
+        color: var(--dds-main) !important;
+    }
+
+    .dds-theme .bg-primary {
+        background-color: var(--dds-main) !important;
+        color: var(--dds-100) !important;
+    }
+
+    .dds-theme .btn-primary {
+        background-color: var(--dds-main) !important;
+        border-color: var(--dds-40) !important;
+        color: var(--dds-100) !important;
+    }
+
+    .dds-theme .btn-primary:focus,
+    .dds-theme .btn-primary:active,
+    .dds-theme .btn-primary:hover {
+        background-color: var(--dds-40) !important;
+        border-color: var(--dds-35) !important;
+        color: var(--dds-100) !important;
+    }
+
+    .dds-theme .btn-outline-primary {
+        color: var(--dds-main) !important;
+        border-color: var(--dds-main) !important;
+    }
+
+    .dds-theme .btn-outline-primary:hover {
+        background-color: var(--dds-main) !important;
+        color: var(--dds-100) !important;
+    }
+
+    .dds-theme .border-primary {
+        border-color: var(--dds-main) !important;
+    }
+
+    .dds-theme .table-hover tbody tr:hover {
+        background-color: var(--dds-90) !important;
+    }
+</style>
+
+<div class="container mt-4 dds-theme">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-hourglass-split"></i> Centro de Inteligência de Atrasos
+        </h2>
+        <a href="/" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Modal Checklist da Vitória -->
+    <div class="modal fade" id="modalChecklistVitoria" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header bg-dark text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold d-flex align-items-center">
+                        <i class="fas fa-trophy text-warning me-2"></i> CHECKLIST DA VITÓRIA
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
+                    <p class="text-muted small mb-4 text-center fw-bold">Siga estes 5 passos antes de validar sua
+                        aposta real:</p>
+
+                    <div class="checklist-item d-flex mb-3">
+                        <div class="step-number me-3">1</div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Sincronismo Total</h6>
+                            <p class="small text-muted mb-0">Atualize os sorteios da Caixa para garantir que os
+                                dados de atraso sejam reais.</p>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item d-flex mb-3">
+                        <div class="step-number me-3">2</div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Toggle Elite ON</h6>
+                            <p class="small text-muted mb-0">Ative o <strong>Modo Elite Inteligente</strong> para
+                                travar os filtros em padrões vencedores.</p>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item d-flex mb-3">
+                        <div class="step-number me-3">3</div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Configurar Inteligência</h6>
+                            <p class="small text-muted mb-0">Use a aba <strong>Afinidade IA</strong> e selecione as
+                                dezenas de exclusão/foco.</p>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item d-flex mb-3">
+                        <div class="step-number me-3">4</div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Duelo de Destaques</h6>
+                            <p class="small text-muted mb-0">Compare os modelos no <strong>Comparativo
+                                    Diferencial</strong> para ver as substituições da IA.</p>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item d-flex mb-0">
+                        <div class="step-number me-3">5</div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Conferência Final</h6>
+                            <p class="small text-muted mb-0">Envie o arquivo para a <strong>Central</strong> e
+                                valide o perfil de prêmios recente.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-center">
+                    <button type="button" class="btn btn-warning fw-bold px-5 rounded-pill shadow-sm"
+                        data-bs-dismiss="modal">
+                        ESTOU PRONTO PARA GANHAR <i class="fas fa-rocket ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .step-number {
+            background-color: #ffc107;
+            color: #000;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+    <!-- Filtros Globais Físicos -->
+    <div class="card mb-4 border-warning shadow-sm" style="background-color: #fffdf5;">
+        <div class="card-body p-3">
+            <!-- Header de Filtros Inteligentes -->
+            <div class="row align-items-center mb-3">
+                <div class="col-md-12">
+                    <h6 class="text-secondary fw-bold mb-0">
+                        <i class="fas fa-robot text-warning"></i> Monitor de Filtros Dinâmicos
+                        <small class="text-muted fw-normal ms-2">(Inteligência de Dados Sniper)</small>
+                    </h6>
+                </div>
+            </div>
+
+            <!-- Painel do Modo Elite (Dashboard Permanente) -->
+            <div id="eliteModeInfo" class="alert alert-warning py-3 px-4 mb-0 animate__animated animate__fadeIn"
+                style="border-radius: 12px; border-left: 8px solid #d4b31a; background: linear-gradient(to right, #fffdf5, #fff9e6);">
+                <div class="row align-items-center">
+                    <div class="col-md-1 text-center d-none d-md-block">
+                        <i class="fas fa-shield-alt text-warning fa-2x"></i>
+                    </div>
+                    <div class="col-md-11">
+                        <div class="fw-bold text-dark mb-1">Status: Operação de Alta Precisão Ativada</div>
+                        <div class="text-secondary small">
+                            O sistema está sincronizado com as estatísticas reais do banco. Os filtros abaixo são
+                            aplicados automaticamente para garantir o padrão vencedor:
+                        </div>
+                        <div class="mt-2 d-flex flex-wrap gap-2">
+                            <span class="badge bg-dark p-2" id="badgeEliteSoma" style="font-size: 0.9rem;">Soma:
+                                CARREGANDO...</span>
+                            <span class="badge bg-dark p-2" id="badgeEliteDigitos" style="font-size: 0.9rem;">Dígitos:
+                                CARREGANDO...</span>
+                            <span class="badge bg-dark p-2" id="badgeEliteSeq" style="font-size: 0.9rem;">Sequência:
+                                Máx 3</span>
+                            <span class="badge bg-success p-2"><i class="fas fa-sync-alt fa-spin me-1"></i>
+                                Inteligência Ativa</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inputs Ocultos (necessários para o backend receber os valores via JS) -->
+            <input type="hidden" id="globalSomaMin" value="90">
+            <input type="hidden" id="globalSomaMax" value="112">
+            <input type="hidden" id="globalDigitosMin" value="6">
+            <input type="hidden" id="globalDigitosMax" value="8">
+            <input type="hidden" id="globalMaxSeq" value="3">
+            <input type="checkbox" id="toggleEliteMode" checked class="d-none">
+        </div>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <ul class="nav nav-tabs mb-4" id="analiseTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="tab-posicao-tab" data-bs-toggle="tab"
+                data-bs-target="#tab-posicao" type="button" role="tab" aria-controls="tab-posicao" aria-selected="true">
+                <i class="bi bi-list-ol"></i> Sniper Vertical
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="tab-afinidade-tab" data-bs-toggle="tab" data-bs-target="#tab-afinidade"
+                type="button" role="tab" aria-controls="tab-afinidade" aria-selected="false">
+                <i class="bi bi-diagram-3"></i> Afinidade IA
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-danger" id="tab-comparativo-tab" data-bs-toggle="tab"
+                data-bs-target="#tab-comparativo" type="button" role="tab" aria-controls="tab-comparativo"
+                aria-selected="false">
+                <i class="fas fa-columns"></i> Comparativo Diferencial
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="analiseTabsContent">
+        <!-- ABA 1: CONTEÚDO ATUAL -->
+        <div class="tab-pane fade show active" id="tab-posicao" role="tabpanel" aria-labelledby="tab-posicao-tab">
+            <div class="card mb-4 border-info shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-info"><i class="bi bi-info-circle-fill"></i> O que esta página faz?
+                    </h5>
+                    <p class="card-text">
+                        Esta ferramenta monitora o <strong>"atraso"</strong> (número de concursos sem aparecer) de
+                        cada
+                        dezena,
+                        mas com um diferencial: a análise é <strong>Posicional</strong>.
+                        <br>Ela identifica quais números estão "devendo" uma aparição especificamente na Posição 1,
+                        Posição 2, e
+                        assim por diante.
+                    </p>
+                    <div class="row mt-2">
+                        <div class="col-md-6 border-end">
+                            <small><strong>⚙️ Modo Máquina (Genuína):</strong> Analisa as bolas na ordem exata em
+                                que
+                                caíram do
+                                globo (foco no comportamento físico do sorteio).</small>
+                        </div>
+                        <div class="col-md-6">
+                            <small><strong>📝 Modo Volante (Crescente):</strong> Analisa os concursos após os
+                                números
+                                serem
+                                ordenados (foco na lógica estatística do bilhete).</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label for="selectModo" class="form-label fw-bold text-primary">Modo de Análise:</label>
+                    <select class="form-select border-primary fw-bold text-primary" id="selectModo"
+                        onchange="buscarAtrasados()">
+                        <option value="crescente">Lógica: Volante (Ordem Crescente)</option>
+                        <option value="sorteio" selected>Lógica: Máquina (Ordem Genuína de Queda)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="selectPosicao" class="form-label">Posição (1 a 7):</label>
+                    <select class="form-select" id="selectPosicao" onchange="buscarAtrasados()">
+                        <option value="1">Posição 1</option>
+                        <option value="2">Posição 2</option>
+                        <option value="3">Posição 3</option>
+                        <option value="4">Posição 4</option>
+                        <option value="5">Posição 5</option>
+                        <option value="6">Posição 6</option>
+                        <option value="7">Posição 7</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="selectTopQtd" class="form-label">Quantidade Exibida:</label>
+                    <select class="form-select" id="selectTopQtd" onchange="buscarAtrasados()">
+                        <option value="10">Top 10</option>
+                        <option value="15" selected>Top 15</option>
+                        <option value="20">Top 20</option>
+                        <option value="31">Todos (31)</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex flex-column align-items-end justify-content-end gap-2">
+                    <div class="d-flex w-100 gap-2">
+                        <button class="btn btn-primary flex-fill" onclick="buscarAtrasados()">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <button class="btn btn-danger flex-fill fw-bold shadow-sm" onclick="gerarApostasAtrasados()"
+                            title="ESTRATÉGIA DE COBERTURA (TEIA):&#10;Gera milhares de apostas cruzando os 3 números mais atrasados de CADA posição.&#10;Ideal para quem busca cercar o prêmio usando a exaustão de atrasos.">
+                            <i class="fas fa-magic"></i> Matriz Top 3
+                        </button>
+                    </div>
+                    <div class="d-flex w-100 gap-2 mt-1">
+                        <button class="btn btn-dark w-100 fw-bold shadow-sm" onclick="gerarRankVertical()"
+                            title="ESTRATÉGIA SNIPER (VERTICAL):&#10;Gera apostas 'direto ao ponto'.&#10;Aposta 1 = Pega o 1º mais atrasado de cada posição.&#10;Aposta 2 = Pega o 2º mais atrasado, e assim por diante.&#10;Cria poucos bilhetes (até 31) mas com extrema precisão cirúrgica sem cruzamentos repetitivos.">
+                            <i class="fas fa-crosshairs text-warning"></i> Download Sniper Vertical
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guia de Operações e Pastas -->
+            <div class="alert alert-light border shadow-sm mb-4">
+                <div class="row align-items-center text-center text-md-start">
+                    <div class="col-md-1 d-none d-md-block text-center">
+                        <i class="fas fa-folder-open fa-2x text-warning"></i>
+                    </div>
+                    <div class="col-md-11">
+                        <div class="row">
+                            <div class="col-md-6 mb-2 mb-md-0">
+                                <small class="d-block text-uppercase fw-bold text-muted">📁 Destino Matriz Top 3
+                                    (Teia):</small>
+                                <span class="badge bg-danger">/conferencia_filtros-baixados</span>
+                                <p class="mb-0 small text-muted">Gera cruzamentos em massa entre as dezenas de topo.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="d-block text-uppercase fw-bold text-muted">📁 Destino Sniper Vertical
+                                    (Exatidão):</small>
+                                <span class="badge bg-dark">/docs</span>
+                                <p class="mb-0 small text-muted">Extrai bilhetes cirúrgicos seguindo o ranking puro.
+                                </p>
+                            </div>
+                        </div>
+                        <hr class="my-2">
+                        <small class="text-primary fw-bold">
+                            <i class="fas fa-info-circle me-1"></i> DICA: Além de baixar na pasta <code
+                                class="text-dark">/conferencia_filtros-baixados</code>, o sistema já enviou estes
+                            arquivos
+                            automaticamente para a <a href="/central-conferencias#conferencia-historica"
+                                class="text-decoration-none border-bottom border-primary">Conferência Histórica</a>.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultado"></div>
+
+            <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="insightsContent"></div>
+                </div>
+            </div>
+
+            <div id="loading" class="text-center d-none mt-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: ANÁLISE DE AFINIDADE -->
+        <div class="tab-pane fade" id="tab-afinidade" role="tabpanel" aria-labelledby="tab-afinidade-tab">
+            <div class="card mb-4 border-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-warning"><i class="bi bi-diagram-3-fill"></i> Inteligência de
+                        Afinidade e
+                        Clusters</h5>
+                    <p class="card-text text-muted" style="font-size: 0.95rem;">
+                        <strong>O que é afinidade?</strong> É o estudo de <em>Coocorrência</em>. Descobrimos quais
+                        dezenas
+                        não gostam de sair sozinhas. Quando um número atrasado está para sair, ele tende a "puxar"
+                        seus parceiros históricos (Clusters).
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-2 border rounded bg-light h-100">
+                                <small class="fw-bold d-block mb-1 text-primary text-uppercase">🔥 Janelas
+                                    Móveis:</small>
+                                <span style="font-size: 0.85rem;">Analisa as tendências mais recentes (últimos 30
+                                    jogos)
+                                    para captar o comportamento atual das dezenas.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 border rounded bg-light h-100">
+                                <small class="fw-bold d-block mb-1 text-success text-uppercase">🔗 Hubs de
+                                    Conexão:</small>
+                                <span style="font-size: 0.85rem;">Identifica dezenas "influenciadoras" que conectam
+                                    diversos grupos de acertos simultâneos.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 border rounded bg-light h-100">
+                                <small class="fw-bold d-block mb-1 text-danger text-uppercase">🎯 Radar do
+                                    Ciclo:</small>
+                                <span style="font-size: 0.85rem;">Prioriza as dezenas que faltam para fechar o ciclo
+                                    de
+                                    1 a 31, cruzando-as com suas duplas favoritas.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h6 class="mb-0"><i class="fas fa-cog"></i> Configurar Inteligência</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Profundidade da Janela:</label>
+                                <select class="form-select" id="selectJanelaAfinidade">
+                                    <option value="10">Últimos 10 concursos (Tendência Instantânea)</option>
+                                    <option value="20">Últimos 20 concursos (Tendência Curta)</option>
+                                    <option value="30" selected>Últimos 30 concursos (Tendência Média)</option>
+                                    <option value="50">Últimos 50 concursos (Tendência Firme)</option>
+                                    <option value="0">Histórico Total (Frequência Absoluta)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+                                    Força da Ligação:
+                                    <i class="fas fa-question-circle text-muted" style="cursor: help;"
+                                        title="BAIXA: Mais jogos e volume. ALTA: Filtros rígidos, apenas dezenas que costumam sair juntas."></i>
+                                </label>
+                                <input type="range" class="form-range" id="rangeLigacao" min="1" max="5" value="3"
+                                    oninput="document.getElementById('valForcaLigacao').innerText = this.value">
+                                <div class="d-flex justify-content-between small text-muted px-1">
+                                    <span>1 (Fraca)</span>
+                                    <span class="badge bg-primary" id="valForcaLigacao">3</span>
+                                    <span>5 (Forte)</span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-muted text-uppercase d-block mb-1">
+                                    <i class="fas fa-layer-group"></i> Quantidade de Jogos:
+                                </label>
+                                <input type="range" class="form-range" id="rangeQtdJogos" min="5" max="30" step="1"
+                                    value="30" oninput="document.getElementById('valQtdJogos').innerText = this.value">
+                                <div class="d-flex justify-content-between small text-muted px-1">
+                                    <span>5</span>
+                                    <span class="badge bg-dark" id="valQtdJogos">30</span>
+                                    <span>30</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 mes-da-sorte-field">
+                                {{ mes_da_sorte_label('selectMesSorte') }}
+                                <select class="form-select form-select-sm mes-da-sorte-select" id="selectMesSorte">
+                                    <option value="ranking_atraso">🏆 Ranking de Atraso (Auto)</option>
+                                    <option value="mais_frequente">⭐ Mais Frequente</option>
+                                    <option value="mais_atrasado">⏳ Mais Atrasado</option>
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+
+                            <!-- COMPARAÇÃO VISUAL: PENÚLTIMO CONCURSO (ESTÁTICO) -->
+                            <div class="mb-3 bg-light p-2 border rounded shadow-sm" id="painelPenultimoConcurso">
+                                <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                                    <label class="form-label fw-bold small text-muted text-uppercase mb-0">
+                                        <i class="fas fa-history"></i> Concurso Anterior:
+                                    </label>
+                                    <span class="badge bg-warning text-dark" id="numPenultimoConcurso">----</span>
+                                </div>
+                                <div id="dezenasPenultimoConcurso"
+                                    class="d-flex flex-wrap gap-2 justify-content-center mb-1">
+                                    <!-- Preenchido via JS (Dourado Estático) -->
+                                </div>
+                            </div>
+
+                            <!-- INTERAÇÃO: ÚLTIMO CONCURSO (TOGGLE) -->
+                            <div class="mb-4 bg-light p-2 border rounded shadow-sm" id="painelUltimoConcurso">
+                                <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                                    <label class="form-label fw-bold small text-muted text-uppercase mb-0">
+                                        <i class="fas fa-check-circle"></i> Repetição do Último:
+                                    </label>
+                                    <span class="badge bg-danger" id="numUltimoConcurso">----</span>
+                                </div>
+                                <div id="dezenasUltimoConcurso"
+                                    class="d-flex flex-wrap gap-2 justify-content-center mb-2">
+                                    <!-- Preenchido via JS (Verde Interativo) -->
+                                    <small class="text-muted">Carregando...</small>
+                                </div>
+                                <small class="d-block text-center text-muted" style="font-size: 0.75rem;">
+                                    Clique para <b>Excluir</b> (Cinza) ou <b>Manter</b> (Verde)
+                                </small>
+                            </div>
+
+                            <div class="bg-white p-3 rounded border shadow-sm small mb-4" id="guiaUsoAfinidade">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-graduation-cap"></i> Fluxo Estratégico (Passo a Passo)
+                                </h6>
+
+                                <p class="mb-2"><strong>1. A Base de Ouro:</strong> O sistema coleta automaticamente
+                                    os
+                                    números mais atrasados de todas as <strong>7 posições</strong> (o mesmo ranking
+                                    da
+                                    primeira aba) para garantir que você jogue com dezenas que estão na "janela de
+                                    saída".</p>
+
+                                <p class="mb-2"><strong>2. Refinamento por Afinidade:</strong> O motor de IA cruza
+                                    essa
+                                    base posicional com os <strong>Clusters de Coocorrência</strong>. Se dois
+                                    números
+                                    atrasados nunca saíram juntos na história, eles são evitados, sobrando apenas as
+                                    combinações com "química" estatística.</p>
+
+                                <p class="mb-2"><strong>3. Controle do Ciclo:</strong> Observe o <strong>Radar de
+                                        Ciclo</strong>. As dezenas ali pendentes têm prioridade total. Você pode
+                                    clicar
+                                    nelas para decidir se quer forçar o fechamento do ciclo nos seus 30 jogos.</p>
+
+                                <p class="mb-2"><strong>4. Ajustes Finais:</strong> Defina o <strong>Mês da
+                                        Sorte</strong> (recomendamos o Ranking de Atraso) e exclua números do último
+                                    concurso se quiser reduzir as repetições.</p>
+
+                                <div class="alert alert-info py-2 px-3 mb-0 mt-3 border-0" style="font-size: 0.8rem;">
+                                    <i class="fas fa-check-circle"></i> <strong>Ação Dupla:</strong> Ao gerar, o
+                                    arquivo
+                                    será salvo em <code>/conferencia_filtros-baixados</code> e você será levado
+                                    instantaneamente para a <strong>Conferência Histórica</strong>.
+                                </div>
+                            </div>
+
+                            <div class="mb-4 bg-light p-2 border rounded shadow-sm" id="painelRadarCiclo">
+                                <label class="form-label fw-bold small text-muted text-uppercase d-block mb-2">
+                                    <i class="fas fa-sync-alt"></i> Radar de Dezenas do Ciclo:
+                                </label>
+                                <div id="dezenasPendentesCiclo"
+                                    class="d-flex flex-wrap gap-2 justify-content-center mb-2">
+                                    <!-- Preenchido via JS -->
+                                    <small class="text-muted">Analisando ciclo...</small>
+                                </div>
+                                <small class="d-block text-center text-primary fw-bold" style="font-size: 0.75rem;">
+                                    Prioridade de fechamento automática
+                                </small>
+                            </div>
+
+                            <hr>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-warning fw-bold text-dark" onclick="buscarClustersAfinidade()">
+                                    <i class="fas fa-project-diagram"></i> Mapear Clusters e Hubs
+                                </button>
+                                <button class="btn btn-success fw-bold" onclick="gerarApostasAfinidade()"
+                                    title="Gera bilhetes casando as dezenas atrasadas com seus parceiros de maior afinidade estatística.">
+                                    <i class="fas fa-magic"></i> Gerar Bilhetes por Afinidade
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert: Local de download e conferência -->
+                    <div class="alert alert-warning p-2 shadow-sm"
+                        style="font-size: 0.85rem; border-left: 5px solid #ffc107;">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Os arquivos de Afinidade também serão salvos em: <br>
+                        <code class="text-dark fw-bold">/conferencia_filtros-baixados</code> <br>
+                        e enviados para a <strong>Conferência Histórica</strong>.
+                    </div>
+                    <!-- Info: O que  devinitivamentea rota faz -->
+                    <div class="alert alert-warning p-2 shadow-sm"
+                        style="font-size: 0.85rem; border-left: 5px solid #ffc107;">
+                        <i class="fas fa-info-circle me-1"></i>
+
+                        <ol>
+                            <li>(<b>Base</b>) - Pega os TOP das colunas "Vem da aba 'Números Atrasados por posição'"
+                            </li>
+                            <li>(<b>Filtro</b>) - Elimina os "quentes" do último concurso </li>
+                            <li>(<b>Prioridade</b>) - Carimba as dezenas do ciclo </li>
+                        </ol>
+
+
+                    </div>
+
+
+
+                </div>
+
+                <div class="col-lg-8">
+                    <!-- Dashboard de Afinidade Automático -->
+                    <div id="resultadoAfinidade" class="h-100">
+                        <div
+                            class="card border-0 bg-light h-100 min-vh-25 d-flex align-items-center justify-content-center text-muted">
+                            <div class="text-center p-5">
+                                <i class="fas fa-brain fa-3x mb-3 opacity-25"></i>
+                                <p>Clique em "Mapear Clusters e Hubs" para iniciar a inteligência de associação.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: COMPARATIVO DIFERENCIAL -->
+        <div class="tab-pane fade" id="tab-comparativo" role="tabpanel" aria-labelledby="tab-comparativo-tab">
+            <div class="card mb-4 border-danger shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title text-danger mb-0">
+                            <i class="fas fa-balance-scale"></i> Sniper Vertical vs. Afinidade IA
+                        </h5>
+                        <button class="btn btn-danger btn-sm fw-bold shadow-sm" onclick="gerarComparativoDiferencial()">
+                            <i class="fas fa-bolt"></i> Exibir Duelo das Estratégias (30 vs 30)
+                        </button>
+                    </div>
+                    <p class="text-muted small">
+                        Este painel gera 30 apostas de cada estratégia e destaca as dezenas que a Inteligência por
+                        Afinidade decidiu <strong>substituir</strong> ou <strong>manter</strong> em relação ao
+                        modelo de
+                        atraso puro (Sniper).
+                    </p>
+
+                    <div id="resultadoComparativo" class="row">
+                        <div class="col-12 text-center p-5 text-muted">
+                            <i class="fas fa-layer-group fa-3x mb-3 opacity-25"></i>
+                            <p>Clique no botão acima para carregar o duelo estatístico.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- MODAL DE NOVIDADES E GUIA RÁPIDO -->
+<div class="modal fade" id="modalNovidades" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white border-0 py-4">
+                <div class="w-100 text-center">
+                    <i class="fas fa-rocket fa-3x text-warning mb-3"></i>
+                    <h4 class="modal-title fw-bold" style="letter-spacing: 1px;">CENTRO DE INTELIGÊNCIA ATUALIZADO</h4>
+                </div>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-3" style="border-left: 4px solid #D4B31A;">
+                            <h6 class="fw-bold text-dark"><i class="fas fa-trophy text-warning me-2"></i> 4 Acertos
+                                Integrados</h6>
+                            <p class="small text-muted mb-0">Agora a Conferência Histórica mede o lucro real dos 4
+                                acertos (essencial no Dia de Sorte).</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-3" style="border-left: 4px solid #dc3545;">
+                            <h6 class="fw-bold text-dark"><i class="fas fa-columns text-danger me-2"></i> Aba de Duelo
+                                (Aba 3)</h6>
+                            <p class="small text-muted mb-0">Compare lado a lado o Sniper Vertical contra a Afinidade IA
+                                com realce de diferenças.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-3" style="border-left: 4px solid #0dcaf0;">
+                            <h6 class="fw-bold text-dark"><i class="fas fa-sliders-h text-info me-2"></i> Controles
+                                Precisos</h6>
+                            <p class="small text-muted mb-0">Números em tempo real e Tooltips explicativos na
+                                configuração da Força de Ligação.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-3" style="border-left: 4px solid #198754;">
+                            <h6 class="fw-bold text-dark"><i class="fas fa-brain text-success me-2"></i> Fluxo Sniper
+                                Ativo</h6>
+                            <p class="small text-muted mb-0">Memória Inteligente: Gere os jogos nas abas 1 e 2, e o
+                                duelo na aba 3 já estará pronto!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-dark px-5 fw-bold shadow" data-bs-dismiss="modal"
+                    style="border-radius: 30px;">
+                    ESTOU PRONTO PARA GANHAR!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="planoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let posicaoAtual = 1;
+    let ultimosDados = null;
+    let dezenasExcluidas = new Set();
+    let dezenasCicloSelecionadas = new Set();
+
+    // Memória para Duelo
+    let ultimasApostasSniper = null;
+    let ultimasApostasAfinidade = null;
+    let ultimoArquivoSniper = null;
+    let ultimoArquivoAfinidade = null;
+
+    function buscarAtrasados() {
+        const posicao = document.getElementById('selectPosicao').value;
+        const top = document.getElementById('selectTopQtd').value;
+        const modo = document.getElementById('selectModo').value;
+        posicaoAtual = posicao;
+
+        document.getElementById('loading').classList.remove('d-none');
+        document.getElementById('resultado').innerHTML = '';
+        document.getElementById('insightsCard').style.display = 'none';
+
+        fetch(`/api/analise/atrasados/posicao/${posicao}?top=${top}&modo=${modo}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').classList.add('d-none');
+                // Clean noise: If freq is 0 and atraso is total limit, let's format it nicer
+                if (data.numeros) {
+                    data.numeros.forEach(item => {
+                        if (item.frequencia === 0) item.atrasoVisual = "Nunca Sorteada";
+                        else item.atrasoVisual = `${item.atraso} concursos`;
+                    });
+                }
+                ultimosDados = data;
+                mostrarResultado(data);
+                gerarInsights(data);
+            })
+            .catch(error => {
+                document.getElementById('loading').classList.add('d-none');
+                document.getElementById('resultado').innerHTML = '<div class="alert alert-danger">Erro ao carregar dados.</div>';
+            });
+    }
+
+    function gerarApostasAtrasados() {
+        const modo = document.getElementById('selectModo').value;
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+        btn.disabled = true;
+
+        const qtdJogosElement = document.getElementById('rangeQtdJogos');
+        const qtdJogos = qtdJogosElement ? qtdJogosElement.value : 30;
+
+        const mesElement = document.getElementById('selectMesSorte');
+        const modoMes = mesElement ? mesElement.value : 'ranking_atraso';
+
+        const somaMin = document.getElementById('globalSomaMin').value || 37;
+        const somaMax = document.getElementById('globalSomaMax').value || 135;
+        const digitosMin = document.getElementById('globalDigitosMin').value || 5;
+        const digitosMax = document.getElementById('globalDigitosMax').value || 8;
+        const maxSeq = document.getElementById('globalMaxSeq').value || 3;
+
+        fetch('/api/analise/atrasados/gerar-apostas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                modo: modo, top_n: 3, qtd_jogos: parseInt(qtdJogos), modo_mes: modoMes,
+                soma_min: parseInt(somaMin), soma_max: parseInt(somaMax),
+                digitos_min: parseInt(digitosMin), digitos_max: parseInt(digitosMax),
+                max_seq: parseInt(maxSeq)
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                if (data.sucesso) {
+                    alert(`🎯 SNIPER VERTICAL CONCLUÍDO!\n\n` +
+                        `✅ ARQUIVO GERADO: ${data.total_combinacoes} bilhetes salvos em /conferencia_filtros-baixados\n\n` +
+                        `Apostas repetidas do histórico foram automaticamente bloqueadas.\n` +
+                        `Agora você pode ir na aba "Comparativo Diferencial" para ver o duelo!`);
+                } else {
+                    alert('Erro ao gerar apostas.');
+                }
+            })
+            .catch(err => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Falha na comunicação com o servidor.');
+            });
+    }
+
+    function gerarRankVertical() {
+        const mensagemModal = "🎯 Extração SNIPER (Vertical Absoluta)\n\n" +
+            "O robô descerá a tabela do ranking de atrasos puxando exatamente a linha vertical (Top 1 com Top 1, Top 2 com Top 2...).\n\n" +
+            "Quantos bilhetes você quer baixar? (LIMITE MÁXIMO: 31 pois o Dia de Sorte possui apenas 31 dezenas físicas):";
+
+        const qtdStr = prompt(mensagemModal, "31");
+        if (!qtdStr) return;
+        const qtd = parseInt(qtdStr);
+        if (isNaN(qtd) || qtd < 1) return;
+
+        if (qtd > 31) {
+            alert("⚠️ Bloqueio de UX: O limite físico insuperável desta loteria são 31 dezenas. Por favor, solicite a geração de 1 a 31 apostas no máximo.");
+            return;
+        }
+
+        const modo = document.getElementById('selectModo').value;
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Baixando...';
+        btn.disabled = true;
+
+        const mesElement = document.getElementById('selectMesSorte');
+        const modoMes = mesElement ? mesElement.value : 'ranking_atraso';
+
+        const somaMin = document.getElementById('globalSomaMin').value || 37;
+        const somaMax = document.getElementById('globalSomaMax').value || 135;
+        const digitosMin = document.getElementById('globalDigitosMin').value || 5;
+        const digitosMax = document.getElementById('globalDigitosMax').value || 8;
+        const maxSeq = document.getElementById('globalMaxSeq').value || 3;
+
+        fetch('/api/analise/atrasados/gerar-rank-vertical', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                modo: modo, qtd_apostas: qtd, modo_mes: modoMes,
+                soma_min: parseInt(somaMin), soma_max: parseInt(somaMax),
+                digitos_min: parseInt(digitosMin), digitos_max: parseInt(digitosMax),
+                max_seq: parseInt(maxSeq)
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                if (data.sucesso) {
+                    ultimasApostasSniper = data.apostas;
+                    alert(`${data.mensagem}\n\nArquivo baixado com sucesso em:\n${data.caminho}`);
+                } else {
+                    alert('Erro ao separar ranking absoluto.');
+                }
+            })
+            .catch(err => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Falha na comunicação.');
+            });
+    }
+
+    function mostrarResultado(data) {
+        let html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Números Atrasados - Posição ${data.posicao}</h5>
+                <small>Mostrando ${data.numeros.length} números mais atrasados</small>
+            </div>
+            <div class="card-body">
+                <div style="overflow-x: auto; overflow-y: visible; max-height: none;">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Atraso</th>
+                                <th>Frequência</th>
+                                <th>%</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+        data.numeros.forEach(item => {
+            let badgeClass = 'bg-success';
+            if (item.atraso > 80) badgeClass = 'bg-danger';
+            else if (item.atraso > 50) badgeClass = 'bg-warning';
+
+            html += `
+            <tr>
+                <td><strong class="fs-5">${item.numero}</strong></td>
+                <td><span class="badge ${badgeClass}">${item.atrasoVisual}</span></td>
+                <td>${item.frequencia}x</td>
+                <td>${item.percentual}%</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary"
+                            onclick="mostrarPlano(${item.numero}, ${JSON.stringify(item.plano_apostas).replace(/"/g, '&quot;')}, ${item.atraso})">
+                        📊 Ver Plano
+                    </button>
+                </td>
+            </tr>
+        `;
+        });
+
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+        document.getElementById('resultado').innerHTML = html;
+    }
+
+    function mostrarPlano(numero, plano, atraso) {
+        document.getElementById('modalTitle').textContent = `Plano de Apostas - Número ${numero} (Atraso: ${atraso})`;
+
+        let html = `
+        <p class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            Probabilidades de o número <strong>${numero}</strong> sair na posição <strong>${posicaoAtual}</strong>:
+        </p>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-header bg-success text-white">
+                        <strong>Plano Conservador</strong>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-success">80.59%</h3>
+                        <p class="mb-2">Apostar por <strong>50 concursos</strong></p>
+                        <hr>
+                        <small class="text-muted">
+                            Do concurso <strong>${plano.proximo_concurso}</strong><br>
+                            até o <strong>${plano.ate_50}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-header bg-warning text-dark">
+                        <strong>Plano Moderado</strong>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-warning">96.23%</h3>
+                        <p class="mb-2">Apostar por <strong>100 concursos</strong></p>
+                        <hr>
+                        <small class="text-muted">
+                            Do concurso <strong>${plano.proximo_concurso}</strong><br>
+                            até o <strong>${plano.ate_100}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <strong>Plano Agressivo</strong>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-danger">99.92%</h3>
+                        <p class="mb-2">Apostar por <strong>217 concursos</strong></p>
+                        <hr>
+                        <small class="text-muted">
+                            Do concurso <strong>${plano.proximo_concurso}</strong><br>
+                            até o <strong>${plano.ate_217}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="text-muted small mt-3">
+            <i class="bi bi-calculator"></i>
+            Probabilidade calculada pela fórmula: P = 1 - (30/31)^N
+        </p>
+    `;
+
+        document.getElementById('modalBody').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('planoModal')).show();
+    }
+
+    function gerarInsights(data) {
+        if (!data || !data.numeros || data.numeros.length === 0) {
+            return;
+        }
+
+        const insightsCard = document.getElementById('insightsCard');
+        const insightsContent = document.getElementById('insightsContent');
+
+        const top3 = data.numeros.slice(0, 3);
+        const medalhas = ['🥇', '🥈', '🥉'];
+
+        let htmlTop3 = '<div class="mb-4">';
+        htmlTop3 += `<h6 class="fw-bold text-primary mb-3">🏆 Top 3 Mais Atrasados na Posição ${data.posicao}:</h6>`;
+
+        top3.forEach((numero, index) => {
+            const destaque = index === 0 ? 'text-danger fw-bold' : '';
+            const comentario = index === 0 ? ' - O mais atrasado!' : '';
+
+            htmlTop3 += `<div class="${destaque} mb-2">
+            ${medalhas[index]} Número ${numero.numero}:
+            ${numero.atraso} concursos de atraso${comentario}
+        </div>`;
+        });
+
+        htmlTop3 += '</div>';
+
+        const muitoAtrasados = data.numeros.filter(n => n.atraso > 80);
+        let htmlAtrasados = '';
+
+        if (muitoAtrasados.length > 0) {
+            htmlAtrasados = '<div class="mb-4">';
+            htmlAtrasados += '<h6 class="fw-bold text-primary mb-3">⚠️ Números Muito Atrasados (>80 concursos):</h6>';
+            htmlAtrasados += '<div class="alert alert-danger py-2">';
+            htmlAtrasados += `<i class="bi bi-exclamation-triangle-fill"></i>
+            ${muitoAtrasados.length} número(s) com atraso crítico:<br>`;
+            const numerosAtrasados = muitoAtrasados.map(n => `${n.numero} (${n.atraso})`).join(', ');
+            htmlAtrasados += `<strong>${numerosAtrasados}</strong>`;
+            htmlAtrasados += '</div></div>';
+        }
+
+        const baixaFreq = data.numeros.filter(n => parseFloat(n.percentual) < 3.0);
+        let htmlFrequencia = '';
+
+        if (baixaFreq.length > 0 && baixaFreq.length <= 5) {
+            htmlFrequencia = '<div class="mb-4">';
+            htmlFrequencia += '<h6 class="fw-bold text-primary mb-3">📊 Números com Baixa Frequência Histórica:</h6>';
+            htmlFrequencia += '<div class="text-muted">';
+            baixaFreq.forEach(n => {
+                htmlFrequencia += `<div class="mb-1">✓ Número ${n.numero}: apenas ${n.percentual}% (${n.frequencia}x)</div>`;
+            });
+            htmlFrequencia += '</div></div>';
+        }
+
+        let htmlEstrategico = '<div class="mb-2">';
+        htmlEstrategico += '<h6 class="fw-bold text-primary mb-3">💡 Insights Estratégicos:</h6>';
+
+        const top1 = data.numeros[0];
+        if (top1.atraso > 100) {
+            htmlEstrategico += `<div class="alert alert-danger py-2 mb-2">
+            <i class="bi bi-fire"></i>
+            O número ${top1.numero} está com atraso EXTREMO de ${top1.atraso} concursos!
+        </div>`;
+        } else if (top1.atraso > 50) {
+            htmlEstrategico += `<div class="alert alert-warning py-2 mb-2">
+            <i class="bi bi-clock-history"></i>
+            O número ${top1.numero} não sai há ${top1.atraso} concursos na posição ${data.posicao}
+        </div>`;
+        }
+
+        if (data.numeros.length >= 5) {
+            const top5MediaAtraso = data.numeros.slice(0, 5).reduce((acc, n) => acc + n.atraso, 0) / 5;
+            htmlEstrategico += `<div class="alert alert-info py-2 mb-2">
+            <i class="bi bi-graph-up-arrow"></i>
+            Média de atraso dos top 5: ${Math.round(top5MediaAtraso)} concursos
+        </div>`;
+        }
+
+        const candidatos = data.numeros.filter(n => n.atraso > 30 && n.atraso <= 80 && parseFloat(n.percentual) >= 3.0);
+        if (candidatos.length > 0) {
+            const nums = candidatos.slice(0, 3).map(n => n.numero).join(', ');
+            htmlEstrategico += `<div class="alert alert-success py-2">
+            <i class="bi bi-check-circle-fill"></i>
+            Candidatos com bom equilíbrio (atraso moderado + boa frequência): ${nums}
+        </div>`;
+        }
+
+        htmlEstrategico += '</div>';
+
+        insightsContent.innerHTML = htmlTop3 + htmlAtrasados + htmlFrequencia + htmlEstrategico;
+        insightsCard.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        carregarStatusCicloRadar();
+
+        // Inicialização ao carregar a página
+        window.onload = function () {
+            carregarUltimosConcursos();
+            sincronizarFiltrosComOrigens();
+
+            // Exibir Checklist da Vitória automaticamente (Popup Profissional)
+            var modalChecklist = new bootstrap.Modal(document.getElementById('modalChecklistVitoria'));
+            modalChecklist.show();
+        };
+
+        // Lógica para mostrar modal de novidades apenas 1x por dia/sessão
+        if (!localStorage.getItem('novidadesV1Seen')) {
+            const myModal = new bootstrap.Modal(document.getElementById('modalNovidades'));
+            myModal.show();
+            localStorage.setItem('novidadesV1Seen', 'true');
+        }
+
+        // Auto-selecionar aba baseada no hash da URL (Afinidade IA, Sniper, etc)
+        let hash = window.location.hash;
+        if (hash) {
+            let tabElement = document.querySelector('button[data-bs-target="' + hash + '"]');
+            if (tabElement) {
+                let tab = new bootstrap.Tab(tabElement);
+                tab.show();
+            }
+        }
+    });
+
+    /**
+     * Valida e limita os campos numéricos em tempo real
+     */
+    function validarRange(input, min, max) {
+        let valor = parseInt(input.value);
+        if (isNaN(valor)) return;
+        if (valor < min) input.value = min;
+        if (valor > max) input.value = max;
+    }
+
+    // Configuração dinâmica do Modo Elite (atualizada pelas APIs)
+    let eliteConfig = {
+        somaMin: 90,
+        somaMax: 112,
+        digitosMin: 6,
+        digitosMax: 8,
+        maxSeq: 3
+    };
+
+    /**
+     * Mantém o modo elite sempre ativo e atualiza a interface
+     */
+    function toggleEliteMode(active) {
+        const eliteInfo = document.getElementById('eliteModeInfo');
+
+        // Aplicar valores dinâmicos nos inputs ocultos (que são lidos pelo gerador)
+        document.getElementById('globalSomaMin').value = eliteConfig.somaMin;
+        document.getElementById('globalSomaMax').value = eliteConfig.somaMax;
+        document.getElementById('globalDigitosMin').value = eliteConfig.digitosMin;
+        document.getElementById('globalDigitosMax').value = eliteConfig.digitosMax;
+        document.getElementById('globalMaxSeq').value = eliteConfig.maxSeq;
+
+        // Atualizar badges do dashboard
+        document.getElementById('badgeEliteSoma').innerText = `Soma: ${eliteConfig.somaMin}–${eliteConfig.somaMax}`;
+        document.getElementById('badgeEliteDigitos').innerText = `Dígitos: ${eliteConfig.digitosMin}–${eliteConfig.digitosMax}`;
+
+        console.log("🚀 Monitor Elite Ativo: Sincronizado com API.");
+    }
+
+    /**
+     * Sincroniza os filtros e atualiza a Inteligência Elite com base no banco real
+     */
+    async function sincronizarFiltrosComOrigens() {
+        console.log("🔄 Sincronizando Inteligência com dados reais do banco...");
+
+        try {
+            // 1. Soma
+            const respSoma = await fetch('/api/analise/soma-dezenas');
+            const dataSoma = await respSoma.json();
+            if (dataSoma && !dataSoma.error) {
+                const media = Math.round(dataSoma.soma_media);
+                eliteConfig.somaMax = media;
+                eliteConfig.somaMin = media - 22;
+            }
+
+            // 2. Dígitos
+            const respDigitos = await fetch('/api/analise/digitos-unicos');
+            const dataDigitos = await respDigitos.json();
+            if (dataDigitos && !dataDigitos.error) {
+                eliteConfig.digitosMin = 6;
+                eliteConfig.digitosMax = 8;
+            }
+
+            // 3. Sequências
+            const respSeq = await fetch('/api/analise/sequencias');
+            const dataSeq = await respSeq.json();
+            if (dataSeq && !dataSeq.error) {
+                eliteConfig.maxSeq = 3;
+            }
+
+            // Atualiza a interface Elite
+            toggleEliteMode(true);
+
+        } catch (e) {
+            console.error("Erro ao sincronizar inteligência:", e);
+        }
+    }
+
+    // ============================================
+    // LÓGICA DE AFINIDADE E CLUSTERS
+    // ============================================
+
+
+    function carregarUltimosConcursos() {
+        fetch('/api/analise/ultimos-dois-concursos')
+            .then(r => r.json())
+            .then(data => {
+                if (data.length >= 2) {
+                    const ultimo = data[0];
+                    const penultimo = data[1];
+
+                    // Preencher Penúltimo (Dourado Estático)
+                    document.getElementById('numPenultimoConcurso').innerText = penultimo.concurso;
+                    const divPenultimo = document.getElementById('dezenasPenultimoConcurso');
+                    divPenultimo.innerHTML = penultimo.dezenas.map(n => `
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
+                             style="width: 32px; height: 32px; background: linear-gradient(135deg, #D4B31A 0%, #B69816 100%); font-size: 0.85rem;">
+                            ${String(n).padStart(2, '0')}
+                        </div>
+                    `).join('');
+
+                    // Preencher Último (Verde Interativo)
+                    document.getElementById('numUltimoConcurso').innerText = ultimo.concurso;
+                    const divUltimo = document.getElementById('dezenasUltimoConcurso');
+                    divUltimo.innerHTML = '';
+                    ultimo.dezenas.forEach(num => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-success btn-sm rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm';
+                        btn.style.width = '32px';
+                        btn.style.height = '32px';
+                        btn.style.fontSize = '0.85rem';
+                        btn.innerText = String(num).padStart(2, '0');
+                        btn.onclick = () => toggleExclusao(num, btn);
+                        divUltimo.appendChild(btn);
+                    });
+                }
+            })
+            .catch(err => console.error("Erro ao carregar sorteios:", err));
+    }
+
+    function toggleExclusao(num, btn) {
+        if (dezenasExcluidas.has(num)) {
+            dezenasExcluidas.delete(num);
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-success');
+            btn.style.opacity = '1';
+        } else {
+            dezenasExcluidas.add(num);
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-secondary');
+            btn.style.opacity = '0.5';
+        }
+    }
+
+    function carregarStatusCicloRadar() {
+        const container = document.getElementById('dezenasPendentesCiclo');
+        fetch('/api/ciclos-dezenas/ciclo-atual')
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso && data.dados && data.dados.dezenas_pendentes) {
+                    const pendentes = data.dados.dezenas_pendentes;
+                    if (pendentes.length > 0) {
+                        container.innerHTML = '';
+                        pendentes.forEach(num => {
+                            // Inicialmente todas selecionadas
+                            dezenasCicloSelecionadas.add(num);
+
+                            const btn = document.createElement('button');
+                            btn.className = 'btn btn-sm btn-primary fw-bold shadow-sm d-flex align-items-center justify-content-center';
+                            btn.style.width = '42px';
+                            btn.style.height = '42px';
+                            btn.style.borderRadius = '50%';
+                            btn.style.fontSize = '0.9rem';
+                            btn.style.padding = '0';
+                            btn.textContent = num < 10 ? '0' + num : num;
+                            btn.onclick = () => toggleCiclo(num, btn);
+                            container.appendChild(btn);
+                        });
+                    } else {
+                        container.innerHTML = '<small class="text-success fw-bold">Ciclo pronto para fechar!</small>';
+                    }
+                } else {
+                    container.innerHTML = '<small class="text-muted">Sem pendências no ciclo.</small>';
+                }
+            })
+            .catch(() => {
+                container.innerHTML = '<small class="text-muted">Info de ciclo indisponível.</small>';
+            });
+    }
+
+    function carregarDestaquesMeses() {
+        const selectMes = document.getElementById('selectMesSorte');
+        fetch('/api/analise/meses')
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso !== false && data.meses) {
+                    const mesesAtraso = [...data.meses].sort((a, b) => b.atraso - a.atraso);
+                    const mesesFreq = [...data.meses].sort((a, b) => b.frequencia - a.frequencia);
+
+                    const topAtraso = mesesAtraso[0].nome;
+                    const topFreq = mesesFreq[0].nome;
+
+                    // Atualizar textos das opções
+                    const optFreq = selectMes.querySelector('option[value="mais_frequente"]');
+                    const optAtraso = selectMes.querySelector('option[value="mais_atrasado"]');
+
+                    if (optFreq) optFreq.textContent = `⭐ Mais Frequente (${topFreq})`;
+                    if (optAtraso) optAtraso.textContent = `⏳ Mais Atrasado (${topAtraso})`;
+                }
+            })
+            .catch(e => console.error("Erro ao carregar destaques de meses:", e));
+    }
+
+    function toggleCiclo(num, btn) {
+        if (dezenasCicloSelecionadas.has(num)) {
+            dezenasCicloSelecionadas.delete(num);
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-secondary');
+        } else {
+            dezenasCicloSelecionadas.add(num);
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-primary');
+        }
+    }
+
+    function buscarClustersAfinidade() {
+        const janela = document.getElementById('selectJanelaAfinidade').value;
+        const forca = document.getElementById('rangeLigacao').value;
+        const container = document.getElementById('resultadoAfinidade');
+
+        container.innerHTML = `
+            <div class="text-center p-5">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="mt-2 text-muted">Mapeando conexões neurais das dezenas...</p>
+            </div>
+        `;
+
+        fetch(`/api/analise/afinidade/clusters?janela=${janela}&forca=${forca}`)
+            .then(r => r.json())
+            .then(data => {
+                renderizarDashboardAfinidade(data);
+            })
+            .catch(err => {
+                container.innerHTML = '<div class="alert alert-danger">Erro ao processar gráfico de afinidade.</div>';
+            });
+    }
+
+    function renderizarDashboardAfinidade(data) {
+        const container = document.getElementById('resultadoAfinidade');
+
+        let htmlHubs = '';
+        data.hubs.forEach(h => {
+            htmlHubs += `
+                <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-1">
+                    <span class="badge bg-dark fs-6">${h.numero < 10 ? '0' + h.numero : h.numero}</span>
+                    <span class="text-success fw-bold">${h.conexoes} conexões fortes</span>
+                </div>
+            `;
+        });
+
+        let htmlClusters = '';
+        if (data.clusters.length === 0) {
+            htmlClusters = '<div class="text-muted small italic">Nenhum cluster de 3 dezenas encontrado com esta força na janela selecionada.</div>';
+        } else {
+            data.clusters.forEach(c => {
+                htmlClusters += `
+                    <div class="card mb-2 border-primary bg-light shadow-sm">
+                        <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                ${c.dezenas.map(d => `<span class="badge bg-primary me-1">${d < 10 ? '0' + d : d}</span>`).join('')}
+                            </div>
+                            <span class="badge bg-secondary">${c.frequencia}x juntos</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        let htmlLinks = '';
+        data.links_detalhados.slice(0, 10).forEach(l => {
+            htmlLinks += `
+                <div class="col-md-6 mb-2">
+                    <div class="p-2 border rounded d-flex justify-content-between bg-white small">
+                        <span><b class="text-primary">${l.n1 < 10 ? '0' + l.n1 : l.n1}</b> ↔ <b class="text-primary">${l.n2 < 10 ? '0' + l.n2 : l.n2}</b></span>
+                        <span class="text-muted">${l.frequencia}x</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = `
+            <div class="row g-3">
+                <!-- Coluna 1: Hubs -->
+                <div class="col-md-5">
+                    <div class="card h-100 shadow-sm border-dark">
+                        <div class="card-header bg-dark text-white p-2 text-center">
+                            <h6 class="mb-0"><i class="fas fa-network-wired"></i> Dezenas Hubs (Conectoras)</h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <p class="small text-muted mb-3">Números que funcionam como âncoras para diversos outros grupos.</p>
+                            ${htmlHubs}
+                        </div>
+                    </div>
+                </div>
+                <!-- Coluna 2: Trios (Clusters) -->
+                <div class="col-md-7">
+                    <div class="card h-100 shadow-sm border-primary">
+                        <div class="card-header bg-primary text-white p-2 text-center">
+                            <h6 class="mb-0"><i class="fas fa-layer-group"></i> Clusters (Triângulos Reais)</h6>
+                        </div>
+                        <div class="card-body p-3" style="max-height: 300px; overflow-y: auto;">
+                            ${htmlClusters}
+                        </div>
+                    </div>
+                </div>
+                <!-- Linha 2 de Detalhes -->
+                <div class="col-12">
+                    <div class="card shadow-sm border-info">
+                        <div class="card-header bg-info text-white p-2">
+                            <h6 class="mb-0 small"><i class="fas fa-link"></i> Top Conexões Bilaterais (Duplas de Ferro)</h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row">
+                                ${htmlLinks}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function gerarApostasAfinidade() {
+        const janela = document.getElementById('selectJanelaAfinidade').value;
+        const forca = document.getElementById('rangeLigacao').value;
+        const qtd_jogos = document.getElementById('rangeQtdJogos').value;
+        const modo_mes = document.getElementById('selectMesSorte').value;
+
+        const btn = event.currentTarget;
+        const original = btn.innerHTML;
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        btn.disabled = true;
+
+        const somaMin = document.getElementById('globalSomaMin').value || 37;
+        const somaMax = document.getElementById('globalSomaMax').value || 135;
+        const digitosMin = document.getElementById('globalDigitosMin').value || 5;
+        const digitosMax = document.getElementById('globalDigitosMax').value || 8;
+        const maxSeq = document.getElementById('globalMaxSeq').value || 3;
+
+        fetch('/api/analise/afinidade/gerar-apostas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                janela: parseInt(janela),
+                forca: parseInt(forca),
+                qtd_jogos: parseInt(qtd_jogos),
+                modo_mes: modo_mes,
+                excluir: Array.from(dezenasExcluidas),
+                pendentes_ciclo: Array.from(dezenasCicloSelecionadas),
+                soma_min: parseInt(somaMin), soma_max: parseInt(somaMax),
+                digitos_min: parseInt(digitosMin), digitos_max: parseInt(digitosMax),
+                max_seq: parseInt(maxSeq)
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                if (data.sucesso) {
+                    ultimasApostasAfinidade = data.apostas;
+                    alert(`🎯 IA DE AFINIDADE CONCLUÍDA!\n\n` +
+                        `✅ ARQUIVO GERADO: ${data.total_combinacoes} bilhetes salvos em /conferencia_filtros-baixados\n\n` +
+                        `As dezenas excluídas foram respeitadas e duplicatas eliminadas.\n` +
+                        `Agora você pode ir na aba "Comparativo Diferencial" para ver o duelo!`);
+                } else {
+                    alert('Erro ao gerar bilhetes de afinidade.');
+                }
+            })
+            .catch(err => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                alert('Falha na comunicação.');
+            });
+    }
+
+    async function gerarComparativoDiferencial() {
+        const container = document.getElementById('resultadoComparativo');
+
+        container.innerHTML = `
+            <div class="col-12 text-center p-5">
+                <div class="spinner-border text-danger" role="status"></div>
+                <p class="mt-2 text-muted">Buscando os últimos arquivos gerados nas pastas...</p>
+            </div>
+        `;
+
+        try {
+            const resp = await fetch('/api/analise/comparativo/ultimos-arquivos');
+            const data = await resp.json();
+
+            if (!data.sniper.length || !data.afinidade.length) {
+                container.innerHTML = `
+                    <div class="col-12 text-center p-4">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Arquivos não encontrados:</strong> <br>
+                            Certifique-se de que você já gerou um arquivo Sniper (Aba 1) e um de Afinidade (Aba 2) nesta sessão.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="col-md-6 border-end">
+                    <h6 class="text-center bg-dark text-white p-2 rounded mb-0">Mecanismo: Sniper Vertical</h6>
+                    <div class="text-center mb-2"><small class="text-muted fw-bold">Arquivo: ${data.arquivo_sniper}</small></div>
+                    <div class="table-responsive" style="max-height: 500px;">
+                        <table class="table table-sm table-hover text-center align-middle">
+                            <thead class="table-light"><tr><th style="width: 40px;">#</th><th class="text-center">Dezenas</th></tr></thead>
+                            <tbody>
+            `;
+
+            const maxRows = Math.max(data.sniper.length, data.afinidade.length);
+
+            for (let i = 0; i < maxRows; i++) {
+                const sGame = data.sniper[i] || [];
+                const aGame = data.afinidade[i] || [];
+
+                html += `<tr><td class="small text-muted fw-bold">${i + 1}</td><td class="d-flex justify-content-center gap-1">`;
+                sGame.forEach(n => {
+                    const diff = !aGame.includes(n);
+                    const cls = diff ? 'bg-primary text-white' : 'bg-success text-white';
+                    html += `<span class="badge ${cls} rounded-pill fs-6 d-inline-flex align-items-center justify-content-center border border-white" style="width: 30px; height: 30px;">${String(n).padStart(2, '0')}</span>`;
+                });
+                html += `</td></tr>`;
+            }
+
+            html += `</tbody></table></div>
+                <div class="text-center mt-2">
+                    <button class="btn btn-sm btn-outline-dark px-4 fw-bold" onclick="enviarParaVisualizador('sniper')">
+                        <i class="fas fa-eye text-primary"></i> VER NO SIMULADOR VISUAL
+                    </button>
+                </div>
+            </div>`;
+
+            html += `
+                <div class="col-md-6">
+                    <h6 class="text-center bg-warning text-dark p-2 rounded mb-0">Mecanismo: Afinidade IA</h6>
+                    <div class="text-center mb-2"><small class="text-muted fw-bold">Arquivo: ${data.arquivo_afinidade}</small></div>
+                    <div class="table-responsive" style="max-height: 500px;">
+                        <table class="table table-sm table-hover text-center align-middle">
+                            <thead class="table-light"><tr><th style="width: 40px;">#</th><th class="text-center">Dezenas</th></tr></thead>
+                            <tbody>
+            `;
+
+            for (let i = 0; i < maxRows; i++) {
+                const sGame = data.sniper[i] || [];
+                const aGame = data.afinidade[i] || [];
+
+                html += `<tr><td class="small text-muted fw-bold">${i + 1}</td><td class="d-flex justify-content-center gap-1">`;
+                aGame.forEach(n => {
+                    const diff = !sGame.includes(n);
+                    const cls = diff ? 'bg-primary text-white' : 'bg-success text-white';
+                    html += `<span class="badge ${cls} rounded-pill fs-6 d-inline-flex align-items-center justify-content-center border border-white" style="width: 30px; height: 30px;">${String(n).padStart(2, '0')}</span>`;
+                });
+                html += `</td></tr>`;
+            }
+
+            html += `</tbody></table></div>
+                <div class="text-center mt-2">
+                    <button class="btn btn-sm btn-outline-warning text-dark border-warning px-4 fw-bold" onclick="enviarParaVisualizador('afinidade')">
+                        <i class="fas fa-eye text-success"></i> VER NO SIMULADOR VISUAL
+                    </button>
+                </div>
+            </div>`;
+
+            html += `
+                <div class="col-12 mt-3 mb-4 text-center">
+                    <button class="btn-exportar-padrao" onclick="enviarDueloParaConferencia()">
+                        <i class="fas fa-check-double"></i> ENVIAR ESTES 2 ARQUIVOS PARA CONFERÊNCIA AGORA
+                    </button>
+                    <button class="btn btn-info fw-bold px-4 shadow-sm ms-2 text-white" onclick="enviarParaVisualizador('ambos')">
+                        <i class="fas fa-eye"></i> VISUALIZAR OS DOIS (60 Apostas)
+                    </button>
+                    <div class="p-3 border rounded shadow-sm d-flex justify-content-center gap-4 small mt-3" style="background-color: #fff9f9;">
+                        <div class="d-flex align-items-center"><span class="badge bg-primary me-2" style="width: 20px; height: 16px;">&nbsp;</span> Dezenas Diferentes (Exclusivas do lado correspondente)</div>
+                        <div class="d-flex align-items-center"><span class="badge bg-success me-2" style="width: 20px; height: 16px;">&nbsp;</span> Dezenas Iguais (Presentes em ambas as apostas)</div>
+                    </div>
+                </div>
+            `;
+
+            ultimoArquivoSniper = data.arquivo_sniper;
+            ultimoArquivoAfinidade = data.arquivo_afinidade;
+
+            window.dueloSniperCurrent = data.sniper;
+            window.dueloAfinidadeCurrent = data.afinidade;
+
+            container.innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = '<div class="alert alert-danger">Erro ao ler arquivos físicos. Verifique se a pasta /conferencia_filtros-baixados possui arquivos válidos de ambas as estratégias.</div>';
+        }
+    }
+
+    function enviarDueloParaConferencia() {
+        if (!ultimoArquivoSniper && !ultimoArquivoAfinidade) {
+            alert('Nenhum arquivo detectado para envio.');
+            return;
+        }
+
+        const btn = event.currentTarget;
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        btn.disabled = true;
+
+        fetch('/api/analise/comparativo/enviar-conferencia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                arquivo_sniper: ultimoArquivoSniper,
+                arquivo_afinidade: ultimoArquivoAfinidade
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                if (data.sucesso) {
+                    alert(`✅ SUCESSO!\n\n${data.mensagem}\n\nAgora você pode ir na Central de Conferências para ver os acertos.`);
+                    window.location.href = '/central-conferencias#pane-conferencia-historica';
+                } else {
+                    alert('Erro ao enviar duelo.');
+                }
+            })
+            .catch(err => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                alert('Falha na comunicação.');
+            });
+    }
+
+    function enviarParaVisualizador(tipo) {
+        if (tipo === 'sniper' && window.dueloSniperCurrent) {
+            localStorage.setItem('simuladorJogosTransfer', JSON.stringify(window.dueloSniperCurrent));
+            window.open('/analise-visual/#pane-simulador-filtros', '_blank');
+        }
+        else if (tipo === 'afinidade' && window.dueloAfinidadeCurrent) {
+            localStorage.setItem('simuladorJogosTransfer', JSON.stringify(window.dueloAfinidadeCurrent));
+            window.open('/analise-visual/#pane-simulador-filtros', '_blank');
+        }
+        else if (tipo === 'ambos' && window.dueloSniperCurrent && window.dueloAfinidadeCurrent) {
+            const ambos = window.dueloSniperCurrent.concat(window.dueloAfinidadeCurrent);
+            localStorage.setItem('simuladorJogosTransfer', JSON.stringify(ambos));
+            window.open('/analise-visual/#pane-simulador-filtros', '_blank');
+        } else {
+            alert('Aguarde carregar o Duelo primeiro ou verifique a conexão.');
+        }
+    }
+</script>
+{% endblock %}

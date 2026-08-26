@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Análise por Posição - Dia de Sorte">
+    <meta name="author" content="Márcio Fernando Maia">
+
+    <title>{% block title %}Análise por Posição - Dia de Sorte{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="/static/css/colors.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+
+    <!-- CSS Dinâmico das Cores dos Meses -->
+    <link rel="stylesheet" href="/static/css/cores-meses.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navbar inicio -->
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <div class="logo d-inline-block me-2"></div>
+                <span class="fw-bold">Análise por Posição</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Início
+                        </a>
+                    </li>
+                    <!-- DASHBOARDS GERAIS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dashboards" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-chart-pie me-1"></i>Dashboards
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownDashboards">
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/indice-analises">
+                                    <i class="fas fa-sitemap me-1 text-primary"></i>Índice Central de Análises
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/dashboard-analises" target="_blank"
+                                    rel="noopener noreferrer">⚖️ Dashboard</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/dashboard-analises-v2" target="_blank"
+                                    rel="noopener noreferrer">⚖️ Dashboard com análises (Testando) </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- INDISPENSÃVEIS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownIndispensaveis" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-chart-simple me-1"></i>Indispensáveis
+                        </a>
+						
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownIndispensaveis">
+						
+                            <li><a class="dropdown-item" href="/analise/tubular">🎯 Análise Tubular Inteligente</a></li>
+                            <li><a class="dropdown-item" href="/analise/estrutura-apostas">🧩 Estrutura de Apostas
+                                    (Teoria 3 Faltantes)</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                                <span><small><b>Diversos (Mas indispensáveis)</b></small></span>
+                            </li>
+                            <!--🆕 NOVO MÓDULO ESTRATÉGICO -->
+                            <li><a class="dropdown-item" href="/analise-ciclos-dezenas">🔄 Ciclos das Dezenas (NOVO)</a>
+                            </li>
+                            <!--<li><hr class="dropdown-divider"><span><small><b>Fechamentos</b><a href="/conceitos">Saiba+</a></a></small></span></li>-->
+                            <li>
+                                <hr class="dropdown-divider">
+                                <span>
+                                    <small>
+                                        <b>Fechamentos</b>
+                                        <a href="/conceitos">Saiba+</a>
+                                    </small>
+                                </span>
+                            </li>
+                            <li><a class="dropdown-item" href="/ferramentas/fechamentos">🎰 Central de Fechamentos</a>
+                            </li>
+                            <!--<li><hr class="dropdown-divider"><span><small><b>Desdobramentos</b></small></span></li>-->
+                            <li>
+                                <hr class="dropdown-divider">
+                                <span>
+                                    <small>
+                                        <b>Desdobramentos</b>
+                                        <a href="/conceitos">Saiba+</a>
+                                    </small>
+                                </span>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise-visual">🧮 Análise Visual </a></li>
+                            <li><a class="dropdown-item" href="/desdobramentos">🎯 Vários Modelos (E)</a></li>
+                            <li><a class="dropdown-item" href="/estatisticas">🧮 Estatística</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                                <span>
+                                    <small>
+                                        <b>Garantias</b>
+                                        <a href="/conceitos">Saiba+</a>
+                                    </small>
+                                </span>
+                            </li>
+                            <!--<li><a class="dropdown-item" href="/apostas-com-garantia">🔒 Apostas</a></li>
+                        <li><a class="dropdown-item" href="/estrategias-dinamicas">⚙️ Estratégias Dinâmicas</a></li>-->
+                            <li><a class="dropdown-item" href="/central-garantias">⚙️ Central de Garantias</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Resultados</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/resultados">🏆 Resultados dos Concursos (Abas)</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Conferidores (Apostas)</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/central-conferencias">✅ Central de Conferências</a></li>
+                            <li><a class="dropdown-item" href="/analise-ausentes">✅ Backtest de Ausentes (Escapes)</a>
+                            </li>
+                            <!--<li><a class="dropdown-item" href="/conferencia-pos-apostas">✅ Pós-Apostas</a></li>
+                        <li><a class="dropdown-item" href="/conferencia-apostas-ocr">✅ Via OCR (Combinações Inteligentes)</a></li>-->
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Geradores / Simuladores /
+                                            Palpites</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/estatisticas#gerador-palpites">✅ Gerador de Palpites
+                                    (Stats)</a></li>
+                            <li><a class="dropdown-item" href="/gerador-inteligente">✅ Gerador Inteligente (2.6M
+                                    Combinações)</a></li>
+                            <li><a class="dropdown-item" href="/gerador-padroes">✅ Gerador Completo por Padrões
+                                    (Abas)</a></li>
+                            <li><a class="dropdown-item" href="/gerador-especial/">✅ Gerador Especial de Apostas
+                                    (NOVO)</a></li>
+                            <li><a class="dropdown-item" href="/analise/simulador-apostas">🎲 Simulador (Apostas)</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/palpites"><i class="fas fa-lightbulb me-1"></i>🎰
+                                    Palpites </a></li>
+                            <!--
+							TRATAR ESTA ROTA NA BUSCA INTELIGENTE E TRANSFORMAR O REALCE EM QUE VAI APARECENDO A SEQUENCIA PROCURADA
+							ENTRE OUTRAS MELHORIAS - PRECISA  IR OLHANDO COM CALMA  - DEPOIS ESCLUIR O LINK ABAIXO /combinacoes-inteligentes
+						-->
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Conversor</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/conversor-apostas">📄 ⚔️ 🧩 TXT vs Json</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Filtradores</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/filtrador-combinacoes/">✅ Filtrador de Combinações</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Monitoramentos</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/monitoramento-apostas">✅ Apostas (testanto)</a></li>
+                            <li><a class="dropdown-item" href="/analise/frequencia-premios">🏆 Frequência de Prêmios</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Estatisticas</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/estatisticas">🏆 Estatisticas (Abas)</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Registro de Eventos</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/eventos-intuitivos">🎯 Eventos Intuitivos </a></li>
+
+                        </ul>
+                    </li>
+
+                    <!-- ESTATISTICAS  GERAIS I -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEstatisticas1" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-chart-pie me-1"></i>Estatísticas Gerais I
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticas1">
+                            <li><a class="dropdown-item" href="/estatisticas">📊 Frequência Geral</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/pares-impares">⚖️ Pares e Ímpares</a></li>
+                            <li><a class="dropdown-item" href="/analise/previsao-atrasados">🔮 Previsão de Aparição -
+                                    Atrasados</a></li>
+                            <li><a class="dropdown-item" href="/analise/matriz-probabilidade">📐 Matriz de
+                                    Probabilidade</a></li>
+                            <li><a class="dropdown-item" href="/analise/soma-dezenas">➕ Soma das Dezenas</a></li>
+                            <li><a class="dropdown-item" href="/analise/digito-padrao-inicial-final">🔹 Padrão Dígito
+                                    Inicial/Final</a></li>
+                            <li><a class="dropdown-item" href="/analise/digitos-unicos">🎲 Dígitos Únicos Usados em Cada
+                                    Sorteio</a></li>
+                            <li><a class="dropdown-item" href="/analise/gaps-distancias">📏 Distância/Gap entre
+                                    Números</a></li>
+                            <li><a class="dropdown-item" href="/analise/quadrantes-volante">🎯 Quadrantes do Volante</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/multiplos">🧩 Múltiplos (3, 5, 7)</a></li>
+                            <li><a class="dropdown-item" href="/analise/raiz-digital">🔸 Raiz Digital</a></li>
+                            <li><a class="dropdown-item" href="/analise/ciclos-intervalos">⏱️ Ciclos e Intervalos</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/repeticao-persistencia">🔁 Repetição e
+                                    Persistência</a></li>
+                            <li><a class="dropdown-item" href="/analise/distribuicao-numerica">📊 Distribuição
+                                    Numérica</a></li>
+                            <li><a class="dropdown-item" href="/analise/padroes-sequencias">🧩 Padrões de Sequências</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/probabilidade-condicional">🎯 Probabilidade
+                                    Condicional</a></li>
+                        </ul>
+                    </li>
+                    <!-- ESTATISTICAS  GERAL II -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEstatisticasII" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Estatísticas Gerais II
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticasII">
+                            <li><a class="dropdown-item" href="/estatisticas">📊 Análises Geral</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/analise-profunda">🎲 Análise Profunda Simples </a></li>
+                            <li><a class="dropdown-item" href="/analise/volante">🎲 Análise Volante </a></li>
+                            <li><a class="dropdown-item" href="/posicao-minima-maxima">🎲 Análise Posição Máxima
+                                    Minima</a></li>
+                            <li><a class="dropdown-item" href="/analises/finais-iguais">🎲 Análise Finais Iguais </a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analises/sequencias-dezenas">🎲 Análises Sequencia
+                                    Dezenas </a></li>
+                            <li><a class="dropdown-item" href="/analises/repeticao-concurso-anterior">🎲 Análise
+                                    Repetição Concurso Anterior I</a></li>
+                            <li><a class="dropdown-item" href="/repeticao">🎲 Análise Repetição Concurso Anterior II</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise-colunas/dashboard">🎲 Análises Colunas </a></li>
+                            <li><a class="dropdown-item" href="/cruzamentos/dashboard">🎲 Análises Colunas -
+                                    Cruzamentos</a></li>
+                            <li><a class="dropdown-item" href="/sequenciais/dashboard">🎲 Análises Sequenciais</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Análises Avançadas</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise-profunda/v2">🎲 Análise Profunda Avançada</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/sazonal">🌍 Análise Sazonal</a></li>
+                            <li><a class="dropdown-item" href="/analise/dezenas-faixas">📈 Análise por Dezenas</a></li>
+                            <li><a class="dropdown-item" href="/analise/sequencias">🔢 Análise de Sequências</a></li>
+                            <li><a class="dropdown-item" href="/analise/defasagem">📉 Análise de Defasagem</a></li>
+                            <li><a class="dropdown-item" href="/analise/fibonacci">📐 Análise Fibonacci</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- ESTATÍSTICAS NUMERAIS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownNumerais" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-chart-simple me-1"></i>Estatísticas Numerais
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownNumerais">
+                            <li><a class="dropdown-item" href="/estatisticas">📊 Por Posição</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/numeros-atrasados">⏰ Números Atrasados por
+                                    Posição</a></li>
+                            <li><a class="dropdown-item" href="/analise/numeros-juntos">🤝 Números que Saem Juntos</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/quentes-frios">🔥❄️ Números Quentes e Frios</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/numeros-repetem">🔁 Números que se Repetem</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/numeros-devidos">📈 Números "Devidos"</a></li>
+                            <li><a class="dropdown-item" href="/analise/primos-compostos">🔢 Primos vs Compostos</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/numeros-consecutivos">👯 Vizinhos /
+                                    Consecutivos</a></li>
+                            <li><a class="dropdown-item" href="/analise/numeros-espelhados">🔄 Números Espelhados</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/numeros-capicua">♾️ Números Capicua</a></li>
+                        </ul>
+                    </li>
+                    <!-- MESES -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEstatisticas3" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Meses
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticas3">
+                            <li><a class="dropdown-item" href="/estatisticas">📅 Meses da Sorte</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/meses-atrasados">📆 Meses Atrasados</a></li>
+                            <li><a class="dropdown-item" href="/analise/evolucao-meses">📈 Evolução Temporal</a></li>
+                            <li><a class="dropdown-item" href="/analise/expectativa-meses">🧮 Expectativa por Mês</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/ciclos-meses">🔄 Ciclos e Padrões</a></li>
+                            <li><a class="dropdown-item" href="/analise/transicao-meses">↔️ Transição entre Meses</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/correlacao-mes-dezenas">🔗 Correlação
+                                    Mês/Dezenas</a></li>
+                            <li><a class="dropdown-item" href="/analise/acumulos-mes">💰 Acúmulos x Mês</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- CÁLCULOS VARIADOS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEstatisticas4" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-chart-kanban me-1"></i>Cálculos Variados
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticas4">
+                            <li><a class="dropdown-item" href="/estatisticas">🧮 Atrasados</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/calculadora-probabilidade">🔢 Calculadora de
+                                    Probabilidade</a></li>
+                            <li><a class="dropdown-item" href="/analise/valores-probabilidades">📊 Valores e
+                                    Probabilidades</a></li>
+                        </ul>
+                    </li>
+                    <!-- VISUALIZAÇÕES -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownVisualizacoes" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Visualizações
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownVisualizacoes">
+                            <li><a class="dropdown-item" href="https://gerarpalpitesindividualdiadesorte.netlify.app/"
+                                    target="_blank">📊 Visualização Tubular (Externo)</a></li>
+                            <li><a class="dropdown-item" href="/visualizacao-tubular">📈 Visualização Tubular
+                                    (Interno)</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>&#128315; Resultados
+                                            Minimalistas</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="https://resumodiadesorte.netlify.app/" target="_blank">📋
+                                    Resultados</a></li>
+                            <li><a class="dropdown-item" href="https://apostenasmodalidades.netlify.app/"
+                                    target="_blank">📋 Sistema Completo - Loterias</a></li>
+                        </ul>
+                    </li>
+
+
+                    <!-- CRUZAMENTOS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCruzamentos" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Cruzamentos
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownCruzamentos">
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Gaps</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/gaps-completo">📏 x Dígitos</a></li>
+                            <li><a class="dropdown-item" href="/analise/gaps-expandido">📏 x Outras</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Padrões Faltantes</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/analise/digito-padrao-inicial-final">🔹 Padrões
+                                    Faltantes</a></li>
+                        </ul>
+                    </li>
+                    <!-- SITES TERCEIROS -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSitesTerceiros" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Sites de Terceiros
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownSitesTerceiros">
+                            <li><a class="dropdown-item" href="https://www.mazusoft.com.br/dia-de-sorte/confere.php"
+                                    target="_blank">Confere</a></li>
+                            <li><a class="dropdown-item" href="https://confiraloterias.com.br/" target="_blank">Confira
+                                    Loterias</a></li>
+                            <li><a class="dropdown-item" href="https://www.somatematica.com.br/" target="_blank">Só
+                                    matemática</a></li>
+                            <li><a class="dropdown-item" href="https://www.lottoland.com.br/loterias"
+                                    target="_blank">LotoLand</a></li>
+                            <li><a class="dropdown-item" href="https://www.lotoloto.com.br/"
+                                    target="_blank">Lotoloto</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>Exterior</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="https://www.thelotter.com/pt/" target="_blank">The
+                                    Lotter</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small><b>CEF</b></small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="https://loterias.caixa.gov.br/Paginas/default.aspx/"
+                                    target="_blank">Resultados</a></li>
+                            <li><a class="dropdown-item" href="https://www.loteriasonline.caixa.gov.br/"
+                                    target="_blank">Apostas Online</a></li>
+                        </ul>
+                    </li>
+                    <!-- CONFIGURAÇÕES -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ferramentas" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-clipboard-check"></i> Configurações
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownVisualizacoes">
+                            <li>
+                                <hr class="dropdown-divider"><span><small>Configurável</small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/sistema/configuracoes">💲 Valor da Aposta Mínima</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/sistema/configuracoes">🎨 Cores dos Meses</a></li>
+                            <li>
+                                <hr class="dropdown-divider"><span><small>Informativo</small></span>
+                            </li>
+                            <li><a class="dropdown-item" href="/sistema/configuracoes">ℹ️ Informações do Sistema</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/sistema/configuracoes">⚙️ Todas as Configurações</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Navbar final -->
+
+    <!-- Conteúdo Principal -->
+    <main class="container-fluid py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SheetJS para exportação XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

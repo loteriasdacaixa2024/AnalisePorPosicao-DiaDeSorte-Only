@@ -1,0 +1,1487 @@
+{% extends "base.html" %}
+{% block title %}Frequência de Prêmios - Dia de Sorte{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    :root {
+        --cor-primary: #D4B31A;
+        --cor-primary-dark: #B89615;
+        --cor-primary-light: #E5C942;
+    }
+
+    .frequencia-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .frequencia-header {
+        background: linear-gradient(135deg, var(--cor-primary) 0%, var(--cor-primary-dark) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.3);
+    }
+
+    .frequencia-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .frequencia-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 25px;
+        margin-bottom: 20px;
+        text-align: center;
+        border-left: 4px solid var(--cor-primary);
+    }
+
+    .dark .stats-card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .stats-card h5 {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .dark .stats-card h5 {
+        color: #aaa;
+    }
+
+    .stats-card h2 {
+        color: var(--cor-primary);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .card-analise {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+
+    .dark .card-analise {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--cor-primary) 0%, var(--cor-primary-dark) 100%);
+        color: white;
+        padding: 20px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .card-header-custom i {
+        margin-right: 8px;
+    }
+
+    .card-body-custom {
+        padding: 25px;
+    }
+
+    .top-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 45px;
+        height: 45px;
+        background: var(--cor-primary);
+        color: white;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-right: 15px;
+        box-shadow: 0 2px 6px rgba(212, 179, 26, 0.4);
+    }
+
+    .top-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        transition: all 0.3s;
+    }
+
+    .dark .top-item {
+        background: #1e1e1e;
+    }
+
+    .top-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(212, 179, 26, 0.2);
+    }
+
+    .top-item-content {
+        flex: 1;
+    }
+
+    .top-item-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .top-item-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .dark .top-item-subtitle {
+        color: #aaa;
+    }
+
+    .badge-percentual {
+        background: var(--cor-primary);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .numero-badge {
+        display: inline-block;
+        min-width: 40px;
+        padding: 8px 12px;
+        margin: 3px;
+        background: var(--cor-primary);
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .tabela-custom {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .tabela-custom th {
+        background: #f8f9fa;
+        padding: 12px;
+        font-weight: 600;
+        text-align: left;
+        border-bottom: 2px solid var(--cor-primary);
+    }
+
+    .dark .tabela-custom th {
+        background: #1e1e1e;
+    }
+
+    .tabela-custom td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .dark .tabela-custom td {
+        border-bottom-color: #444;
+    }
+
+    .tabela-custom tr:hover {
+        background: rgba(212, 179, 26, 0.1);
+    }
+
+    .atraso-item {
+        padding: 12px;
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .dark .atraso-item {
+        background: #3d3520;
+        border-left-color: #ffc107;
+    }
+
+    .sequencia-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .dark .sequencia-badge {
+        background: #1a3a52;
+        color: #64b5f6;
+    }
+
+    .correlacao-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .dark .correlacao-item {
+        background: #1e1e1e;
+    }
+
+    .insight-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--cor-primary);
+        transition: all 0.3s;
+    }
+
+    .dark .insight-card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .insight-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.3);
+    }
+
+    .insight-card.success { border-left-color: #28a745; }
+    .insight-card.info { border-left-color: #17a2b8; }
+    .insight-card.warning { border-left-color: #ffc107; }
+    .insight-card.primary { border-left-color: var(--cor-primary); }
+    .insight-card.danger { border-left-color: #dc3545; }
+    .insight-card.secondary { border-left-color: #6c757d; }
+
+    .insight-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--cor-primary);
+    }
+
+    .insight-titulo {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        color: var(--cor-primary);
+    }
+
+    .insight-descricao {
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .dark .insight-descricao {
+        color: #aaa;
+    }
+
+    /* Tabs */
+    .nav-tabs .nav-link {
+        color: #666;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: var(--cor-primary);
+        border-bottom-color: var(--cor-primary-light);
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--cor-primary);
+        border-bottom-color: var(--cor-primary);
+        background: transparent;
+    }
+
+    /* Accordion para detalhes do jogo */
+    .jogo-accordion {
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .dark .jogo-accordion {
+        background: #1e1e1e;
+    }
+
+    .jogo-accordion-header {
+        padding: 12px 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s;
+    }
+
+    .jogo-accordion-header:hover {
+        background: rgba(212, 179, 26, 0.1);
+    }
+
+    .jogo-accordion-body {
+        padding: 15px;
+        border-top: 1px solid #dee2e6;
+        display: none;
+    }
+
+    .dark .jogo-accordion-body {
+        border-top-color: #444;
+    }
+
+    .jogo-accordion-body.show {
+        display: block;
+    }
+
+    /* Matriz de Comparação */
+    .matriz-grid {
+        display: grid;
+        grid-template-columns: auto repeat(31, 1fr);
+        gap: 2px;
+        font-size: 0.75rem;
+        overflow-x: auto;
+    }
+
+    .matriz-header {
+        background: var(--cor-primary);
+        color: white;
+        padding: 5px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .matriz-concurso {
+        background: #f8f9fa;
+        padding: 5px 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dark .matriz-concurso {
+        background: #1e1e1e;
+    }
+
+    .matriz-cell {
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f0f0;
+        border-radius: 3px;
+    }
+
+    .dark .matriz-cell {
+        background: #2d2d2d;
+    }
+
+    .matriz-cell.ativo {
+        background: var(--cor-primary);
+        color: white;
+        font-weight: 700;
+    }
+
+    /* Badge de Repetições */
+    .badge-repeticao {
+        background: #ffc107;
+        color: #000;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-intervalo {
+        background: #17a2b8;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        color: var(--cor-primary);
+        border-color: #dee2e6;
+    }
+
+    .pagination .page-link:hover {
+        background: var(--cor-primary-light);
+        border-color: var(--cor-primary);
+        color: white;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--cor-primary);
+        border-color: var(--cor-primary);
+    }
+</style>
+
+<div class="frequencia-container">
+    <!-- Header -->
+    <div class="frequencia-header">
+        <h1><i class="fas fa-trophy"></i> Frequência de Prêmios (7 Acertos)</h1>
+        <p>Análise detalhada dos padrões encontrados nos sorteios premiados</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status" style="color: var(--cor-primary) !important;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3">Analisando sorteios premiados...</p>
+    </div>
+
+    <!-- Content -->
+    <div id="content" style="display: none;">
+        <!-- Insights Inteligentes -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-lightbulb"></i> Insights Inteligentes
+            </div>
+            <div class="card-body-custom">
+                <div id="insightsInteligentes" class="row"></div>
+            </div>
+        </div>
+
+        <!-- Resumo Consolidado (Tabela) -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-table"></i> Resumo Consolidado
+            </div>
+            <div class="card-body-custom">
+                <table class="tabela-custom">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Mais Frequente</th>
+                            <th>Menos Frequente</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaResumo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Jogos Vencedores Detalhados com TABS -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-trophy"></i> Jogos Vencedores Detalhados
+            </div>
+            <div class="card-body-custom">
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs mb-4" id="jogosVencedoresTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-lista" data-bs-toggle="tab" data-bs-target="#tabLista" type="button">
+                            <i class="fas fa-list"></i> Lista Completa
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-comparador" data-bs-toggle="tab" data-bs-target="#tabComparador" type="button">
+                            <i class="fas fa-th"></i> Comparador Visual
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-repeticoes" data-bs-toggle="tab" data-bs-target="#tabRepeticoes" type="button">
+                            <i class="fas fa-redo"></i> Análise de Repetições
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-digitos-iniciais" data-bs-toggle="tab" data-bs-target="#tabDigitosIniciais" type="button">
+                            <i class="fas fa-sort-numeric-up"></i> Padrões de Dígitos Iniciais
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-numeros-altos" data-bs-toggle="tab" data-bs-target="#tabNumerosAltos" type="button">
+                            <i class="fas fa-arrow-up"></i> Resultados Números Altos
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="jogosVencedoresTabContent">
+                    <!-- TAB 1: Lista Completa -->
+                    <div class="tab-pane fade show active" id="tabLista" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="tabela-custom">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Concurso</th>
+                                        <th>Data</th>
+                                        <th>Intervalo</th>
+                                        <th>Dezenas Vencedoras</th>
+                                        <th>Mês</th>
+                                        <th>P/I</th>
+                                        <th>Soma</th>
+                                        <th>Rep.</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaJogosVencedores"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav class="mt-3">
+                            <ul class="pagination justify-content-center" id="paginationJogos"></ul>
+                        </nav>
+                    </div>
+
+                    <!-- TAB 2: Comparador Visual -->
+                    <div class="tab-pane fade" id="tabComparador" role="tabpanel">
+                        <div id="matrizComparacao"></div>
+                    </div>
+
+                    <!-- TAB 3: Análise de Repetições -->
+                    <div class="tab-pane fade" id="tabRepeticoes" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-chart-bar"></i> Estatísticas de Repetições</h5>
+                                <div id="estatisticasRepeticoes"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-list-ol"></i> Maiores Repetições</h5>
+                                <div id="detalhesRepeticoes"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: Padrões de Dígitos Iniciais -->
+                    <div class="tab-pane fade" id="tabDigitosIniciais" role="tabpanel">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>O que são Padrões de Dígitos Iniciais?</strong><br>
+                            Este padrão mostra os dígitos iniciais de cada dezena sorteadas.
+                            Exemplo: <code>04 08 12 17 24 27 29</code> → <code>0 0 1 1 2 2 2</code>
+                        </div>
+                        <h5><i class="fas fa-trophy"></i> TOP 3 Padrões Mais Frequentes</h5>
+                        <div id="topDigitosIniciais"></div>
+                    </div>
+                    <!-- TAB 5: Resultados Números Altos -->
+                    <div class="tab-pane fade" id="tabNumerosAltos" role="tabpanel">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Critério de Filtro:</strong> Sorteios cujo <strong>menor número (ordenado)</strong> é <strong>maior ou igual a 10</strong>.<br>
+                            <small>Exemplo válido: <code>10, 12, 13, 24, 25, 26, 30</code> → Menor número = 10 ✓</small>
+                        </div>
+
+                        <!-- Estatísticas Resumidas -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <h5>Total Filtrado</h5>
+                                    <h2 id="numerosAltosTotal">-</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <h5>Com Prêmio (7 acertos)</h5>
+                                    <h2 id="numerosAltosPremios">-</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <h5>Acumulados</h5>
+                                    <h2 id="numerosAltosAcumulados">-</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <h5>Período</h5>
+                                    <h2 style="font-size:1.2rem;" id="numerosAltosPeriodo">-</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Resultados -->
+                        <h5><i class="fas fa-list"></i> Lista Completa de Sorteios Filtrados</h5>
+
+                        <!-- Filtros -->
+                        <div class="btn-group mb-3" role="group">
+                            <button type="button" class="btn btn-outline-primary active" onclick="filtrarNumerosAltos('todos')">
+                                <i class="fas fa-list"></i> Todos
+                            </button>
+                            <button type="button" class="btn btn-outline-success" onclick="filtrarNumerosAltos('premiados')">
+                                <i class="fas fa-trophy"></i> Com Prêmio
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="filtrarNumerosAltos('acumulados')">
+                                <i class="fas fa-clock"></i> Acumulados
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="tabela-custom">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Concurso</th>
+                                        <th>Data</th>
+                                        <th>Dezenas Sorteadas</th>
+                                        <th>Mês</th>
+                                        <th>Premiou?</th>
+                                        <th>P/I</th>
+                                        <th>Soma</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaNumerosAltos"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav class="mt-3">
+                            <ul class="pagination justify-content-center" id="paginationNumerosAltos"></ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5>Total de Sorteios</h5>
+                    <h2 id="totalSorteios">-</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5>Total de Prêmios</h5>
+                    <h2 id="totalPremios">-</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5>Diferença</h5>
+                    <h2 id="diferencaSorteiosPremios">-</h2>
+                    <small style="color: #666; display: block; margin-top: 5px;">Sorteios sem prêmio</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h5>Valor Total Pago</h5>
+                    <h2 id="valorTotalPago" style="font-size: 1.8rem;">-</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="stats-card">
+                    <h5>Total de Ganhadores (7 Acertos)</h5>
+                    <h2 id="totalGanhadores">-</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP 3 - Dezenas Mais Frequentes -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-hashtag"></i> TOP 3 - Dezenas Mais Frequentes
+            </div>
+            <div class="card-body-custom">
+                <div id="topDezenas"></div>
+            </div>
+        </div>
+
+        <!-- TOP 3 - Padrões Dominantes -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card-analise">
+                    <div class="card-header-custom">
+                        <i class="fas fa-balance-scale"></i> TOP 3 - Pares e Ímpares
+                    </div>
+                    <div class="card-body-custom">
+                        <div id="topParesImpares"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-analise">
+                    <div class="card-header-custom">
+                        <i class="fas fa-sort-numeric-down"></i> TOP 3 - Dígitos Finais
+                    </div>
+                    <div class="card-body-custom">
+                        <div id="topDigitosFinais"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card-analise">
+                    <div class="card-header-custom">
+                        <i class="fas fa-th"></i> TOP 3 - Quadrantes
+                    </div>
+                    <div class="card-body-custom">
+                        <div id="topQuadrantes"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-analise">
+                    <div class="card-header-custom">
+                        <i class="fas fa-link"></i> TOP 3 - Consecutivos
+                    </div>
+                    <div class="card-body-custom">
+                        <div id="topConsecutivos"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card-analise">
+                    <div class="card-header-custom">
+                        <i class="fas fa-redo"></i> TOP 3 - Repetições
+                    </div>
+                    <div class="card-body-custom">
+                        <div id="topRepeticoes"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-analise">
+                    <div class="card-header-custom">
+                         TOP 3 - Meses
+                    </div>
+                    <div class="card-body-custom">
+                        <div id="topMeses"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP 3 - Atrasos e Sequências (JUNTOS) -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-clock"></i> TOP 3 - Atrasos Relevantes & Principais Sequências
+            </div>
+            <div class="card-body-custom">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-clock"></i> Atrasos Relevantes</h5>
+                        <div id="topAtrasos"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-stream"></i> Principais Sequências</h5>
+                        <div id="topSequencias"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP 3 - GAPS (Distâncias entre Dezenas) -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-ruler-horizontal"></i> TOP 3 - GAPS (Distâncias entre Dezenas)
+            </div>
+            <div class="card-body-custom">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>O que são GAPS?</strong><br>
+                    GAPS são as distâncias entre números consecutivos sorteados.
+                    Exemplo: <code>[02, 08, 15, 23, 27, 29, 31]</code> → GAPS: <code>6 7 8 4 2 2</code>
+                </div>
+                <div id="topGaps"></div>
+            </div>
+        </div>
+
+        <!-- Correlação Mês x Dezena -->
+        <div class="card-analise">
+            <div class="card-header-custom">
+                <i class="fas fa-project-diagram"></i> TOP 10 - Correlação Mês × Dezena
+            </div>
+            <div class="card-body-custom">
+                <div id="correlacaoMesDezena"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function carregarAnalise() {
+    try {
+        const response = await fetch('/api/analise/frequencia-premios');
+        const data = await response.json();
+
+        if (data.erro) {
+            showError(data.erro);
+            return;
+        }
+
+        // Insights Inteligentes
+        renderInsights(data.insights || []);
+
+        // Resumo Consolidado (Tabela)
+        renderResumoTabela(data.resumo_tabela || []);
+
+        // Stats Cards
+        document.getElementById('totalSorteios').textContent = data.total_sorteios || 0;
+        document.getElementById('totalPremios').textContent = data.total_premios || 0;
+        document.getElementById('diferencaSorteiosPremios').textContent = data.diferenca_sorteios_premios || 0;
+        document.getElementById('totalGanhadores').textContent = data.total_ganhadores || 0;
+        document.getElementById('valorTotalPago').textContent = formatarMoeda(data.valor_total_pago || 0);
+
+        // TOP 3 - Dezenas
+        renderTopDezenas(data.top_dezenas || []);
+
+        // TOP 3 - Padrões
+        renderTopPadrao(data.top_padroes_pares_impares || [], 'topParesImpares');
+        renderTopPadrao(data.top_padroes_digitos_finais || [], 'topDigitosFinais');
+        renderTopPadrao(data.top_padroes_quadrantes || [], 'topQuadrantes');
+        renderTopPadrao(data.top_consecutivos || [], 'topConsecutivos');
+        renderTopPadrao(data.top_repeticoes || [], 'topRepeticoes');
+        renderTopMeses(data.top_meses || []);
+
+        // TOP 3 - Atrasos
+        renderTopAtrasos(data.top_atrasos || []);
+
+        // TOP 3 - Sequências
+        renderTopSequencias(data.top_sequencias || []);
+
+        // TOP 3 - GAPS
+        renderTopGaps(data.top_gaps || []);
+
+        // Correlação
+        renderCorrelacao(data.correlacao_mes_dezena || []);
+
+        // Padrões de Dígitos Iniciais
+        renderPadroesDigitosIniciais(data.top_padroes_digitos_iniciais || []);
+
+        // Jogos Vencedores
+        renderJogosVencedores(data.jogos_vencedores || []);
+        renderMatrizComparacao(data.matriz_comparacao_dezenas || []);
+        renderAnaliseRepeticoes(data.analise_repeticoes_entre_premios || {});
+
+        // Números Altos
+        renderNumerosAltos(data.analise_numeros_altos || {});
+
+        // Mostrar conteúdo
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+
+    } catch (error) {
+        showError('Erro ao carregar análise: ' + error);
+    }
+}
+
+function renderTopDezenas(dezenas) {
+    const container = document.getElementById('topDezenas');
+    container.innerHTML = '';
+
+    dezenas.forEach((item, index) => {
+        container.innerHTML += `
+            <div class="top-item">
+                <div class="top-badge">${index + 1}</div>
+                <div class="top-item-content">
+                    <div class="top-item-title">
+                        <span class="numero-badge">${item.dezena}</span>
+                    </div>
+                    <div class="top-item-subtitle">
+                        ${item.frequencia} aparições • ${item.media_aparicoes.toFixed(2)} por concurso
+                    </div>
+                </div>
+                <div class="badge-percentual">${item.percentual}%</div>
+            </div>
+        `;
+    });
+}
+
+function renderTopPadrao(padroes, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    padroes.forEach((item, index) => {
+        const exemplos = item.exemplos ? item.exemplos.slice(0, 3).join(', ') : '';
+        container.innerHTML += `
+            <div class="top-item">
+                <div class="top-badge">${index + 1}</div>
+                <div class="top-item-content">
+                    <div class="top-item-title">${item.padrao}</div>
+                    <div class="top-item-subtitle">
+                        ${item.frequencia} vezes ${exemplos ? '• Ex: ' + exemplos : ''}
+                    </div>
+                </div>
+                <div class="badge-percentual">${item.percentual}%</div>
+            </div>
+        `;
+    });
+}
+
+function renderTopMeses(meses) {
+    const container = document.getElementById('topMeses');
+    container.innerHTML = '';
+
+    meses.forEach((item, index) => {
+        container.innerHTML += `
+            <div class="top-item">
+                <div class="top-badge">${index + 1}</div>
+                <div class="top-item-content">
+                    <div class="top-item-title">
+                        <span class="badge mes-cor-${item.mes - 1}">${item.mes_nome}</span>
+                    </div>
+                    <div class="top-item-subtitle">
+                        ${item.frequencia} prêmios • ${item.ganhadores_total} ganhadores
+                    </div>
+                </div>
+                <div class="badge-percentual">${item.percentual}%</div>
+            </div>
+        `;
+    });
+}
+
+function renderTopAtrasos(atrasos) {
+    const container = document.getElementById('topAtrasos');
+    container.innerHTML = '';
+
+    atrasos.forEach(item => {
+        container.innerHTML += `
+            <div class="atraso-item">
+                <strong>Dezena <span class="numero-badge">${item.dezena}</span></strong>
+                • Atraso: <strong>${item.atraso} concursos</strong>
+                • Último concurso: ${item.ultimo_concurso}
+            </div>
+        `;
+    });
+}
+
+function renderTopSequencias(sequencias) {
+    const container = document.getElementById('topSequencias');
+    container.innerHTML = '';
+
+    sequencias.forEach((item, index) => {
+        const exemplos = item.exemplos ? item.exemplos.slice(0, 3).join(', ') : '';
+        container.innerHTML += `
+            <div class="top-item">
+                <div class="top-badge">${index + 1}</div>
+                <div class="top-item-content">
+                    <div class="top-item-title">
+                        <span class="sequencia-badge">${item.padrao}</span>
+                    </div>
+                    <div class="top-item-subtitle">
+                        ${item.frequencia} vezes ${exemplos ? '• Ex: Concursos ' + exemplos : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function renderCorrelacao(correlacoes) {
+    const container = document.getElementById('correlacaoMesDezena');
+    container.innerHTML = '';
+
+    correlacoes.forEach(item => {
+        container.innerHTML += `
+            <div class="correlacao-item">
+                <span class="badge mes-cor-${item.mes - 1}" style="margin-right: 10px;">${item.mes_nome}</span>
+                <i class="fas fa-arrow-right" style="margin: 0 10px; color: var(--cor-primary);"></i>
+                <span class="numero-badge">${item.dezena}</span>
+                <span style="margin-left: auto; font-weight: 600;">${item.frequencia} vezes</span>
+            </div>
+        `;
+    });
+}
+
+function renderInsights(insights) {
+    const container = document.getElementById('insightsInteligentes');
+    container.innerHTML = '';
+
+    insights.forEach(insight => {
+        container.innerHTML += `
+            <div class="col-md-6 col-lg-4">
+                <div class="insight-card ${insight.cor}">
+                    <div class="insight-icon">
+                        <i class="fas fa-${insight.icone}"></i>
+                    </div>
+                    <div class="insight-titulo">${insight.titulo}</div>
+                    <div class="insight-descricao">${insight.descricao}</div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function renderResumoTabela(resumo) {
+    const tbody = document.getElementById('tabelaResumo');
+    tbody.innerHTML = '';
+
+    resumo.forEach(item => {
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${item.categoria}</strong></td>
+                <td>${item.mais_frequente}</td>
+                <td>${item.menos_frequente}</td>
+                <td><span class="badge bg-secondary">${item.observacao}</span></td>
+            </tr>
+        `;
+    });
+}
+
+// Variáveis globais para pagination
+let jogosVencedoresData = [];
+let currentPage = 1;
+const itemsPerPage = 10;
+
+function renderJogosVencedores(jogos) {
+    jogosVencedoresData = jogos;
+    renderPaginationJogos();
+    renderPageJogos(1);
+}
+
+function renderPageJogos(page) {
+    currentPage = page;
+    const tbody = document.getElementById('tabelaJogosVencedores');
+    tbody.innerHTML = '';
+
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageJogos = jogosVencedoresData.slice(start, end);
+
+    pageJogos.forEach(jogo => {
+        const intervaloHTML = jogo.intervalo ?
+            `<span class="badge-intervalo">${jogo.intervalo} concursos</span>` :
+            '<span class="text-muted">-</span>';
+
+        const repeticoesHTML = jogo.repeticoes_anterior > 0 ?
+            `<span class="badge-repeticao" title="${jogo.dezenas_repetidas.join(', ')}">${jogo.repeticoes_anterior}</span>` :
+            '<span class="text-muted">0</span>';
+
+        const numerosHTML = jogo.numeros.map(n => `<span class="numero-badge">${n}</span>`).join(' ');
+
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${jogo.sequencia_numero}</strong></td>
+                <td><strong>${jogo.concurso}</strong></td>
+                <td>${jogo.data}</td>
+                <td>${intervaloHTML}</td>
+                <td>${numerosHTML}</td>
+                <td><span class="badge mes-cor-${jogo.mes_sorte - 1}">${jogo.mes_nome}</span></td>
+                <td>${jogo.pares}P/${jogo.impares}I</td>
+                <td>${jogo.soma}</td>
+                <td>${repeticoesHTML}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="toggleDetalhesJogo(${jogo.concurso})">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr id="detalhes-${jogo.concurso}" style="display: none;">
+                <td colspan="10">
+                    <div class="p-3" style="background: #f8f9fa; border-radius: 8px;">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Ganhadores:</strong> ${jogo.ganhadores}<br>
+                                <strong>Prêmio:</strong> ${formatarMoeda(jogo.valor_premio)}<br>
+                                <strong>Consecutivos:</strong> ${jogo.consecutivos}
+                            </div>
+                            <div class="col-md-8">
+                                ${jogo.repeticoes_anterior > 0 ?
+                                    `<strong>Repetidas do anterior:</strong> ${jogo.dezenas_repetidas.map(n => `<span class="numero-badge">${n}</span>`).join(' ')}` :
+                                    '<em>Nenhuma repetição com o concurso anterior</em>'}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function renderPaginationJogos() {
+    const totalPages = Math.ceil(jogosVencedoresData.length / itemsPerPage);
+    const pagination = document.getElementById('paginationJogos');
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // Botão Anterior
+    pagination.innerHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">«</a>
+        </li>
+    `;
+
+    // Páginas
+    const maxPages = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+    if (endPage - startPage < maxPages - 1) {
+        startPage = Math.max(1, endPage - maxPages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagination.innerHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+            </li>
+        `;
+    }
+
+    // Botão Próximo
+    pagination.innerHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">»</a>
+        </li>
+    `;
+}
+
+function changePage(page) {
+    const totalPages = Math.ceil(jogosVencedoresData.length / itemsPerPage);
+    if (page < 1 || page > totalPages) return;
+    renderPageJogos(page);
+    renderPaginationJogos();
+}
+
+function toggleDetalhesJogo(concurso) {
+    const detalhesRow = document.getElementById(`detalhes-${concurso}`);
+    if (detalhesRow.style.display === 'none') {
+        detalhesRow.style.display = 'table-row';
+    } else {
+        detalhesRow.style.display = 'none';
+    }
+}
+
+function renderMatrizComparacao(matriz) {
+    const container = document.getElementById('matrizComparacao');
+    if (!matriz || matriz.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum dado disponível</p>';
+        return;
+    }
+
+    let html = '<div class="matriz-grid">';
+
+    // Header
+    html += '<div class="matriz-header">Concurso</div>';
+    for (let i = 1; i <= 31; i++) {
+        html += `<div class="matriz-header">${i}</div>`;
+    }
+
+    // Linhas
+    matriz.forEach(item => {
+        html += `<div class="matriz-concurso">${item.concurso}</div>`;
+        item.linha.forEach((valor, index) => {
+            const ativo = valor === 1 ? 'ativo' : '';
+            html += `<div class="matriz-cell ${ativo}">${valor === 1 ? '●' : ''}</div>`;
+        });
+    });
+
+    html += '</div>';
+    html += '<p class="mt-3 text-muted"><small>● = Dezena sorteada neste concurso (Últimos 20 prêmios)</small></p>';
+    container.innerHTML = html;
+}
+
+function renderAnaliseRepeticoes(analise) {
+    // Estatísticas
+    const estatisticasDiv = document.getElementById('estatisticasRepeticoes');
+    let htmlEstatisticas = '';
+
+    if (analise.estatisticas) {
+        for (let qtd in analise.estatisticas) {
+            const info = analise.estatisticas[qtd];
+            htmlEstatisticas += `
+                <div class="top-item">
+                    <div class="top-badge">${qtd}</div>
+                    <div class="top-item-content">
+                        <div class="top-item-title">${qtd} repetições</div>
+                        <div class="top-item-subtitle">${info.frequencia} vezes</div>
+                    </div>
+                    <div class="badge-percentual">${info.percentual}%</div>
+                </div>
+            `;
+        }
+    }
+
+    if (!htmlEstatisticas) {
+        htmlEstatisticas = '<p class="text-muted">Nenhuma estatística disponível</p>';
+    }
+
+    estatisticasDiv.innerHTML = htmlEstatisticas;
+
+    // Detalhes
+    const detalhesDiv = document.getElementById('detalhesRepeticoes');
+    let htmlDetalhes = '';
+
+    if (analise.detalhes && analise.detalhes.length > 0) {
+        analise.detalhes.forEach(item => {
+            const numerosHTML = item.dezenas.map(n => `<span class="numero-badge">${n}</span>`).join(' ');
+            htmlDetalhes += `
+                <div class="correlacao-item">
+                    <strong>Concurso ${item.concurso_anterior} → ${item.concurso_atual}</strong>
+                    <div style="flex: 1; margin-left: 15px;">
+                        ${numerosHTML}
+                    </div>
+                    <span class="badge-repeticao">${item.quantidade} rep.</span>
+                </div>
+            `;
+        });
+    } else {
+        htmlDetalhes = '<p class="text-muted">Nenhuma repetição encontrada</p>';
+    }
+
+    detalhesDiv.innerHTML = htmlDetalhes;
+}
+
+function renderPadroesDigitosIniciais(padroes) {
+    const container = document.getElementById('topDigitosIniciais');
+    container.innerHTML = '';
+
+    if (!padroes || padroes.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum padrão disponível</p>';
+        return;
+    }
+
+    padroes.forEach((item, index) => {
+        // Mostrar exemplos com números completos
+        let exemplosHTML = '';
+        if (item.exemplos && item.exemplos.length > 0) {
+            exemplosHTML = '<div class="mt-2" style="font-size: 0.9rem;">';
+            exemplosHTML += '<strong>Exemplos:</strong><br>';
+            item.exemplos.forEach((exemplo, idx) => {
+                const numerosHTML = exemplo.numeros.map(n => `<span class="numero-badge">${n}</span>`).join(' ');
+                exemplosHTML += `<div class="mt-1">
+                    Concurso ${exemplo.concurso}: ${numerosHTML}
+                </div>`;
+            });
+            exemplosHTML += '</div>';
+        }
+
+        container.innerHTML += `
+            <div class="top-item" style="flex-direction: column; align-items: flex-start;">
+                <div style="display: flex; align-items: center; width: 100%; margin-bottom: 10px;">
+                    <div class="top-badge">${index + 1}</div>
+                    <div class="top-item-content">
+                        <div class="top-item-title">
+                            Padrão: <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 5px; font-size: 1.1rem;">${item.padrao}</code>
+                        </div>
+                        <div class="top-item-subtitle">
+                            ${item.frequencia} vezes nos jogos premiados
+                        </div>
+                    </div>
+                    <div class="badge-percentual">${item.percentual}%</div>
+                </div>
+                ${exemplosHTML}
+            </div>
+        `;
+    });
+}
+
+function renderTopGaps(gaps) {
+    const container = document.getElementById('topGaps');
+    container.innerHTML = '';
+
+    if (!gaps || gaps.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum padrão de gaps disponível</p>';
+        return;
+    }
+
+    gaps.forEach((item, index) => {
+        // Mostrar exemplos com números e gaps
+        let exemplosHTML = '';
+        if (item.exemplos && item.exemplos.length > 0) {
+            exemplosHTML = '<div class="mt-2" style="font-size: 0.9rem;">';
+            exemplosHTML += '<strong>Exemplos:</strong><br>';
+            item.exemplos.forEach((exemplo, idx) => {
+                const numerosHTML = exemplo.numeros.map(n => `<span class="numero-badge">${n}</span>`).join(' ');
+                const gapsDisplay = exemplo.gaps.join(' → ');
+                exemplosHTML += `<div class="mt-1">
+                    Concurso ${exemplo.concurso}: ${numerosHTML}<br>
+                    <small style="color: #666;">Gaps: ${gapsDisplay}</small>
+                </div>`;
+            });
+            exemplosHTML += '</div>';
+        }
+
+        container.innerHTML += `
+            <div class="top-item" style="flex-direction: column; align-items: flex-start;">
+                <div style="display: flex; align-items: center; width: 100%; margin-bottom: 10px;">
+                    <div class="top-badge">${index + 1}</div>
+                    <div class="top-item-content">
+                        <div class="top-item-title">
+                            Padrão de GAPS: <code style="background: #e3f2fd; padding: 5px 10px; border-radius: 5px; font-size: 1.1rem; color: #1976d2;">${item.padrao}</code>
+                        </div>
+                        <div class="top-item-subtitle">
+                            ${item.frequencia} vezes nos jogos premiados
+                        </div>
+                    </div>
+                    <div class="badge-percentual">${item.percentual}%</div>
+                </div>
+                ${exemplosHTML}
+            </div>
+        `;
+    });
+}
+
+function formatarMoeda(valor) {
+    return 'R$ ' + valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function showError(mensagem) {
+    const loading = document.getElementById('loading');
+    loading.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> ${mensagem}
+        </div>
+    `;
+}
+
+
+
+// Variáveis globais para números altos
+let numerosAltosData = [];
+let numerosAltosDataOriginal = [];
+let numerosAltosCurrentPage = 1;
+let numerosAltosFiltroAtual = 'todos';
+const numerosAltosPerPage = 20;
+
+// Render Números Altos
+function renderNumerosAltos(dados) {
+    if (!dados || dados.erro) {
+        console.error('Erro ao renderizar números altos:', dados?.erro);
+        return;
+    }
+
+    numerosAltosDataOriginal = dados.lista_sorteios || [];
+    numerosAltosData = [...numerosAltosDataOriginal];
+
+    // Estatísticas gerais
+    document.getElementById('numerosAltosTotal').textContent = dados.total_sorteios_filtrados || 0;
+    document.getElementById('numerosAltosPremios').textContent = `${dados.total_premios_7_acertos || 0} (${dados.percentual_premios || 0}%)`;
+    document.getElementById('numerosAltosAcumulados').textContent = `${dados.total_acumulados || 0} (${dados.percentual_acumulados || 0}%)`;
+    document.getElementById('numerosAltosPeriodo').textContent = `${dados.primeira_data || '-'} a ${dados.ultima_data || '-'}`;
+
+    // Renderizar primeira página da tabela
+    renderTabelaNumerosAltos(1);
+}
+
+// Função de filtro
+function filtrarNumerosAltos(tipo) {
+    numerosAltosFiltroAtual = tipo;
+
+    // Atualizar botões ativos
+    const buttons = document.querySelectorAll('#tabNumerosAltos .btn-group button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Filtrar dados
+    if (tipo === 'todos') {
+        numerosAltosData = [...numerosAltosDataOriginal];
+    } else if (tipo === 'premiados') {
+        numerosAltosData = numerosAltosDataOriginal.filter(s => s.premiou === true);
+    } else if (tipo === 'acumulados') {
+        numerosAltosData = numerosAltosDataOriginal.filter(s => s.acumulado === true);
+    }
+
+    // Resetar para primeira página e renderizar
+    renderTabelaNumerosAltos(1);
+}
+
+// Renderizar tabela com paginação
+function renderTabelaNumerosAltos(page) {
+    numerosAltosCurrentPage = page;
+    const tbody = document.getElementById('tabelaNumerosAltos');
+    tbody.innerHTML = '';
+
+    const start = (page - 1) * numerosAltosPerPage;
+    const end = start + numerosAltosPerPage;
+    const paginatedData = numerosAltosData.slice(start, end);
+
+    paginatedData.forEach((sorteio, idx) => {
+        const row = document.createElement('tr');
+
+        // Formatar números
+        const numerosHtml = sorteio.numeros.map(n =>
+            `<span class="numero-badge">${String(n).padStart(2, '0')}</span>`
+        ).join(' ');
+
+        // Ícone de premiação
+        const premiouIcon = sorteio.premiou ?
+            '<span class="badge bg-success">✓ Sim</span>' :
+            '<span class="badge bg-secondary">Não</span>';
+
+        row.innerHTML = `
+            <td>${start + idx + 1}</td>
+            <td><strong>${sorteio.concurso}</strong></td>
+            <td>${sorteio.data}</td>
+            <td>${numerosHtml}</td>
+            <td class="mes-badge mes-${sorteio.mes_sorte}">${sorteio.mes_nome}</td>
+            <td>${premiouIcon}</td>
+            <td>${sorteio.padrao_pi}</td>
+            <td><strong>${sorteio.soma}</strong></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Renderizar paginação
+    renderPaginationNumerosAltos();
+}
+
+// Renderizar paginação
+function renderPaginationNumerosAltos() {
+    const totalPages = Math.ceil(numerosAltosData.length / numerosAltosPerPage);
+    const pagination = document.getElementById('paginationNumerosAltos');
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // Botão anterior
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${numerosAltosCurrentPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" onclick="renderTabelaNumerosAltos(${numerosAltosCurrentPage - 1}); return false;">Anterior</a>`;
+    pagination.appendChild(prevLi);
+
+    // Números de página
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= numerosAltosCurrentPage - 2 && i <= numerosAltosCurrentPage + 2)) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === numerosAltosCurrentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" onclick="renderTabelaNumerosAltos(${i}); return false;">${i}</a>`;
+            pagination.appendChild(li);
+        } else if (i === numerosAltosCurrentPage - 3 || i === numerosAltosCurrentPage + 3) {
+            const li = document.createElement('li');
+            li.className = 'page-item disabled';
+            li.innerHTML = '<a class="page-link">...</a>';
+            pagination.appendChild(li);
+        }
+    }
+
+    // Botão próximo
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${numerosAltosCurrentPage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" onclick="renderTabelaNumerosAltos(${numerosAltosCurrentPage + 1}); return false;">Próximo</a>`;
+    pagination.appendChild(nextLi);
+}
+
+// Carregar análise ao abrir a página
+carregarAnalise();
+</script>
+{% endblock %}

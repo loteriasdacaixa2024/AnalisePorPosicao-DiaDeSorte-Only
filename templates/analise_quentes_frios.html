@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Números Quentes e Frios - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+        <i class="bi bi-thermometer-half"></i> Números Quentes e Frios
+    </h2>
+        <a href="/" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">🔥❄️ Análise de Frequência</h5>
+            <p class="card-text">
+                Identifique os números MAIS sorteados (quentes 🔥) e MENOS sorteados (frios ❄️).
+                <br><strong>Útil para:</strong> Equilibrar suas apostas entre números populares e negligenciados.
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="selectTopQtd" class="form-label">Quantidade:</label>
+            <select class="form-select" id="selectTopQtd">
+                <option value="10">Top 10</option>
+                <option value="15" selected>Top 15</option>
+                <option value="20">Top 20</option>
+                <option value="31">Todos (31)</option>
+            </select>
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+            <button class="btn btn-primary w-100" onclick="buscarQuentesFrios()">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div id="resultadoQuentes"></div>
+        </div>
+        <div class="col-md-6">
+            <div id="resultadoFrios"></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4" id="insightsCard" style="display: none;">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-lightbulb-fill"></i> Insights Inteligentes
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="insightsContent"></div>
+        </div>
+    </div>
+
+    <div id="loading" class="text-center d-none mt-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+let ultimosDados = null;
+
+function buscarQuentesFrios() {
+    const top = document.getElementById('selectTopQtd').value;
+
+    document.getElementById('loading').classList.remove('d-none');
+    document.getElementById('resultadoQuentes').innerHTML = '';
+    document.getElementById('resultadoFrios').innerHTML = '';
+
+    fetch(`/api/analise/quentes-frios?top=${top}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').classList.add('d-none');
+            ultimosDados = data;
+            mostrarQuentes(data);
+            mostrarFrios(data);
+            gerarInsights(data);
+        })
+        .catch(error => {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('resultadoQuentes').innerHTML = '<div class="alert alert-danger">Erro ao carregar dados.</div>';
+        });
+}
+
+function mostrarQuentes(data) {
+    let html = `
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">🔥 Números QUENTES</h5>
+                <small>Mais sorteados (${data.quentes.length} números)</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Número</th>
+                                <th>Frequência</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.quentes.forEach((item, index) => {
+        const medalha = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+        const destaque = index < 3 ? 'fw-bold' : '';
+
+        html += `
+            <tr>
+                <td>${medalha} ${index + 1}</td>
+                <td><span class="badge bg-danger fs-6">${item.numero}</span></td>
+                <td class="${destaque}">${item.frequencia}x</td>
+                <td class="${destaque}">${item.percentual}%</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('resultadoQuentes').innerHTML = html;
+}
+
+function mostrarFrios(data) {
+    let html = `
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">❄️ Números FRIOS</h5>
+                <small>Menos sorteados (${data.frios.length} números)</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Número</th>
+                                <th>Frequência</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    data.frios.forEach((item, index) => {
+        const icone = index === 0 ? '🧊' : '';
+        const destaque = index < 3 ? 'fw-bold' : '';
+
+        html += `
+            <tr>
+                <td>${icone} ${index + 1}</td>
+                <td><span class="badge bg-primary fs-6">${item.numero}</span></td>
+                <td class="${destaque}">${item.frequencia}x</td>
+                <td class="${destaque}">${item.percentual}%</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('resultadoFrios').innerHTML = html;
+}
+
+function gerarInsights(data) {
+    if (!data || !data.quentes || !data.frios || data.quentes.length === 0 || data.frios.length === 0) {
+        return;
+    }
+
+    const insightsCard = document.getElementById('insightsCard');
+    const insightsContent = document.getElementById('insightsContent');
+
+    const top3Quentes = data.quentes.slice(0, 3);
+    const top3Frios = data.frios.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    let htmlTop3Quentes = '<div class="mb-4">';
+    htmlTop3Quentes += '<h6 class="fw-bold text-primary mb-3">🔥 Top 3 Números Mais QUENTES:</h6>';
+
+    top3Quentes.forEach((num, index) => {
+        const destaque = index === 0 ? 'text-danger fw-bold' : '';
+        const comentario = index === 0 ? ' - O mais sorteado!' : '';
+
+        htmlTop3Quentes += `<div class="${destaque} mb-2">
+            ${medalhas[index]} Número ${num.numero}:
+            ${num.frequencia} aparições (${num.percentual}%)${comentario}
+        </div>`;
+    });
+
+    htmlTop3Quentes += '</div>';
+
+    let htmlTop3Frios = '<div class="mb-4">';
+    htmlTop3Frios += '<h6 class="fw-bold text-primary mb-3">❄️ Top 3 Números Mais FRIOS:</h6>';
+
+    top3Frios.forEach((num, index) => {
+        const icone = index === 0 ? '🧊' : '❄️';
+        const comentario = index === 0 ? ' - O menos sorteado!' : '';
+
+        htmlTop3Frios += `<div class="mb-2">
+            ${icone} Número ${num.numero}:
+            ${num.frequencia} aparições (${num.percentual}%)${comentario}
+        </div>`;
+    });
+
+    htmlTop3Frios += '</div>';
+
+    const maisQuente = data.quentes[0];
+    const maisFrio = data.frios[0];
+    const diferenca = maisQuente.frequencia - maisFrio.frequencia;
+    const diferencaPercent = ((diferenca / data.total_concursos) * 100).toFixed(2);
+
+    let htmlComparacao = '<div class="mb-4">';
+    htmlComparacao += '<h6 class="fw-bold text-primary mb-3">📊 Comparação Extremos:</h6>';
+    htmlComparacao += '<div class="alert alert-warning py-2">';
+    htmlComparacao += `<i class="bi bi-exclamation-triangle-fill"></i>
+        Diferença entre mais quente (${maisQuente.numero}) e mais frio (${maisFrio.numero}): 
+        <strong>${diferenca} aparições (${diferencaPercent}%)</strong>
+    </div>`;
+    htmlComparacao += '</div>';
+
+    const mediaQuentes = data.quentes.reduce((acc, n) => acc + n.frequencia, 0) / data.quentes.length;
+    const mediaFrios = data.frios.reduce((acc, n) => acc + n.frequencia, 0) / data.frios.length;
+
+    let htmlEstrategico = '<div class="mb-2">';
+    htmlEstrategico += '<h6 class="fw-bold text-primary mb-3">💡 Insights Estratégicos:</h6>';
+
+    htmlEstrategico += `<div class="alert alert-danger py-2 mb-2">
+        <i class="bi bi-fire"></i>
+        Média de aparições dos QUENTES: ${Math.round(mediaQuentes)} vezes
+    </div>`;
+
+    htmlEstrategico += `<div class="alert alert-info py-2 mb-2">
+        <i class="bi bi-snow"></i>
+        Média de aparições dos FRIOS: ${Math.round(mediaFrios)} vezes
+    </div>`;
+
+    const todosNumeros = [...data.quentes, ...data.frios];
+    const mediaGeral = todosNumeros.reduce((acc, n) => acc + n.frequencia, 0) / todosNumeros.length;
+    const equilibrados = todosNumeros.filter(n => Math.abs(n.frequencia - mediaGeral) < mediaGeral * 0.1);
+
+    if (equilibrados.length > 0) {
+        const nums = equilibrados.slice(0, 5).map(n => n.numero).join(', ');
+        htmlEstrategico += `<div class="alert alert-success py-2">
+            <i class="bi bi-check-circle-fill"></i>
+            Números equilibrados (nem muito quente, nem muito frio): ${nums}
+        </div>`;
+    }
+
+    htmlEstrategico += '</div>';
+
+    insightsContent.innerHTML = htmlTop3Quentes + htmlTop3Frios + htmlComparacao + htmlEstrategico;
+    insightsCard.style.display = 'block';
+}
+
+window.onload = function() {
+    buscarQuentesFrios();
+};
+</script>
+{% endblock %}

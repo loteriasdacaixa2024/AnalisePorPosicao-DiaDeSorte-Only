@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}Matriz de Probabilidade por Posição - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">📊 Matriz de Probabilidade por Posição</h2>
+                <a href="/" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+            <p class="text-muted mt-2">Descubra qual número tem maior probabilidade em cada posição</p>
+        </div>
+    </div>
+
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted">Calculando matriz de probabilidades...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <strong>📊 Total de Concursos:</strong> <span id="totalConcursos">-</span> | 
+                    <strong>🔢 Números Analisados:</strong> 31 | 
+                    <strong>📍 Posições:</strong> 7 | 
+                    <strong>⚠️ Combinações Raras:</strong> <span id="totalRaras">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">🗺️ Mapa de Calor - Probabilidades (%)</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Quanto mais escuro, maior a probabilidade do número naquela posição</p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm text-center" id="matrizCalor">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Nº</th>
+                                        <th>Pos 1</th>
+                                        <th>Pos 2</th>
+                                        <th>Pos 3</th>
+                                        <th>Pos 4</th>
+                                        <th>Pos 5</th>
+                                        <th>Pos 6</th>
+                                        <th>Pos 7</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="matrizBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3">🏆 Top 5 Números Favoritos por Posição</h4>
+            </div>
+            <div id="numerosFavoritos" class="col-12">
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">⚠️ Combinações Raras (Nunca Saíram)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="combinacoesRaras">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">💡 Insights Inteligentes</h5>
+                    </div>
+                    <div class="card-body" id="insightsContainer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let matrizData = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    carregarAnalise();
+});
+
+function carregarAnalise() {
+    fetch('/api/analise/matriz-probabilidade')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Erro:</strong> ${data.error}
+                    </div>
+                `;
+                return;
+            }
+
+            matrizData = data;
+            exibirDados(data);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            document.getElementById('loading').innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Erro ao carregar análise.</strong> Tente novamente.
+                </div>
+            `;
+        });
+}
+
+function exibirDados(data) {
+    document.getElementById('totalConcursos').textContent = data.total_concursos;
+    document.getElementById('totalRaras').textContent = data.total_combinacoes_raras;
+
+    exibirMatrizCalor(data.matriz);
+    exibirNumerosFavoritos(data.numeros_favoritos_por_posicao);
+    exibirCombinacoesRaras(data.combinacoes_raras);
+    gerarInsights(data);
+}
+
+function exibirMatrizCalor(matriz) {
+    const tbody = document.getElementById('matrizBody');
+    let html = '';
+
+    for (let numero = 1; numero <= 31; numero++) {
+        html += `<tr><th class="table-secondary">${numero}</th>`;
+        
+        for (let posicao = 1; posicao <= 7; posicao++) {
+            const percentual = matriz[numero]['posicoes'][posicao]['percentual'];
+            const aparicoes = matriz[numero]['posicoes'][posicao]['aparicoes'];
+            const cor = getCorCalor(percentual);
+            
+            html += `<td style="background-color: ${cor}; color: ${percentual > 2 ? 'white' : 'black'};" 
+                         title="Número ${numero} na Posição ${posicao}: ${percentual}% (${aparicoes}x)">
+                        ${percentual}%
+                    </td>`;
+        }
+        
+        html += '</tr>';
+    }
+
+    tbody.innerHTML = html;
+}
+
+function getCorCalor(percentual) {
+    if (percentual === 0) return '#f8f9fa';
+    if (percentual < 1) return '#d4edda';
+    if (percentual < 2) return '#b8daff';
+    if (percentual < 3) return '#6c757d';
+    if (percentual < 4) return '#495057';
+    return '#212529';
+}
+
+function exibirNumerosFavoritos(favoritos) {
+    const container = document.getElementById('numerosFavoritos');
+    let html = '<div class="row">';
+
+    for (let posicao = 1; posicao <= 7; posicao++) {
+        html += `
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <strong>📍 Posição ${posicao}</strong>
+                    </div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+        `;
+
+        favoritos[posicao].forEach(item => {
+            const badge = item.percentual >= 3 ? 'success' : item.percentual >= 2 ? 'info' : 'secondary';
+            html += `
+                <li class="mb-2">
+                    <strong>Número ${item.numero}</strong>
+                    <span class="badge bg-${badge}">${item.percentual}%</span>
+                    <small class="text-muted">(${item.aparicoes}x)</small>
+                </li>
+            `;
+        });
+
+        html += `
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function exibirCombinacoesRaras(raras) {
+    const container = document.getElementById('combinacoesRaras');
+
+    if (raras.length === 0) {
+        container.innerHTML = '<p class="text-muted">Todas as combinações já apareceram pelo menos uma vez!</p>';
+        return;
+    }
+
+    let html = '<div class="row">';
+
+    const agrupadoPorPosicao = {};
+    raras.forEach(item => {
+        if (!agrupadoPorPosicao[item.posicao]) {
+            agrupadoPorPosicao[item.posicao] = [];
+        }
+        agrupadoPorPosicao[item.posicao].push(item.numero);
+    });
+
+    for (let posicao = 1; posicao <= 7; posicao++) {
+        if (agrupadoPorPosicao[posicao]) {
+            html += `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="alert alert-danger mb-0">
+                        <h6>📍 Posição ${posicao}</h6>
+                        <p class="mb-0">
+                            <strong>Números que nunca saíram:</strong><br>
+                            ${agrupadoPorPosicao[posicao].join(', ')}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function gerarInsights(data) {
+    const insights = [];
+
+    let maxPercentual = 0;
+    let melhorCombinacao = null;
+
+    for (let numero = 1; numero <= 31; numero++) {
+        for (let posicao = 1; posicao <= 7; posicao++) {
+            const percentual = data.matriz[numero]['posicoes'][posicao]['percentual'];
+            if (percentual > maxPercentual) {
+                maxPercentual = percentual;
+                melhorCombinacao = { numero, posicao, percentual };
+            }
+        }
+    }
+
+    if (melhorCombinacao) {
+        insights.push({
+            icone: '🎯',
+            titulo: `Combinação Mais Forte Detectada`,
+            texto: `O número ${melhorCombinacao.numero} na posição ${melhorCombinacao.posicao} tem a maior probabilidade de todas: ${melhorCombinacao.percentual}%! Esta é a combinação número-posição mais frequente no histórico.`
+        });
+    }
+
+    if (data.total_combinacoes_raras > 0) {
+        insights.push({
+            icone: '⚠️',
+            titulo: `${data.total_combinacoes_raras} Combinações Nunca Saíram`,
+            texto: `Existem ${data.total_combinacoes_raras} combinações de número-posição que nunca apareceram em ${data.total_concursos} concursos. Evite essas combinações ou aguarde a "quebra" do padrão histórico.`
+        });
+    }
+
+    const numerosMaisVersateis = [];
+    for (let numero = 1; numero <= 31; numero++) {
+        let posicoesComAparicao = 0;
+        for (let posicao = 1; posicao <= 7; posicao++) {
+            if (data.matriz[numero]['posicoes'][posicao]['aparicoes'] > 0) {
+                posicoesComAparicao++;
+            }
+        }
+        if (posicoesComAparicao === 7) {
+            numerosMaisVersateis.push(numero);
+        }
+    }
+
+    if (numerosMaisVersateis.length > 0) {
+        insights.push({
+            icone: '🌟',
+            titulo: `${numerosMaisVersateis.length} Números Versáteis Identificados`,
+            texto: `Os números ${numerosMaisVersateis.slice(0, 10).join(', ')} já apareceram em TODAS as 7 posições! São números "completos" que transitam por todo o jogo.`
+        });
+    }
+
+    let numeroEspecialista = null;
+    let maxDiferenca = 0;
+
+    for (let numero = 1; numero <= 31; numero++) {
+        const posicoes = data.posicoes_favoritas_por_numero[numero];
+        if (posicoes.length >= 2) {
+            const diferenca = posicoes[0].percentual - posicoes[1].percentual;
+            if (diferenca > maxDiferenca) {
+                maxDiferenca = diferenca;
+                numeroEspecialista = { numero, posicao: posicoes[0].posicao, percentual: posicoes[0].percentual };
+            }
+        }
+    }
+
+    if (numeroEspecialista && maxDiferenca > 1) {
+        insights.push({
+            icone: '🎖️',
+            titulo: `Número Especialista em Posição`,
+            texto: `O número ${numeroEspecialista.numero} é ESPECIALISTA na posição ${numeroEspecialista.posicao} (${numeroEspecialista.percentual}%), com diferença significativa para outras posições. Use-o prioritariamente nesta posição!`
+        });
+    }
+
+    const posicoesMaisPrevisíveis = [];
+    for (let posicao = 1; posicao <= 7; posicao++) {
+        const top1 = data.numeros_favoritos_por_posicao[posicao][0];
+        if (top1.percentual >= 3) {
+            posicoesMaisPrevisíveis.push({ posicao, numero: top1.numero, percentual: top1.percentual });
+        }
+    }
+
+    if (posicoesMaisPrevisíveis.length > 0) {
+        insights.push({
+            icone: '📈',
+            titulo: `${posicoesMaisPrevisíveis.length} Posição(ões) com Padrão Forte`,
+            texto: `${posicoesMaisPrevisíveis.map(p => `Posição ${p.posicao} (Número ${p.numero}: ${p.percentual}%)`).join(', ')}. Estas posições têm números dominantes!`
+        });
+    }
+
+    exibirInsights(insights);
+}
+
+function exibirInsights(insights) {
+    const container = document.getElementById('insightsContainer');
+    let html = '';
+
+    const insightsExibir = insights.slice(0, 3);
+
+    insightsExibir.forEach((insight, index) => {
+        const medalhas = ['🥇', '🥈', '🥉'];
+        html += `
+            <div class="alert alert-light border-start border-5 border-warning mb-3">
+                <h6>${medalhas[index]} ${insight.titulo}</h6>
+                <p class="mb-0">${insight.icone} ${insight.texto}</p>
+            </div>
+        `;
+    });
+
+    html += `
+        <div class="alert alert-info mb-0">
+            <strong>💡 Recomendação Estratégica:</strong><br>
+            Use a matriz de calor para identificar combinações fortes. Priorize números com alta probabilidade em suas posições favoritas. 
+            Evite combinações raras ou use-as apenas para "quebra de padrão" em apostas experimentais.
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+</script>
+
+<style>
+#matrizCalor td {
+    font-size: 0.85rem;
+    padding: 0.3rem;
+    font-weight: 500;
+}
+
+#matrizCalor th {
+    font-size: 0.9rem;
+    padding: 0.4rem;
+}
+</style>
+{% endblock %}

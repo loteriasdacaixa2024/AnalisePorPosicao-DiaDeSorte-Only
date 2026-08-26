@@ -1,0 +1,1298 @@
+{% extends "base.html" %}
+
+{% block title %}Gerador de Combinações Inteligentes{% endblock %}
+
+{% block content %}
+<!-- Painel Flutuante: Último Resultado (discreto no canto) -->
+<div id="painelResultadoFlutuante" class="position-fixed" style="display: none; top: 80px; right: 15px; z-index: 1000; max-width: 280px;">
+    <div class="card shadow border-0" style="background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px);">
+        <div class="card-body py-2 px-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-warning fw-bold">
+                    <i class="fas fa-trophy"></i> Resultado Oficial
+                </small>
+                <button class="btn btn-sm p-0 text-muted" onclick="togglePainelResultado()" title="Minimizar">
+                    <i class="fas fa-minus" id="iconePainelResultado"></i>
+                </button>
+            </div>
+            <div id="painelResultadoConteudo">
+                <div id="painelNumerosSorteados" class="d-flex flex-wrap gap-1 mb-2">
+                    <!-- Números sorteados -->
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge" id="painelMesSorte" style="font-size: 11px;">--</span>
+                    <small class="text-muted" id="painelConcursoInfo">--</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-4">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #D4B31A 0%, #F4D03F 100%);">
+                <div class="card-body text-dark">
+                    <h2 class="card-title mb-1">
+                        <i class="fas fa-magic"></i>
+                        Gerador de Combinações Inteligentes
+                    </h2>
+                    <p class="mb-0">
+                        Gere todas as combinações possíveis a partir dos seus palpites e aplique filtros inteligentes
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Seleção de Concurso -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-folder-open"></i>
+                        Selecionar Concurso
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Concurso:</label>
+                            <select class="form-select" id="selectConcurso">
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Mês da Aposta:</label>
+                            <select class="form-select" id="selectMes">
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-success w-100" id="btnCarregarApostas" disabled>
+                                <i class="fas fa-search"></i> Carregar Apostas
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-secondary w-100" id="btnRecarregar">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Resumo do Universo -->
+    <div class="row mb-4" id="cardUniverso" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%); color: #D4B31A;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-globe"></i>
+                        Universo de Números
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="text-muted mb-2">Números disponíveis nos seus palpites:</h6>
+                            <div id="numerosUniverso" class="d-flex flex-wrap gap-2 mb-3">
+                                <!-- Números serão inseridos aqui -->
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="card bg-light text-center">
+                                        <div class="card-body py-2">
+                                            <h3 class="mb-0 text-primary" id="totalUniverso">0</h3>
+                                            <small class="text-muted">Números Únicos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card bg-light text-center">
+                                        <div class="card-body py-2">
+                                            <h3 class="mb-0 text-success" id="totalCombinacoes">0</h3>
+                                            <small class="text-muted">Combinações</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning mt-3 mb-0 py-2" id="avisoVolume" style="display: none;">
+                                <small><i class="fas fa-exclamation-triangle"></i> <span id="avisoVolumeTexto"></span></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado do Sorteio (Referência) -->
+                    <div class="mt-3 p-3 rounded" style="background-color: rgba(212, 179, 26, 0.1); border: 1px solid #D4B31A;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="mb-2"><i class="fas fa-trophy text-warning"></i> Resultado Oficial (referência):</h6>
+                                <div id="numerosResultado" class="d-flex flex-wrap gap-2">
+                                    <!-- Números sorteados -->
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge fs-6" id="mesSorte" style="padding: 8px 16px;">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-center">
+                        <button class="btn btn-lg text-white" id="btnGerarCombinacoes" style="background: linear-gradient(135deg, #D4B31A 0%, #F4D03F 100%); color: #1a1a2e !important; font-weight: 600;">
+                            <i class="fas fa-cogs"></i> Gerar Combinações Inteligentes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Filtros -->
+    <div class="row mb-4" id="cardFiltros" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter"></i>
+                        Filtros Inteligentes
+                    </h5>
+                    <button class="btn btn-sm btn-outline-light" id="btnToggleFiltros" onclick="toggleFiltros()">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="card-body" id="filtrosContent">
+                    <div class="row g-3">
+                        <!-- Filtro: Soma -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-calculator text-primary"></i> Soma
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">Mín</span>
+                                <input type="number" class="form-control" id="filtroSomaMin" value="95" min="28" max="196">
+                                <span class="input-group-text">Máx</span>
+                                <input type="number" class="form-control" id="filtroSomaMax" value="155" min="28" max="196">
+                            </div>
+                            <small class="text-muted">Faixa ideal: 95-155</small>
+                        </div>
+
+                        <!-- Filtro: Pares/Ímpares -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-balance-scale text-success"></i> Pares/Ímpares
+                            </label>
+                            <select class="form-select" id="filtroParesImpares" multiple size="4">
+                                <option value="0">0 pares / 7 ímpares</option>
+                                <option value="1">1 par / 6 ímpares</option>
+                                <option value="2">2 pares / 5 ímpares</option>
+                                <option value="3" selected>3 pares / 4 ímpares ⭐</option>
+                                <option value="4" selected>4 pares / 3 ímpares ⭐</option>
+                                <option value="5">5 pares / 2 ímpares</option>
+                                <option value="6">6 pares / 1 ímpar</option>
+                                <option value="7">7 pares / 0 ímpares</option>
+                            </select>
+                            <small class="text-muted">Ctrl+Click para múltiplos</small>
+                        </div>
+
+                        <!-- Filtro: Sequências -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-sort-numeric-down text-warning"></i> Máx. Sequência
+                            </label>
+                            <select class="form-select" id="filtroMaxSequencia">
+                                <option value="">Sem limite</option>
+                                <option value="2">Máximo 2 consecutivos</option>
+                                <option value="3" selected>Máximo 3 consecutivos</option>
+                                <option value="4">Máximo 4 consecutivos</option>
+                                <option value="5">Máximo 5 consecutivos</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtro: Score Mínimo -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-star text-warning"></i> Score Mínimo
+                            </label>
+                            <select class="form-select" id="filtroScoreMin">
+                                <option value="">Sem limite</option>
+                                <option value="30">30+ (Básico)</option>
+                                <option value="50" selected>50+ (Bom)</option>
+                                <option value="70">70+ (Excelente)</option>
+                                <option value="85">85+ (Top)</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtro: Repetições -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-redo text-info"></i> Repetições (último sorteio)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">Mín</span>
+                                <input type="number" class="form-control" id="filtroRepeticoesMin" value="" min="0" max="7" placeholder="--">
+                                <span class="input-group-text">Máx</span>
+                                <input type="number" class="form-control" id="filtroRepeticoesMax" value="" min="0" max="7" placeholder="--">
+                            </div>
+                        </div>
+
+                        <!-- Filtro: Opções Rápidas -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-bolt text-danger"></i> Filtros Rápidos
+                            </label>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filtroApenasIdeal">
+                                    <label class="form-check-label" for="filtroApenasIdeal">
+                                        Apenas proporção ideal (3×4 ou 4×3)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filtroExcluirSomaFora" checked>
+                                    <label class="form-check-label" for="filtroExcluirSomaFora">
+                                        Excluir soma fora da faixa
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NÚCLEO ESTRATÉGICO -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-bullseye text-success"></i> Núcleo Estratégico
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="chk-usar-nucleo-combinacoes" style="width: 3em; height: 1.5em;">
+                                <label class="form-check-label" for="chk-usar-nucleo-combinacoes">
+                                    <strong>Aplicar núcleo</strong>
+                                </label>
+                            </div>
+                            <div id="info-nucleo-combinacoes" class="alert alert-warning mt-2 py-2 px-2" style="display: none; margin-bottom: 0;">
+                                <small>
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    <span id="nucleo-numeros-combinacoes">--</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" id="btnAplicarFiltros">
+                                <i class="fas fa-check"></i> Aplicar Filtros
+                            </button>
+                            <button class="btn btn-outline-secondary" id="btnLimparFiltros">
+                                <i class="fas fa-eraser"></i> Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Ordenação e Paginação -->
+    <div class="row mb-4" id="cardOrdenacao" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <label class="form-label mb-0 fw-bold">Ordenar por:</label>
+                            <select class="form-select form-select-sm" id="selectOrdenacao">
+                                <option value="score_desc">Score (maior → menor)</option>
+                                <option value="score_asc">Score (menor → maior)</option>
+                                <option value="soma_asc">Soma (menor → maior)</option>
+                                <option value="soma_desc">Soma (maior → menor)</option>
+                                <option value="pares_asc">Pares (menor → maior)</option>
+                                <option value="pares_desc">Pares (maior → menor)</option>
+                                <option value="repeticoes_desc">Repetições (maior → menor)</option>
+                                <option value="crescente">Ordem Crescente</option>
+                                <option value="sorteio">Ordem de Sorteio</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label mb-0 fw-bold">Por página:</label>
+                            <select class="form-select form-select-sm" id="selectPorPagina">
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <span class="badge bg-info fs-6" id="infoPaginacao">
+                                Página 1 de 1 | Total: 0
+                            </span>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" id="btnPrimeira" disabled>
+                                    <i class="fas fa-angle-double-left"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" id="btnAnterior" disabled>
+                                    <i class="fas fa-angle-left"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" id="btnProxima" disabled>
+                                    <i class="fas fa-angle-right"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" id="btnUltima" disabled>
+                                    <i class="fas fa-angle-double-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Busca Inteligente -->
+    <div class="row mb-3" id="cardBuscaInteligente" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="border-left: 4px solid #D4B31A !important;">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-warning text-dark">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="inputBuscaNumeros"
+                                       placeholder="Digite números para buscar (ex: 5 12 18 ou 05 12 18)"
+                                       style="font-size: 16px;">
+                                <button class="btn btn-outline-secondary" type="button" id="btnLimparBusca" title="Limpar busca">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Digite os números separados por espaço. O realce é em tempo real.
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="checkBuscaExata">
+                                <label class="form-check-label" for="checkBuscaExata">
+                                    Busca exata (todos os números)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div id="resultadoBusca" class="d-none">
+                                <span class="badge bg-success" id="badgeEncontradas">0 encontradas</span>
+                                <span class="badge bg-secondary" id="badgeNaoEncontradas">0 não visíveis</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Resultados -->
+    <div class="row mb-4" id="cardResultados" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-ol"></i>
+                        Combinações Geradas
+                    </h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-light" id="btnExportarTodas">
+                            <i class="fas fa-download"></i> Exportar Todas
+                        </button>
+                        <button class="btn btn-sm btn-warning" id="btnExportarTop100">
+                            <i class="fas fa-star"></i> Top 100
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Loading -->
+                    <div id="loadingResultados" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Gerando combinações...</p>
+                    </div>
+
+                    <!-- Tabela de Resultados -->
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tabelaCombinacoes">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center" style="width: 60px;">#</th>
+                                    <th>Números</th>
+                                    <th class="text-center" style="width: 70px;">Soma</th>
+                                    <th class="text-center" style="width: 80px;">P/I</th>
+                                    <th class="text-center" style="width: 100px;">Faixas</th>
+                                    <th class="text-center" style="width: 60px;">Seq.</th>
+                                    <th class="text-center" style="width: 60px;">Rep.</th>
+                                    <th class="text-center" style="width: 80px;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCombinacoes">
+                                <!-- Combinações serão inseridas aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Estatísticas -->
+    <div class="row mb-4" id="cardEstatisticas" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i>
+                        Estatísticas das Combinações
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-0 text-primary" id="statScoreMedio">--</h4>
+                                    <small class="text-muted">Score Médio</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-0 text-success" id="statCombIdeais">--</h4>
+                                    <small class="text-muted">Combinações Ideais</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-0 text-warning" id="statScoreAlto">--</h4>
+                                    <small class="text-muted">Score 70+</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="mb-0 text-info" id="statSomaMedia">--</h4>
+                                    <small class="text-muted">Soma Média</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: Exportação -->
+<div class="modal fade" id="modalExportar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-download"></i> Exportar Combinações
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Quantidade:</label>
+                    <select class="form-select" id="exportarQuantidade">
+                        <option value="">Todas as filtradas</option>
+                        <option value="50">Top 50</option>
+                        <option value="100">Top 100</option>
+                        <option value="500">Top 500</option>
+                        <option value="1000">Top 1000</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Incluir Mês:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="exportarComMes" checked>
+                        <label class="form-check-label" for="exportarComMes">
+                            Incluir mês da sorte no arquivo
+                        </label>
+                    </div>
+                </div>
+                <div class="alert alert-info py-2">
+                    <small>
+                        <i class="fas fa-info-circle"></i>
+                        Formato: números separados por espaço + mês
+                        <br>
+                        Exemplo: <code>01 05 09 12 18 24 30 Set</code>
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnConfirmarExportar">
+                    <i class="fas fa-download"></i> Baixar .TXT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Estado global
+let concursoAtual = null;
+let dadosUniverso = null;
+let paginaAtual = 1;
+let totalPaginas = 1;
+let totalFiltradas = 0;
+
+// Mapeamento de meses
+const MESES = {
+    1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+    5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+    9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+};
+
+const MESES_ABREV = {
+    1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr',
+    5: 'Mai', 6: 'Jun', 7: 'Jul', 8: 'Ago',
+    9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez'
+};
+
+// Cores dos meses (serão carregadas do banco)
+let CORES_MESES = {
+    1: '#FF6B9D', 2: '#C060A1', 3: '#5EC4CD', 4: '#95C93D',
+    5: '#FFD700', 6: '#FF8C42', 7: '#E63946', 8: '#A8DADC',
+    9: '#457B9D', 10: '#F4A261', 11: '#E9C46A', 12: '#2A9D8F'
+};
+
+// ==========================================
+// NÚCLEO ESTRATÉGICO
+// ==========================================
+function verificarNucleoDisponivel() {
+    const nucleoData = localStorage.getItem('nucleoEstrategico');
+    const chk = document.getElementById('chk-usar-nucleo-combinacoes');
+    const infoDiv = document.getElementById('info-nucleo-combinacoes');
+    const numerosSpan = document.getElementById('nucleo-numeros-combinacoes');
+
+    if (nucleoData) {
+        try {
+            const nucleo = JSON.parse(nucleoData);
+            const nucleoPrincipal = nucleo.principal || [];
+            
+            chk.disabled = false;
+            numerosSpan.textContent = '✓ Núcleo: ' + nucleoPrincipal.map(n => String(n).padStart(2, '0')).join(', ');
+            
+            if (chk.checked) {
+                infoDiv.style.display = 'block';
+            }
+        } catch (e) {
+            chk.disabled = true;
+            console.warn('Erro ao carregar núcleo:', e);
+        }
+    } else {
+        chk.disabled = true;
+        infoDiv.style.display = 'none';
+    }
+}
+
+// ==========================================
+// CARREGAMENTO INICIAL
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Carregar cores dos meses
+    await carregarCoresMeses();
+
+    // Carregar concursos disponíveis
+    carregarConcursos();
+    
+    // Verificar núcleo disponível
+    verificarNucleoDisponivel();
+
+    // Event Listeners
+    document.getElementById('selectConcurso').addEventListener('change', function() {
+        document.getElementById('btnCarregarApostas').disabled = !this.value;
+    });
+
+    document.getElementById('btnCarregarApostas').addEventListener('click', carregarApostas);
+    document.getElementById('btnRecarregar').addEventListener('click', carregarConcursos);
+    document.getElementById('btnGerarCombinacoes').addEventListener('click', gerarCombinacoes);
+    document.getElementById('btnAplicarFiltros').addEventListener('click', () => gerarCombinacoes());
+    document.getElementById('btnLimparFiltros').addEventListener('click', limparFiltros);
+
+    // Núcleo Estratégico
+    document.getElementById('chk-usar-nucleo-combinacoes').addEventListener('change', function() {
+        const infoDiv = document.getElementById('info-nucleo-combinacoes');
+        infoDiv.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Paginação
+    document.getElementById('btnPrimeira').addEventListener('click', () => irParaPagina(1));
+    document.getElementById('btnAnterior').addEventListener('click', () => irParaPagina(paginaAtual - 1));
+    document.getElementById('btnProxima').addEventListener('click', () => irParaPagina(paginaAtual + 1));
+    document.getElementById('btnUltima').addEventListener('click', () => irParaPagina(totalPaginas));
+
+    // Busca Inteligente - Em tempo real
+    document.getElementById('inputBuscaNumeros').addEventListener('input', realizarBuscaInteligente);
+    document.getElementById('btnLimparBusca').addEventListener('click', limparBusca);
+    document.getElementById('checkBuscaExata').addEventListener('change', realizarBuscaInteligente);
+
+    // Ordenação e itens por página
+    document.getElementById('selectOrdenacao').addEventListener('change', () => gerarCombinacoes());
+    document.getElementById('selectPorPagina').addEventListener('change', () => {
+        paginaAtual = 1;
+        gerarCombinacoes();
+    });
+    
+    // Monitorar mudanças no localStorage (quando gera novo núcleo)
+    window.addEventListener('storage', verificarNucleoDisponivel);
+
+    // Exportação
+    document.getElementById('btnExportarTodas').addEventListener('click', () => abrirModalExportar(''));
+    document.getElementById('btnExportarTop100').addEventListener('click', () => abrirModalExportar(100));
+    document.getElementById('btnConfirmarExportar').addEventListener('click', confirmarExportar);
+});
+
+async function carregarCoresMeses() {
+    try {
+        const response = await fetch('/api/configuracoes/cores-meses');
+        const data = await response.json();
+
+        if (data.sucesso && data.cores_meses) {
+            CORES_MESES = {};
+            for (let mes in data.cores_meses) {
+                CORES_MESES[parseInt(mes)] = data.cores_meses[mes];
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar cores dos meses:', error);
+    }
+}
+
+// ==========================================
+// CARREGAR CONCURSOS
+// ==========================================
+
+async function carregarConcursos() {
+    const select = document.getElementById('selectConcurso');
+    select.innerHTML = '<option value="">Carregando...</option>';
+    select.disabled = true;
+
+    try {
+        const response = await fetch('/api/combinacoes/concursos-disponiveis');
+        const data = await response.json();
+
+        if (data.sucesso && data.concursos.length > 0) {
+            select.innerHTML = '<option value="">Selecione um concurso...</option>';
+
+            data.concursos.forEach(concurso => {
+                const option = document.createElement('option');
+                option.value = concurso.numero_concurso;
+                option.textContent = `Concurso ${concurso.numero_concurso} - ${concurso.total_apostas} apostas`;
+                if (concurso.data_sorteio) {
+                    option.textContent += ` (${concurso.data_sorteio})`;
+                }
+                if (!concurso.resultado_disponivel) {
+                    option.textContent += ' ⚠️ Sem resultado';
+                    option.disabled = true;
+                }
+                select.appendChild(option);
+            });
+
+            select.disabled = false;
+        } else {
+            select.innerHTML = '<option value="">Nenhum concurso com apostas encontrado</option>';
+        }
+    } catch (error) {
+        select.innerHTML = '<option value="">Erro ao carregar concursos</option>';
+        console.error('Erro:', error);
+    }
+}
+
+// ==========================================
+// CARREGAR APOSTAS E UNIVERSO
+// ==========================================
+
+async function carregarApostas() {
+    const concurso = document.getElementById('selectConcurso').value;
+    if (!concurso) return;
+
+    concursoAtual = parseInt(concurso);
+
+    try {
+        const response = await fetch(`/api/combinacoes/validar/${concurso}`);
+        const data = await response.json();
+
+        if (data.sucesso && data.valido) {
+            dadosUniverso = data;
+            exibirUniverso(data);
+
+            // Mostrar cards
+            document.getElementById('cardUniverso').style.display = 'block';
+            document.getElementById('cardFiltros').style.display = 'none';
+            document.getElementById('cardOrdenacao').style.display = 'none';
+            document.getElementById('cardBuscaInteligente').style.display = 'none';
+            document.getElementById('cardResultados').style.display = 'none';
+            document.getElementById('cardEstatisticas').style.display = 'none';
+
+            // Atualizar painel flutuante
+            atualizarPainelFlutuante(data);
+
+        } else {
+            mostrarAlerta('warning', data.mensagem || 'Erro ao carregar apostas');
+        }
+    } catch (error) {
+        mostrarAlerta('danger', 'Erro ao carregar apostas: ' + error.message);
+    }
+}
+
+function exibirUniverso(data) {
+    // Números do universo
+    const containerUniverso = document.getElementById('numerosUniverso');
+    containerUniverso.innerHTML = data.universo.map(n => {
+        const acertou = data.numeros_sorteados.includes(n);
+        const bgColor = acertou ? '#FFD700' : '#6c757d';
+        const textColor = acertou ? '#000' : '#fff';
+        const border = acertou ? 'border: 2px solid #FFA500;' : '';
+        return `<span class="badge" style="background-color: ${bgColor}; color: ${textColor}; ${border} font-size: 16px; padding: 8px 12px; font-weight: bold;">
+            ${String(n).padStart(2, '0')}
+        </span>`;
+    }).join('');
+
+    // Totais
+    document.getElementById('totalUniverso').textContent = data.total_universo;
+    document.getElementById('totalCombinacoes').textContent = data.total_combinacoes.toLocaleString('pt-BR');
+
+    // Aviso de volume
+    if (data.aviso) {
+        document.getElementById('avisoVolume').style.display = 'block';
+        document.getElementById('avisoVolumeTexto').textContent = data.aviso;
+    } else {
+        document.getElementById('avisoVolume').style.display = 'none';
+    }
+
+    // Resultado oficial
+    const containerResultado = document.getElementById('numerosResultado');
+    containerResultado.innerHTML = data.numeros_sorteados.map(n =>
+        `<span class="badge bg-primary" style="font-size: 16px; padding: 8px 12px;">${String(n).padStart(2, '0')}</span>`
+    ).join('');
+
+    // Mês da sorte
+    const mesBadge = document.getElementById('mesSorte');
+    mesBadge.textContent = MESES[data.mes_sorte];
+    mesBadge.style.backgroundColor = CORES_MESES[data.mes_sorte];
+    mesBadge.style.color = 'white';
+}
+
+// ==========================================
+// GERAR COMBINAÇÕES
+// ==========================================
+
+async function gerarCombinacoes() {
+    if (!concursoAtual) return;
+
+    // Mostrar loading
+    document.getElementById('cardFiltros').style.display = 'block';
+    document.getElementById('cardOrdenacao').style.display = 'block';
+    document.getElementById('cardBuscaInteligente').style.display = 'block';
+    document.getElementById('cardResultados').style.display = 'block';
+    document.getElementById('loadingResultados').style.display = 'block';
+    document.getElementById('tabelaCombinacoes').style.display = 'none';
+
+    // Obter filtros
+    const filtros = obterFiltros();
+    const ordenacao = document.getElementById('selectOrdenacao').value;
+    const porPagina = parseInt(document.getElementById('selectPorPagina').value);
+    const mesAposta = parseInt(document.getElementById('selectMes').value);
+
+    try {
+        const response = await fetch('/api/combinacoes/gerar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                concurso: concursoAtual,
+                filtros: filtros,
+                ordenacao: ordenacao,
+                pagina: paginaAtual,
+                por_pagina: porPagina,
+                mes_aposta: mesAposta
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            // NOVO: Aplicar núcleo estratégico se ativo
+            const usarNucleo = document.getElementById('chk-usar-nucleo-combinacoes').checked;
+            if (usarNucleo) {
+                const nucleoData = localStorage.getItem('nucleoEstrategico');
+                if (nucleoData) {
+                    try {
+                        const nucleo = JSON.parse(nucleoData);
+                        const nucleoPrincipal = nucleo.principal || [];
+                        
+                        // Aplicar núcleo a cada combinação
+                        data.combinacoes.forEach(comb => {
+                            // Remover números já presentes no núcleo
+                            comb.numeros = comb.numeros.filter(n => !nucleoPrincipal.includes(n));
+                            // Adicionar núcleo no início
+                            comb.numeros = [...nucleoPrincipal, ...comb.numeros];
+                            // Garantir que temos exatamente 7 números
+                            comb.numeros = comb.numeros.slice(0, 7);
+                        });
+                        
+                        data.nucleoAplicado = nucleoPrincipal;
+                    } catch (e) {
+                        console.warn('Erro ao aplicar núcleo:', e);
+                    }
+                }
+            }
+            
+            exibirCombinacoes(data);
+            carregarEstatisticas();
+        } else {
+            mostrarAlerta('danger', data.mensagem || 'Erro ao gerar combinações');
+        }
+    } catch (error) {
+        mostrarAlerta('danger', 'Erro ao gerar combinações: ' + error.message);
+    } finally {
+        document.getElementById('loadingResultados').style.display = 'none';
+        document.getElementById('tabelaCombinacoes').style.display = 'table';
+    }
+}
+
+function obterFiltros() {
+    const filtros = {};
+
+    // Soma
+    const somaMin = document.getElementById('filtroSomaMin').value;
+    const somaMax = document.getElementById('filtroSomaMax').value;
+    if (somaMin) filtros.soma_min = parseInt(somaMin);
+    if (somaMax) filtros.soma_max = parseInt(somaMax);
+
+    // Pares/Ímpares
+    const paresSelect = document.getElementById('filtroParesImpares');
+    const paresSelecionados = Array.from(paresSelect.selectedOptions).map(opt => parseInt(opt.value));
+    if (paresSelecionados.length > 0 && paresSelecionados.length < 8) {
+        filtros.pares = paresSelecionados;
+    }
+
+    // Sequência máxima
+    const maxSeq = document.getElementById('filtroMaxSequencia').value;
+    if (maxSeq) filtros.max_sequencia = parseInt(maxSeq);
+
+    // Score mínimo
+    const scoreMin = document.getElementById('filtroScoreMin').value;
+    if (scoreMin) filtros.score_min = parseInt(scoreMin);
+
+    // Repetições
+    const repMin = document.getElementById('filtroRepeticoesMin').value;
+    const repMax = document.getElementById('filtroRepeticoesMax').value;
+    if (repMin) filtros.repeticoes_min = parseInt(repMin);
+    if (repMax) filtros.repeticoes_max = parseInt(repMax);
+
+    // Opções rápidas
+    if (document.getElementById('filtroApenasIdeal').checked) {
+        filtros.apenas_proporcao_ideal = true;
+    }
+    if (document.getElementById('filtroExcluirSomaFora').checked) {
+        filtros.excluir_soma_fora = true;
+    }
+
+    return filtros;
+}
+
+function exibirCombinacoes(data) {
+    const tbody = document.getElementById('tbodyCombinacoes');
+    const paginacao = data.paginacao;
+
+    // Atualizar estado
+    paginaAtual = paginacao.pagina_atual;
+    totalPaginas = paginacao.total_paginas;
+    totalFiltradas = paginacao.total_itens;
+
+    // Atualizar info de paginação
+    document.getElementById('infoPaginacao').textContent =
+        `Página ${paginaAtual} de ${totalPaginas} | Total: ${totalFiltradas.toLocaleString('pt-BR')}`;
+
+    // Atualizar botões de paginação
+    document.getElementById('btnPrimeira').disabled = paginaAtual <= 1;
+    document.getElementById('btnAnterior').disabled = paginaAtual <= 1;
+    document.getElementById('btnProxima').disabled = paginaAtual >= totalPaginas;
+    document.getElementById('btnUltima').disabled = paginaAtual >= totalPaginas;
+
+    // Renderizar combinações
+    const numInicio = (paginaAtual - 1) * paginacao.por_pagina;
+
+    tbody.innerHTML = data.combinacoes.map((comb, idx) => {
+        const numLinha = numInicio + idx + 1;
+
+        // Determinar cores baseado em análise
+        const somaClass = comb.soma_fora_faixa ? 'text-warning' : '';
+        const scoreClass = comb.score >= 70 ? 'bg-success text-white' :
+                          comb.score >= 50 ? 'bg-info text-white' : '';
+        const proporcaoClass = comb.proporcao_ideal ? 'text-success fw-bold' : '';
+
+        // Renderizar números com destaque nos acertados
+        const numerosHtml = comb.numeros.map(n => {
+            const acertou = dadosUniverso.numeros_sorteados.includes(n);
+            const bgColor = acertou ? '#FFD700' : '#6c757d';
+            const textColor = acertou ? '#000' : '#fff';
+            const border = acertou ? 'border: 2px solid #FFA500;' : '';
+            return `<span class="badge me-1" style="background-color: ${bgColor}; color: ${textColor}; ${border} font-size: 12px; padding: 4px 6px;">
+                ${String(n).padStart(2, '0')}
+            </span>`;
+        }).join('');
+
+        // Distribuição de faixas
+        const faixasHtml = `
+            <small class="text-muted">
+                B:${comb.distribuicao.baixa} M:${comb.distribuicao.media} A:${comb.distribuicao.alta}
+            </small>
+        `;
+
+        return `
+            <tr>
+                <td class="text-center text-muted">${numLinha}</td>
+                <td>${numerosHtml}</td>
+                <td class="text-center ${somaClass}">${comb.soma}</td>
+                <td class="text-center ${proporcaoClass}">${comb.pares}/${comb.impares}</td>
+                <td class="text-center">${faixasHtml}</td>
+                <td class="text-center">${comb.max_sequencia}</td>
+                <td class="text-center">${comb.repeticoes}</td>
+                <td class="text-center"><span class="badge ${scoreClass}" style="min-width: 40px;">${comb.score}</span></td>
+            </tr>
+        `;
+    }).join('');
+
+    // Se não houver resultados
+    if (data.combinacoes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    <i class="fas fa-search fa-2x mb-2"></i>
+                    <p class="mb-0">Nenhuma combinação encontrada com os filtros aplicados</p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+async function carregarEstatisticas() {
+    if (!concursoAtual) return;
+
+    try {
+        const response = await fetch(`/api/combinacoes/estatisticas/${concursoAtual}`);
+        const data = await response.json();
+
+        if (data.sucesso) {
+            document.getElementById('cardEstatisticas').style.display = 'block';
+
+            const stats = data.estatisticas;
+            document.getElementById('statScoreMedio').textContent = stats.score_medio.toFixed(1);
+            document.getElementById('statCombIdeais').textContent =
+                `${stats.combinacoes_ideais.toLocaleString('pt-BR')} (${stats.percentual_ideais}%)`;
+            document.getElementById('statScoreAlto').textContent =
+                `${stats.combinacoes_score_alto.toLocaleString('pt-BR')} (${stats.percentual_score_alto}%)`;
+            document.getElementById('statSomaMedia').textContent = stats.soma_media.toFixed(1);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+    }
+}
+
+// ==========================================
+// PAGINAÇÃO
+// ==========================================
+
+function irParaPagina(pagina) {
+    if (pagina < 1 || pagina > totalPaginas) return;
+    paginaAtual = pagina;
+    gerarCombinacoes();
+}
+
+// ==========================================
+// FILTROS
+// ==========================================
+
+function limparFiltros() {
+    document.getElementById('filtroSomaMin').value = '95';
+    document.getElementById('filtroSomaMax').value = '155';
+
+    // Resetar seleção de pares
+    const paresSelect = document.getElementById('filtroParesImpares');
+    Array.from(paresSelect.options).forEach(opt => {
+        opt.selected = opt.value === '3' || opt.value === '4';
+    });
+
+    document.getElementById('filtroMaxSequencia').value = '3';
+    document.getElementById('filtroScoreMin').value = '50';
+    document.getElementById('filtroRepeticoesMin').value = '';
+    document.getElementById('filtroRepeticoesMax').value = '';
+    document.getElementById('filtroApenasIdeal').checked = false;
+    document.getElementById('filtroExcluirSomaFora').checked = true;
+
+    paginaAtual = 1;
+    gerarCombinacoes();
+}
+
+function toggleFiltros() {
+    const content = document.getElementById('filtrosContent');
+    const btn = document.getElementById('btnToggleFiltros');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+    } else {
+        content.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+    }
+}
+
+// ==========================================
+// EXPORTAÇÃO
+// ==========================================
+
+function abrirModalExportar(quantidade) {
+    document.getElementById('exportarQuantidade').value = quantidade;
+    const modal = new bootstrap.Modal(document.getElementById('modalExportar'));
+    modal.show();
+}
+
+async function confirmarExportar() {
+    const quantidade = document.getElementById('exportarQuantidade').value;
+    const comMes = document.getElementById('exportarComMes').checked;
+    const mesAposta = comMes ? parseInt(document.getElementById('selectMes').value) : null;
+
+    const filtros = obterFiltros();
+    const ordenacao = document.getElementById('selectOrdenacao').value;
+
+    try {
+        const response = await fetch('/api/combinacoes/exportar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                concurso: concursoAtual,
+                filtros: filtros,
+                ordenacao: ordenacao,
+                limite: quantidade ? parseInt(quantidade) : null,
+                mes_aposta: mesAposta
+            })
+        });
+
+        if (response.ok) {
+            // Criar blob e fazer download
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `combinacoes_concurso_${concursoAtual}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+
+            // Fechar modal
+            bootstrap.Modal.getInstance(document.getElementById('modalExportar')).hide();
+        } else {
+            const data = await response.json();
+            mostrarAlerta('danger', data.mensagem || 'Erro ao exportar');
+        }
+    } catch (error) {
+        mostrarAlerta('danger', 'Erro ao exportar: ' + error.message);
+    }
+}
+
+// ==========================================
+// PAINEL FLUTUANTE - RESULTADO OFICIAL
+// ==========================================
+
+let painelMinimizado = false;
+
+function atualizarPainelFlutuante(data) {
+    const painel = document.getElementById('painelResultadoFlutuante');
+    painel.style.display = 'block';
+
+    // Números sorteados
+    const containerNumeros = document.getElementById('painelNumerosSorteados');
+    containerNumeros.innerHTML = data.numeros_sorteados.map(n =>
+        `<span class="badge bg-primary" style="font-size: 11px; padding: 4px 6px;">${String(n).padStart(2, '0')}</span>`
+    ).join('');
+
+    // Mês da sorte
+    const mesBadge = document.getElementById('painelMesSorte');
+    mesBadge.textContent = MESES_ABREV[data.mes_sorte];
+    mesBadge.style.backgroundColor = CORES_MESES[data.mes_sorte];
+    mesBadge.style.color = 'white';
+
+    // Info do concurso
+    document.getElementById('painelConcursoInfo').textContent = `Concurso ${data.concurso}`;
+}
+
+function togglePainelResultado() {
+    const conteudo = document.getElementById('painelResultadoConteudo');
+    const icone = document.getElementById('iconePainelResultado');
+
+    painelMinimizado = !painelMinimizado;
+
+    if (painelMinimizado) {
+        conteudo.style.display = 'none';
+        icone.className = 'fas fa-plus';
+    } else {
+        conteudo.style.display = 'block';
+        icone.className = 'fas fa-minus';
+    }
+}
+
+// ==========================================
+// BUSCA INTELIGENTE EM TEMPO REAL
+// ==========================================
+
+let numerosBuscados = [];
+
+function realizarBuscaInteligente() {
+    const input = document.getElementById('inputBuscaNumeros').value.trim();
+    const buscaExata = document.getElementById('checkBuscaExata').checked;
+
+    // Limpar busca anterior
+    limparDestaquesLinhas();
+
+    if (!input) {
+        document.getElementById('resultadoBusca').classList.add('d-none');
+        numerosBuscados = [];
+        return;
+    }
+
+    // Extrair números do input
+    numerosBuscados = input
+        .split(/[\s,;]+/)
+        .map(n => parseInt(n))
+        .filter(n => !isNaN(n) && n >= 1 && n <= 31);
+
+    if (numerosBuscados.length === 0) {
+        document.getElementById('resultadoBusca').classList.add('d-none');
+        return;
+    }
+
+    // Realizar busca nas linhas visíveis da tabela
+    const linhas = document.querySelectorAll('#tbodyCombinacoes tr');
+    let encontradas = 0;
+    let naoVisiveis = 0;
+
+    linhas.forEach(linha => {
+        // Extrair números da linha (dos badges)
+        const badges = linha.querySelectorAll('td:nth-child(2) .badge');
+        const numerosLinha = Array.from(badges).map(b => parseInt(b.textContent.trim()));
+
+        // Verificar match
+        let match = false;
+        if (buscaExata) {
+            // Todos os números buscados devem estar na linha
+            match = numerosBuscados.every(n => numerosLinha.includes(n));
+        } else {
+            // Pelo menos um número buscado deve estar na linha
+            match = numerosBuscados.some(n => numerosLinha.includes(n));
+        }
+
+        if (match) {
+            encontradas++;
+            linha.style.backgroundColor = 'rgba(255, 215, 0, 0.25)';
+            linha.style.borderLeft = '4px solid #FFD700';
+
+            // Destacar números específicos
+            badges.forEach(badge => {
+                const num = parseInt(badge.textContent.trim());
+                if (numerosBuscados.includes(num)) {
+                    badge.style.boxShadow = '0 0 0 3px #FF4500';
+                    badge.style.transform = 'scale(1.15)';
+                    badge.style.transition = 'all 0.2s ease';
+                }
+            });
+        }
+    });
+
+    // Mostrar resultado da busca
+    document.getElementById('resultadoBusca').classList.remove('d-none');
+    document.getElementById('badgeEncontradas').textContent = `${encontradas} encontrada(s)`;
+
+    // Calcular estimativa de não visíveis (baseado no total filtrado)
+    if (totalFiltradas > linhas.length) {
+        naoVisiveis = totalFiltradas - linhas.length;
+        document.getElementById('badgeNaoEncontradas').textContent = `${naoVisiveis} em outras páginas`;
+        document.getElementById('badgeNaoEncontradas').style.display = 'inline';
+    } else {
+        document.getElementById('badgeNaoEncontradas').style.display = 'none';
+    }
+}
+
+function limparDestaquesLinhas() {
+    const linhas = document.querySelectorAll('#tbodyCombinacoes tr');
+    linhas.forEach(linha => {
+        linha.style.backgroundColor = '';
+        linha.style.borderLeft = '';
+
+        const badges = linha.querySelectorAll('td:nth-child(2) .badge');
+        badges.forEach(badge => {
+            badge.style.boxShadow = '';
+            badge.style.transform = '';
+        });
+    });
+}
+
+function limparBusca() {
+    document.getElementById('inputBuscaNumeros').value = '';
+    document.getElementById('resultadoBusca').classList.add('d-none');
+    numerosBuscados = [];
+    limparDestaquesLinhas();
+}
+
+// ==========================================
+// UTILITÁRIOS
+// ==========================================
+
+function mostrarAlerta(tipo, mensagem) {
+    // Criar alerta temporário
+    const alertHtml = `
+        <div class="alert alert-${tipo} alert-dismissible fade show position-fixed" style="top: 80px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas fa-${tipo === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    const div = document.createElement('div');
+    div.innerHTML = alertHtml;
+    document.body.appendChild(div.firstElementChild);
+
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        const alert = document.querySelector('.alert.position-fixed');
+        if (alert) alert.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

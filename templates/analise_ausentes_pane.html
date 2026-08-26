@@ -1,0 +1,1122 @@
+<style>
+    :root {
+        --cor-principal: #d4b31a;
+        --cor-principal-dark: #b69816;
+        --bg-darker: #171303;
+        --bg-dark: #2d2606;
+        --text-light: #fcf9e8;
+        --accent-green: #28a745;
+        --accent-red: #dc3545;
+        --accent-blue: #0dcaf0;
+        --glass-bg: rgba(23, 19, 3, 0.7);
+        --glass-border: rgba(212, 179, 26, 0.3);
+    }
+
+    .premium-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .select-premium {
+        background-color: var(--bg-dark);
+        color: var(--cor-principal);
+        border: 2px solid var(--cor-principal);
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .select-premium:focus {
+        box-shadow: 0 0 10px var(--cor-principal);
+        outline: none;
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-left: 4px solid var(--cor-principal);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .stat-box h2 {
+        font-size: 2.5rem;
+        margin: 10px 0;
+        color: var(--cor-principal);
+        text-shadow: 0 0 10px rgba(212, 179, 26, 0.5);
+    }
+
+    .stat-box.danger {
+        border-left-color: var(--accent-red);
+    }
+
+    .stat-box.danger h2 {
+        color: var(--accent-red);
+        text-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+
+    .stat-box.success {
+        border-left-color: var(--accent-green);
+    }
+
+    .stat-box.success h2 {
+        color: var(--accent-green);
+        text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+
+    .volante-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .bola {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        background: #333;
+        color: #888;
+        border: 2px solid #444;
+        transition: all 0.3s ease;
+    }
+
+    /* Cores das bolas baseadas no status */
+    .bola.apostado {
+        background: rgba(13, 202, 240, 0.1);
+        color: var(--accent-blue);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 8px rgba(13, 202, 240, 0.4);
+    }
+
+    .bola.ausente {
+        background: transparent;
+        color: #888;
+        border-color: #555;
+    }
+
+    .bola.sorteado-apostado {
+        background: rgba(40, 167, 69, 0.2);
+        color: var(--accent-green);
+        border-color: var(--accent-green);
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
+        transform: scale(1.1);
+        z-index: 2;
+    }
+
+    .bola.sorteado-ausente {
+        background: rgba(220, 53, 69, 0.2);
+        color: var(--accent-red);
+        border-color: var(--accent-red);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
+        transform: scale(1.1);
+        animation: pulseRed 2s infinite;
+        z-index: 2;
+    }
+
+    @keyframes pulseRed {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
+
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .legenda-bola {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+    }
+
+    .pulseRec {
+        animation: pulseRed 2s infinite;
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="premium-card d-flex flex-column flex-md-row justify-content-between align-items-center"
+            style="background-color: #171303;">
+            <div class="mb-3 mb-md-0 d-flex flex-column">
+                <div class="d-flex align-items-center gap-2">
+                    <h2 class="mb-0" style="color: var(--cor-principal);">
+                        <i class="fas fa-radar text-warning"></i> Análise de Ausentes (Escapes)
+                    </h2>
+                    <button class="btn btn-sm btn-outline-info rounded-circle" data-bs-toggle="modal"
+                        data-bs-target="#modalInfoAusentes" title="Guia Estratégico"
+                        style="width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; border-width: 2px;">
+                        <i class="fas fa-info" style="font-size: 0.85rem;"></i>
+                    </button>
+                </div>
+                <p class="text-white mt-1 mb-0"><small>Cruze o Universo que escapou das suas apostas com o Sorteio
+                        Real.</small></p>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                <label for="concursoSelectAusentes" class="form-label mb-0 fw-bold"
+                    style="color: var(--cor-principal);">Analisar Concurso:</label>
+                <select id="concursoSelectAusentes" class="form-select select-premium"
+                    style="width: auto; max-width: 110px;" onchange="carregarDadosAusentes()">
+                    <option value="">Carregando...</option>
+                </select>
+                <span class="text-light fw-bold ms-1" style="font-size: 0.95rem;">
+                    de <span id="lblQtdConcursos" class="text-warning">...</span> dados
+                </span>
+                <button class="btn btn-outline-warning d-flex align-items-center gap-2 fw-bold ms-2"
+                    onclick="carregarDadosAusentes()">
+                    <i class="fas fa-sync-alt"></i> Rodar Análise
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Container do Loading e Status -->
+<div id="loadingStatusAusentes" class="alert d-flex align-items-center justify-content-center gap-2 d-none"
+    style="background: var(--glass-bg); border-color: var(--cor-principal); color: var(--text-light);">
+    <i class="fas fa-spinner fa-spin fs-4"></i> <span class="fs-5 text-white">Processando análise...</span>
+</div>
+
+<!-- Nenhuma Aposta Encontrada -->
+<div id="noDataStatusAusentes" class="alert alert-warning text-center d-none"
+    style="background: rgba(212, 179, 26, 0.1); border-color: var(--cor-principal); color: var(--cor-principal);">
+    <i class="fas fa-exclamation-triangle fs-4 mb-2"></i><br>
+    <strong>Nenhum concurso com apostas (apostas.json) encontrado.</strong><br>
+    Certifique-se de que a pasta <code>conferencia_apostas/[concurso]</code> existe e contém o arquivo JSON.
+</div>
+
+<!-- Área de Resultados (Inicialmente oculta) -->
+<div id="resultadoAreaAusentes" class="d-none" style="background-color: #171303; padding: 15px; border-radius: 12px;">
+    <!-- Dashboards de Saldo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-box" style="background-color: #2d2606;">
+                <h6 class="text-uppercase tracking-wide text-white mb-0 fw-bold">Universo Jogado</h6>
+                <h2 id="stat_jogado_ausentes">0</h2>
+                <div class="w-100 px-3">
+                    <div class="progress" style="height: 6px; background: #333;">
+                        <div id="bar_jogado_ausentes" class="progress-bar"
+                            style="background-color: var(--cor-principal); width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box" style="background-color: #2d2606;">
+                <h6 class="text-uppercase tracking-wide text-white mb-0 fw-bold">Total Ausentes</h6>
+                <h2 id="stat_ausentes_ausentes">0</h2>
+                <div class="w-100 px-3">
+                    <div class="progress" style="height: 6px; background: #333;">
+                        <div id="bar_ausentes_ausentes" class="progress-bar bg-secondary" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box danger" style="background-color: #2d2606;">
+                <h6 class="text-uppercase tracking-wide mb-0 fw-bold text-white">Dezenas Perdidas <i
+                        class="fas fa-skull text-danger"></i></h6>
+                <small class="text-light">(Ausentes que saíram)</small>
+                <h2 id="stat_escapes_ausentes">0</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box success" style="background-color: #2d2606;">
+                <h6 class="text-uppercase tracking-wide mb-0 fw-bold text-white">Teto Max. Aposta</h6>
+                <small class="text-light">(O que sobrou possível)</small>
+                <h2 id="stat_teto_ausentes">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Coluna do Painel Visual -->
+        <div class="col-lg-8">
+            <div class="premium-card h-100" style="background-color: #2d2606;">
+                <h4 class="border-bottom border-warning pb-2 mb-4" style="color: var(--cor-principal);">
+                    <i class="fas fa-border-all"></i> Panorama Visual (Concurso <span id="lblConcursoAusentes"
+                        class="text-white"></span>)
+                </h4>
+
+                <div class="volante-grid mb-5" id="volanteContainerAusentes">
+                    <!-- Bolas geradas via JS -->
+                </div>
+
+                <hr class="border-secondary">
+
+                <div class="row mt-4">
+                    <div class="col-md-6 border-end border-secondary">
+                        <h5 style="color: var(--text-light);"><i class="fas fa-trophy text-warning"></i> Legenda
+                            (Realidade)</h5>
+                        <div class="legenda-item mt-3 text-white">
+                            <div class="legenda-bola bola sorteado-apostado" style="transform: none;"></div>
+                            <span><b>Bom Eco</b> (Apostado & Sorteado)</span>
+                        </div>
+                        <div class="legenda-item text-white">
+                            <div class="legenda-bola bola sorteado-ausente" style="transform: none; animation: none;">
+                            </div>
+                            <span class="text-danger fw-bold">O Escape (Ausente & Sorteado)</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ps-md-4 mt-4 mt-md-0 text-white">
+                        <h5 style="color: var(--text-light);"><i class="fas fa-user-edit text-info"></i> Legenda (Sua
+                            Ação)</h5>
+                        <div class="legenda-item mt-3">
+                            <div class="legenda-bola bola apostado"></div>
+                            <span>Apostado (Mas não saiu)</span>
+                        </div>
+                        <div class="legenda-item">
+                            <div class="legenda-bola bola ausente"></div>
+                            <span class="text-light">Ausente Intencional (Não saiu)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna de Listagem -->
+        <div class="col-lg-4">
+            <div class="premium-card h-100 text-light" style="background-color: #2d2606;">
+                <h4 class="border-bottom border-warning pb-2 mb-4" style="color: var(--cor-principal);">
+                    <i class="fas fa-list-ol"></i> Detalhamento Numérico
+                </h4>
+
+                <div class="mb-4 bg-dark bg-opacity-50 p-3 rounded border border-success border-opacity-50">
+                    <h6 class="text-success text-uppercase fw-bold"><i class="fas fa-star"></i> Sorteio Real do
+                        Concurso:</h6>
+                    <div id="lista_sorteio_ausentes" class="d-flex flex-wrap gap-2 fw-bold fs-5 mt-2">
+                        --
+                    </div>
+                </div>
+
+                <div class="mb-4 bg-dark bg-opacity-50 p-3 rounded border border-danger border-opacity-50"
+                    id="box_escapes_ausentes">
+                    <h6 class="text-danger text-uppercase fw-bold"><i class="fas fa-exclamation-circle"></i> Escapes!
+                        (Sorteados que não usou):</h6>
+                    <div id="lista_escapes_ausentes" class="d-flex flex-wrap gap-2 text-danger fw-bold fs-5 mt-2">
+                        --
+                    </div>
+                </div>
+
+                <div class="mb-4 mt-4">
+                    <h6 class="text-info text-uppercase fw-bold border-bottom border-info border-opacity-25 pb-1"><i
+                            class="fas fa-crosshairs"></i> Universo Apostado (<span
+                            id="count_jogado_ausentes">0</span>):</h6>
+                    <p id="lista_jogado_ausentes" class="small text-white font-monospace lh-lg mb-0 mt-2"
+                        style="font-size: 0.95rem;">
+                        --
+                    </p>
+                </div>
+
+                <div>
+                    <h6
+                        class="text-secondary text-uppercase fw-bold border-bottom border-secondary border-opacity-25 pb-1">
+                        <i class="fas fa-eye-slash"></i> Ausentes Intencionais (<span
+                            id="count_ausentes_ausentes">0</span>):
+                    </h6>
+                    <p id="lista_ausentes_ausentes" class="small text-white font-monospace lh-lg mb-0 mt-2"
+                        style="font-size: 0.95rem;">
+                        --
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nova Linha: Dicas, Estratégias e Evolução Histórica -->
+    <div class="row mt-4" id="areaHistoricoEstrategico">
+        <div class="col-12 mb-3">
+            <h4 class="border-bottom border-warning pb-2" style="color: var(--cor-principal);">
+                <i class="fas fa-chart-line"></i> Relatório Estratégico e Frequência de Escapes
+            </h4>
+            <p class="text-light small">Visão macro de todos os concursos presentes na sua pasta de apostas.</p>
+        </div>
+
+        <!-- Painel Central de Eficiência: Ranking Direto & Visual -->
+        <div class="col-12 mb-4">
+            <div class="premium-card p-3 border-info border-opacity-50" style="background-color: #1a1a1a;">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center border-end border-secondary mb-3 mb-md-0">
+                        <h6 class="text-uppercase text-info fw-bold mb-1">Diagnóstico Atual</h6>
+                        <h3 id="efi_status_titulo" class="mb-0 fw-bold">--</h3>
+                        <small id="efi_status_desc" class="text-white">Avaliando ciclo...</small>
+                    </div>
+                    <div class="col-md-8 ps-md-4">
+                        <h6 class="text-uppercase text-warning fw-bold mb-3 text-center text-md-start">
+                            <i class="fas fa-medal"></i> Retenção dos 7 Oficiais <span id="efi_qtd_concursos">(Últimos
+                                Concursos)</span>
+                        </h6>
+                        <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2"
+                            id="efi_ranking_boxes">
+                            <span class="text-muted small">Processando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloco Isolado: Histograma de Escapes -->
+        <div class="col-md-6 mb-4">
+            <div class="premium-card p-3 border-info border-opacity-50 h-100" style="background-color: #1a1a1a;">
+                <h6 class="text-info text-uppercase fw-bold mb-3"><i class="fas fa-chart-bar"></i> Distribuição de
+                    Escapes (Histograma)</h6>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-sm mb-0">
+                        <thead style="background-color: #171303;">
+                            <tr>
+                                <th class="text-center text-light py-2">Escapes</th>
+                                <th class="text-center py-2" style="color: var(--cor-principal);">Vezes que ocorreu</th>
+                                <th class="text-left text-light py-2">Nos Concursos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_histograma_escapes">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-2">Carregando histograma...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nova Seção Analítica: Top Escapes / Teto vs Quantidade de Escapes -->
+        <div class="col-md-6 mb-4">
+            <div class="premium-card p-3 border-warning border-opacity-50 h-100" style="background-color: #1a1a1a;">
+                <h6 class="text-warning text-uppercase fw-bold mb-3">
+                    <i class="fas fa-bullseye text-warning"></i> Top Escapes (Teto vs Quantidade de Escapes)
+                </h6>
+                <p class="text-muted small mb-3">Ranking dos 3 piores cenários históricos (maiores dezenas perdidas / menores tetos).</p>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-sm mb-0">
+                        <thead style="background-color: #171303;">
+                            <tr>
+                                <th class="text-center text-light py-2">Teto (Acertos Possíveis)</th>
+                                <th class="text-center py-2 text-danger">Qtd. Escapes</th>
+                                <th class="text-center text-light py-2">Ocorrências</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_teto_vs_escapes">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-2">Carregando dados analíticos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="premium-card h-100 p-3" style="background-color: #2d2606;">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                    <h6 class="text-warning text-uppercase fw-bold m-0">
+                        <i class="fas fa-history"></i> Evolução
+                        <span id="contadorFiltro" class="badge bg-warning text-dark ms-2 fw-bold"
+                            style="font-size: 0.8rem;">Carregando...</span>
+                    </h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-light small">Exibir:</span>
+                        <select id="pagSizeAusentes" class="form-select form-select-sm bg-dark text-warning border-warning" 
+                                style="width: auto; cursor: pointer; height: 30px; padding: 2px 10px;" onchange="mudarTamanhoPaginaAusentes()">
+                            <option value="10">10 itens</option>
+                            <option value="25" selected>25 itens</option>
+                            <option value="50">50 itens</option>
+                            <option value="100">100 itens</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <table class="table table-dark table-hover table-sm" id="tabelaHistoricoEscapes">
+                        <thead style="background-color: #171303; border-bottom: 2px solid var(--cor-principal);">
+                            <tr>
+                                <th class="text-center text-warning align-middle p-2">
+                                    Concurso<br>
+                                    <input type="text" id="filtroCol0" onkeyup="filtrarColunasTabela()"
+                                        class="form-control form-control-sm mt-1 bg-dark text-white border-warning mx-auto"
+                                        style="width: 80px;" placeholder="Ex: 1195">
+                                </th>
+                                <th class="text-center text-light align-middle p-2">
+                                    Universo<br>
+                                    <input type="text" id="filtroCol1" onkeyup="filtrarColunasTabela()"
+                                        class="form-control form-control-sm mt-1 bg-dark text-white border-secondary mx-auto"
+                                        style="width: 80px;" placeholder="...">
+                                </th>
+                                <th class="text-center text-danger align-middle p-2">
+                                    Teto<br>
+                                    <input type="text" id="filtroCol2" onkeyup="filtrarColunasTabela()"
+                                        class="form-control form-control-sm mt-1 bg-dark text-white border-secondary mx-auto"
+                                        style="width: 80px;" placeholder="...">
+                                </th>
+                                <th class="text-center text-danger align-middle p-2">
+                                    Qtd. Escapes<br>
+                                    <input type="text" id="filtroCol3" onkeyup="filtrarColunasTabela()"
+                                        class="form-control form-control-sm mt-1 bg-dark text-white border-danger mx-auto"
+                                        style="width: 80px;" placeholder="...">
+                                </th>
+                                <th class="text-left text-light align-middle p-2">
+                                    Dezenas Perdidas<br>
+                                    <input type="text" id="filtroCol4" onkeyup="filtrarColunasTabela()"
+                                        class="form-control form-control-sm mt-1 bg-dark text-white border-warning w-75"
+                                        placeholder="Filtrar por dezena (Ex: 05)...">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_historico_escapes">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Carregando histórico...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3 pt-2 border-top border-secondary border-opacity-25">
+                    <div class="text-light small" id="infoPaginacaoAusentes">
+                        Exibindo de 0 a 0 de 0 registros
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0 justify-content-center" id="ulPaginacaoAusentes">
+                            <!-- Gerado via JS -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mt-4">
+            <div class="premium-card h-100 p-3" style="background-color: #2d2606;">
+                <h6 class="text-danger text-uppercase fw-bold mb-3"><i class="fas fa-fire-alt"></i> Top Escapes
+                    (Frequência)</h6>
+                <p class="text-muted small mb-3">Dezenas que você deixou de fora e que MAIS SAÍRAM nos sorteios
+                    analisados.</p>
+                <div class="mt-2">
+                    <table class="table table-dark table-hover table-sm">
+                        <thead style="background-color: #171303; border-bottom: 2px solid var(--accent-red);">
+                            <tr>
+                                <th class="text-center text-light py-2">Dezena</th>
+                                <th class="text-center text-warning py-2">Vezes Escapada</th>
+                                <th class="text-left text-light py-2">Nível de Risco / Alerta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_frequencia_escapes">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-2">Carregando métricas...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 p-3 rounded"
+                    style="background: rgba(212, 179, 26, 0.1); border-left: 4px solid var(--cor-principal);">
+                    <h6 class="text-warning fw-bold mb-1"><i class="fas fa-lightbulb"></i> Insight:</h6>
+                    <p class="small text-light mb-0" id="insight_estrategico">
+                        Aguardando dados para gerar insight...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Ajuda Estratégica -->
+<div class="modal fade" id="modalInfoAusentes" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(5px);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-light"
+            style="background-color: #1a1a1a; border: 1px solid var(--cor-principal); box-shadow: 0 0 20px rgba(212, 179, 26, 0.2);">
+            <div class="modal-header border-secondary pb-2">
+                <h5 class="modal-title text-warning fw-bold"><i class="fas fa-lightbulb"></i> Manual Estratégico</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="font-size: 0.95rem; line-height: 1.6;">
+                <p class="text-white mb-4" style="font-size: 0.95rem;">Esta aba funciona como um <strong>Radar de
+                        Prevenção</strong> e um
+                    <strong>Termômetro de Danos</strong>. Ela cruza as dezenas que você eliminou com a realidade
+                    sorteada.
+                </p>
+
+                <h6 class="text-danger fw-bold text-uppercase border-bottom border-secondary pb-1"
+                    style="font-size: 0.8rem;">
+                    <i class="fas fa-search-dollar"></i> Pós-Sorteio (Contabilizando Escapes)
+                </h6>
+                <p class="small text-light mb-4">Após ocorrido um Sorteio, a ferramenta caça os seus
+                    <strong>Escapes</strong>. Um Escape é uma dezena que explodiu no sorteio oficial da Caixa Econômica
+                    Federal mas que você, por falha na estratégia ou filtro pesado, <strong>não incluiu</strong> em
+                    nenhuma aposta. (Derruba diretamente seu Teto de Acertos).
+                </p>
+
+                <h6 class="text-info fw-bold text-uppercase border-bottom border-secondary pb-1"
+                    style="font-size: 0.8rem;">
+                    <i class="fas fa-shield-alt"></i> Pré-Sorteio (Blindando a Estratégia)
+                </h6>
+                <p class="small text-light mb-2">Use esta inteligência para melhorar as suas <i>Apostas Futuras</i>.
+                    Siga a lógica de ação:</p>
+                <ol class="small text-light ps-3 mb-0">
+                    <li class="mb-2">Observe a tabela final: <strong>"Top Escapes (Frequência)"</strong>. Ela lista e
+                        delata que certas dezenas têm despistado você constantemente e sendo sorteadas.
+                    </li>
+                    <li class="mb-2">Antes de fechar suas próximas apostas, compare o seu rascunho. Você deixou as
+                        líderes de escape de fora (ausentes) DE NOVO?</li>
+                    <li class="text-warning fw-bold">Ação Corretiva: Force a inserção dessas "Ausentes Recorrentes" no
+                        seu novo Universo Jogado para que elas não te derrubem mais!</li>
+                </ol>
+                <div class="mt-3 p-3 rounded text-center border border-warning" style="background-color: #171303;">
+                    <span class="text-warning fw-bold d-block mb-2 text-uppercase" style="font-size: 0.85rem;"><i
+                            class="fas fa-exclamation-triangle"></i> Top 3 "Perigosas" Omitidas Atuais:</span>
+                    <div id="modalTop3Perigosas" class="d-flex justify-content-center gap-2">
+                        <span class="text-muted small">Aguardando cálculo...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-center">
+                <button type="button" class="btn btn-outline-warning btn-sm w-75 fw-bold"
+                    data-bs-dismiss="modal">Compreendido!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        carregarListaConcursosAusentes();
+
+        // Auto-abrir o Modal APENAS quando a aba for ativada (e apenas a 1ª vez)
+        const abaTracker = document.getElementById("tab-analise-ausentes");
+        if (abaTracker) {
+            const triggerModal = () => {
+                if (!window.jaMostrouGuiaAusentes) {
+                    setTimeout(() => {
+                        const modalElement = document.getElementById('modalInfoAusentes');
+                        if (modalElement && window.bootstrap) {
+                            new bootstrap.Modal(modalElement).show();
+                            window.jaMostrouGuiaAusentes = true;
+                        }
+                    }, 400);
+                }
+            };
+
+            if (abaTracker.classList.contains("active")) {
+                triggerModal(); // Dispara se já for a tab padrão no onload
+            }
+
+            abaTracker.addEventListener('shown.bs.tab', triggerModal);
+
+        } else {
+            // Fallback caso seja a rota standalone (/analise-ausentes)
+            setTimeout(() => {
+                const modalElement = document.getElementById('modalInfoAusentes');
+                if (modalElement && window.bootstrap) {
+                    new bootstrap.Modal(modalElement).show();
+                }
+            }, 600);
+        }
+    });
+
+    async function carregarListaConcursosAusentes() {
+        const sel = document.getElementById("concursoSelectAusentes");
+        try {
+            const resp = await fetch("/api/analise-ausentes/concursos-disponiveis");
+            const data = await resp.json();
+
+            sel.innerHTML = "";
+
+            if (!data.concursos || data.concursos.length === 0) {
+                sel.innerHTML = `<option value="">Nenhum apostas encontrado</option>`;
+                sel.disabled = true;
+                document.getElementById('noDataStatusAusentes').classList.remove('d-none');
+                return;
+            }
+
+            sel.disabled = false;
+            document.getElementById('noDataStatusAusentes').classList.add('d-none');
+
+            data.concursos.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c;
+                opt.textContent = `${c}`; // Retirado a palavra 'Concurso' para caber melhor no flow visual
+                sel.appendChild(opt);
+            });
+
+            // Atualizar o contador total de pastas encontradas
+            const badgeQtd = document.getElementById("lblQtdConcursos");
+            if (badgeQtd) {
+                badgeQtd.textContent = `${data.concursos.length}`; // Sem colchetes
+            }
+
+            carregarDadosAusentes();
+            carregarHistoricoEstrategicoAusentes(); // Nova chamada para carregar o histórico macro
+
+        } catch (err) {
+            console.error(err);
+            sel.innerHTML = `<option value="">Erro ao carregar</option>`;
+        }
+    }
+
+    async function carregarDadosAusentes() {
+        const concurso = document.getElementById("concursoSelectAusentes").value;
+        if (!concurso) return;
+
+        const loader = document.getElementById("loadingStatusAusentes");
+        const painel = document.getElementById("resultadoAreaAusentes");
+
+        loader.classList.remove("d-none");
+        painel.classList.add("d-none");
+
+        try {
+            const resp = await fetch(`/api/analise-ausentes/${concurso}`);
+            if (!resp.ok) {
+                const e = await resp.json();
+                alert("Erro: " + (e.erro || "Falha ao carregar análise"));
+                loader.classList.add("d-none");
+                return;
+            }
+
+            const data = await resp.json();
+            preencherUIAusentes(data);
+
+            loader.classList.add("d-none");
+            painel.classList.remove("d-none");
+
+        } catch (err) {
+            console.error(err);
+            loader.classList.add("d-none");
+            alert("Ocorreu um erro ao processar os dados.");
+        }
+    }
+
+    function preencherUIAusentes(data) {
+        document.getElementById("lblConcursoAusentes").textContent = data.concurso;
+
+        document.getElementById("stat_jogado_ausentes").textContent = data.stats.total_apostado;
+        document.getElementById("bar_jogado_ausentes").style.width = `${(data.stats.total_apostado / 31) * 100}%`;
+
+        document.getElementById("stat_ausentes_ausentes").textContent = data.stats.total_ausentes;
+        document.getElementById("bar_ausentes_ausentes").style.width = `${(data.stats.total_ausentes / 31) * 100}%`;
+
+        document.getElementById("stat_escapes_ausentes").textContent = data.stats.total_ausentes_sorteados;
+        document.getElementById("stat_teto_ausentes").textContent = data.stats.teto_maximo_acertos;
+
+        document.getElementById("count_jogado_ausentes").textContent = data.stats.total_apostado;
+        document.getElementById("count_ausentes_ausentes").textContent = data.stats.total_ausentes;
+
+        const container = document.getElementById("volanteContainerAusentes");
+        let htmlVolante = '';
+
+        for (let i = 1; i <= 31; i++) {
+            let classe = "bola";
+
+            const isSorteado = data.sorteio_real && data.sorteio_real.includes(i);
+            const isApostado = data.universo_apostado.includes(i);
+
+            if (isSorteado && isApostado) {
+                classe += " sorteado-apostado";
+            } else if (isSorteado && !isApostado) {
+                classe += " sorteado-ausente";
+            } else if (!isSorteado && isApostado) {
+                classe += " apostado";
+            } else {
+                classe += " ausente";
+            }
+
+            htmlVolante += `<div class="${classe}">${i.toString().padStart(2, '0')}</div>`;
+        }
+        container.innerHTML = htmlVolante;
+
+        const fmtList = (arr) => arr.length > 0 ? arr.map(e => e.toString().padStart(2, '0')).join(', ') : "Nenhum número";
+
+        const listaSorteio = document.getElementById("lista_sorteio_ausentes");
+        if (data.sorteio_real && data.sorteio_real.length > 0) {
+            listaSorteio.innerHTML = data.sorteio_real.map(e =>
+                `<span class="badge border border-success text-success p-2 px-3">${e.toString().padStart(2, '0')}</span>`
+            ).join('');
+        } else {
+            listaSorteio.innerHTML = "<span class='text-warning border border-warning rounded p-2 px-3 fw-normal fs-6'><i class='fas fa-clock'></i> Aguardando sorteio no DB...</span>";
+        }
+
+        const boxEscapes = document.getElementById("box_escapes_ausentes");
+        const listaEscapes = document.getElementById("lista_escapes_ausentes");
+
+        if (data.sorteio_real && data.sorteio_real.length > 0) {
+            if (data.ausentes_sorteados.length > 0) {
+                listaEscapes.innerHTML = data.ausentes_sorteados.map(e =>
+                    `<span class="badge border border-danger bg-danger bg-opacity-25 text-danger p-2 px-3 fs-6 pulseRec">${e.toString().padStart(2, '0')}</span>`
+                ).join('');
+                boxEscapes.classList.add("pulseRec");
+            } else {
+                listaEscapes.innerHTML = "<span class='text-success fw-normal fs-6'><i class='fas fa-check-circle'></i> Zero escape! Cobertura top 100%.</span>";
+                boxEscapes.classList.remove("pulseRec");
+                boxEscapes.className = "mb-4 bg-dark bg-opacity-50 p-3 rounded border border-success border-opacity-50";
+                boxEscapes.querySelector("h6").className = "text-success text-uppercase fw-bold";
+            }
+        } else {
+            listaEscapes.innerHTML = "<span class='text-muted fs-6 fw-normal'>--</span>";
+            boxEscapes.classList.remove("pulseRec");
+        }
+
+        document.getElementById("lista_jogado_ausentes").textContent = fmtList(data.universo_apostado);
+        document.getElementById("lista_ausentes_ausentes").textContent = fmtList(data.ausentes);
+    }
+
+    window.historicoCompletoAusentes = [];
+    window.historicoFiltradoAusentes = [];
+    window.pagAtualAusentes = 1;
+    window.pagTamanhoAusentes = 25;
+
+    async function carregarHistoricoEstrategicoAusentes() {
+        try {
+            const resp = await fetch("/api/analise-ausentes/historico");
+            if (!resp.ok) return;
+            const data = await resp.json();
+
+            // 0. Preencher Histograma
+            const tbodyHist = document.getElementById("tbody_histograma_escapes");
+            if (tbodyHist && data.histograma_escapes) {
+                if (data.histograma_escapes.length === 0) {
+                    tbodyHist.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Ainda não há dados suficientes.</td></tr>';
+                } else {
+                    tbodyHist.innerHTML = data.histograma_escapes.map(h => {
+                        const corBadge = h.qtd_escapes === 0 ? 'bg-success text-white' : (h.qtd_escapes <= 1 ? 'bg-warning text-dark' : 'bg-danger text-white');
+                        const concursoBadges = h.concursos.map(c => `<span class="badge bg-dark border border-secondary text-light me-1 mb-1" style="font-size: 0.75rem;">${c}</span>`).join('');
+
+                        return `
+                            <tr>
+                                <td class="text-center align-middle fw-bold py-2"><span class="badge border border-secondary ${corBadge} fs-6">${h.qtd_escapes}</span></td>
+                                <td class="text-center align-middle fw-bold fs-6 py-2" style="color: var(--cor-principal);">${h.vezes}x</td>
+                                <td class="text-left align-middle py-2" style="white-space: normal; line-height: 1.8;">${concursoBadges}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Novo: Preencher Top Escapes (Teto vs Quantidade de Escapes)
+            const tbodyTetoEscapes = document.getElementById("tbody_teto_vs_escapes");
+            if (tbodyTetoEscapes && data.historico) {
+                const gruposTeto = {};
+                data.historico.forEach(h => {
+                    const teto = h.teto_acertos;
+                    const escapes = h.escapes_qtd;
+                    if (!gruposTeto[teto]) {
+                        gruposTeto[teto] = {
+                            teto: teto,
+                            escapes: escapes,
+                            ocorrencias: 0
+                        };
+                    }
+                    gruposTeto[teto].ocorrencias++;
+                });
+
+                const arrayTopEscapes = Object.values(gruposTeto);
+                // Ordenar por Qtd. Escapes desc (piores cenários primeiro)
+                arrayTopEscapes.sort((a, b) => b.escapes - a.escapes);
+
+                // Pegar os top 3 piores
+                const top3Escapes = arrayTopEscapes.slice(0, 3);
+
+                if (top3Escapes.length === 0) {
+                    tbodyTetoEscapes.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">Sem dados disponíveis.</td></tr>';
+                } else {
+                    tbodyTetoEscapes.innerHTML = top3Escapes.map(item => {
+                        const corTeto = item.escapes === 0 ? 'text-success' : (item.escapes <= 1 ? 'text-warning' : 'text-danger');
+                        const corBadge = item.escapes === 0 ? 'bg-success text-white' : (item.escapes <= 1 ? 'bg-warning text-dark' : 'bg-danger text-white');
+                        return `
+                            <tr>
+                                <td class="text-center align-middle fw-bold py-2 ${corTeto}"><i class="fas fa-award"></i> Teto ${item.teto}</td>
+                                <td class="text-center align-middle fw-bold py-2"><span class="badge ${corBadge} fs-6 px-3 border border-secondary">${item.escapes}</span></td>
+                                <td class="text-center align-middle fw-bold text-light py-2" style="font-size: 0.95rem;">${item.ocorrencias}x</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Novo: Painel de Eficiência / Ranking Visual Mural
+            if (data.historico.length > 0) {
+                const muralHistorico = data.historico;
+                let rankingHtml = '';
+
+                muralHistorico.forEach(r => {
+                    let corBox = 'bg-success text-white border-success';
+                    let icone = 'fa-star text-warning';
+
+                    if (r.teto_acertos === 6) {
+                        corBox = 'bg-warning text-dark border-warning';
+                        icone = 'fa-check text-dark';
+                    } else if (r.teto_acertos < 6) {
+                        corBox = 'bg-danger text-white border-danger';
+                        icone = 'fa-exclamation-triangle text-white';
+                    }
+
+                    rankingHtml += `
+                        <div class="text-center p-1 rounded border ${corBox}" style="min-width: 48px; max-height: 45px; flex: 0 0 auto;">
+                            <div class="fw-bold opacity-75" style="font-size: 0.6rem; letter-spacing: -0.5px;">C.${r.concurso}</div>
+                            <div class="fw-bold" style="font-size: 1.0rem; line-height: 1;"><i class="fas ${icone}" style="font-size: 0.6rem;"></i> ${r.teto_acertos}</div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById("efi_ranking_boxes").innerHTML = rankingHtml;
+                const tituloSpan = document.getElementById("efi_qtd_concursos");
+                if (tituloSpan) {
+                    tituloSpan.textContent = `(Últimos ${muralHistorico.length} Concursos)`;
+                }
+
+                // Manter o "Diagnóstico Atual" focado APENAS no recorte recente
+                const recentesDiag = data.historico.slice(0, 5);
+                let somaTetoDiag = 0;
+                recentesDiag.forEach(r => somaTetoDiag += r.teto_acertos);
+                const mediaRecente = somaTetoDiag / recentesDiag.length;
+
+                const statusTitulo = document.getElementById("efi_status_titulo");
+                const statusDesc = document.getElementById("efi_status_desc");
+
+                if (mediaRecente >= 6.5) {
+                    statusTitulo.innerHTML = "ALTA<br>PERFORMANCE 🔥";
+                    statusTitulo.className = "mb-1 fw-bold text-success mt-2";
+                    statusDesc.innerHTML = "<span class='badge bg-success'>Teto intacto! Filtre forte!</span>";
+                } else if (mediaRecente >= 5.5) {
+                    statusTitulo.innerHTML = "STATUS<br>ESTÁVEL ⚡";
+                    statusTitulo.className = "mb-1 fw-bold text-warning mt-2";
+                    statusDesc.innerHTML = "<span class='badge bg-warning text-dark'>Pouco escape. Jogue folgado.</span>";
+                } else {
+                    statusTitulo.innerHTML = "STATUS<br>VAZANDO 📉";
+                    statusTitulo.className = "mb-1 fw-bold text-danger mt-2";
+                    statusDesc.innerHTML = "<span class='badge bg-danger'>Matriz fraca! Adicione dezenas.</span>";
+                }
+
+            } else {
+                document.getElementById("efi_status_titulo").textContent = "SEM DADOS";
+                document.getElementById("efi_ranking_boxes").innerHTML = "Aguardando análises para gerar ranking visual...";
+            }
+
+            // Guardar histórico e inicializar tabela paginada
+            window.historicoCompletoAusentes = data.historico || [];
+            filtrarColunasTabela();
+
+            // 2. Preencher Ranking de Frequência
+            const rankingTbody = document.getElementById("tbody_frequencia_escapes");
+            const insightBox = document.getElementById("insight_estrategico");
+
+            if (data.frequencia_escapes.length === 0) {
+                rankingTbody.innerHTML = `<tr><td colspan="3" class="text-center text-success py-2"><i class="fas fa-shield-alt"></i> Nenhuma dezena pendente frequente! Tudo coberto.</td></tr>`;
+                insightBox.innerHTML = "Excelente! Nas últimas análises, você não deixou nenhuma dezena solta que tenha sido sorteada.";
+            } else {
+                rankingTbody.innerHTML = data.frequencia_escapes.map(f => {
+                    let alertColor = "text-warning";
+                    let badgeClass = "badge bg-warning text-dark";
+                    let msg = "Risco Moderado - Dezena perdeu cobertura recentemente.";
+
+                    if (f.qtd > 2) {
+                        alertColor = "text-danger fw-bold";
+                        badgeClass = "badge bg-danger text-white";
+                        msg = "ALTO RISCO! Dezena frequentemente ignorada pelas suas apostas.";
+                    }
+
+                    return `
+                        <tr>
+                            <td class="text-center align-middle fw-bold fs-5 p-2" style="color: #fff;">${f.dezena.toString().padStart(2, '0')}</td>
+                            <td class="text-center align-middle p-2"><span class="${badgeClass} fs-6">${f.qtd}x</span></td>
+                            <td class="text-left align-middle ${alertColor} p-2 small">${msg}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // 3. Montar Insight Dinâmico
+                const piores = data.frequencia_escapes.filter(f => f.qtd >= 2).map(f => f.dezena.toString().padStart(2, '0'));
+                if (piores.length > 0) {
+                    insightBox.innerHTML = `
+                        As dezenas <b>${piores.join(', ')}</b> escaparam 2 ou mais vezes nos últimos concursos. <br>
+                        <span class="text-warning">Sugestão:</span> Reavalie sua matriz de exclusão. Incluir ao menos duas delas no seu "Universo Jogado" do próximo concurso aumentará drasticamente o Teto Máximo.
+                    `;
+                } else {
+                    const top1 = data.frequencia_escapes[0].dezena.toString().padStart(2, '0');
+                    insightBox.innerHTML = `
+                        As perdas estão diluídas, o que indica que sua metodologia de exclusão não está falhando sistematicamente em uma dezena específica. Fique de olho na dezena <b>${top1}</b> por precaução.
+                    `;
+                }
+
+                // 4. Injetar o Top 3 no Modal de Ajuda
+                const modalTop3 = document.getElementById("modalTop3Perigosas");
+                if (modalTop3) {
+                    const top3 = data.frequencia_escapes.slice(0, 3);
+                    if (top3.length > 0) {
+                        modalTop3.innerHTML = top3.map(f => `<span class="badge border border-danger bg-danger bg-opacity-25 text-danger fs-5 pulseRec">${f.dezena.toString().padStart(2, '0')}</span>`).join('');
+                    } else {
+                        modalTop3.innerHTML = "<span class='text-success small'><i class='fas fa-check'></i> Nenhum perigo detectado!</span>";
+                    }
+                }
+            }
+
+        } catch (e) {
+            console.error("Erro ao carregar histórico", e);
+        }
+    }
+
+    function renderizarTabelaPaginada() {
+        const tbody = document.getElementById("tbody_historico_escapes");
+        if (!tbody) return;
+
+        const totalRegistros = window.historicoFiltradoAusentes.length;
+        const tamanhoVal = window.pagTamanhoAusentes;
+        const tamanho = tamanhoVal === 'all' ? totalRegistros : parseInt(tamanhoVal);
+
+        const totalPaginas = Math.ceil(totalRegistros / tamanho) || 1;
+        if (window.pagAtualAusentes > totalPaginas) {
+            window.pagAtualAusentes = totalPaginas;
+        }
+        if (window.pagAtualAusentes < 1) {
+            window.pagAtualAusentes = 1;
+        }
+
+        const inicio = (window.pagAtualAusentes - 1) * tamanho;
+        const fim = Math.min(inicio + tamanho, totalRegistros);
+
+        const paginaDados = window.historicoFiltradoAusentes.slice(inicio, fim);
+
+        if (totalRegistros === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Nenhum registro encontrado com os filtros aplicados.</td></tr>`;
+            document.getElementById("infoPaginacaoAusentes").textContent = "Exibindo 0 a 0 de 0 registros";
+            document.getElementById("ulPaginacaoAusentes").innerHTML = "";
+            return;
+        }
+
+        tbody.innerHTML = paginaDados.map(h => {
+            const dezenasFormatadas = h.escapes_dezenas.length > 0
+                ? h.escapes_dezenas.map(d => `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-1">${d.toString().padStart(2, '0')}</span>`).join(' ')
+                : '<span class="text-success small"><i class="fas fa-check"></i> Zero Escape</span>';
+
+            return `
+                <tr>
+                    <td class="text-center fw-bold text-warning">${h.concurso}</td>
+                    <td class="text-center font-monospace align-middle">${h.total_apostado}</td>
+                    <td class="text-center fw-bold align-middle text-success">${h.teto_acertos}</td>
+                    <td class="text-center fw-bold align-middle ${h.escapes_qtd > 0 ? 'text-danger' : 'text-success'}">${h.escapes_qtd}</td>
+                    <td class="text-left align-middle">${dezenasFormatadas}</td>
+                </tr>
+            `;
+        }).join('');
+
+        document.getElementById("infoPaginacaoAusentes").textContent = `Exibindo ${inicio + 1} a ${fim} de ${totalRegistros} registros`;
+        renderizarControlesPaginacao(totalPaginas);
+    }
+
+    function renderizarControlesPaginacao(totalPaginas) {
+        const ul = document.getElementById("ulPaginacaoAusentes");
+        if (!ul) return;
+
+        ul.innerHTML = "";
+
+        if (totalPaginas <= 1 || window.pagTamanhoAusentes === 'all') {
+            return;
+        }
+
+        const maxBotoesVisiveis = 5;
+        let paginaInicial = Math.max(1, window.pagAtualAusentes - Math.floor(maxBotoesVisiveis / 2));
+        let paginaFinal = Math.min(totalPaginas, paginaInicial + maxBotoesVisiveis - 1);
+
+        if (paginaFinal - paginaInicial + 1 < maxBotoesVisiveis) {
+            paginaInicial = Math.max(1, paginaFinal - maxBotoesVisiveis + 1);
+        }
+
+        // Botão Primeira
+        const liPrimeira = document.createElement("li");
+        liPrimeira.className = `page-item ${window.pagAtualAusentes === 1 ? 'disabled' : ''}`;
+        liPrimeira.innerHTML = `<a class="page-link bg-dark border-secondary text-warning" href="javascript:void(0)" onclick="mudarPaginaAusentes(1)" title="Primeira"><i class="fas fa-angle-double-left"></i></a>`;
+        ul.appendChild(liPrimeira);
+
+        // Botão Anterior
+        const liAnterior = document.createElement("li");
+        liAnterior.className = `page-item ${window.pagAtualAusentes === 1 ? 'disabled' : ''}`;
+        liAnterior.innerHTML = `<a class="page-link bg-dark border-secondary text-warning" href="javascript:void(0)" onclick="mudarPaginaAusentes(${window.pagAtualAusentes - 1})" title="Anterior"><i class="fas fa-angle-left"></i></a>`;
+        ul.appendChild(liAnterior);
+
+        // Páginas numeradas
+        for (let i = paginaInicial; i <= paginaFinal; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${window.pagAtualAusentes === i ? 'active' : ''}`;
+            const activeStyle = window.pagAtualAusentes === i ? 'background-color: var(--cor-principal) !important; border-color: var(--cor-principal) !important; color: #171303 !important; font-weight: bold;' : '';
+            li.innerHTML = `<a class="page-link bg-dark border-secondary text-warning" style="${activeStyle}" href="javascript:void(0)" onclick="mudarPaginaAusentes(${i})">${i}</a>`;
+            ul.appendChild(li);
+        }
+
+        // Botão Próxima
+        const liProxima = document.createElement("li");
+        liProxima.className = `page-item ${window.pagAtualAusentes === totalPaginas ? 'disabled' : ''}`;
+        liProxima.innerHTML = `<a class="page-link bg-dark border-secondary text-warning" href="javascript:void(0)" onclick="mudarPaginaAusentes(${window.pagAtualAusentes + 1})" title="Próxima"><i class="fas fa-angle-right"></i></a>`;
+        ul.appendChild(liProxima);
+
+        // Botão Última
+        const liUltima = document.createElement("li");
+        liUltima.className = `page-item ${window.pagAtualAusentes === totalPaginas ? 'disabled' : ''}`;
+        liUltima.innerHTML = `<a class="page-link bg-dark border-secondary text-warning" href="javascript:void(0)" onclick="mudarPaginaAusentes(${totalPaginas})" title="Última"><i class="fas fa-angle-double-right"></i></a>`;
+        ul.appendChild(liUltima);
+    }
+
+    window.mudarPaginaAusentes = function(pagina) {
+        window.pagAtualAusentes = pagina;
+        renderizarTabelaPaginada();
+    }
+
+    window.mudarTamanhoPaginaAusentes = function() {
+        window.pagTamanhoAusentes = document.getElementById("pagSizeAusentes").value;
+        window.pagAtualAusentes = 1;
+        renderizarTabelaPaginada();
+    }
+
+    function filtrarColunasTabela() {
+        const val0 = document.getElementById("filtroCol0").value.toLowerCase();
+        const val1 = document.getElementById("filtroCol1").value.toLowerCase();
+        const val2 = document.getElementById("filtroCol2").value.toLowerCase();
+        const val3 = document.getElementById("filtroCol3").value.toLowerCase();
+        const val4 = document.getElementById("filtroCol4").value.toLowerCase();
+
+        window.historicoFiltradoAusentes = window.historicoCompletoAusentes.filter(h => {
+            const td0 = h.concurso.toString().toLowerCase();
+            const td1 = h.total_apostado.toString().toLowerCase();
+            const td2 = h.teto_acertos.toString().toLowerCase();
+            const td3 = h.escapes_qtd.toString().toLowerCase();
+            const td4 = h.escapes_dezenas.map(d => d.toString().padStart(2, '0')).join(' ').toLowerCase();
+
+            return td0.includes(val0) && 
+                   td1.includes(val1) && 
+                   td2.includes(val2) && 
+                   td3.includes(val3) && 
+                   (val4 === "" || td4.includes(val4) || (val4.includes("zero") && h.escapes_qtd === 0));
+        });
+
+        const badge = document.getElementById("contadorFiltro");
+        if (badge) {
+            badge.textContent = window.historicoFiltradoAusentes.length + " registro(s)";
+        }
+
+        window.pagAtualAusentes = 1;
+        renderizarTabelaPaginada();
+    }
+</script>

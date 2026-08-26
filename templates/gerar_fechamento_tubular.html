@@ -1,0 +1,923 @@
+{% extends "base.html" %}
+
+{% block title %}Gerar Fechamento (Tubular) - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style>
+    :root {
+        --ds-dourado-principal: #D4B31A;
+        --ds-dourado-95: #fcf9e8;
+        --ds-dourado-90: #f9f2d2;
+        --ds-dourado-80: #f4e5a4;
+        --ds-dourado-70: #eed877;
+        --ds-dourado-60: #e9cb49;
+        --ds-dourado-50: #e3be1c;
+        --ds-dourado-40: #b69816;
+        --ds-dourado-30: #887211;
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--ds-dourado-95) 0%, #ffffff 50%, var(--ds-dourado-95) 100%);
+        background-attachment: fixed;
+    }
+
+    /* Container específico do conteúdo (não afeta navbar) */
+    .conteudo-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(212, 179, 26, 0.15);
+        margin-top: 20px;
+    }
+
+    .card {
+        border: 2px solid var(--ds-dourado-90);
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, var(--ds-dourado-principal) 0%, var(--ds-dourado-40) 100%) !important;
+        border-bottom: 3px solid var(--ds-dourado-30);
+        color: white;
+    }
+
+    .form-label {
+        font-weight: bold;
+        color: var(--ds-dourado-30);
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--ds-dourado-80);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ds-dourado-principal);
+        box-shadow: 0 0 0 0.25rem rgba(212, 179, 26, 0.25);
+    }
+
+    .numero-circulo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        background: var(--ds-dourado-principal);
+        color: #ffffff;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 3px 8px rgba(212, 179, 26, 0.4);
+        margin: 0 3px;
+    }
+
+    .btn-gerar {
+        background: linear-gradient(135deg, var(--ds-dourado-principal) 0%, var(--ds-dourado-40) 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-weight: bold;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(212, 179, 26, 0.3);
+    }
+
+    .btn-gerar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(212, 179, 26, 0.4);
+    }
+
+    .recomendacao-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 5px solid var(--ds-dourado-principal);
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .jogo-card {
+        background: white;
+        border: 2px solid var(--ds-dourado-80);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .spinner-border {
+        color: var(--ds-dourado-principal);
+    }
+
+    /* 🆕 Estilo para inputs de soma pequenos */
+    .soma-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .soma-input-group input {
+        width: 80px;
+    }
+
+    .soma-input-group label {
+        margin: 0;
+        font-size: 13px;
+    }
+
+    /* 🆕 Custom Modal Styles */
+    .custom-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .custom-modal-content {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+        width: 90%;
+        margin: 0 16px;
+        animation: slideIn 0.3s ease;
+    }
+
+    .custom-modal-icon {
+        font-size: 48px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .custom-modal-message {
+        font-size: 16px;
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .custom-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .custom-modal-btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .custom-modal-btn-primary {
+        background: var(--ds-dourado-principal);
+        color: white;
+    }
+
+    .custom-modal-btn-primary:hover {
+        background: var(--ds-dourado-40);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.3);
+    }
+
+    /* 🆕 Link discreto para análises */
+    .link-analise {
+        font-size: 11px;
+        color: #6c757d;
+        text-decoration: none;
+        display: block;
+        margin-top: 5px;
+    }
+
+    .link-analise:hover {
+        color: var(--ds-dourado-principal);
+        text-decoration: underline;
+    }
+
+    /* 🆕 Sugestão discreta */
+    .sugestao-soma {
+        font-size: 11px;
+        color: #6c757d;
+        margin-top: 5px;
+        font-style: italic;
+    }
+
+    .sugestao-soma strong {
+        color: var(--ds-dourado-principal);
+        font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid conteudo-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 style="color: var(--ds-dourado-principal); font-weight: bold;">
+                <i class="bi bi-gear-fill"></i> Gerar Fechamento (Tubular)
+            </h2>
+            <p class="text-muted">Gere jogos inteligentes baseados nas análises estatísticas da Visualização Tubular</p>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted">Carregando opções...</p>
+    </div>
+
+    <!-- Formulário -->
+    <div id="formulario" style="display: none;">
+        <!-- Recomendações -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0"><i class="bi bi-lightbulb-fill"></i> Recomendações Estratégicas</h5>
+            </div>
+            <div class="card-body" id="recomendacoes-container">
+                <!-- Será preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- Parâmetros de Geração -->
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0"><i class="bi bi-sliders"></i> Parâmetros de Geração</h5>
+            </div>
+            <div class="card-body">
+                <!-- Quantidade de Jogos (separado) -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label for="quantidade" class="form-label">📊 Quantidade de Jogos</label>
+                        <input type="number" class="form-control" id="quantidade" value="5" min="1" max="20">
+                    </div>
+                </div>
+
+                <hr class="mb-4">
+
+                <!-- 🆕 LAYOUT REORGANIZADO EM PARES -->
+                <div class="row">
+                    <!-- Par 1: Par/Ímpar — DEZENAS Soma -->
+                    <div class="col-md-6 mb-3">
+                        <label for="par-impar" class="form-label">⚖️ Padrão Par/Ímpar</label>
+                        <select class="form-select" id="par-impar">
+                            <option value="">Qualquer</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">➕ DEZENAS Soma</label>
+                        <div class="soma-input-group">
+                            <div>
+                                <label>Mínimo</label>
+                                <input type="number" class="form-control" id="soma-min" placeholder="48">
+                            </div>
+                            <div>
+                                <label>Máximo</label>
+                                <input type="number" class="form-control" id="soma-max" placeholder="178">
+                            </div>
+                            <div>
+                                <label>Média</label>
+                                <input type="number" class="form-control" id="soma-media" readonly placeholder="112.19">
+                            </div>
+                        </div>
+                        <div class="sugestao-soma" id="sugestao-soma-text">
+                            💡 Carregando sugestão...
+                        </div>
+                    </div>
+
+                    <!-- Par 2: Finais Iguais — Repetição -->
+                    <div class="col-md-6 mb-3">
+                        <label for="finais" class="form-label">🎯 Finais Iguais</label>
+                        <select class="form-select" id="finais">
+                            <option value="">Qualquer</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="repeticao" class="form-label">🔁 Repetição (Rept)</label>
+                        <select class="form-select" id="repeticao">
+                            <option value="">Qualquer</option>
+                            <option value="1">01 (Uma) Dezena</option>
+                            <option value="2">02 (Duas) Dezenas</option>
+                            <option value="3">03 (Três) Dezenas</option>
+                        </select>
+                        <a href="/analises/repeticao-concurso-anterior" target="_blank" class="link-analise">
+                            <i class="bi bi-box-arrow-up-right"></i> Ver análise completa
+                        </a>
+                    </div>
+
+                    <!-- Par 3: Sequência — Padrão Inicial -->
+                    <div class="col-md-6 mb-3">
+                        <label for="sequencia" class="form-label">🔢 Sequência</label>
+                        <select class="form-select" id="sequencia">
+                            <option value="">Qualquer</option>
+                        </select>
+                        <a href="/analises/sequencias-dezenas" target="_blank" class="link-analise">
+                            <i class="bi bi-box-arrow-up-right"></i> Ver análise completa
+                        </a>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="padrao-inicial" class="form-label">🔰 Padrão Inicial (Dígitos)</label>
+                        <select class="form-select" id="padrao-inicial">
+                            <option value="">Qualquer</option>
+                        </select>
+                    </div>
+
+                    <!-- Par 4: Mês da Sorte — Dígitos Únicos -->
+                    <div class="col-md-6 mb-3">
+                        <label for="mes" class="form-label">📅 Mês da Sorte</label>
+                        <select class="form-select" id="mes">
+                            <option value="">Qualquer</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="digitos" class="form-label">🎲 Dígitos Únicos (Qtde)</label>
+                        <select class="form-select" id="digitos">
+                            <option value="">Qualquer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-gerar btn-lg" onclick="gerarJogos()">
+                        <i class="bi bi-stars"></i> Gerar Fechamento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultados" style="display: none;">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0"><i class="bi bi-trophy-fill"></i> Jogos Gerados</h5>
+            </div>
+            <div class="card-body" id="jogos-container">
+                <!-- Será preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- Botões de Exportação -->
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-download"></i> Exportar Palpites</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-success btn-lg" onclick="exportarTXT()">
+                        📄 Exportar TXT
+                    </button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="exportarXLS()">
+                        📊 Exportar Excel
+                    </button>
+                    <button type="button" class="btn btn-info btn-lg" onclick="exportarHTML()">
+                        🌐 Exportar HTML
+                    </button>
+                </div>
+                <p class="mt-3 text-muted small">
+                    <i class="bi bi-info-circle"></i> Baixe os palpites em diferentes formatos
+                </p>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <button class="btn btn-secondary" onclick="voltarFormulario()">
+                <i class="bi bi-arrow-left"></i> Gerar Novamente
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let opcoesGlobais = {};
+let resultadoJogos = null;
+let parametrosUsados = null;
+
+// ========================================================================
+// CUSTOM MODAL FUNCTIONS
+// ========================================================================
+
+function showNotification(message, type = 'info') {
+    const icons = {
+        success: '✅',
+        warning: '⚠️',
+        error: '❌',
+        info: 'ℹ️'
+    };
+
+    const modal = document.createElement('div');
+    modal.className = 'custom-modal-overlay';
+    modal.innerHTML = `
+        <div class="custom-modal-content">
+            <div class="custom-modal-icon">${icons[type] || icons.info}</div>
+            <div class="custom-modal-message">${message}</div>
+            <div class="custom-modal-buttons">
+                <button class="custom-modal-btn custom-modal-btn-primary" onclick="this.closest('.custom-modal-overlay').remove()">
+                    OK
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    if (type === 'success') {
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.remove();
+            }
+        }, 3000);
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// ========================================================================
+// HELPER FUNCTIONS
+// ========================================================================
+
+/**
+ * Formata percentual com 2 dígitos decimais
+ * Exemplo: 8.9 => 08.09
+ */
+function formatarPercentual(valor) {
+    const num = parseFloat(valor);
+    if (isNaN(num)) return '00.00';
+
+    const parteInteira = Math.floor(num);
+    const parteDecimal = Math.round((num - parteInteira) * 100);
+
+    return `${String(parteInteira).padStart(2, '0')}.${String(parteDecimal).padStart(2, '0')}`;
+}
+
+/**
+ * Formata número com 2 dígitos
+ * Exemplo: 1 => 01
+ */
+function formatarNumero(num) {
+    return String(num).padStart(2, '0');
+}
+
+/**
+ * 🆕 Converte padrão de dígitos do formato "0:2 | 1:2 | 2:3 | 3:0" para "0 0 1 1 2 2 2"
+ * @param {string} padraoOriginal - Padrão no formato "0:2 | 1:2 | 2:3 | 3:0"
+ * @returns {string} - Padrão formatado "0 0 1 1 2 2 2"
+ */
+function converterPadraoDigitos(padraoOriginal) {
+    try {
+        // Se já está no formato espaçado (sem ":"), retorna como está
+        if (!padraoOriginal.includes(':')) {
+            return padraoOriginal;
+        }
+
+        // Divide por " | " para pegar cada parte (ex: "0:2", "1:2", "2:3", "3:0")
+        const partes = padraoOriginal.split(' | ');
+        const digitos = [];
+
+        partes.forEach(parte => {
+            // Divide cada parte em [digito, quantidade]
+            const [digito, qtd] = parte.split(':').map(Number);
+
+            // Adiciona o dígito N vezes
+            for (let i = 0; i < qtd; i++) {
+                digitos.push(digito);
+            }
+        });
+
+        // Junta com espaço
+        return digitos.join(' ');
+    } catch (error) {
+        console.error('Erro ao converter padrão:', padraoOriginal, error);
+        return padraoOriginal; // Retorna original em caso de erro
+    }
+}
+
+// ========================================================================
+// MAIN FUNCTIONS
+// ========================================================================
+
+function obterIndiceMes(nomeMes) {
+    const meses = {
+        'Janeiro': 0, 'Fevereiro': 1, 'Março': 2, 'Abril': 3,
+        'Maio': 4, 'Junho': 5, 'Julho': 6, 'Agosto': 7,
+        'Setembro': 8, 'Outubro': 9, 'Novembro': 10, 'Dezembro': 11
+    };
+    return meses[nomeMes] !== undefined ? meses[nomeMes] : 0;
+}
+
+function carregarOpcoes() {
+    fetch('/api/ferramentas/opcoes-fechamento-tubular')
+        .then(response => response.json())
+        .then(data => {
+            if (data.erro) {
+                mostrarErro(data.erro);
+            } else {
+                opcoesGlobais = data;
+                preencherSelects(data);
+                preencherSomaDezenas(data.soma_dezenas);
+                exibirRecomendacoes(data.recomendacao);
+
+                // 🆕 Carregar sugestão de soma mais frequente
+                carregarSugestaoSoma();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('formulario').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            mostrarErro('Erro ao carregar opções: ' + error.message);
+        });
+}
+
+/**
+ * 🆕 Carrega a soma mais frequente da API
+ */
+function carregarSugestaoSoma() {
+    fetch('/api/analise/soma-dezenas')
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.top_10_frequentes && data.top_10_frequentes.length > 0) {
+                const maisFrequente = data.top_10_frequentes[0];
+                const sugestaoText = document.getElementById('sugestao-soma-text');
+
+                sugestaoText.innerHTML = `💡 Mais frequente: <strong>${maisFrequente.soma}</strong> (${maisFrequente.frequencia}x - ${maisFrequente.percentual}%)`;
+            } else {
+                // Fallback caso não tenha dados
+                document.getElementById('sugestao-soma-text').innerHTML = '💡 Recomendado: entre 91-130 (~60% dos casos)';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar sugestão de soma:', error);
+            // Fallback em caso de erro
+            document.getElementById('sugestao-soma-text').innerHTML = '💡 Recomendado: entre 91-130 (~60% dos casos)';
+        });
+}
+
+function preencherSelects(opcoes) {
+    // 1. SEQUÊNCIA - Manter lógica atual
+    const selectSequencia = document.getElementById('sequencia');
+    opcoes.sequencias.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.descricao;
+        option.textContent = `${opt.descricao} (${formatarPercentual(opt.percentual)}%)`;
+        selectSequencia.appendChild(option);
+    });
+
+    // 2. PAR/ÍMPAR - Adicionar frequência
+    const selectParImpar = document.getElementById('par-impar');
+    opcoes.pares_impares.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.descricao;
+        // Formato: 3P + 4I | 362x | 31.59%
+        const freq = opt.frequencia || '';
+        option.textContent = `${opt.descricao} | ${freq}x | ${formatarPercentual(opt.percentual)}%`;
+        selectParImpar.appendChild(option);
+    });
+
+    // 3. MÊS - Formatar percentual com 2 dígitos
+    const selectMes = document.getElementById('mes');
+    opcoes.meses.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.descricao;
+        // Formato: Novembro | 09.42%
+        option.textContent = `${opt.descricao} | ${formatarPercentual(opt.percentual)}%`;
+        selectMes.appendChild(option);
+    });
+
+    // 4. FINAIS IGUAIS - Formato: 1 | 222x | 19.37%
+    const selectFinais = document.getElementById('finais');
+    opcoes.finais.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.descricao;
+        const freq = opt.frequencia || opt.count || '';
+        // Formato: 1 | 222x | 19.37%
+        option.textContent = `${opt.descricao} | ${freq}x | ${formatarPercentual(opt.percentual)}%`;
+        selectFinais.appendChild(option);
+    });
+
+    // 5. DÍGITOS ÚNICOS - Formato simplificado: 7 | 479x | 41.08%
+    const selectDigitos = document.getElementById('digitos');
+    opcoes.digitos_unicos.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.descricao;
+        const freq = opt.frequencia || '';
+        // Formato: 7 | 479x | 41.08%
+        option.textContent = `${opt.descricao} | ${freq}x | ${formatarPercentual(opt.percentual)}%`;
+        selectDigitos.appendChild(option);
+    });
+
+    // 6. PADRÃO INICIAL - Formato: 0 0 1 1 2 2 2 | 92x | 08.03%
+    const selectPadraoInicial = document.getElementById('padrao-inicial');
+    if (opcoes.padrao_inicial) {
+        opcoes.padrao_inicial.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.descricao;
+            const freq = opt.frequencia || opt.vezes || '';
+            // 🆕 Usa converterPadraoDigitos() para transformar "0:2 | 1:2 | 2:3" em "0 0 1 1 2 2 2"
+            option.textContent = `${converterPadraoDigitos(opt.descricao)} | ${freq}x | ${formatarPercentual(opt.percentual)}%`;
+            selectPadraoInicial.appendChild(option);
+        });
+    }
+}
+
+function preencherSomaDezenas(somaDados) {
+    if (somaDados) {
+        document.getElementById('soma-min').value = somaDados.minimo || 48;
+        document.getElementById('soma-max').value = somaDados.maximo || 178;
+        document.getElementById('soma-media').value = somaDados.media || 112.19;
+    }
+}
+
+function exibirRecomendacoes(recomendacoes) {
+    const container = document.getElementById('recomendacoes-container');
+    let html = '';
+
+    recomendacoes.forEach(rec => {
+        const badge = rec.prioridade === 'ALTA' ? 'bg-success' : 'bg-warning';
+        html += `
+            <div class="recomendacao-box">
+                <h6>
+                    <span class="badge ${badge}">${rec.prioridade}</span>
+                    ${rec.tipo}
+                </h6>
+                <p class="mb-0">${rec.sugestao}</p>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function gerarJogos() {
+    const parametros = {
+        quantidade: parseInt(document.getElementById('quantidade').value),
+        sequencia: document.getElementById('sequencia').value,
+        par_impar: document.getElementById('par-impar').value,
+        mes: document.getElementById('mes').value,
+        finais_iguais: document.getElementById('finais').value,
+        digitos_unicos: document.getElementById('digitos').value,
+        // 🆕 Novos parâmetros
+        soma_min: parseInt(document.getElementById('soma-min').value) || null,
+        soma_max: parseInt(document.getElementById('soma-max').value) || null,
+        repeticao_dezena: document.getElementById('repeticao').value,
+        padrao_inicial: document.getElementById('padrao-inicial').value
+    };
+
+    parametrosUsados = parametros;
+
+    document.getElementById('formulario').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    fetch('/api/ferramentas/gerar-jogos-tubular', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(parametros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.erro) {
+            mostrarErro(data.erro);
+        } else {
+            resultadoJogos = data;
+
+            exibirJogos(data);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('resultados').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        mostrarErro('Erro ao gerar jogos: ' + error.message);
+    });
+}
+
+function exibirJogos(data) {
+    const container = document.getElementById('jogos-container');
+    let html = '';
+
+    data.jogos.forEach(jogo => {
+        const mesNome = obterNomeMes(jogo.mes_sorte);
+        const mesIndex = obterIndiceMes(mesNome);
+
+        html += `
+            <div class="jogo-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Jogo #${jogo.numero}</h5>
+                    <span class="badge mes-cor-${mesIndex}">${mesNome}</span>
+                </div>
+                <div class="text-center mb-3">
+                    ${jogo.numeros.map(n => `<span class="numero-circulo">${String(n).padStart(2, '0')}</span>`).join('')}
+                </div>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <small class="text-muted">Soma</small><br>
+                        <strong>${jogo.analise.soma}</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">Pares/Ímpares</small><br>
+                        <strong>${jogo.analise.pares}P + ${jogo.analise.impares}I</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">Sequência</small><br>
+                        <strong>${jogo.analise.tem_sequencia ? '✅ Sim' : '❌ Não'}</strong>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function obterNomeMes(numero) {
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return meses[numero - 1] || 'Janeiro';
+}
+
+function voltarFormulario() {
+    document.getElementById('resultados').style.display = 'none';
+    document.getElementById('formulario').style.display = 'block';
+}
+
+function mostrarErro(mensagem) {
+    document.getElementById('loading').innerHTML = `
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i> ${mensagem}
+        </div>
+        <div class="text-center mt-3">
+            <button class="btn btn-secondary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Tentar Novamente
+            </button>
+        </div>
+    `;
+}
+
+// ========================================================================
+// FUNÇÕES DE EXPORTAÇÃO
+// ========================================================================
+
+function exportarTXT() {
+    if (!resultadoJogos) {
+        showNotification('Gere os jogos primeiro!', 'warning');
+        return;
+    }
+
+    const btn = event.target;
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Exportando...';
+    btn.disabled = true;
+
+    fetch('/api/fechamento/exportar/txt', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ jogos_data: resultadoJogos })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erro ao exportar');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `palpites_tubular_${new Date().getTime()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+        showNotification('Arquivo TXT baixado com sucesso!', 'success');
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao exportar TXT: ' + error, 'error');
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+    });
+}
+
+function exportarXLS() {
+    if (!resultadoJogos) {
+        showNotification('Gere os jogos primeiro!', 'warning');
+        return;
+    }
+
+    const btn = event.target;
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Exportando...';
+    btn.disabled = true;
+
+    fetch('/api/fechamento/exportar/xls', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ jogos_data: resultadoJogos })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erro ao exportar');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `palpites_tubular_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+        showNotification('Arquivo Excel baixado com sucesso!', 'success');
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao exportar Excel: ' + error, 'error');
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+    });
+}
+
+function exportarHTML() {
+    if (!resultadoJogos) {
+        showNotification('Gere os jogos primeiro!', 'warning');
+        return;
+    }
+
+    const btn = event.target;
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Exportando...';
+    btn.disabled = true;
+
+    fetch('/api/fechamento/exportar/html', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            jogos_data: resultadoJogos,
+            parametros: parametrosUsados
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erro ao exportar');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `palpites_tubular_${new Date().getTime()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+        showNotification('Relatório HTML baixado com sucesso!', 'success');
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao exportar HTML: ' + error, 'error');
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+    });
+}
+
+window.onload = carregarOpcoes;
+</script>
+{% endblock %}

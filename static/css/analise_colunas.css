@@ -1,0 +1,339 @@
+/* Complemento à análise de linhas — colunas do volante */
+
+.analise-colunas-container {
+    border-top-color: #5b4c0b;
+}
+
+.analise-colunas-container .analise-linhas-title i {
+    color: #5b4c0b;
+}
+
+.colunas-top3-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+}
+
+/* Insights centralizados */
+.insights-grid-colunas-centered {
+    justify-content: center;
+    justify-items: center;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.insights-grid-colunas-centered .insight-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+.insights-grid-colunas-centered .insight-content {
+    align-items: center;
+}
+
+.insights-grid-colunas-centered .sugestao-aposta {
+    max-width: 100%;
+}
+
+/* Tabela compacta */
+.analise-colunas-tabela {
+    font-size: 0.78rem;
+}
+
+.analise-colunas-tabela thead th {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    vertical-align: top;
+    padding: 0.35rem 0.25rem;
+}
+
+.analise-colunas-tabela tbody td {
+    vertical-align: middle;
+    padding: 0.28rem 0.35rem;
+    line-height: 1.25;
+}
+
+.col-cell-compact {
+    white-space: nowrap;
+}
+
+.col-cell-nome {
+    white-space: normal;
+    max-width: 220px;
+}
+
+.col-nome-compact {
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #333;
+}
+
+.dark .col-nome-compact {
+    color: #eee;
+}
+
+.col-nome-compact .col-dez-list {
+    font-weight: 500;
+    color: #666;
+}
+
+.col-val-main {
+    font-weight: 700;
+}
+
+.col-val-pct {
+    font-size: 0.68rem;
+    color: #888;
+    margin-left: 2px;
+}
+
+.col-rank-vol {
+    display: inline-block;
+    min-width: 1.5rem;
+    font-weight: 700;
+    color: #5b4c0b;
+}
+
+.col-tabela-row {
+    transition: background-color 0.15s ease;
+}
+
+.col-tabela-row:hover {
+    background-color: #fcf9e8 !important;
+}
+
+.dark .col-tabela-row:hover {
+    background-color: #3d3418 !important;
+}
+
+.col-highlight-dupla {
+    background-color: rgba(212, 179, 26, 0.12);
+}
+
+.col-highlight-trinca {
+    background-color: rgba(255, 215, 0, 0.22);
+    font-weight: 600;
+}
+
+.col-row-trinca {
+    box-shadow: inset 3px 0 0 #ffd700;
+}
+
+.col-row-quadra {
+    box-shadow: inset 3px 0 0 #d4b31a;
+}
+
+.col-row-alta-zerada td.col-cell-compact.text-danger {
+    font-weight: 700;
+}
+
+.col-has-quadra {
+    background-color: rgba(212, 179, 26, 0.18);
+}
+
+/* Cabeçalho interativo */
+.col-th-interactive {
+    min-width: 52px;
+}
+
+.col-th-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.col-th-label {
+    line-height: 1.1;
+    text-align: center;
+}
+
+.col-th-sort-btn {
+    border: none;
+    background: transparent;
+    padding: 0 4px;
+    color: #5b4c0b;
+    cursor: pointer;
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.col-th-sort-btn:hover {
+    color: #d4b31a;
+}
+
+.col-th-filter {
+    font-size: 0.62rem;
+    padding: 0.1rem 0.15rem;
+    max-width: 58px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.dark .col-th-filter {
+    background: #444;
+    border-color: #555;
+    color: #eee;
+}
+
+.colunas-filtro-busca-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.colunas-filtro-busca-wrap input {
+    width: 180px;
+}
+
+/* Mini popover (hover em célula) */
+.col-analise-tooltip.col-mini-tip-float {
+    position: fixed;
+    z-index: 10050;
+    max-width: 260px;
+    max-height: 200px;
+    overflow: hidden;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #d4b31a;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    pointer-events: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.1s ease;
+}
+
+.col-analise-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.col-mini-tip {
+    display: flex;
+    flex-direction: column;
+    max-height: 200px;
+}
+
+.col-mini-tip-titulo {
+    font-weight: 700;
+    padding: 6px 10px;
+    background: #fcf9e8;
+    border-bottom: 1px solid #eed877;
+    color: #5b4c0b;
+    flex-shrink: 0;
+}
+
+.col-mini-tip .col-tip-list-compact {
+    margin: 0;
+    padding: 6px 10px 8px 22px;
+    overflow-y: auto;
+    max-height: 160px;
+}
+
+.col-tip-list-compact {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.col-tip-list-compact li {
+    margin-bottom: 3px;
+}
+
+.col-tip-mais {
+    color: #888;
+    font-style: italic;
+    list-style: none;
+    margin-left: -1rem;
+}
+
+.col-tip-vazio {
+    padding: 8px 10px;
+    color: #888;
+}
+
+.col-btn-detalhes {
+    border: none;
+    background: transparent;
+    color: #5b4c0b;
+    padding: 0 4px;
+    margin-left: 4px;
+    font-size: 0.85rem;
+    vertical-align: middle;
+    cursor: pointer;
+    opacity: 0.75;
+}
+
+.col-btn-detalhes:hover {
+    opacity: 1;
+    color: #d4b31a;
+}
+
+.col-cell-nome {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+/* Modal detalhes */
+.col-modal-tab-body {
+    max-height: 320px;
+    overflow-y: auto;
+    font-size: 0.82rem;
+}
+
+#modalDetalhesColunaVolante .nav-tabs .nav-link {
+    font-size: 0.78rem;
+    padding: 0.35rem 0.65rem;
+    color: #5b4c0b;
+}
+
+#modalDetalhesColunaVolante .nav-tabs .nav-link.active {
+    background: #fcf9e8;
+    border-color: #d4b31a #d4b31a #fff;
+    color: #5b4c0b;
+    font-weight: 700;
+}
+
+.dark .col-analise-tooltip {
+    background: #2d2d2d;
+    border-color: #f4d03f;
+    color: #eee;
+}
+
+[data-col-tip] {
+    cursor: help;
+}
+
+[data-col-tip]:hover {
+    background-color: rgba(212, 179, 26, 0.15);
+}
+
+.dark .analise-colunas-tabela thead {
+    background: #333 !important;
+    color: #eee;
+}
+
+.dark .analise-colunas-tabela {
+    color: #ddd;
+}
+
+@media (max-width: 768px) {
+    .colunas-tabela-wrap {
+        overflow-x: auto;
+    }
+
+    .analise-colunas-tabela {
+        min-width: 720px;
+    }
+
+    .insights-grid-colunas-centered .insight-item {
+        max-width: 100%;
+    }
+}

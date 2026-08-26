@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+{% block title %}Estratégias Dinâmicas - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    .card { margin-bottom: 20px; }
+    .table-estrategias { font-size: 0.9rem; }
+    .btn-action { margin: 2px; }
+    .modal-body label { font-weight: 600; margin-top: 10px; }
+    .estrategia-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .estrategia-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .estrategia-card.selected {
+        border: 3px solid #D4B31A;
+    }
+    .parametro-item {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 4px;
+    }
+    .validacao-result {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .validacao-result.valido {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+    .validacao-result.invalido {
+        border-color: #dc3545;
+        background: #f8d7da;
+    }
+    .numero-input {
+        width: 60px;
+        display: inline-block;
+        margin: 3px;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="fas fa-brain"></i> Estratégias Dinâmicas</h1>
+    <p class="text-muted">Gerencie estratégias de análise e validação de apostas baseadas em padrões matemáticos</p>
+
+    <!-- Seletor de Estratégia -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-list"></i> Estratégias Disponíveis</h5>
+                </div>
+                <div class="card-body">
+                    <div id="loadingEstrategias" class="text-center my-3">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p>Carregando estratégias...</p>
+                    </div>
+                    <div id="estrategiasContainer" class="row" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalhes da Estratégia Selecionada -->
+    <div class="row mb-4" id="detalhesContainer" style="display: none;">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Detalhes: <span id="estrategiaNome"></span></h5>
+                    <div>
+                        <button class="btn btn-light btn-sm" onclick="editarEstrategiaSelecionada()">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirEstrategiaSelecionada()">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p id="estrategiaDescricao" class="mb-3"></p>
+
+                    <h6><i class="fas fa-cog"></i> Parâmetros:</h6>
+                    <div id="parametrosContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validador de Jogos -->
+    <div class="row mb-4" id="validadorContainer" style="display: none;">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-check-circle"></i> Validar Jogo com Estratégia</h5>
+                </div>
+                <div class="card-body">
+                    <p>Digite 7 números para validar se o jogo atende aos critérios da estratégia selecionada:</p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Números do Jogo:</label>
+                        <div>
+                            <input type="number" class="form-control numero-input" id="num1" min="1" max="31" placeholder="N1">
+                            <input type="number" class="form-control numero-input" id="num2" min="1" max="31" placeholder="N2">
+                            <input type="number" class="form-control numero-input" id="num3" min="1" max="31" placeholder="N3">
+                            <input type="number" class="form-control numero-input" id="num4" min="1" max="31" placeholder="N4">
+                            <input type="number" class="form-control numero-input" id="num5" min="1" max="31" placeholder="N5">
+                            <input type="number" class="form-control numero-input" id="num6" min="1" max="31" placeholder="N6">
+                            <input type="number" class="form-control numero-input" id="num7" min="1" max="31" placeholder="N7">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="validarJogo()">
+                        <i class="fas fa-check"></i> Validar Jogo
+                    </button>
+
+                    <div id="resultadoValidacao"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gerenciamento de Estratégias -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-table"></i> Todas as Estratégias</h5>
+                    <button class="btn btn-light btn-sm" onclick="abrirModalAdicionar()">
+                        <i class="fas fa-plus"></i> Nova Estratégia
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-estrategias">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaEstrategias"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar/Editar -->
+<div class="modal fade" id="modalEstrategia" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Nova Estratégia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editandoId">
+
+                <label>ID da Estratégia:</label>
+                <input type="text" id="inputId" class="form-control" placeholder="Ex: minha_estrategia" required>
+
+                <label>Nome:</label>
+                <input type="text" id="inputNome" class="form-control" placeholder="Ex: Estratégia Personalizada" required>
+
+                <label>Descrição:</label>
+                <textarea id="inputDescricao" class="form-control" rows="2" required></textarea>
+
+                <label>Parâmetros (JSON):</label>
+                <textarea id="inputParametros" class="form-control" rows="12" placeholder='{"grupo_baixo": {"min": 1, "max": 10, "quantidade": 2}, ...}'></textarea>
+                <small class="text-muted">Digite os parâmetros em formato JSON válido</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarEstrategia()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let modal;
+let estrategiaSelecionada = null;
+let todasEstrategias = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    modal = new bootstrap.Modal(document.getElementById('modalEstrategia'));
+    carregarEstrategias();
+});
+
+async function carregarEstrategias() {
+    try {
+        const response = await fetch('/api/estrategias');
+        todasEstrategias = await response.json();
+
+        renderizarCardsEstrategias();
+        renderizarTabelaEstrategias();
+
+        document.getElementById('loadingEstrategias').style.display = 'none';
+        document.getElementById('estrategiasContainer').style.display = 'flex';
+    } catch (error) {
+        console.error('Erro ao carregar estratégias:', error);
+        document.getElementById('loadingEstrategias').innerHTML =
+            '<div class="alert alert-danger">Erro ao carregar estratégias</div>';
+    }
+}
+
+function renderizarCardsEstrategias() {
+    const container = document.getElementById('estrategiasContainer');
+    container.innerHTML = '';
+
+    todasEstrategias.forEach(e => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-3';
+        col.innerHTML = `
+            <div class="estrategia-card" onclick="selecionarEstrategia('${e.id}')">
+                <h5>${e.nome}</h5>
+                <p class="mb-0">${e.descricao}</p>
+            </div>
+        `;
+        container.appendChild(col);
+    });
+}
+
+function renderizarTabelaEstrategias() {
+    const tbody = document.getElementById('tabelaEstrategias');
+    tbody.innerHTML = '';
+
+    todasEstrategias.forEach(e => {
+        tbody.innerHTML += `
+            <tr>
+                <td><code>${e.id}</code></td>
+                <td><strong>${e.nome}</strong></td>
+                <td>${e.descricao}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-primary btn-action" onclick="selecionarEstrategia('${e.id}')" title="Selecionar">
+                        <i class="fas fa-hand-pointer"></i>
+                    </button>
+                    <button class="btn btn-sm btn-warning btn-action" onclick="editarEstrategia('${e.id}')" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-action" onclick="excluirEstrategia('${e.id}')" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function selecionarEstrategia(id) {
+    estrategiaSelecionada = todasEstrategias.find(e => e.id === id);
+
+    if (!estrategiaSelecionada) return;
+
+    // Atualiza visual dos cards
+    document.querySelectorAll('.estrategia-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.target.closest('.estrategia-card')?.classList.add('selected');
+
+    // Mostra detalhes
+    document.getElementById('estrategiaNome').textContent = estrategiaSelecionada.nome;
+    document.getElementById('estrategiaDescricao').textContent = estrategiaSelecionada.descricao;
+
+    // Renderiza parâmetros
+    const parametrosContainer = document.getElementById('parametrosContainer');
+    parametrosContainer.innerHTML = '';
+
+    const params = estrategiaSelecionada.parametros;
+
+    // Grupos
+    if (params.grupo_baixo) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>📊 Grupo Baixo (${params.grupo_baixo.min}-${params.grupo_baixo.max}):</strong>
+                ${JSON.stringify(params.grupo_baixo.quantidade)} números
+            </div>
+        `;
+    }
+    if (params.grupo_medio) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>📊 Grupo Médio (${params.grupo_medio.min}-${params.grupo_medio.max}):</strong>
+                ${JSON.stringify(params.grupo_medio.quantidade)} números
+            </div>
+        `;
+    }
+    if (params.grupo_alto) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>📊 Grupo Alto (${params.grupo_alto.min}-${params.grupo_alto.max}):</strong>
+                ${JSON.stringify(params.grupo_alto.quantidade)} números
+            </div>
+        `;
+    }
+
+    // Pares/Ímpares
+    if (params.pares) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>🔢 Pares:</strong> ${params.pares.min} a ${params.pares.max}
+            </div>
+        `;
+    }
+    if (params.impares) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>🔢 Ímpares:</strong> ${params.impares.min} a ${params.impares.max}
+            </div>
+        `;
+    }
+
+    // Outras restrições
+    if (params.sequencias_max !== undefined) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>↔️ Sequências máximas:</strong> ${params.sequencias_max}
+            </div>
+        `;
+    }
+    if (params.finais_iguais_max !== undefined) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>🔚 Finais iguais máximos:</strong> ${params.finais_iguais_max}
+            </div>
+        `;
+    }
+    if (params.repeticoes_anterior_max !== undefined) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>🔁 Repetições do anterior (máx):</strong> ${params.repeticoes_anterior_max}
+            </div>
+        `;
+    }
+    if (params.digitos_unicos) {
+        parametrosContainer.innerHTML += `
+            <div class="parametro-item">
+                <strong>1️⃣ Dígitos únicos:</strong>
+                ${params.digitos_unicos.permitir ? 'Permitido' : 'Não permitido'}
+                (máx: ${params.digitos_unicos.max})
+            </div>
+        `;
+    }
+
+    document.getElementById('detalhesContainer').style.display = 'block';
+    document.getElementById('validadorContainer').style.display = 'block';
+    document.getElementById('resultadoValidacao').innerHTML = '';
+}
+
+async function validarJogo() {
+    if (!estrategiaSelecionada) {
+        mostrarErro('Selecione uma estratégia primeiro');
+        return;
+    }
+
+    const numeros = [];
+    for (let i = 1; i <= 7; i++) {
+        const valor = parseInt(document.getElementById(`num${i}`).value);
+        if (!valor || valor < 1 || valor > 31) {
+            mostrarErro(`Número ${i} inválido (deve ser entre 1 e 31)`);
+            return;
+        }
+        numeros.push(valor);
+    }
+
+    // Verifica duplicatas
+    if (new Set(numeros).size !== 7) {
+        mostrarErro('Não pode haver números repetidos');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/estrategias/${estrategiaSelecionada.id}/validar`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({numeros})
+        });
+
+        const resultado = await response.json();
+
+        const container = document.getElementById('resultadoValidacao');
+        container.className = resultado.valido ? 'validacao-result valido' : 'validacao-result invalido';
+
+        let html = `
+            <h5>${resultado.valido ? '✅ Jogo VÁLIDO' : '❌ Jogo INVÁLIDO'}</h5>
+            <p><strong>Números:</strong> ${numeros.sort((a,b) => a-b).join(', ')}</p>
+        `;
+
+        if (resultado.detalhes) {
+            html += `<h6>Detalhes:</h6><ul>`;
+            html += `<li>Grupo Baixo: ${resultado.detalhes.grupo_baixo}</li>`;
+            html += `<li>Grupo Médio: ${resultado.detalhes.grupo_medio}</li>`;
+            html += `<li>Grupo Alto: ${resultado.detalhes.grupo_alto}</li>`;
+            html += `<li>Pares: ${resultado.detalhes.pares}</li>`;
+            html += `<li>Ímpares: ${resultado.detalhes.impares}</li>`;
+            html += `<li>Sequências: ${resultado.detalhes.sequencias}</li>`;
+            html += `<li>Finais Iguais: ${resultado.detalhes.finais_iguais}</li>`;
+            html += `<li>Dígitos Únicos: ${resultado.detalhes.digitos_unicos}</li>`;
+            html += `</ul>`;
+        }
+
+        if (resultado.erros && resultado.erros.length > 0) {
+            html += `<h6 class="text-danger">Erros encontrados:</h6><ul>`;
+            resultado.erros.forEach(erro => {
+                html += `<li>${erro}</li>`;
+            });
+            html += `</ul>`;
+        }
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Erro ao validar jogo:', error);
+        mostrarErro('Erro ao validar jogo');
+    }
+}
+
+function mostrarErro(mensagem) {
+    const container = document.getElementById('resultadoValidacao');
+    container.className = 'validacao-result invalido';
+    container.innerHTML = `<p class="mb-0">${mensagem}</p>`;
+}
+
+function abrirModalAdicionar() {
+    document.getElementById('modalTitulo').textContent = 'Nova Estratégia';
+    document.getElementById('editandoId').value = '';
+    document.getElementById('inputId').value = '';
+    document.getElementById('inputNome').value = '';
+    document.getElementById('inputDescricao').value = '';
+    document.getElementById('inputParametros').value = JSON.stringify({
+        grupo_baixo: {min: 1, max: 10, quantidade: 2},
+        grupo_medio: {min: 11, max: 20, quantidade: 3},
+        grupo_alto: {min: 21, max: 31, quantidade: 2},
+        pares: {min: 3, max: 4},
+        impares: {min: 3, max: 4},
+        sequencias_max: 2,
+        finais_iguais_max: 2,
+        repeticoes_anterior_max: 3,
+        digitos_unicos: {permitir: true, max: 1}
+    }, null, 2);
+
+    document.getElementById('inputId').disabled = false;
+    modal.show();
+}
+
+async function editarEstrategia(id) {
+    try {
+        const response = await fetch(`/api/estrategias/${id}`);
+        const estrategia = await response.json();
+
+        document.getElementById('modalTitulo').textContent = 'Editar Estratégia';
+        document.getElementById('editandoId').value = estrategia.id;
+        document.getElementById('inputId').value = estrategia.id;
+        document.getElementById('inputNome').value = estrategia.nome;
+        document.getElementById('inputDescricao').value = estrategia.descricao;
+        document.getElementById('inputParametros').value = JSON.stringify(estrategia.parametros, null, 2);
+
+        document.getElementById('inputId').disabled = true;
+        modal.show();
+    } catch (error) {
+        console.error('Erro ao buscar estratégia:', error);
+    }
+}
+
+function editarEstrategiaSelecionada() {
+    if (estrategiaSelecionada) {
+        editarEstrategia(estrategiaSelecionada.id);
+    }
+}
+
+async function salvarEstrategia() {
+    const idOriginal = document.getElementById('editandoId').value;
+    const id = document.getElementById('inputId').value;
+    const nome = document.getElementById('inputNome').value;
+    const descricao = document.getElementById('inputDescricao').value;
+    const parametrosText = document.getElementById('inputParametros').value;
+
+    if (!id || !nome || !descricao || !parametrosText) {
+        mostrarErroModal('Todos os campos são obrigatórios');
+        return;
+    }
+
+    let parametros;
+    try {
+        parametros = JSON.parse(parametrosText);
+    } catch (e) {
+        mostrarErroModal('JSON de parâmetros inválido: ' + e.message);
+        return;
+    }
+
+    const dados = {id, nome, descricao, parametros};
+
+    try {
+        const url = idOriginal ? `/api/estrategias/${idOriginal}` : '/api/estrategias';
+        const method = idOriginal ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        });
+
+        const resultado = await response.json();
+
+        if (response.ok) {
+            modal.hide();
+            carregarEstrategias();
+            if (estrategiaSelecionada && estrategiaSelecionada.id === idOriginal) {
+                estrategiaSelecionada = null;
+                document.getElementById('detalhesContainer').style.display = 'none';
+                document.getElementById('validadorContainer').style.display = 'none';
+            }
+        } else {
+            mostrarErroModal(resultado.erro || 'Erro ao salvar');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar:', error);
+        mostrarErroModal('Erro ao salvar estratégia');
+    }
+}
+
+function mostrarErroModal(mensagem) {
+    const existente = document.querySelector('.modal-body .alert');
+    if (existente) existente.remove();
+
+    const alerta = document.createElement('div');
+    alerta.className = 'alert alert-danger';
+    alerta.textContent = mensagem;
+    document.querySelector('.modal-body').prepend(alerta);
+}
+
+function excluirEstrategia(id) {
+    const modalConfirm = document.createElement('div');
+    modalConfirm.className = 'modal fade';
+    modalConfirm.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Deseja realmente excluir esta estratégia?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarExclusao('${id}')">Excluir</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalConfirm);
+    const bsModal = new bootstrap.Modal(modalConfirm);
+    bsModal.show();
+    modalConfirm.addEventListener('hidden.bs.modal', () => modalConfirm.remove());
+}
+
+function excluirEstrategiaSelecionada() {
+    if (estrategiaSelecionada) {
+        excluirEstrategia(estrategiaSelecionada.id);
+    }
+}
+
+async function confirmarExclusao(id) {
+    try {
+        const response = await fetch(`/api/estrategias/${id}`, {method: 'DELETE'});
+        if (response.ok) {
+            document.querySelector('.modal.show').querySelectorAll('[data-bs-dismiss="modal"]')[0].click();
+            carregarEstrategias();
+            if (estrategiaSelecionada && estrategiaSelecionada.id === id) {
+                estrategiaSelecionada = null;
+                document.getElementById('detalhesContainer').style.display = 'none';
+                document.getElementById('validadorContainer').style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao excluir:', error);
+    }
+}
+</script>
+{% endblock %}

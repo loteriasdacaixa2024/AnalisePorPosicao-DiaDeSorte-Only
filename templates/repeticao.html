@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Repetição por Posição - Dia de Sorte{% endblock %}
+
+{% block content %}
+<style>
+    /* ========================================
+       Identidade Visual Dia de Sorte
+       Cor base: #D4B31A
+    ======================================== */
+    :root {
+        --ds-primary: #D4B31A;
+        --ds-primary-dark: #B8960F;
+        --ds-primary-light: #F4D03F;
+        --ds-dark: #1a1a2e;
+        --ds-gradient: linear-gradient(135deg, #D4B31A 0%, #F4D03F 100%);
+        --ds-primary-10: rgba(212, 179, 26, 0.1);
+        --ds-primary-20: rgba(212, 179, 26, 0.2);
+        --ds-primary-30: rgba(212, 179, 26, 0.3);
+    }
+
+    /* Header da Página */
+    .rp-header {
+        background: linear-gradient(135deg, var(--ds-dark) 0%, #2d2d44 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .rp-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 60%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(212, 179, 26, 0.1), transparent);
+        transform: rotate(30deg);
+        animation: rp-shimmer 4s infinite;
+    }
+
+    @keyframes rp-shimmer {
+        0% { transform: translateX(-100%) rotate(30deg); }
+        100% { transform: translateX(100%) rotate(30deg); }
+    }
+
+    .rp-header h2 {
+        color: var(--ds-primary);
+        font-weight: 800;
+    }
+
+    /* Cards de Estatísticas Gerais */
+    .rp-stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-top: 4px solid var(--ds-primary);
+        transition: all 0.3s ease;
+    }
+
+    .rp-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(212, 179, 26, 0.2);
+    }
+
+    .rp-stat-card h3 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--ds-dark);
+        margin-bottom: 5px;
+    }
+
+    .rp-stat-card p {
+        color: #6c757d;
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+
+    /* Cards de Ranking */
+    .rp-ranking-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .rp-ranking-header {
+        background: var(--ds-gradient);
+        color: var(--ds-dark);
+        padding: 15px 20px;
+        font-weight: 700;
+    }
+
+    .rp-ranking-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.2s ease;
+    }
+
+    .rp-ranking-item:hover {
+        background: var(--ds-primary-10);
+    }
+
+    .rp-ranking-item:last-child {
+        border-bottom: none;
+    }
+
+    .rp-rank-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        margin-right: 15px;
+        font-size: 1.1rem;
+    }
+
+    .rp-rank-badge.gold { background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a1a2e; }
+    .rp-rank-badge.silver { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: #1a1a2e; }
+    .rp-rank-badge.bronze { background: linear-gradient(135deg, #CD7F32, #8B4513); color: white; }
+    .rp-rank-badge.normal { background: #e9ecef; color: #6c757d; }
+
+    .rp-posicao-numero {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--ds-dark);
+        margin-right: 15px;
+    }
+
+    .rp-barra-container {
+        flex: 1;
+        margin-right: 15px;
+    }
+
+    .rp-barra {
+        height: 12px;
+        border-radius: 6px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .rp-barra-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.5s ease;
+    }
+
+    .rp-barra-fill.quente { background: linear-gradient(90deg, #dc3545, #fd7e14); }
+    .rp-barra-fill.morna { background: linear-gradient(90deg, #fd7e14, #ffc107); }
+    .rp-barra-fill.neutra { background: linear-gradient(90deg, #ffc107, #20c997); }
+    .rp-barra-fill.fria { background: linear-gradient(90deg, #17a2b8, #6f42c1); }
+
+    .rp-percentual {
+        font-weight: 700;
+        font-size: 1.1rem;
+        min-width: 60px;
+        text-align: right;
+    }
+
+    /* Badge de Classificação */
+    .rp-class-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .rp-class-badge.quente { background: #dc354520; color: #dc3545; }
+    .rp-class-badge.morna { background: #fd7e1420; color: #fd7e14; }
+    .rp-class-badge.neutra { background: #20c99720; color: #20c997; }
+    .rp-class-badge.fria { background: #17a2b820; color: #17a2b8; }
+
+    /* Insights */
+    .rp-insight-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-left: 5px solid var(--ds-primary);
+        transition: all 0.3s ease;
+    }
+
+    .rp-insight-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(212, 179, 26, 0.2);
+    }
+
+    .rp-insight-card.destaque { border-left-color: #dc3545; background: #fff5f5; }
+    .rp-insight-card.quente { border-left-color: #fd7e14; background: #fff8f0; }
+    .rp-insight-card.frio { border-left-color: #17a2b8; background: #f0fafc; }
+    .rp-insight-card.mes { border-left-color: #6f42c1; background: #f8f5ff; }
+    .rp-insight-card.info { border-left-color: var(--ds-primary); }
+
+    .rp-insight-icon {
+        font-size: 2rem;
+        margin-right: 15px;
+    }
+
+    .rp-insight-card.destaque .rp-insight-icon { color: #dc3545; }
+    .rp-insight-card.quente .rp-insight-icon { color: #fd7e14; }
+    .rp-insight-card.frio .rp-insight-icon { color: #17a2b8; }
+    .rp-insight-card.mes .rp-insight-icon { color: #6f42c1; }
+    .rp-insight-card.info .rp-insight-icon { color: var(--ds-primary); }
+
+    /* Recomendações */
+    .rp-recomendacao-card {
+        background: linear-gradient(135deg, var(--ds-dark) 0%, #2d2d44 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+
+    .rp-recomendacao-card h5 {
+        color: var(--ds-primary);
+    }
+
+    .rp-posicao-badge {
+        display: inline-block;
+        background: var(--ds-primary);
+        color: var(--ds-dark);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        margin: 3px;
+    }
+
+    /* Histórico */
+    .rp-historico-item {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .rp-numero-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        font-weight: 700;
+        margin: 2px;
+        font-size: 0.9rem;
+    }
+
+    .rp-numero-box.normal { background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; }
+    .rp-numero-box.repetido { background: var(--ds-primary); color: var(--ds-dark); box-shadow: 0 2px 8px rgba(212, 179, 26, 0.4); }
+
+    .rp-seta {
+        display: inline-block;
+        margin: 0 5px;
+        color: var(--ds-primary);
+        font-weight: 700;
+    }
+
+    /* Loading */
+    .rp-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 80px;
+    }
+
+    .rp-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--ds-primary);
+        border-radius: 50%;
+        animation: rp-spin 1s linear infinite;
+    }
+
+    @keyframes rp-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Transições */
+    .rp-transicao-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 8px 15px;
+        border-radius: 8px;
+        margin: 5px;
+        font-weight: 600;
+    }
+
+    .rp-transicao-arrow {
+        margin: 0 10px;
+        color: var(--ds-primary);
+    }
+
+    /* Dark Mode */
+    .dark .rp-stat-card,
+    .dark .rp-ranking-card,
+    .dark .rp-insight-card,
+    .dark .rp-historico-item {
+        background: #2d2d44;
+        color: #e0e0e0;
+    }
+
+    .dark .rp-stat-card h3 { color: var(--ds-primary); }
+    .dark .rp-ranking-item:hover { background: rgba(212, 179, 26, 0.1); }
+    .dark .rp-posicao-numero { color: #e0e0e0; }
+    .dark .rp-barra { background: #1a1a2e; }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .rp-header { padding: 20px; }
+        .rp-stat-card h3 { font-size: 1.8rem; }
+        .rp-posicao-numero { font-size: 1.4rem; }
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="rp-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-2">
+                    <i class="fas fa-sync-alt me-2"></i>Análise de Repetição por Posição
+                </h2>
+                <p class="mb-0 opacity-75">
+                    Descubra quais posições mais repetem números entre concursos consecutivos
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-warning btn-lg" id="btnAtualizar">
+                    <i class="fas fa-sync-alt me-2"></i>Atualizar Análise
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingAnalise" class="rp-loading">
+        <div class="text-center">
+            <div class="rp-spinner mb-3"></div>
+            <p class="fw-bold" style="color: var(--ds-primary);">Analisando repetições...</p>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div id="conteudoPrincipal" style="display: none;">
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="rp-stat-card">
+                    <i class="fas fa-percentage fa-2x mb-2" style="color: var(--ds-primary);"></i>
+                    <h3 id="statTaxaRepeticao">-</h3>
+                    <p>Taxa de Repetição</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="rp-stat-card">
+                    <i class="fas fa-calculator fa-2x mb-2" style="color: var(--ds-primary);"></i>
+                    <h3 id="statMediaRepeticoes">-</h3>
+                    <p>Média por Concurso</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="rp-stat-card">
+                    <i class="fas fa-database fa-2x mb-2" style="color: var(--ds-primary);"></i>
+                    <h3 id="statTotalComparacoes">-</h3>
+                    <p>Concursos Analisados</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="rp-stat-card">
+                    <i class="fas fa-check-circle fa-2x mb-2" style="color: #28a745;"></i>
+                    <h3 id="statCom1Repeticao">-</h3>
+                    <p>Com 1 Repetição</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Ranking Posição de Origem -->
+            <div class="col-lg-6 mb-4">
+                <div class="rp-ranking-card">
+                    <div class="rp-ranking-header">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Ranking: Posição de ORIGEM
+                        <small class="d-block opacity-75">Onde o número estava no concurso anterior</small>
+                    </div>
+                    <div id="rankingOrigem">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking Posição de Destino -->
+            <div class="col-lg-6 mb-4">
+                <div class="rp-ranking-card">
+                    <div class="rp-ranking-header">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Ranking: Posição de DESTINO
+                        <small class="d-block opacity-75">Onde o número apareceu no concurso seguinte</small>
+                    </div>
+                    <div id="rankingDestino">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights e Recomendações -->
+        <div class="row">
+            <!-- Insights -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header" style="background: var(--ds-dark); color: var(--ds-primary);">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Insights Inteligentes
+                        </h5>
+                    </div>
+                    <div class="card-body" id="containerInsights">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recomendações -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header" style="background: var(--ds-gradient); color: var(--ds-dark);">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chess me-2"></i>Recomendações Estratégicas
+                        </h5>
+                    </div>
+                    <div class="card-body" style="background: #f8f9fa;" id="containerRecomendacoes">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Transições -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exchange-alt me-2"></i>Top 10 Transições Mais Frequentes
+                            <small class="d-block opacity-75">De qual posição para qual posição os números mais migram</small>
+                        </h5>
+                    </div>
+                    <div class="card-body" id="containerTransicoes">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Análise por Mês -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #6f42c1, #9b59b6); color: white;">
+                        <h5 class="mb-0">
+                            Análise por Mês da Sorte
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tabelaMeses">
+                                <thead>
+                                    <tr>
+                                        <th>Ranking</th>
+                                        <th>Mês</th>
+                                        <th>Concursos</th>
+                                        <th>Com Repetição</th>
+                                        <th>Taxa</th>
+                                        <th>Média</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico Recente -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Histórico Recente de Repetições
+                            </h5>
+                            <button class="btn btn-sm btn-outline-light" id="btnVerMais">
+                                <i class="fas fa-plus me-1"></i>Ver Mais
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="containerHistorico">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Carregar análise ao iniciar
+    document.addEventListener('DOMContentLoaded', carregarAnalise);
+    document.getElementById('btnAtualizar')?.addEventListener('click', carregarAnalise);
+    document.getElementById('btnVerMais')?.addEventListener('click', () => carregarHistorico(50));
+
+    async function carregarAnalise() {
+        const loading = document.getElementById('loadingAnalise');
+        const conteudo = document.getElementById('conteudoPrincipal');
+
+        loading.style.display = 'flex';
+        conteudo.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/repeticao/analise-completa');
+            const data = await response.json();
+
+            if (data.erro) {
+                loading.innerHTML = `<div class="alert alert-danger">${data.erro}</div>`;
+                return;
+            }
+
+            // Estatísticas
+            document.getElementById('statTaxaRepeticao').textContent = data.estatisticas.percentual_com_repeticao + '%';
+            document.getElementById('statMediaRepeticoes').textContent = data.estatisticas.media_repeticoes;
+            document.getElementById('statTotalComparacoes').textContent = data.estatisticas.total_comparacoes;
+            document.getElementById('statCom1Repeticao').textContent = data.estatisticas.concursos_com_1_repeticao;
+
+            // Rankings
+            renderizarRanking('rankingOrigem', data.ranking_origem);
+            renderizarRanking('rankingDestino', data.ranking_destino);
+
+            // Insights
+            renderizarInsights(data.insights);
+
+            // Recomendações
+            renderizarRecomendacoes(data.recomendacoes);
+
+            // Transições
+            renderizarTransicoes(data.top_transicoes);
+
+            // Meses
+            renderizarMeses(data.analise_meses);
+
+            // Histórico recente
+            renderizarHistoricoRecente(data.repeticoes_recentes);
+
+            loading.style.display = 'none';
+            conteudo.style.display = 'block';
+
+        } catch (error) {
+            console.error('Erro:', error);
+            loading.innerHTML = `<div class="alert alert-danger">Erro ao carregar análise</div>`;
+        }
+    }
+
+    function renderizarRanking(containerId, ranking) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        ranking.forEach((item, index) => {
+            const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : 'normal';
+            const maxPercentual = ranking[0].percentual || 1;
+            const barWidth = (item.percentual / maxPercentual) * 100;
+
+            const div = document.createElement('div');
+            div.className = 'rp-ranking-item';
+            div.innerHTML = `
+                <div class="rp-rank-badge ${rankClass}">${index + 1}º</div>
+                <div class="rp-posicao-numero">P${item.posicao}</div>
+                <div class="rp-barra-container">
+                    <div class="rp-barra">
+                        <div class="rp-barra-fill ${item.classificacao}" style="width: ${barWidth}%"></div>
+                    </div>
+                </div>
+                <div class="rp-percentual">${item.percentual}%</div>
+                <span class="rp-class-badge ${item.classificacao}">${item.classificacao}</span>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderizarInsights(insights) {
+        const container = document.getElementById('containerInsights');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        insights.forEach(insight => {
+            const div = document.createElement('div');
+            div.className = `rp-insight-card ${insight.tipo}`;
+            div.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="${insight.icone} rp-insight-icon"></i>
+                    <div>
+                        <h6 class="mb-1 fw-bold">${insight.titulo}</h6>
+                        <p class="mb-0 text-muted">${insight.texto}</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderizarRecomendacoes(recomendacoes) {
+        const container = document.getElementById('containerRecomendacoes');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        recomendacoes.forEach(rec => {
+            const posicoesHtml = rec.posicoes.map(p => `<span class="rp-posicao-badge">P${p}</span>`).join('');
+
+            const div = document.createElement('div');
+            div.className = 'rp-recomendacao-card';
+            div.innerHTML = `
+                <h5 class="mb-2">
+                    <i class="${rec.icone} me-2"></i>${rec.titulo}
+                </h5>
+                <p class="mb-2 opacity-75">${rec.texto}</p>
+                ${posicoesHtml ? `<div class="mt-2">${posicoesHtml}</div>` : ''}
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderizarTransicoes(transicoes) {
+        const container = document.getElementById('containerTransicoes');
+        if (!container) return;
+
+        container.innerHTML = '<div class="d-flex flex-wrap justify-content-center">';
+
+        transicoes.forEach(t => {
+            const span = document.createElement('div');
+            span.className = 'rp-transicao-badge';
+            span.innerHTML = `
+                <strong>P${t.origem}</strong>
+                <i class="fas fa-arrow-right rp-transicao-arrow"></i>
+                <strong>P${t.destino}</strong>
+                <span class="badge bg-warning text-dark ms-2">${t.quantidade}x</span>
+            `;
+            container.appendChild(span);
+        });
+
+        container.innerHTML += '</div>';
+    }
+
+    function renderizarMeses(meses) {
+        const tbody = document.querySelector('#tabelaMeses tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        meses.forEach((mes, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="badge bg-primary">${index + 1}º</span></td>
+                <td><strong>${mes.nome}</strong></td>
+                <td>${mes.total_concursos}</td>
+                <td>${mes.com_repeticao}</td>
+                <td><span class="badge bg-success">${mes.taxa_repeticao}%</span></td>
+                <td>${mes.media_repeticoes}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderizarHistoricoRecente(historico) {
+        const container = document.getElementById('containerHistorico');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        historico.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'rp-historico-item';
+
+            let numerosHtml = '';
+            item.detalhes.forEach(det => {
+                numerosHtml += `
+                    <span class="rp-numero-box repetido" title="P${det.posicao_origem} → P${det.posicao_destino}">
+                        ${det.numero.toString().padStart(2, '0')}
+                    </span>
+                `;
+            });
+
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-dark me-2">Concurso ${item.concurso_atual}</span>
+                        <span class="badge ${item.qtd_repeticoes > 0 ? 'bg-success' : 'bg-secondary'}">${item.qtd_repeticoes} repetição(ões)</span>
+                    </div>
+                    <div>${numerosHtml || '<span class="text-muted">Nenhuma repetição</span>'}</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function carregarHistorico(limite) {
+        try {
+            const response = await fetch(`/api/repeticao/historico?limite=${limite}`);
+            const data = await response.json();
+
+            if (data.erro) {
+                console.error('Erro:', data.erro);
+                return;
+            }
+
+            const container = document.getElementById('containerHistorico');
+            container.innerHTML = '';
+
+            data.historico.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'rp-historico-item';
+
+                let numerosAnterior = item.numeros_anterior.map((n, i) => {
+                    const isRepetido = item.repeticoes.some(r => r.numero === n);
+                    return `<span class="rp-numero-box ${isRepetido ? 'repetido' : 'normal'}">${n.toString().padStart(2, '0')}</span>`;
+                }).join('');
+
+                let numerosAtual = item.numeros_atual.map((n, i) => {
+                    const isRepetido = item.repeticoes.some(r => r.numero === n);
+                    return `<span class="rp-numero-box ${isRepetido ? 'repetido' : 'normal'}">${n.toString().padStart(2, '0')}</span>`;
+                }).join('');
+
+                div.innerHTML = `
+                    <div class="mb-2">
+                        <span class="badge bg-dark">Concurso ${item.concurso}</span>
+                        <span class="badge bg-info ms-1">${item.mes_sorte}</span>
+                        <span class="badge ${item.qtd_repeticoes > 0 ? 'bg-success' : 'bg-secondary'} ms-1">${item.qtd_repeticoes} repetição(ões)</span>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap">
+                        <small class="text-muted me-2">Anterior:</small>
+                        ${numerosAnterior}
+                        <span class="rp-seta mx-3"><i class="fas fa-arrow-right"></i></span>
+                        <small class="text-muted me-2">Atual:</small>
+                        ${numerosAtual}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+        } catch (error) {
+            console.error('Erro ao carregar histórico:', error);
+        }
+    }
+</script>
+{% endblock %}

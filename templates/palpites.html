@@ -1,0 +1,959 @@
+{% extends "base.html" %}
+
+{% block title %}Gerador de Palpites - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<!-- CSS Externo para cores dos meses -->
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mes_da_sorte.css') }}">
+<style id="cores-meses-dinamicas">
+    /* As cores dos meses serão carregadas dinamicamente da API /api/cores-meses/listar */
+</style>
+<style>
+    /* =========================================
+       DEGRADÊ DIA DE SORTE - #D4B31A
+       ========================================= */
+
+    /* Header dos cards de aposta com degradê dourado */
+    .card-aposta-header {
+        background: linear-gradient(135deg, #e6c533 0%, #D4B31A 50%, #b69816 100%);
+        color: #2d2606;
+        border: none;
+        font-weight: 600;
+    }
+
+    .card-aposta-header h6 {
+        color: #2d2606;
+        text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+    }
+
+    .card-aposta-header i {
+        color: #5b4c0b;
+    }
+
+    /* Badge do mês */
+    .badge-mes {
+        font-size: 0.95rem;
+        padding: 0.5em 1em;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    /* Números das apostas */
+    .numero-aposta {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-weight: bold;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    /* Card de aposta */
+    .card-aposta {
+        border: 2px solid #D4B31A;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card-aposta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(212, 179, 26, 0.3);
+    }
+
+    /* Select de mês estilizado */
+    .select-mes-container {
+        background: linear-gradient(135deg, #f7ecbb 0%, #f4e5a4 100%);
+        border-radius: 10px;
+        padding: 15px;
+        border: 2px solid #D4B31A;
+    }
+
+    .select-mes-container label {
+        color: #5b4c0b;
+        font-weight: 600;
+    }
+
+    .select-mes-container select {
+        border: 2px solid #D4B31A;
+        background-color: #fff;
+    }
+
+    .select-mes-container select:focus {
+        border-color: #e6c533;
+        box-shadow: 0 0 0 0.2rem rgba(212, 179, 26, 0.25);
+    }
+
+    /* Info mês selecionado */
+    .info-mes-selecionado {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+    }
+
+    /* Botão gerar com cor Dia de Sorte */
+    .btn-gerar-palpites {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        border: none;
+        font-size: 1.1rem;
+        padding: 12px 30px;
+        transition: all 0.3s;
+    }
+
+    .btn-gerar-palpites:hover {
+        background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    @media print {
+        .navbar, footer, .btn, #infoPalpites, .alert-warning, .select-mes-container {
+            display: none !important;
+        }
+        .card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary-custom">
+                <i class="fas fa-lightbulb me-2"></i>Gerador de Palpites Inteligentes
+            </h2>
+            <p class="text-muted">Gere apostas baseadas em estatísticas avançadas e algoritmos de análise de padrões</p>
+        </div>
+    </div>
+
+    <!-- Configuração de Palpites -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configurar Apostas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Método de Geração -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-brain me-1"></i>Método de Geração
+                            </label>
+                            <select class="form-select" id="metodoGeracao" onchange="atualizarDescricaoMetodo()" style="font-size: 16px;">
+                                <optgroup label="📊 Métodos Estatísticos">
+                                    <option value="inteligente" selected>🧠 Inteligente (50% Freq + 50% Atraso)</option>
+                                    <option value="frequencia">📊 Por Frequência</option>
+                                    <option value="atraso">⏰ Por Atraso</option>
+                                    <option value="misto">🔀 Misto (4 Freq + 3 Atraso)</option>
+                                    <option value="posicao">📍 Por Posição</option>
+                                    <option value="simples">🎲 Aleatório (Surpresinha)</option>
+                                </optgroup>
+                                <optgroup label="🎯 Métodos por Padrões de Dezenas">
+                                    <option value="padroes_faltantes">🎯 Padrões Faltantes (nunca saíram!)</option>
+                                    <option value="padroes_frequentes">🏆 Top 10 Padrões Frequentes</option>
+                                    <option value="padroes_atrasados">⌛ Top 10 Padrões Atrasados</option>
+                                    <option value="digitos_iniciais_top3">🥇 Top 3 Dígitos Iniciais</option>
+                                </optgroup>
+                            </select>
+                            <div id="descricaoMetodo" class="form-text mt-2">
+                                <span class="badge bg-info me-1">ℹ️</span>
+                                <span id="textoDescricao">Algoritmo balanceado que considera frequência histórica e atraso dos números</span>
+                            </div>
+                        </div>
+
+                        <!-- Quantidade de Apostas -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-list-ol me-1"></i>Quantidade
+                            </label>
+                            <select class="form-select" id="quantidadeApostas" style="font-size: 16px;">
+                                <option value="1">1 aposta</option>
+                                <option value="3">3 apostas</option>
+                                <option value="5" selected>5 apostas</option>
+                                <option value="10">10 apostas</option>
+                                <option value="15">15 apostas</option>
+                                <option value="20">20 apostas</option>
+                                <option value="30">30 apostas</option>
+                                <option value="50">50 apostas</option>
+                            </select>
+                        </div>
+
+                        <!-- Seletor de Mês da Sorte -->
+                        <div class="col-md-3 mes-da-sorte-field">
+                            <label class="form-label fw-bold mes-da-sorte-label" for="mesSorte">Mês da Sorte:</label>
+                            <select class="form-select mes-da-sorte-select" id="mesSorte" style="font-size: 16px;">
+                                <!-- Opções serão preenchidas via JavaScript -->
+                                <option value="frequente">⭐ Mais Frequente</option>
+                                <option value="atrasado">⏳ Mais Atrasado</option>
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Núcleo Estratégico -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch p-3 bg-light border rounded">
+                                <input class="form-check-input" type="checkbox" id="chk-usar-nucleo-palpites">
+                                <label class="form-check-label" for="chk-usar-nucleo-palpites">
+                                    <strong>🎯 USAR NÚCLEO ESTRATÉGICO (concentra acertos em menos números)</strong>
+                                </label>
+                                <div id="info-nucleo-palpites" class="alert alert-warning mt-2" style="display: none; margin-bottom: 0;">
+                                    <small>
+                                        <i class="fas fa-bullseye me-1"></i>
+                                        <strong>Núcleo ativo:</strong> <span id="nucleo-numeros-palpites">--</span><br>
+                                        <small class="text-muted">Esses números aparecerão FIXOS em todas as apostas geradas. 
+                                        <a href="/gerador-padroes" target="_blank">Configurar núcleo <i class="fas fa-external-link-alt"></i></a>
+                                        </small>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desdobramento -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="p-3 bg-light border rounded">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="chk-usar-desdobramento-palpites">
+                                    <label class="form-check-label" for="chk-usar-desdobramento-palpites">
+                                        <strong>🔗 USAR DESDOBRAMENTO NA GERAÇÃO (fixa em 21 jogos)</strong>
+                                    </label>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Pares desdobrados (21 linhas)</strong></label>
+                                        <textarea id="txt-pares-desdobrados-palpites" class="form-control" rows="6"
+                                                  placeholder="Ex.:\n2 11\n2 13\n2 16\n...\n23 25"></textarea>
+                                        <small class="text-muted">Informe 21 pares (um por linha). Formato: "A B".</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Dezenas selecionadas (complemento)</strong></label>
+                                        <input id="txt-dezenas-selecionadas-palpites" class="form-control" type="text"
+                                               placeholder="Ex.: 03 04 06 07 13 14 17 19 23 24 26 28 30">
+                                        <small class="text-muted">Serão usadas para completar cada aposta até 7 dezenas.</small>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mt-3 mb-0">
+                                    <small>
+                                        ✓ Quando ativado, o campo "Quantidade" é ignorado e sempre gera 21 apostas.<br>
+                                        ✓ Se o Núcleo estiver ativo, será mesclado nos jogos sem duplicação e mantendo 7 dezenas.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <button class="btn btn-success btn-lg w-100 btn-gerar-palpites" id="btnGerarPalpites">
+                                <i class="fas fa-magic me-2"></i>Gerar Apostas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info sobre Métodos + Mês Selecionado -->
+        <div class="col-md-4">
+            <!-- Info do Mês -->
+            <div class="select-mes-container mb-3" id="infoMesSelecionado">
+                <label class="form-label mb-2">
+                    <i class="fas fa-star me-1"></i>Mês Selecionado para Apostas:
+                </label>
+                <div id="displayMesSelecionado" class="info-mes-selecionado">
+                    
+                    <span id="nomeMesSelecionado">Carregando...</span>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Sobre os Métodos</h6>
+                </div>
+                <div class="card-body" style="max-height: 320px; overflow-y: auto;">
+                    <h6 class="text-primary mb-2">📊 Métodos Estatísticos</h6>
+                    <ul class="list-unstyled small mb-3">
+                        <li class="mb-2">
+                            <strong>🧠 Inteligente:</strong> Algoritmo balanceado (50% frequência + 50% atraso)
+                        </li>
+                        <li class="mb-2">
+                            <strong>📊 Frequência:</strong> Prioriza números mais sorteados
+                        </li>
+                        <li class="mb-2">
+                            <strong>⏰ Atraso:</strong> Foca em números que não saem há mais tempo
+                        </li>
+                        <li class="mb-2">
+                            <strong>🔀 Misto:</strong> Combina 4 frequentes + 3 atrasados
+                        </li>
+                        <li class="mb-2">
+                            <strong>📍 Por Posição:</strong> Números mais frequentes em cada posição (1-7)
+                        </li>
+                        <li class="mb-2">
+                            <strong>🎲 Aleatório:</strong> Geração totalmente aleatória
+                        </li>
+                    </ul>
+
+                    <h6 class="text-success mb-2">🎯 Métodos por Padrões</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            <strong>🎯 Faltantes:</strong> Padrões que <span class="text-danger fw-bold">NUNCA saíram</span>
+                        </li>
+                        <li class="mb-2">
+                            <strong>🏆 Frequentes:</strong> Top 10 padrões mais frequentes
+                        </li>
+                        <li class="mb-2">
+                            <strong>⌛ Atrasados:</strong> Top 10 padrões mais atrasados
+                        </li>
+                        <li class="mb-2">
+                            <strong>🥇 Dígitos Iniciais:</strong> Top 3 padrões campeões
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-success py-2 mt-3 mb-0">
+                        <small><i class="fas fa-check-circle me-1"></i>Todos incluem validação de soma (90-140)!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Palpites Gerados -->
+    <div id="containerPalpites" style="display: none;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Apostas Geradas
+                    </h5>
+                    <div>
+                        <button class="btn btn-light btn-sm me-2" id="btnExportar">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                        <button class="btn btn-light btn-sm" id="btnImprimirPalpites">
+                            <i class="fas fa-print me-1"></i>Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="infoPalpites" class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span id="infoMetodo"></span>
+                </div>
+
+                <div class="row" id="listaPalpites">
+                    <!-- Palpites serão inseridos aqui via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Atenção:</strong> As apostas são geradas com base em análises estatísticas e não garantem acertos.
+                Jogue com responsabilidade e apenas com valores que você pode perder.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // =========================================
+    // CONFIGURAÇÃO DE MESES
+    // =========================================
+    const MESES = {
+        1: { nome: 'Janeiro', abrev: 'Jan' },
+        2: { nome: 'Fevereiro', abrev: 'Fev' },
+        3: { nome: 'Março', abrev: 'Mar' },
+        4: { nome: 'Abril', abrev: 'Abr' },
+        5: { nome: 'Maio', abrev: 'Mai' },
+        6: { nome: 'Junho', abrev: 'Jun' },
+        7: { nome: 'Julho', abrev: 'Jul' },
+        8: { nome: 'Agosto', abrev: 'Ago' },
+        9: { nome: 'Setembro', abrev: 'Set' },
+        10: { nome: 'Outubro', abrev: 'Out' },
+        11: { nome: 'Novembro', abrev: 'Nov' },
+        12: { nome: 'Dezembro', abrev: 'Dez' }
+    };
+
+    // Dados de estatísticas do mês (serão carregados da API)
+    let mesFrequente = null;
+    let mesAtrasado = null;
+
+    // =========================================
+    // CARREGAR CORES DOS MESES DINAMICAMENTE DA API
+    // (Mesmo padrão do estatisticas.html)
+    // =========================================
+    async function carregarCoresMeses() {
+        try {
+            const response = await fetch('/api/cores-meses/listar');
+            const data = await response.json();
+
+            if (response.ok && data.cores) {
+                // Criar CSS dinâmico para as cores dos meses
+                let cssRules = '';
+                data.cores.forEach((cor) => {
+                    cssRules += `
+                        .mes-cor-${cor.mes} {
+                            background-color: ${cor.cor_hex} !important;
+                            color: white !important;
+                            font-weight: bold;
+                        } /* ${cor.nome_mes} */
+                    `;
+                });
+
+                // Injetar CSS no elemento style
+                document.getElementById('cores-meses-dinamicas').innerHTML = cssRules;
+                console.log('✅ Cores dos meses carregadas dinamicamente da configuração');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar cores dos meses:', error);
+            // Em caso de erro, aplicar cores padrão
+            aplicarCoresPadrao();
+        }
+    }
+
+    // Fallback: Cores padrão caso a API falhe
+    function aplicarCoresPadrao() {
+        const coresPadrao = {
+            1: '#8B4513',  // Janeiro
+            2: '#4682B4',  // Fevereiro
+            3: '#228B22',  // Março
+            4: '#9370DB',  // Abril
+            5: '#FF69B4',  // Maio
+            6: '#008B8B',  // Junho
+            7: '#B8860B',  // Julho
+            8: '#DC143C',  // Agosto
+            9: '#4169E1',  // Setembro
+            10: '#FF8C00', // Outubro
+            11: '#9932CC', // Novembro
+            12: '#2F4F4F'  // Dezembro
+        };
+
+        let cssRules = '';
+        for (let mes = 1; mes <= 12; mes++) {
+            cssRules += `
+                .mes-cor-${mes} {
+                    background-color: ${coresPadrao[mes]} !important;
+                    color: white !important;
+                    font-weight: bold;
+                }
+            `;
+        }
+
+        document.getElementById('cores-meses-dinamicas').innerHTML = cssRules;
+        console.warn('⚠️ Usando cores padrão (API não disponível)');
+    }
+
+    // =========================================
+    // CARREGAR DADOS DE MÊS (FREQUENTE/ATRASADO)
+    // =========================================
+    async function carregarDadosMes() {
+        try {
+            // Carregar estatísticas do mês
+            const response = await fetch('/api/estatisticas/mes-sorte');
+            if (response.ok) {
+                const data = await response.json();
+
+                if (data.mais_sorteado) {
+                    mesFrequente = {
+                        numero: data.mais_sorteado.mes,
+                        nome: MESES[data.mais_sorteado.mes]?.nome || 'Desconhecido',
+                        frequencia: data.mais_sorteado.frequencia
+                    };
+                }
+
+                if (data.menos_sorteado) {
+                    mesAtrasado = {
+                        numero: data.menos_sorteado.mes,
+                        nome: MESES[data.menos_sorteado.mes]?.nome || 'Desconhecido',
+                        frequencia: data.menos_sorteado.frequencia
+                    };
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao carregar estatísticas de mês:', error);
+        }
+
+        // Atualizar select de meses
+        atualizarSelectMeses();
+        atualizarDisplayMesSelecionado();
+    }
+
+    // =========================================
+    // ATUALIZAR SELECT DE MESES (SEM DUPLICAÇÃO)
+    // =========================================
+    function atualizarSelectMeses() {
+        const select = document.getElementById('mesSorte');
+        select.innerHTML = '';
+
+        const mesesUsados = new Set();
+
+        // Opção: Mais Atrasado
+        if (mesAtrasado) {
+            const optAtraso = document.createElement('option');
+            optAtraso.value = 'atrasado';
+            optAtraso.textContent = `+ Atrasado (${mesAtrasado.nome})`;
+            optAtraso.dataset.mesNumero = mesAtrasado.numero;
+            select.appendChild(optAtraso);
+            mesesUsados.add(mesAtrasado.numero);
+        }
+
+        // Opção: Mais Frequente (se diferente do atrasado)
+        if (mesFrequente && mesFrequente.numero !== mesAtrasado?.numero) {
+            const optFreq = document.createElement('option');
+            optFreq.value = 'frequente';
+            optFreq.textContent = `+ Frequente (${mesFrequente.nome})`;
+            optFreq.dataset.mesNumero = mesFrequente.numero;
+            select.appendChild(optFreq);
+            mesesUsados.add(mesFrequente.numero);
+        }
+
+        // Todos os meses (exceto os já usados)
+        for (let i = 1; i <= 12; i++) {
+            if (!mesesUsados.has(i)) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = MESES[i].nome;
+                opt.dataset.mesNumero = i;
+                select.appendChild(opt);
+            }
+        }
+
+        // Aleatório
+        const optAleatorio = document.createElement('option');
+        optAleatorio.value = 'aleatorio';
+        optAleatorio.textContent = '+ Aleatório';
+        select.appendChild(optAleatorio);
+    }
+
+    // =========================================
+    // OBTER MÊS SELECIONADO (NÚMERO)
+    // =========================================
+    function getMesSelecionado() {
+        const select = document.getElementById('mesSorte');
+        const valor = select.value;
+
+        if (valor === 'frequente' && mesFrequente) {
+            return mesFrequente.numero;
+        } else if (valor === 'atrasado' && mesAtrasado) {
+            return mesAtrasado.numero;
+        } else if (valor === 'aleatorio') {
+            return 'aleatorio';
+        } else {
+            return parseInt(valor) || 1;
+        }
+    }
+
+    // =========================================
+    // ATUALIZAR DISPLAY DO MÊS SELECIONADO
+    // (Usa classe .mes-cor-{numero} do banco)
+    // =========================================
+    function atualizarDisplayMesSelecionado() {
+        const mesNumero = getMesSelecionado();
+        const nomeMes = mesNumero === 'aleatorio' ? 'Aleatório' : (MESES[mesNumero]?.nome || 'Janeiro');
+
+        const displayEl = document.getElementById('nomeMesSelecionado');
+        displayEl.textContent = nomeMes;
+
+        // Aplicar classe de cor do mês (vindo do banco via API)
+        const containerDisplay = document.getElementById('displayMesSelecionado');
+
+        // Remover classes de meses anteriores e cor inline
+        for (let i = 1; i <= 12; i++) {
+            containerDisplay.classList.remove(`mes-cor-${i}`);
+        }
+        containerDisplay.style.backgroundColor = '';
+
+        // Adicionar classe do mês atual ou fundo genérico se aleatório
+        if (mesNumero === 'aleatorio') {
+            containerDisplay.style.backgroundColor = '#6c757d';
+        } else {
+            containerDisplay.classList.add(`mes-cor-${mesNumero}`);
+        }
+    }
+
+    // Event listener para mudança de mês
+    document.getElementById('mesSorte').addEventListener('change', atualizarDisplayMesSelecionado);
+
+    // =========================================
+    // DESCRIÇÕES DOS MÉTODOS
+    // =========================================
+    const descricoes = {
+        'inteligente': 'Algoritmo balanceado que considera frequência histórica e atraso dos números',
+        'frequencia': 'Prioriza os números que mais saíram no histórico',
+        'atraso': 'Prioriza os números que estão há mais tempo sem sair',
+        'misto': 'Combina 4 números frequentes com 3 atrasados',
+        'posicao': 'Usa os números mais frequentes em cada posição (1ª a 7ª bola)',
+        'simples': 'Gera números completamente aleatórios (Surpresinha)',
+        'padroes_faltantes': 'Usa padrões de dezenas que NUNCA apareceram nos sorteios - potencial de ineditismo!',
+        'padroes_frequentes': 'Usa os 10 padrões de dezenas que mais aparecem nos sorteios',
+        'padroes_atrasados': 'Usa os 10 padrões de dezenas que estão há mais tempo sem sair',
+        'digitos_iniciais_top3': 'Usa os 3 padrões de dígitos iniciais campeões (mais frequentes)'
+    };
+
+    // Atualizar descrição do método selecionado
+    function atualizarDescricaoMetodo() {
+        const metodo = document.getElementById('metodoGeracao').value;
+        const descricao = descricoes[metodo] || 'Método de geração';
+        document.getElementById('textoDescricao').textContent = descricao;
+    }
+
+    // =========================================
+    // GERAR PALPITES
+    // =========================================
+    async function gerarPalpites() {
+        const metodo = document.getElementById('metodoGeracao').value;
+        const quantidade = document.getElementById('quantidadeApostas').value;
+        const mesSelecionado = getMesSelecionado();
+
+        const usarDesdobramento = document.getElementById('chk-usar-desdobramento-palpites').checked;
+
+        const btn = document.getElementById('btnGerarPalpites');
+        const textoOriginal = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gerando apostas...';
+
+        try {
+            let data;
+            if (usarDesdobramento) {
+                // Geração via desdobramento (21 jogos)
+                const paresTexto = document.getElementById('txt-pares-desdobrados-palpites').value || '';
+                const selecionadasTexto = document.getElementById('txt-dezenas-selecionadas-palpites').value || '';
+
+                const pares = paresTexto
+                    .split(/\r?\n/)
+                    .map(l => l.trim())
+                    .filter(l => l)
+                    .map(l => l.replace(/,/g, ' ').split(/\s+/).map(n => parseInt(n, 10)).filter(n => !isNaN(n)))
+                    .filter(arr => arr.length === 2);
+
+                const selecionadas = selecionadasTexto
+                    .replace(/,/g, ' ')
+                    .split(/\s+/)
+                    .map(n => parseInt(n, 10))
+                    .filter(n => !isNaN(n) && n >= 1 && n <= 31);
+
+                if (pares.length !== 21) {
+                    mostrarErro(`Você informou ${pares.length} linha(s). São obrigatórias 21 linhas de pares.`);
+                    return;
+                }
+                if (selecionadas.length < 5) {
+                    mostrarErro('Informe ao menos 5 dezenas selecionadas para complementar os jogos.');
+                    return;
+                }
+
+                const resp = await fetch('/api/desdobramento/gerar-com-desdobradas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        dezenas_desdobradas: pares,
+                        dezenas_selecionadas: selecionadas,
+                        mes: mesSelecionado,
+                        ignorar_quantidade: true
+                    })
+                });
+                const resultado = await resp.json();
+                if (!resp.ok || !resultado.sucesso) {
+                    mostrarErro(resultado.erro || 'Erro ao gerar por desdobramento');
+                    return;
+                }
+                // Adaptar para o formato de exibição dos palpites
+                data = {
+                    tipo: 'desdobramento',
+                    gerado_em: new Date().toLocaleString('pt-BR'),
+                    quantidade: resultado.total_jogos,
+                    metodo_validado: true,
+                    palpites: (resultado.jogos || []).map(j => ({
+                        numero_jogo: j.numero,
+                        numeros: j.numeros_completos,
+                        mes_sorte: mesSelecionado
+                    }))
+                };
+            } else {
+                const response = await fetch(`/api/palpites/gerar?tipo=${metodo}&quantidade=${quantidade}&mes=${mesSelecionado}`);
+                data = await response.json();
+                if (!(response.ok && data.sucesso !== false)) {
+                    mostrarErro(data.erro || 'Erro ao gerar apostas');
+                    return;
+                }
+                // Sobrescrever o mês de cada palpite com o mês selecionado pelo usuário
+                data.palpites.forEach(p => {
+                    p.mes_sorte = mesSelecionado === 'aleatorio' ? Math.floor(Math.random() * 12) + 1 : mesSelecionado;
+                });
+            }
+
+            // NOVO: Aplicar núcleo estratégico se ativo (vale para ambos os fluxos)
+            const usarNucleo = document.getElementById('chk-usar-nucleo-palpites').checked;
+            if (usarNucleo) {
+                const nucleoData = localStorage.getItem('nucleoEstrategico');
+                if (nucleoData) {
+                    try {
+                        const nucleo = JSON.parse(nucleoData);
+                        const nucleoPrincipal = nucleo.principal || [];
+
+                        data.palpites.forEach(p => {
+                            p.numeros = p.numeros.filter(n => !nucleoPrincipal.includes(n));
+                            p.numeros = [...nucleoPrincipal, ...p.numeros];
+                            p.numeros = p.numeros.slice(0, 7);
+                        });
+
+                        data.nucleoAplicado = nucleoPrincipal;
+                    } catch (e) {
+                        console.warn('Erro ao aplicar núcleo:', e);
+                    }
+                }
+            }
+
+            exibirPalpites(data);
+        } catch (error) {
+            mostrarErro('Erro ao conectar ao servidor: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
+
+    // Mostrar erro
+    function mostrarErro(mensagem) {
+        const container = document.getElementById('containerPalpites');
+        container.style.display = 'block';
+        document.getElementById('listaPalpites').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>${mensagem}
+                </div>
+            </div>
+        `;
+    }
+
+    // =========================================
+    // EXIBIR PALPITES NA TELA
+    // =========================================
+    function exibirPalpites(data) {
+        const container = document.getElementById('containerPalpites');
+        const lista = document.getElementById('listaPalpites');
+        const infoMetodo = document.getElementById('infoMetodo');
+
+        // Mostrar container
+        container.style.display = 'block';
+
+        // Informações do método
+        const metodosNomes = {
+            'inteligente': '🧠 Método Inteligente (50% Frequência + 50% Atraso)',
+            'frequencia': '📊 Método por Frequência',
+            'atraso': '⏰ Método por Atraso',
+            'misto': '🔀 Método Misto (4 Frequentes + 3 Atrasados)',
+            'posicao': '📍 Método por Posição',
+            'simples': '🎲 Método Aleatório (Surpresinha)',
+            'padroes_faltantes': '🎯 Padrões Faltantes (nunca saíram!)',
+            'padroes_frequentes': '🏆 Top 10 Padrões Frequentes',
+            'padroes_atrasados': '⌛ Top 10 Padrões Atrasados',
+            'digitos_iniciais_top3': '🥇 Top 3 Dígitos Iniciais'
+        };
+
+        infoMetodo.innerHTML = `
+            <strong>${metodosNomes[data.tipo] || data.tipo}</strong><br>
+            Gerado em: ${data.gerado_em}<br>
+            Total de apostas: ${data.quantidade}
+            ${data.metodo_validado ? '<span class="badge bg-success ms-2">✓ Validado</span>' : ''}
+        `;
+
+        // Limpar lista
+        lista.innerHTML = '';
+
+        // Adicionar cada palpite
+        data.palpites.forEach((palpite, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-4 mb-3';
+
+            const card = document.createElement('div');
+            card.className = 'card card-aposta';
+
+            // Info extra para métodos de padrões
+            let infoExtra = '';
+            if (palpite.padrao_utilizado) {
+                infoExtra = `
+                    <div class="mt-2">
+                        <span class="badge bg-warning text-dark">
+                            Padrão: ${palpite.padrao_utilizado}
+                        </span>
+                    </div>
+                `;
+            }
+            if (palpite.fallback) {
+                infoExtra += `
+                    <div class="mt-1">
+                        <span class="badge bg-secondary">Fallback aplicado</span>
+                    </div>
+                `;
+            }
+
+            // Nome do mês para exibição (APENAS O NOME, sem "Mês:")
+            const nomeMes = MESES[palpite.mes_sorte]?.nome || palpite.mes_sorte;
+            const mesNumero = palpite.mes_sorte;
+
+            card.innerHTML = `
+                <div class="card-header card-aposta-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-ticket-alt me-2"></i>Aposta ${palpite.numero_jogo}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                        ${palpite.numeros.map(num => `
+                            <span class="badge numero-aposta text-white">${String(num).padStart(2, '0')}</span>
+                        `).join('')}
+                    </div>
+                    <div class="text-center">
+                        <span class="badge badge-mes mes-cor-${mesNumero}" data-mes="${mesNumero}">
+                            ${nomeMes}
+                        </span>
+                        ${infoExtra}
+                    </div>
+                </div>
+            `;
+
+            col.appendChild(card);
+            lista.appendChild(col);
+        });
+
+        // Scroll até os palpites
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // =========================================
+    // EXPORTAR PALPITES (NOVO FORMATO)
+    // =========================================
+    function exportarPalpites() {
+        const cards = document.querySelectorAll('#listaPalpites .card-aposta');
+        if (cards.length === 0) {
+            return;
+        }
+
+        let texto = '';
+
+        cards.forEach((card) => {
+            const badges = card.querySelectorAll('.numero-aposta');
+            const numeros = Array.from(badges).map(b => b.textContent.trim()).join(' ');
+
+            // Pegar o mês do badge (usando data-mes)
+            const badgeMes = card.querySelector('.badge-mes');
+            const mesNumero = badgeMes?.dataset.mes;
+            const mesNome = MESES[mesNumero]?.nome || badgeMes?.textContent.trim() || '';
+
+            // Formato: 10 11 12 13 15 18 19 Novembro
+            texto += `${numeros} ${mesNome}\n`;
+        });
+
+        // Criar e baixar arquivo
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `apostas_dia_de_sorte_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Imprimir palpites
+    function imprimirPalpites() {
+        window.print();
+    }
+
+    // =========================================
+    // NÚCLEO ESTRATÉGICO
+    // =========================================
+    function verificarNucleoDisponivel() {
+        const nucleoData = localStorage.getItem('nucleoEstrategico');
+        const chk = document.getElementById('chk-usar-nucleo-palpites');
+        const infoDiv = document.getElementById('info-nucleo-palpites');
+        const numerosSpan = document.getElementById('nucleo-numeros-palpites');
+
+        if (nucleoData) {
+            try {
+                const nucleo = JSON.parse(nucleoData);
+                const nucleoPrincipal = nucleo.principal || [];
+                
+                chk.disabled = false;
+                numerosSpan.textContent = nucleoPrincipal.map(n => String(n).padStart(2, '0')).join(', ');
+                
+                if (chk.checked) {
+                    infoDiv.style.display = 'block';
+                }
+            } catch (e) {
+                chk.disabled = true;
+                console.warn('Erro ao carregar núcleo:', e);
+            }
+        } else {
+            chk.disabled = true;
+            infoDiv.style.display = 'none';
+        }
+    }
+
+    // =========================================
+    // EVENT LISTENERS
+    // =========================================
+    document.getElementById('btnGerarPalpites').addEventListener('click', gerarPalpites);
+    document.getElementById('btnImprimirPalpites').addEventListener('click', imprimirPalpites);
+    document.getElementById('btnExportar').addEventListener('click', exportarPalpites);
+
+    // Toggle do núcleo
+    document.getElementById('chk-usar-nucleo-palpites').addEventListener('change', function() {
+        const infoDiv = document.getElementById('info-nucleo-palpites');
+        infoDiv.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Carregar ao iniciar (MESMA ORDEM DO estatisticas.html)
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 1. PRIMEIRO: Carregar cores dinâmicas dos meses
+        await carregarCoresMeses();
+
+        // 2. DEPOIS: Carregar dados que usam as cores
+        atualizarDescricaoMetodo();
+        await carregarDadosMes();
+        
+        // 3. VERIFICAR NÚCLEO DISPONÍVEL
+        verificarNucleoDisponivel();
+        
+        // 4. MONITORAR MUDANÇAS NO LOCALSTORAGE (quando gera novo núcleo)
+        window.addEventListener('storage', verificarNucleoDisponivel);
+    });
+</script>
+{% endblock %}

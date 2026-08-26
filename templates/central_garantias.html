@@ -1,0 +1,1666 @@
+{% extends "base.html" %}
+{% block title %}Central de Garantias - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<!-- CSS dinâmico das cores dos meses -->
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style id="cores-meses-dinamicas"></style>
+<style>
+    /* ============================================================
+       VARIÁVEIS - IDENTIDADE VISUAL DIA DE SORTE
+       ============================================================ */
+    :root {
+        --ds-primary: #D4B31A;
+        --ds-primary-rgb: 212, 179, 26;
+        --ds-95: #fcf9e8;
+        --ds-90: #f9f2d2;
+        --ds-80: #f4e5a4;
+        --ds-70: #eed877;
+        --ds-65: #ebd260;
+        --ds-60: #e9cb49;
+        --ds-55: #e6c533;
+        --ds-50: #e3be1c;
+        --ds-47: #d4b31a;
+        --ds-45: #ccab19;
+        --ds-40: #b69816;
+        --ds-35: #9f8514;
+        --ds-30: #887211;
+        --ds-25: #715f0e;
+        --ds-20: #5b4c0b;
+        --ds-bg-dark: #1a1a1a;
+        --ds-card-dark: #2a2a2a;
+    }
+
+    /* ============================================================
+       LAYOUT PRINCIPAL
+       ============================================================ */
+    .central-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .central-header {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-35) 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(var(--ds-primary-rgb), 0.4);
+    }
+
+    .central-header h1 { margin: 0 0 10px 0; font-size: 2rem; font-weight: 700; }
+    .central-header p { margin: 0; opacity: 0.9; font-size: 1.1rem; }
+
+    /* ============================================================
+       SISTEMA DE ABAS
+       ============================================================ */
+    .tabs-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .tabs-nav {
+        display: flex;
+        background: linear-gradient(135deg, var(--ds-40) 0%, var(--ds-30) 100%);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 18px 25px;
+        border: none;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .tab-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+    .tab-btn.active { background: var(--ds-47); color: white; box-shadow: inset 0 -3px 0 var(--ds-65); }
+    .tab-btn i { font-size: 1.2rem; }
+
+    .tab-content { display: none; padding: 25px; background: white; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       SEÇÕES / CARDS
+       ============================================================ */
+    .section-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        padding: 18px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h5 { margin: 0; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .section-header.secondary { background: linear-gradient(135deg, var(--ds-55) 0%, var(--ds-47) 100%); }
+    .section-header.tertiary { background: linear-gradient(135deg, var(--ds-60) 0%, var(--ds-55) 100%); color: var(--ds-20); }
+    .section-body { padding: 25px; }
+
+    /* ============================================================
+       FORMULÁRIOS
+       ============================================================ */
+    .form-control, .form-select {
+        border: 2px solid var(--ds-80);
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ds-47);
+        box-shadow: 0 0 0 3px rgba(var(--ds-primary-rgb), 0.2);
+        outline: none;
+    }
+
+    .form-label { font-weight: 600; color: var(--ds-30); margin-bottom: 8px; }
+
+    /* ============================================================
+       BOTÕES
+       ============================================================ */
+    .btn-ds-primary {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-ds-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(var(--ds-primary-rgb), 0.4);
+        color: white;
+    }
+
+    .btn-ds-secondary {
+        background: var(--ds-80);
+        color: var(--ds-25);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-ds-secondary:hover { background: var(--ds-70); }
+
+    .btn-ds-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-action { padding: 6px 12px; margin: 2px; border-radius: 6px; font-size: 0.85rem; }
+
+    .btn-download {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 5px;
+    }
+
+    .btn-download:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4); }
+
+    /* ============================================================
+       TABELAS
+       ============================================================ */
+    .table-container { max-height: 400px; overflow-y: auto; position: relative; }
+
+    .table-ds { width: 100%; border-collapse: collapse; }
+
+    .table-ds thead {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table-ds th { padding: 15px; font-weight: 600; text-align: left; }
+    .table-ds td { padding: 12px 15px; border-bottom: 1px solid var(--ds-90); }
+    .table-ds tbody tr:hover { background: var(--ds-95); }
+    .table-ds tbody tr:nth-child(even) { background: var(--ds-95); }
+
+    /* ============================================================
+       APOSTAS GERADAS
+       ============================================================ */
+    .apostas-container {
+        background: var(--ds-95);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .dezenas-sorteadas {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+
+    .dezenas-sorteadas .numeros {
+        font-size: 1.3rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    .distribuicao-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255,255,255,0.2);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-top: 10px;
+    }
+
+    .aposta-item {
+        background: white;
+        border: 2px solid var(--ds-80);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .aposta-numero {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .aposta-dezenas { flex: 1; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .aposta-dezena {
+        background: var(--ds-90);
+        color: var(--ds-25);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .aposta-mes {
+        color: white;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        /* Cor será aplicada via JavaScript usando CORES_MESES */
+    }
+
+    /* ============================================================
+       BADGES E OUTROS
+       ============================================================ */
+    .badge-ds {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .custo-display {
+        background: linear-gradient(135deg, var(--ds-95) 0%, var(--ds-90) 100%);
+        border: 2px solid var(--ds-47);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .custo-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--ds-70);
+    }
+
+    .custo-item:last-child { border-bottom: none; }
+    .custo-item .label { font-weight: 600; color: var(--ds-35); }
+    .custo-item .value { font-weight: 700; color: var(--ds-30); }
+    .custo-total { font-size: 1.3rem; color: var(--ds-25) !important; }
+
+    .loading-ds { text-align: center; padding: 40px; }
+    .loading-ds .spinner {
+        width: 50px; height: 50px;
+        border: 4px solid var(--ds-80);
+        border-top-color: var(--ds-47);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert-warning-ds {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+        border: 2px solid #ffc107;
+        color: #856404;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+
+    /* ============================================================
+       TOGGLE MÊS DA SORTE (Discreto)
+       ============================================================ */
+    .mes-toggle-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: transparent;
+        padding: 0;
+    }
+
+    .mes-toggle-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mes-toggle-label {
+        font-weight: 500;
+        color: var(--ds-35);
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        opacity: 0.5;
+    }
+
+    .mes-toggle-label.active {
+        opacity: 1;
+        font-weight: 600;
+    }
+
+    .mes-toggle-label .mes-nome {
+        display: inline;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 4px;
+        color: white;
+        margin-left: 4px;
+    }
+
+    .mes-toggle-label .mes-info {
+        display: none;
+    }
+
+    .mes-toggle-label .mes-info-inline {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-left: 4px;
+        font-weight: 400;
+    }
+
+    .toggle-switch-mini {
+        position: relative;
+        width: 36px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch-mini input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider-mini {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: #ccc;
+        border-radius: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-slider-mini:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 2px;
+        bottom: 2px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch-mini input:checked + .toggle-slider-mini {
+        background: var(--ds-47);
+    }
+
+    .toggle-switch-mini input:checked + .toggle-slider-mini:before {
+        transform: translateX(18px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .mes-toggle-label { color: #aaa; }
+        .toggle-slider-mini { background: #555; }
+    }
+
+    /* ============================================================
+       MODO BOLÃO (Discreto)
+       ============================================================ */
+    .bolao-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: var(--ds-95);
+        border-radius: 8px;
+        border: 1px dashed var(--ds-70);
+    }
+
+    .bolao-check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--ds-35);
+    }
+
+    .bolao-check input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--ds-47);
+        cursor: pointer;
+    }
+
+    .bolao-check .bolao-icon {
+        font-size: 1rem;
+    }
+
+    .bolao-dezenas-select {
+        padding: 4px 8px;
+        font-size: 0.85rem;
+        border: 1px solid var(--ds-70);
+        border-radius: 6px;
+        background: white;
+        color: var(--ds-30);
+        font-weight: 600;
+    }
+
+    .bolao-dezenas-select:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .bolao-info {
+        font-size: 0.75rem;
+        color: var(--ds-40);
+        margin-left: auto;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .bolao-container { background: #2d2d2d; border-color: #555; }
+        .bolao-check { color: #aaa; }
+        .bolao-dezenas-select { background: #333; color: #eee; border-color: #555; }
+        .bolao-info { color: #888; }
+    }
+
+    /* ============================================================
+       MODAIS
+       ============================================================ */
+    .modal-ds .modal-header {
+        background: linear-gradient(135deg, var(--ds-47) 0%, var(--ds-40) 100%);
+        color: white;
+        border: none;
+    }
+    .modal-ds .modal-header .btn-close { filter: brightness(0) invert(1); }
+
+    /* ============================================================
+       RESPONSIVIDADE
+       ============================================================ */
+    @media (max-width: 768px) {
+        .tabs-nav { flex-direction: column; }
+        .tab-btn { justify-content: flex-start; padding: 15px 20px; }
+        .central-header h1 { font-size: 1.5rem; }
+    }
+
+    /* ============================================================
+       MODO ESCURO
+       ============================================================ */
+    @media (prefers-color-scheme: dark) {
+        body { background-color: var(--ds-bg-dark); color: #f0f0f0; }
+        .tabs-container, .section-card { background: var(--ds-card-dark); }
+        .tab-content, .section-body { background: var(--ds-card-dark); }
+        .form-control, .form-select { background: #333; border-color: #555; color: #eee; }
+        .table-ds td { border-bottom-color: #444; }
+        .table-ds tbody tr:hover { background: #333; }
+        .apostas-container { background: #2d2d2d; }
+        .aposta-item { background: #333; border-color: #555; }
+        .aposta-dezena { background: #444; color: #eee; }
+        .modal-content { background: var(--ds-card-dark); }
+        .modal-body { color: #ddd; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="central-container">
+    <!-- Header -->
+    <div class="central-header">
+        <h1><i class="fas fa-shield-alt me-2"></i>Central de Garantias</h1>
+        <p>Gerencie estratégias de análise e sistemas de desdobramento com garantia matemática</p>
+    </div>
+
+    <!-- Sistema de Abas -->
+    <div class="tabs-container">
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="estrategias" onclick="trocarAba('estrategias')">
+                <i class="fas fa-brain"></i> Estratégias Dinâmicas
+            </button>
+            <button class="tab-btn" data-tab="garantias" onclick="trocarAba('garantias')">
+                <i class="fas fa-table"></i> Tabela de Garantias
+            </button>
+        </div>
+
+        <!-- ABA 1: ESTRATÉGIAS DINÂMICAS -->
+        <div id="tab-estrategias" class="tab-content active">
+            <div class="section-card">
+                <div class="section-header">
+                    <h5><i class="fas fa-list"></i> Estratégias Disponíveis</h5>
+                    <button class="btn-ds-secondary" onclick="abrirModalEstrategia()">
+                        <i class="fas fa-plus"></i> Nova Estratégia
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div id="loadingEstrategias" class="loading-ds">
+                        <div class="spinner"></div>
+                        <p>Carregando estratégias...</p>
+                    </div>
+                    <div id="estrategiasContainer" style="display: none;">
+                        <div class="table-container">
+                            <table class="table-ds">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Descrição</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaEstrategias"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: TABELA DE GARANTIAS -->
+        <div id="tab-garantias" class="tab-content">
+            <!-- Calculadora de Custo -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h5><i class="fas fa-calculator"></i> Calculadora de Custo</h5>
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Número de Dezenas:</label>
+                            <input type="number" id="calcDezenas" class="form-control" min="8" max="31" value="9">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Valor da Aposta (R$):</label>
+                            <input type="number" id="calcValorAposta" class="form-control" step="0.01" placeholder="Carregando...">
+                            <small class="text-muted">Carregado das configurações</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn-ds-primary w-100" onclick="calcularCusto()">
+                                <i class="fas fa-search"></i> Calcular
+                            </button>
+                        </div>
+                    </div>
+                    <div id="resultadoCusto" class="custo-display" style="display: none;">
+                        <h5><i class="fas fa-coins"></i> Resultado</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="custo-item"><span class="label">Dezenas:</span><span class="value" id="resDezenas">-</span></div>
+                                <div class="custo-item"><span class="label">Nº Apostas:</span><span class="value" id="resApostas">-</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="custo-item"><span class="label">Garantia:</span><span class="value" id="resGarantia">-</span></div>
+                                <div class="custo-item"><span class="label">Custo Total:</span><span class="value custo-total" id="resCusto">R$ 0,00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gerador de Apostas -->
+            <div class="section-card">
+                <div class="section-header tertiary">
+                    <h5><i class="fas fa-dice"></i> Gerador de Apostas com Garantia</h5>
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Selecione a Garantia:</label>
+                            <select id="selectGarantia" class="form-select">
+                                <option value="">-- Carregando --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mês da Sorte:</label>
+                            <div class="mes-toggle-container">
+                                <div class="mes-toggle-wrapper">
+                                    <div class="mes-toggle-label active" id="labelMaisAtrasado" onclick="document.getElementById('toggleMes').checked=false;alternarMes();">
+                                        <span>Atrasado:</span><span class="mes-nome" id="nomeMaisAtrasado">---</span><span class="mes-info-inline" id="infoMaisAtrasado"></span>
+                                    </div>
+                                    <label class="toggle-switch-mini">
+                                        <input type="checkbox" id="toggleMes" onchange="alternarMes()">
+                                        <span class="toggle-slider-mini"></span>
+                                    </label>
+                                    <div class="mes-toggle-label" id="labelMaisSorteado" onclick="document.getElementById('toggleMes').checked=true;alternarMes();">
+                                        <span>Frequente:</span><span class="mes-nome" id="nomeMaisSorteado">---</span><span class="mes-info-inline" id="infoMaisSorteado"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modo Bolão -->
+                    <div class="bolao-container">
+                        <label class="bolao-check">
+                            <input type="checkbox" id="checkBolao" onchange="toggleBolao()">
+                            <span class="bolao-icon">🎱</span>
+                            <span>Modo Bolão</span>
+                        </label>
+                        <select id="selectDezenasAposta" class="bolao-dezenas-select" disabled onchange="atualizarInfoBolao()">
+                            <option value="7">7 dezenas</option>
+                            <option value="8">8 dezenas</option>
+                            <option value="9">9 dezenas</option>
+                            <option value="10">10 dezenas</option>
+                            <option value="11">11 dezenas</option>
+                            <option value="12">12 dezenas</option>
+                            <option value="13">13 dezenas</option>
+                            <option value="14">14 dezenas</option>
+                            <option value="15">15 dezenas</option>
+                        </select>
+                        <span class="bolao-info" id="bolaoInfo">Padrão: 7 dezenas</span>
+                    </div>
+
+                    <button class="btn-ds-primary mt-3" onclick="gerarApostas()" id="btnGerarApostas">
+                        <i class="fas fa-magic"></i> Gerar Apostas
+                    </button>
+
+                    <div id="avisoGarantia" class="alert-warning-ds" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="avisoTexto"></span>
+                    </div>
+
+                    <!-- Apostas Geradas -->
+                    <div id="apostasGeradas" class="apostas-container" style="display: none;">
+                        <div class="dezenas-sorteadas">
+                            <div><strong>Dezenas sorteadas:</strong></div>
+                            <div class="numeros" id="numerosGerados">-</div>
+                            <div class="distribuicao-badge" id="distribuicaoInfo">
+                                <i class="fas fa-check-circle"></i> <span id="distribuicaoTexto">Equilibrado</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-list-ol"></i> Apostas: <span id="qtdApostas">0</span></h5>
+                            <span class="badge-ds" id="custoTotalApostas">Custo: R$ 0,00</span>
+                        </div>
+
+                        <div id="listaApostas"></div>
+
+                        <div class="mt-4">
+                            <h6><i class="fas fa-download"></i> Download:</h6>
+                            <button class="btn-download" onclick="downloadTXT()"><i class="fas fa-file-alt"></i> TXT</button>
+                            <button class="btn-download" onclick="downloadXLSX()"><i class="fas fa-file-excel"></i> XLSX</button>
+                            <button class="btn-download" onclick="downloadHTML()"><i class="fas fa-file-code"></i> HTML</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Garantias -->
+            <div class="section-card">
+                <div class="section-header secondary">
+                    <h5><i class="fas fa-table"></i> Tabela de Garantias</h5>
+                    <button class="btn-ds-secondary" onclick="abrirModalGarantia()">
+                        <i class="fas fa-plus"></i> Nova Garantia
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div id="loadingGarantias" class="loading-ds">
+                        <div class="spinner"></div>
+                        <p>Carregando garantias...</p>
+                    </div>
+                    <div id="tabelaGarantiasContainer" style="display: none;">
+                        <div class="table-container">
+                            <table class="table-ds">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>🔢 Dezenas</th>
+                                        <th>🎟️ Nº Apostas</th>
+                                        <th>🧩 Garantia</th>
+                                        <th>💬 Observação</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaGarantias"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Estratégia -->
+<div class="modal fade modal-ds" id="modalEstrategia" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTituloEstrategia">Nova Estratégia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editandoIdEstrategia">
+                <div class="mb-3">
+                    <label class="form-label">ID:</label>
+                    <input type="text" id="inputIdEstrategia" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nome:</label>
+                    <input type="text" id="inputNomeEstrategia" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descrição:</label>
+                    <textarea id="inputDescricaoEstrategia" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Parâmetros (JSON):</label>
+                    <textarea id="inputParametrosEstrategia" class="form-control" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-ds-primary" onclick="salvarEstrategia()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Garantia -->
+<div class="modal fade modal-ds" id="modalGarantia" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTituloGarantia">Nova Garantia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editandoIdGarantia">
+                <div class="mb-3">
+                    <label class="form-label">Número de Dezenas:</label>
+                    <input type="number" id="inputDezenasGarantia" class="form-control" min="1" max="31" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Número de Apostas:</label>
+                    <input type="number" id="inputApostasGarantia" class="form-control" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Garantia:</label>
+                    <input type="text" id="inputGarantiaGarantia" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Observação:</label>
+                    <textarea id="inputObservacaoGarantia" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-ds-primary" onclick="salvarGarantia()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    // ============================================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================================
+    let modalEstrategia, modalGarantia;
+    let todasEstrategias = [];
+    let todasGarantias = [];
+    let valorAposta = 2.50;
+    let apostasGeradasData = [];
+    let dezenasGeradas = [];
+    let dadosMesSorte = { maisAtrasado: null, maisSorteado: null };
+
+    // Cores dos meses (fallback - serão carregadas da API)
+    let CORES_MESES = {
+        1: '#1a237e', 2: '#f9a825', 3: '#2e7d32', 4: '#d32f2f',
+        5: '#7b1fa2', 6: '#0288d1', 7: '#f57c00', 8: '#00796b',
+        9: '#5d4037', 10: '#c2185b', 11: '#455a64', 12: '#8d6e63'
+    };
+
+    // Multiplicadores de valor por quantidade de dezenas (Dia de Sorte)
+    const MULTIPLICADORES_DEZENAS = {
+        7: 1, 8: 8, 9: 36, 10: 120, 11: 330, 12: 792, 13: 1716, 14: 3432, 15: 6435
+    };
+
+    const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const MESES_COMPLETOS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    // ============================================================
+    // MATRIZES DE DESDOBRAMENTO (8-15 dezenas)
+    // ============================================================
+    const MATRIZES_GARANTIA = {
+        "8_3": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,4,5,6,7],
+            [1,2,3,4,5,6,7]
+        ],
+        "9_4": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,3,6,7,8],
+            [0,2,4,5,6,7,8],
+            [1,3,4,5,6,7,8]
+        ],
+        "10_5": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,3,7,8,9],
+            [0,4,5,6,7,8,9],
+            [1,2,4,5,7,8,9],
+            [2,3,4,6,7,8,9]
+        ],
+        "11_8": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,7,8,9,10],
+            [0,3,4,5,7,8,9],
+            [0,3,4,6,8,9,10],
+            [1,2,5,6,7,9,10],
+            [1,3,5,6,8,9,10],
+            [2,4,5,6,7,8,10],
+            [3,4,5,6,7,9,10]
+        ],
+        "12_10": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,7,8,9,10],
+            [0,3,4,7,8,9,11],
+            [0,5,6,8,9,10,11],
+            [1,2,3,5,8,10,11],
+            [1,3,4,6,9,10,11],
+            [1,4,5,7,8,9,10],
+            [2,3,6,7,8,10,11],
+            [2,4,5,6,7,9,11],
+            [3,4,5,6,8,9,10]
+        ],
+        "13_16": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,7,8,9,10],
+            [0,1,3,8,10,11,12],
+            [0,2,4,7,9,11,12],
+            [0,3,5,6,9,10,11],
+            [0,4,5,7,8,11,12],
+            [0,6,7,8,9,11,12],
+            [1,2,3,6,9,11,12],
+            [1,2,4,5,10,11,12],
+            [1,3,4,7,8,9,11],
+            [1,5,6,7,8,10,12],
+            [2,3,4,5,8,9,12],
+            [2,5,6,7,9,10,11],
+            [3,4,6,7,10,11,12],
+            [3,5,6,8,9,10,12],
+            [4,5,6,8,9,10,11]
+        ],
+        "14_20": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,7,8,9,10],
+            [0,1,3,9,11,12,13],
+            [0,2,4,8,11,12,13],
+            [0,3,5,7,10,11,12],
+            [0,4,6,7,9,12,13],
+            [0,5,6,8,10,11,13],
+            [1,2,3,8,10,12,13],
+            [1,2,5,6,11,12,13],
+            [1,3,4,7,8,11,13],
+            [1,4,5,9,10,11,12],
+            [1,6,7,8,10,11,12],
+            [2,3,4,6,9,10,13],
+            [2,3,5,7,9,11,13],
+            [2,5,6,7,8,9,12],
+            [3,4,5,8,9,11,12],
+            [3,6,8,9,10,11,13],
+            [4,5,6,7,10,12,13],
+            [4,6,7,8,9,11,12],
+            [5,7,8,9,10,12,13]
+        ],
+        "15_25": [
+            [0,1,2,3,4,5,6],
+            [0,1,2,7,8,9,10],
+            [0,1,3,11,12,13,14],
+            [0,2,4,9,11,12,13],
+            [0,3,5,8,10,12,14],
+            [0,4,6,7,11,13,14],
+            [0,5,7,9,10,11,12],
+            [0,6,8,9,12,13,14],
+            [1,2,5,8,11,13,14],
+            [1,3,4,7,10,12,13],
+            [1,4,5,9,12,13,14],
+            [1,5,6,10,11,12,13],
+            [1,6,7,8,9,11,14],
+            [2,3,6,7,9,12,14],
+            [2,3,5,9,10,11,13],
+            [2,4,5,7,8,12,14],
+            [2,6,8,10,11,12,14],
+            [3,4,6,8,9,11,13],
+            [3,5,6,7,11,13,14],
+            [3,7,8,9,10,13,14],
+            [4,5,6,8,10,12,13],
+            [4,7,8,10,11,12,14],
+            [4,8,9,10,11,13,14],
+            [5,6,7,9,10,13,14],
+            [5,6,8,9,11,12,14]
+        ]
+    };
+
+    // ============================================================
+    // INICIALIZAÇÃO
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        modalEstrategia = new bootstrap.Modal(document.getElementById('modalEstrategia'));
+        modalGarantia = new bootstrap.Modal(document.getElementById('modalGarantia'));
+
+        // Carregar cores dos meses PRIMEIRO
+        await carregarCoresMesesAPI();
+
+        carregarValorAposta();
+        carregarEstrategias();
+        carregarGarantias();
+        carregarMesSorte();
+    });
+
+    async function carregarCoresMesesAPI() {
+        try {
+            const response = await fetch('/api/cores-meses/listar');
+            const data = await response.json();
+            if (data.sucesso && data.cores) {
+                data.cores.forEach(cor => {
+                    CORES_MESES[cor.mes] = cor.cor_hex;
+                });
+            }
+        } catch (error) {
+            console.log('Usando cores padrão dos meses');
+        }
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+
+    // ============================================================
+    // CARREGAR DADOS
+    // ============================================================
+    async function carregarValorAposta() {
+        try {
+            const response = await fetch('/api/configuracoes/valor-aposta');
+            const data = await response.json();
+            if (data.sucesso) {
+                valorAposta = data.valor_aposta;
+                document.getElementById('calcValorAposta').value = valorAposta.toFixed(2);
+            }
+        } catch (error) {
+            document.getElementById('calcValorAposta').value = '2.50';
+        }
+    }
+
+    async function carregarMesSorte() {
+        try {
+            // API correta: /api/analise/meses/estatisticas
+            const response = await fetch('/api/analise/meses/estatisticas');
+            const data = await response.json();
+
+            console.log('Dados meses API:', JSON.stringify(data));
+
+            // A API pode retornar objeto com propriedades ou array direto
+            let mesesArray = [];
+            if (Array.isArray(data)) {
+                mesesArray = data;
+            } else if (data.meses && Array.isArray(data.meses)) {
+                mesesArray = data.meses;
+            } else if (data.estatisticas && Array.isArray(data.estatisticas)) {
+                mesesArray = data.estatisticas;
+            }
+
+            if (mesesArray.length > 0) {
+                // Debug: ver estrutura do primeiro item
+                console.log('Primeiro mês:', JSON.stringify(mesesArray[0]));
+
+                // Encontrar o mais frequente (maior frequencia/contagem)
+                const campoFreq = mesesArray[0].frequencia !== undefined ? 'frequencia' :
+                                  mesesArray[0].contagem !== undefined ? 'contagem' :
+                                  mesesArray[0].total !== undefined ? 'total' : null;
+
+                // Encontrar o mais atrasado (maior atraso/atraso_atual/dias_atraso)
+                const campoAtraso = mesesArray[0].atraso !== undefined ? 'atraso' :
+                                    mesesArray[0].atraso_atual !== undefined ? 'atraso_atual' :
+                                    mesesArray[0].concursos_atraso !== undefined ? 'concursos_atraso' :
+                                    mesesArray[0].dias_atraso !== undefined ? 'dias_atraso' : null;
+
+                console.log('Campo frequência:', campoFreq, '| Campo atraso:', campoAtraso);
+
+                // MAIS FREQUENTE (maior valor de frequência)
+                if (campoFreq) {
+                    const mesesPorFreq = [...mesesArray].sort((a, b) => b[campoFreq] - a[campoFreq]);
+                    const maisSorteado = mesesPorFreq[0];
+                    const mesNum = maisSorteado.mes || maisSorteado.numero || maisSorteado.id;
+
+                    dadosMesSorte.maisSorteado = {
+                        mes: mesNum,
+                        nome: MESES_COMPLETOS[mesNum - 1],
+                        abrev: MESES[mesNum - 1],
+                        info: `${maisSorteado[campoFreq]}x`
+                    };
+                    const elMaisSorteado = document.getElementById('nomeMaisSorteado');
+                    elMaisSorteado.textContent = dadosMesSorte.maisSorteado.nome;
+                    elMaisSorteado.style.backgroundColor = CORES_MESES[mesNum] || '#D4B31A';
+                    document.getElementById('infoMaisSorteado').textContent = `(${maisSorteado[campoFreq]}x)`;
+                }
+
+                // MAIS ATRASADO (maior valor de atraso)
+                if (campoAtraso) {
+                    const mesesPorAtraso = [...mesesArray].sort((a, b) => b[campoAtraso] - a[campoAtraso]);
+                    const maisAtrasado = mesesPorAtraso[0];
+                    const mesNum = maisAtrasado.mes || maisAtrasado.numero || maisAtrasado.id;
+
+                    dadosMesSorte.maisAtrasado = {
+                        mes: mesNum,
+                        nome: MESES_COMPLETOS[mesNum - 1],
+                        abrev: MESES[mesNum - 1],
+                        info: `${maisAtrasado[campoAtraso]} conc.`
+                    };
+                    const elMaisAtrasado = document.getElementById('nomeMaisAtrasado');
+                    elMaisAtrasado.textContent = dadosMesSorte.maisAtrasado.nome;
+                    elMaisAtrasado.style.backgroundColor = CORES_MESES[mesNum] || '#D4B31A';
+                    document.getElementById('infoMaisAtrasado').textContent = `(${maisAtrasado[campoAtraso]} conc.)`;
+                } else if (campoFreq) {
+                    // Se não tem atraso, usar o menos frequente como "mais atrasado"
+                    const mesesPorFreq = [...mesesArray].sort((a, b) => a[campoFreq] - b[campoFreq]);
+                    const menosFrequente = mesesPorFreq[0];
+                    const mesNum = menosFrequente.mes || menosFrequente.numero || menosFrequente.id;
+
+                    dadosMesSorte.maisAtrasado = {
+                        mes: mesNum,
+                        nome: MESES_COMPLETOS[mesNum - 1],
+                        abrev: MESES[mesNum - 1],
+                        info: `${menosFrequente[campoFreq]}x`
+                    };
+                    const elMaisAtrasado = document.getElementById('nomeMaisAtrasado');
+                    elMaisAtrasado.textContent = dadosMesSorte.maisAtrasado.nome;
+                    elMaisAtrasado.style.backgroundColor = CORES_MESES[mesNum] || '#D4B31A';
+                    document.getElementById('infoMaisAtrasado').textContent = `(${menosFrequente[campoFreq]}x)`;
+                }
+
+            } else {
+                throw new Error('Dados inválidos da API');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar meses:', error);
+            // SEM FALLBACK - Mostrar erro
+            document.getElementById('nomeMaisAtrasado').textContent = 'Erro API';
+            document.getElementById('nomeMaisAtrasado').style.backgroundColor = '#dc3545';
+            document.getElementById('infoMaisAtrasado').textContent = '';
+            document.getElementById('nomeMaisSorteado').textContent = 'Erro API';
+            document.getElementById('nomeMaisSorteado').style.backgroundColor = '#dc3545';
+            document.getElementById('infoMaisSorteado').textContent = '';
+        }
+    }
+
+    function alternarMes() {
+        const toggle = document.getElementById('toggleMes');
+        const labelAtrasado = document.getElementById('labelMaisAtrasado');
+        const labelSorteado = document.getElementById('labelMaisSorteado');
+
+        if (toggle.checked) {
+            // Mais Sorteado selecionado
+            labelAtrasado.classList.remove('active');
+            labelSorteado.classList.add('active');
+        } else {
+            // Mais Atrasado selecionado (padrão)
+            labelAtrasado.classList.add('active');
+            labelSorteado.classList.remove('active');
+        }
+    }
+
+    function getMesSelecionado() {
+        const toggle = document.getElementById('toggleMes');
+        if (toggle.checked && dadosMesSorte.maisSorteado) {
+            return dadosMesSorte.maisSorteado;
+        }
+        return dadosMesSorte.maisAtrasado;
+    }
+
+    function toggleBolao() {
+        const check = document.getElementById('checkBolao');
+        const select = document.getElementById('selectDezenasAposta');
+
+        if (check.checked) {
+            select.disabled = false;
+            select.value = '8'; // Começa com 8 dezenas
+        } else {
+            select.disabled = true;
+            select.value = '7';
+        }
+        atualizarInfoBolao();
+    }
+
+    function atualizarInfoBolao() {
+        const dezenas = parseInt(document.getElementById('selectDezenasAposta').value);
+        const mult = MULTIPLICADORES_DEZENAS[dezenas] || 1;
+        const valorUnitario = valorAposta * mult;
+        const info = document.getElementById('bolaoInfo');
+
+        if (dezenas === 7) {
+            info.textContent = `Padrão: 7 dezenas`;
+        } else {
+            info.textContent = `${dezenas} dez = R$ ${valorUnitario.toFixed(2).replace('.', ',')} cada`;
+        }
+    }
+
+    function getDezenasAposta() {
+        const check = document.getElementById('checkBolao');
+        if (check && check.checked) {
+            return parseInt(document.getElementById('selectDezenasAposta').value);
+        }
+        return 7; // Padrão
+    }
+
+    async function carregarEstrategias() {
+        try {
+            const response = await fetch('/api/estrategias');
+            todasEstrategias = await response.json();
+            renderizarTabelaEstrategias();
+            document.getElementById('loadingEstrategias').style.display = 'none';
+            document.getElementById('estrategiasContainer').style.display = 'block';
+        } catch (error) {
+            document.getElementById('loadingEstrategias').innerHTML = '<div class="alert alert-danger">Erro ao carregar</div>';
+        }
+    }
+
+    async function carregarGarantias() {
+        try {
+            const response = await fetch('/api/garantias');
+            todasGarantias = await response.json();
+            renderizarTabelaGarantias();
+            popularSelectGarantias();
+            document.getElementById('loadingGarantias').style.display = 'none';
+            document.getElementById('tabelaGarantiasContainer').style.display = 'block';
+        } catch (error) {
+            document.getElementById('loadingGarantias').innerHTML = '<div class="alert alert-danger">Erro ao carregar</div>';
+        }
+    }
+
+    // ============================================================
+    // ABAS
+    // ============================================================
+    function trocarAba(aba) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === aba);
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById('tab-' + aba).classList.add('active');
+    }
+
+    // ============================================================
+    // ESTRATÉGIAS
+    // ============================================================
+    function renderizarTabelaEstrategias() {
+        const tbody = document.getElementById('tabelaEstrategias');
+        tbody.innerHTML = todasEstrategias.map(e => `
+            <tr>
+                <td><code>${e.id}</code></td>
+                <td><strong>${e.nome}</strong></td>
+                <td>${e.descricao}</td>
+                <td class="text-center">
+                    <button class="btn-ds-secondary btn-action" onclick="editarEstrategia('${e.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-ds-danger btn-action" onclick="excluirEstrategia('${e.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function abrirModalEstrategia() {
+        document.getElementById('modalTituloEstrategia').textContent = 'Nova Estratégia';
+        document.getElementById('editandoIdEstrategia').value = '';
+        document.getElementById('inputIdEstrategia').value = '';
+        document.getElementById('inputNomeEstrategia').value = '';
+        document.getElementById('inputDescricaoEstrategia').value = '';
+        document.getElementById('inputParametrosEstrategia').value = '{}';
+        document.getElementById('inputIdEstrategia').disabled = false;
+        modalEstrategia.show();
+    }
+
+    async function editarEstrategia(id) {
+        const e = todasEstrategias.find(x => x.id === id);
+        if (!e) return;
+        document.getElementById('modalTituloEstrategia').textContent = 'Editar Estratégia';
+        document.getElementById('editandoIdEstrategia').value = e.id;
+        document.getElementById('inputIdEstrategia').value = e.id;
+        document.getElementById('inputNomeEstrategia').value = e.nome;
+        document.getElementById('inputDescricaoEstrategia').value = e.descricao;
+        document.getElementById('inputParametrosEstrategia').value = JSON.stringify(e.parametros, null, 2);
+        document.getElementById('inputIdEstrategia').disabled = true;
+        modalEstrategia.show();
+    }
+
+    async function salvarEstrategia() {
+        const idOriginal = document.getElementById('editandoIdEstrategia').value;
+        const dados = {
+            id: document.getElementById('inputIdEstrategia').value,
+            nome: document.getElementById('inputNomeEstrategia').value,
+            descricao: document.getElementById('inputDescricaoEstrategia').value,
+            parametros: JSON.parse(document.getElementById('inputParametrosEstrategia').value || '{}')
+        };
+
+        const url = idOriginal ? `/api/estrategias/${idOriginal}` : '/api/estrategias';
+        const method = idOriginal ? 'PUT' : 'POST';
+
+        await fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) });
+        modalEstrategia.hide();
+        carregarEstrategias();
+    }
+
+    function excluirEstrategia(id) {
+        mostrarConfirmacao('Excluir esta estratégia?', async () => {
+            await fetch(`/api/estrategias/${id}`, { method: 'DELETE' });
+            carregarEstrategias();
+        });
+    }
+
+    // ============================================================
+    // GARANTIAS
+    // ============================================================
+    function renderizarTabelaGarantias() {
+        const tbody = document.getElementById('tabelaGarantias');
+        tbody.innerHTML = todasGarantias.map(g => `
+            <tr>
+                <td>${g.id}</td>
+                <td><strong>${g.dezenas}</strong></td>
+                <td>${g.apostas}</td>
+                <td><span class="badge-ds">${g.garantia}</span></td>
+                <td>${g.observacao || '-'}</td>
+                <td class="text-center">
+                    <button class="btn-ds-secondary btn-action" onclick="editarGarantia(${g.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn-ds-danger btn-action" onclick="excluirGarantia(${g.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function popularSelectGarantias() {
+        const select = document.getElementById('selectGarantia');
+        select.innerHTML = '<option value="">-- Selecione --</option>' +
+            todasGarantias.map(g => `<option value="${g.id}" data-dezenas="${g.dezenas}" data-apostas="${g.apostas}" data-garantia="${g.garantia}">${g.id} - ${g.dezenas} dez → ${g.apostas} apostas → ${g.garantia}</option>`).join('');
+    }
+
+    function abrirModalGarantia() {
+        document.getElementById('modalTituloGarantia').textContent = 'Nova Garantia';
+        document.getElementById('editandoIdGarantia').value = '';
+        document.getElementById('inputDezenasGarantia').value = '';
+        document.getElementById('inputApostasGarantia').value = '';
+        document.getElementById('inputGarantiaGarantia').value = '';
+        document.getElementById('inputObservacaoGarantia').value = '';
+        modalGarantia.show();
+    }
+
+    async function editarGarantia(id) {
+        const g = todasGarantias.find(x => x.id === id);
+        if (!g) return;
+        document.getElementById('modalTituloGarantia').textContent = 'Editar Garantia';
+        document.getElementById('editandoIdGarantia').value = g.id;
+        document.getElementById('inputDezenasGarantia').value = g.dezenas;
+        document.getElementById('inputApostasGarantia').value = g.apostas;
+        document.getElementById('inputGarantiaGarantia').value = g.garantia;
+        document.getElementById('inputObservacaoGarantia').value = g.observacao || '';
+        modalGarantia.show();
+    }
+
+    async function salvarGarantia() {
+        const id = document.getElementById('editandoIdGarantia').value;
+        const dados = {
+            dezenas: parseInt(document.getElementById('inputDezenasGarantia').value),
+            apostas: parseInt(document.getElementById('inputApostasGarantia').value),
+            garantia: document.getElementById('inputGarantiaGarantia').value,
+            observacao: document.getElementById('inputObservacaoGarantia').value
+        };
+
+        const url = id ? `/api/garantias/${id}` : '/api/garantias';
+        const method = id ? 'PUT' : 'POST';
+
+        await fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) });
+        modalGarantia.hide();
+        carregarGarantias();
+    }
+
+    function excluirGarantia(id) {
+        mostrarConfirmacao('Excluir esta garantia?', async () => {
+            await fetch(`/api/garantias/${id}`, { method: 'DELETE' });
+            carregarGarantias();
+        });
+    }
+
+    async function calcularCusto() {
+        const dezenas = parseInt(document.getElementById('calcDezenas').value);
+        const valor = parseFloat(document.getElementById('calcValorAposta').value);
+
+        try {
+            const response = await fetch('/api/garantias/calcular-custo', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({dezenas, valor_aposta: valor})
+            });
+            const resultado = await response.json();
+
+            if (resultado.erro) {
+                document.getElementById('resultadoCusto').innerHTML = `<div class="alert alert-warning">${resultado.erro}</div>`;
+            } else {
+                document.getElementById('resDezenas').textContent = resultado.dezenas;
+                document.getElementById('resApostas').textContent = resultado.apostas;
+                document.getElementById('resGarantia').textContent = resultado.garantia;
+                document.getElementById('resCusto').textContent = `R$ ${resultado.custo_total.toFixed(2).replace('.', ',')}`;
+            }
+            document.getElementById('resultadoCusto').style.display = 'block';
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // ============================================================
+    // GERADOR DE APOSTAS
+    // ============================================================
+    function gerarNumerosEquilibrados(quantidade) {
+        // Distribuição: Baixo (1-10), Médio (11-20), Alto (21-31)
+        const baixo = [], medio = [], alto = [];
+        for (let i = 1; i <= 10; i++) baixo.push(i);
+        for (let i = 11; i <= 20; i++) medio.push(i);
+        for (let i = 21; i <= 31; i++) alto.push(i);
+
+        // Calcular distribuição equilibrada
+        const qtdBaixo = Math.floor(quantidade / 3);
+        const qtdMedio = Math.floor(quantidade / 3);
+        const qtdAlto = quantidade - qtdBaixo - qtdMedio;
+
+        // Embaralhar arrays
+        const shuffle = arr => arr.sort(() => Math.random() - 0.5);
+        shuffle(baixo);
+        shuffle(medio);
+        shuffle(alto);
+
+        // Selecionar números
+        const selecionados = [
+            ...baixo.slice(0, qtdBaixo),
+            ...medio.slice(0, qtdMedio),
+            ...alto.slice(0, qtdAlto)
+        ];
+
+        return {
+            numeros: selecionados.sort((a, b) => a - b),
+            distribuicao: { baixo: qtdBaixo, medio: qtdMedio, alto: qtdAlto }
+        };
+    }
+
+    function gerarApostas() {
+        const select = document.getElementById('selectGarantia');
+        const option = select.options[select.selectedIndex];
+
+        if (!option || !option.value) {
+            mostrarAlerta('Selecione uma garantia!');
+            return;
+        }
+
+        const dezenas = parseInt(option.dataset.dezenas);
+        const apostas = parseInt(option.dataset.apostas);
+        const garantia = option.dataset.garantia;
+
+        // Verificar se tem matriz disponível
+        const chaveMatriz = `${dezenas}_${apostas}`;
+        const matriz = MATRIZES_GARANTIA[chaveMatriz];
+
+        if (!matriz) {
+            document.getElementById('avisoGarantia').style.display = 'block';
+            document.getElementById('avisoTexto').textContent = `Geração automática disponível apenas para 8-15 dezenas. Para ${dezenas} dezenas, utilize outro método.`;
+            document.getElementById('apostasGeradas').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('avisoGarantia').style.display = 'none';
+
+        // Obter quantidade de dezenas por aposta (7 padrão ou bolão 8-15)
+        const dezenasAposta = getDezenasAposta();
+
+        // Verificar se a matriz suporta a quantidade de dezenas por aposta
+        const dezenasNaMatriz = matriz[0].length; // Quantidade de índices em cada aposta da matriz
+        if (dezenasAposta > dezenasNaMatriz) {
+            // Precisamos de mais dezenas por aposta do que a matriz oferece
+            // Isso só é possível se dezenasAposta <= dezenas (quantidade total)
+            if (dezenasAposta > dezenas) {
+                mostrarAlerta(`Não é possível gerar apostas com ${dezenasAposta} dezenas usando apenas ${dezenas} dezenas totais.`);
+                return;
+            }
+        }
+
+        // Gerar números equilibrados
+        const resultado = gerarNumerosEquilibrados(dezenas);
+        dezenasGeradas = resultado.numeros;
+
+        // Pegar mês do toggle
+        const mesSelecionado = getMesSelecionado();
+        const mesIdx = mesSelecionado.mes;
+        const mesAbrev = mesSelecionado.abrev;
+        const mesCompleto = mesSelecionado.nome;
+
+        // Gerar apostas usando matriz
+        // Se bolão ativo, expandir cada aposta para ter mais dezenas
+        apostasGeradasData = matriz.map((indices, idx) => {
+            let dezenasFinais;
+            if (dezenasAposta === 7) {
+                // Padrão: usar exatamente os índices da matriz
+                dezenasFinais = indices.map(i => dezenasGeradas[i]);
+            } else {
+                // Bolão: pegar as dezenas da matriz + adicionar mais do pool
+                const dezenasBase = indices.map(i => dezenasGeradas[i]);
+                const dezenasRestantes = dezenasGeradas.filter(d => !dezenasBase.includes(d));
+                const qtdAdicional = dezenasAposta - 7;
+                const adicionais = dezenasRestantes.slice(0, qtdAdicional);
+                dezenasFinais = [...dezenasBase, ...adicionais].sort((a, b) => a - b);
+            }
+
+            return {
+                numero: idx + 1,
+                dezenas: dezenasFinais,
+                mes: mesAbrev,
+                mesCompleto: mesCompleto,
+                mesIdx: mesIdx,
+                qtdDezenas: dezenasFinais.length
+            };
+        });
+
+        // Mostrar dezenas sorteadas
+        document.getElementById('numerosGerados').textContent = dezenasGeradas.map(n => n.toString().padStart(2, '0')).join(' - ');
+        document.getElementById('distribuicaoTexto').textContent = `Baixas: ${resultado.distribuicao.baixo} | Médias: ${resultado.distribuicao.medio} | Altas: ${resultado.distribuicao.alto}`;
+
+        // Renderizar apostas (com cor do mês da API)
+        const corMes = CORES_MESES[mesIdx] || '#D4B31A';
+        const container = document.getElementById('listaApostas');
+        container.innerHTML = apostasGeradasData.map(a => `
+            <div class="aposta-item">
+                <div class="aposta-numero">${a.numero}</div>
+                <div class="aposta-dezenas">
+                    ${a.dezenas.map(d => `<span class="aposta-dezena">${d.toString().padStart(2, '0')}</span>`).join('')}
+                </div>
+                <div class="aposta-mes" style="background-color: ${corMes};">${a.mesCompleto}</div>
+            </div>
+        `).join('');
+
+        // Custo (considerando multiplicador do bolão)
+        const multiplicador = MULTIPLICADORES_DEZENAS[dezenasAposta] || 1;
+        const valorUnitario = valorAposta * multiplicador;
+        const custoTotal = apostasGeradasData.length * valorUnitario;
+        document.getElementById('qtdApostas').textContent = apostasGeradasData.length;
+
+        const labelCusto = dezenasAposta > 7
+            ? `Custo: R$ ${custoTotal.toFixed(2).replace('.', ',')} (${dezenasAposta} dez)`
+            : `Custo: R$ ${custoTotal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('custoTotalApostas').textContent = labelCusto;
+
+        document.getElementById('apostasGeradas').style.display = 'block';
+    }
+
+    // ============================================================
+    // DOWNLOADS
+    // ============================================================
+    function downloadTXT() {
+        if (!apostasGeradasData.length) return;
+        const conteudo = apostasGeradasData.map(a =>
+            a.dezenas.map(d => d.toString().padStart(2, '0')).join(' ') + ' ' + a.mes
+        ).join('\n');
+
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `apostas_dia_de_sorte.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function downloadXLSX() {
+        if (!apostasGeradasData.length) return;
+        const qtdDezenas = apostasGeradasData[0].dezenas.length;
+        const dados = apostasGeradasData.map(a => {
+            const row = { 'Aposta': a.numero };
+            a.dezenas.forEach((d, i) => {
+                row[`D${i + 1}`] = d;
+            });
+            row['Mês'] = a.mesCompleto;
+            return row;
+        });
+        const ws = XLSX.utils.json_to_sheet(dados);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Apostas');
+        XLSX.writeFile(wb, `apostas_dia_de_sorte_${qtdDezenas}dez.xlsx`);
+    }
+
+    function downloadHTML() {
+        if (!apostasGeradasData.length) return;
+        const qtdDezenas = apostasGeradasData[0].dezenas.length;
+        const multiplicador = MULTIPLICADORES_DEZENAS[qtdDezenas] || 1;
+        const valorUnitario = valorAposta * multiplicador;
+        const custoTotal = apostasGeradasData.length * valorUnitario;
+        const mesSelecionado = getMesSelecionado();
+        const corMesHTML = CORES_MESES[mesSelecionado.mes] || '#D4B31A';
+
+        // Gerar cabeçalhos dinâmicos
+        const headerDezenas = Array.from({length: qtdDezenas}, (_, i) => `<th>D${i+1}</th>`).join('');
+
+        const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Apostas Dia de Sorte${qtdDezenas > 7 ? ` - Bolão ${qtdDezenas} dezenas` : ''}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #D4B31A; text-align: center; }
+        .info { background: #fcf9e8; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .bolao-badge { background: #D4B31A; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #D4B31A; color: white; padding: 10px 6px; font-size: 0.85rem; }
+        td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        tr:nth-child(even) { background: #fcf9e8; }
+        .mes { background: ${corMesHTML}; color: white; padding: 5px 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍀 Apostas Dia de Sorte ${qtdDezenas > 7 ? `<span class="bolao-badge">🎱 Bolão ${qtdDezenas} dez</span>` : ''}</h1>
+        <div class="info">
+            <p><strong>Dezenas Base:</strong> ${dezenasGeradas.map(n => n.toString().padStart(2, '0')).join(' - ')}</p>
+            <p><strong>Total:</strong> ${apostasGeradasData.length} apostas × ${qtdDezenas} dezenas | <strong>Custo:</strong> R$ ${custoTotal.toFixed(2).replace('.', ',')}</p>
+        </div>
+        <table>
+            <thead><tr><th>Nº</th>${headerDezenas}<th>Mês</th></tr></thead>
+            <tbody>
+                ${apostasGeradasData.map(a => `<tr><td><strong>${a.numero}</strong></td>${a.dezenas.map(d => `<td>${d.toString().padStart(2, '0')}</td>`).join('')}<td><span class="mes">${a.mesCompleto}</span></td></tr>`).join('')}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>`;
+
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'apostas_dia_de_sorte.html';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ============================================================
+    // UTILITÁRIOS
+    // ============================================================
+    function mostrarAlerta(msg) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog"><div class="modal-content">
+                <div class="modal-header" style="background:#D4B31A;color:white;"><h5>Atenção</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">${msg}</div>
+                <div class="modal-footer"><button class="btn-ds-primary" data-bs-dismiss="modal">OK</button></div>
+            </div></div>`;
+        document.body.appendChild(modal);
+        new bootstrap.Modal(modal).show();
+        modal.addEventListener('hidden.bs.modal', () => modal.remove());
+    }
+
+    function mostrarConfirmacao(msg, onConfirm) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog"><div class="modal-content">
+                <div class="modal-header" style="background:#dc3545;color:white;"><h5>Confirmar</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">${msg}</div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn-ds-danger" id="btnConfirm">Excluir</button></div>
+            </div></div>`;
+        document.body.appendChild(modal);
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        modal.querySelector('#btnConfirm').onclick = () => { bsModal.hide(); onConfirm(); };
+        modal.addEventListener('hidden.bs.modal', () => modal.remove());
+    }
+</script>
+{% endblock %}

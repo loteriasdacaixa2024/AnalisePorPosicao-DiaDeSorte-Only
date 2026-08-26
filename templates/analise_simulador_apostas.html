@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}Simulador de Apostas Consistentes - Dia de Sorte{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">🎰 Simulador de Apostas Consistentes</h2>
+                <a href="/" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+            <p class="text-muted mt-2">Simule sua estratégia de apostas e veja como teria performado no histórico</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🎯 Configurar Aposta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Escolha 7 Números (1-31):</strong></label>
+                        <div id="numerosGrid" class="d-flex flex-wrap gap-2 mb-3">
+                        </div>
+                        <small class="text-muted">Selecionados: <span id="contadorNumeros">0</span>/7</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mesAposta" class="form-label"><strong>Mês da Sorte:</strong></label>
+                        <select class="form-select" id="mesAposta">
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7" selected>Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+
+                    <!-- NÚCLEO ESTRATÉGICO -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="chk-usar-nucleo-simulador" style="width: 3em; height: 1.5em;">
+                                <label class="form-check-label fw-bold" for="chk-usar-nucleo-simulador">
+                                    🎯 Usar Núcleo Estratégico
+                                </label>
+                            </div>
+                            <a href="/gerador-padroes" target="_blank" class="btn btn-sm btn-outline-primary">
+                                ⚙️ Configurar núcleo <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                        <div id="info-nucleo-simulador" class="alert alert-warning mt-2 py-2" style="display: none;">
+                            <small>
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                <strong>Núcleo:</strong> <span id="nucleo-numeros-simulador">--</span><br>
+                                <small class="text-muted">Números do núcleo serão selecionados automaticamente</small>
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="limiteConcursos" class="form-label"><strong>Limitar Simulação (opcional):</strong></label>
+                        <input type="number" class="form-control" id="limiteConcursos" placeholder="Deixe em branco para todos">
+                        <small class="text-muted">Simular apenas os N primeiros concursos</small>
+                    </div>
+
+                    <button class="btn btn-success w-100" onclick="simularAposta()">
+                        <i class="bi bi-play-fill"></i> Simular Aposta
+                    </button>
+
+                    <button class="btn btn-outline-secondary w-100 mt-2" onclick="limparSelecao()">
+                        <i class="bi bi-arrow-clockwise"></i> Limpar Seleção
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div id="resultadoSimulacao" style="display: none;">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">📊 Resumo da Simulação</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <h3 id="totalConcursos" class="text-primary mb-0">-</h3>
+                                <small class="text-muted">Concursos</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h3 id="mediaAcertos" class="text-success mb-0">-</h3>
+                                <small class="text-muted">Média Acertos</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h3 id="taxaAcerto" class="text-warning mb-0">-</h3>
+                                <small class="text-muted">Taxa Acerto</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h3 id="taxaMes" class="text-info mb-0">-</h3>
+                                <small class="text-muted">Acerto Mês</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">💰 Prêmio Total</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <h4 id="premioTotal" class="text-success mb-0">-</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">💸 Custo Total</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <h4 id="custoTotal" class="text-danger mb-0">-</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm" id="cardLucro">
+                            <div class="card-header" id="headerLucro">
+                                <h6 class="mb-0">💚 Lucro Líquido</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <h4 id="lucroLiquido" class="mb-0">-</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📈 Distribuição de Acertos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="distribuicaoAcertos"></div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">🏆 Melhor Resultado</h6>
+                            </div>
+                            <div class="card-body" id="melhorResultado">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0">📉 Pior Resultado</h6>
+                            </div>
+                            <div class="card-body" id="piorResultado">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-warning mb-4">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">💡 Insights Inteligentes</h5>
+                    </div>
+                    <div class="card-body" id="insightsContainer">
+                    </div>
+                </div>
+            </div>
+
+            <div id="placeholderInicial" class="text-center py-5">
+                <i class="bi bi-arrow-left-circle" style="font-size: 4rem; color: #ccc;"></i>
+                <h5 class="text-muted mt-3">Configure sua aposta ao lado e clique em "Simular"</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.numero-btn {
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    font-weight: bold;
+}
+
+.numero-btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+</style>
+
+<script>
+const numerosSelecionados = new Set();
+
+document.addEventListener('DOMContentLoaded', function() {
+    criarGridNumeros();
+});
+
+function criarGridNumeros() {
+    const grid = document.getElementById('numerosGrid');
+    let html = '';
+
+    for (let i = 1; i <= 31; i++) {
+        html += '<button class="btn btn-outline-primary numero-btn" data-numero="' + i + '" onclick="toggleNumero(' + i + ')">' + i + '</button>';
+    }
+
+    grid.innerHTML = html;
+}
+
+function toggleNumero(numero) {
+    if (numerosSelecionados.has(numero)) {
+        numerosSelecionados.delete(numero);
+        document.querySelector('[data-numero="' + numero + '"]').classList.remove('active');
+    } else {
+        if (numerosSelecionados.size < 7) {
+            numerosSelecionados.add(numero);
+            document.querySelector('[data-numero="' + numero + '"]').classList.add('active');
+        }
+    }
+
+    document.getElementById('contadorNumeros').textContent = numerosSelecionados.size;
+}
+
+function limparSelecao() {
+    numerosSelecionados.clear();
+    document.querySelectorAll('.numero-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('contadorNumeros').textContent = '0';
+}
+
+function simularAposta() {
+    if (numerosSelecionados.size !== 7) {
+        mostrarErro('Você deve selecionar exatamente 7 números!');
+        return;
+    }
+
+    const numeros = Array.from(numerosSelecionados).sort((a, b) => a - b);
+    const mes = parseInt(document.getElementById('mesAposta').value);
+    const limite = document.getElementById('limiteConcursos').value;
+
+    const payload = {
+        numeros: numeros,
+        mes: mes,
+        concursos_limite: limite ? parseInt(limite) : null
+    };
+
+    document.getElementById('placeholderInicial').style.display = 'none';
+    document.getElementById('resultadoSimulacao').style.display = 'none';
+
+    fetch('/api/analise/simulador-apostas', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            mostrarErro(data.error);
+            return;
+        }
+
+        exibirResultado(data);
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        mostrarErro('Erro ao processar simulação');
+    });
+}
+
+function mostrarErro(mensagem) {
+    const placeholder = document.getElementById('placeholderInicial');
+    placeholder.innerHTML = '<div class="alert alert-danger"><strong>Erro:</strong> ' + mensagem + '</div>';
+    placeholder.style.display = 'block';
+}
+
+function exibirResultado(data) {
+    document.getElementById('totalConcursos').textContent = data.total_concursos;
+    document.getElementById('mediaAcertos').textContent = data.media_acertos;
+    document.getElementById('taxaAcerto').textContent = data.taxa_acerto + '%';
+    document.getElementById('taxaMes').textContent = data.taxa_acerto_mes + '%';
+
+    document.getElementById('premioTotal').textContent = 'R$ ' + data.premio_total.toFixed(2);
+    document.getElementById('custoTotal').textContent = 'R$ ' + data.custo_total.toFixed(2);
+    document.getElementById('lucroLiquido').textContent = 'R$ ' + data.lucro_liquido.toFixed(2);
+
+    const cardLucro = document.getElementById('cardLucro');
+    const headerLucro = document.getElementById('headerLucro');
+    const lucroText = document.getElementById('lucroLiquido');
+
+    if (data.lucro_liquido > 0) {
+        cardLucro.className = 'card shadow-sm border-success';
+        headerLucro.className = 'card-header bg-success text-white';
+        headerLucro.innerHTML = '<h6 class="mb-0">💚 Lucro Líquido</h6>';
+        lucroText.className = 'mb-0 text-success';
+    } else {
+        cardLucro.className = 'card shadow-sm border-danger';
+        headerLucro.className = 'card-header bg-danger text-white';
+        headerLucro.innerHTML = '<h6 class="mb-0">💔 Prejuízo</h6>';
+        lucroText.className = 'mb-0 text-danger';
+    }
+
+    exibirDistribuicao(data.acertos_por_quantidade, data.percentual_acertos);
+    exibirMelhorPior(data.melhor_resultado, data.pior_resultado);
+    gerarInsights(data);
+
+    document.getElementById('resultadoSimulacao').style.display = 'block';
+}
+
+function exibirDistribuicao(acertos, percentuais) {
+    const container = document.getElementById('distribuicaoAcertos');
+    let html = '';
+
+    for (let i = 0; i <= 7; i++) {
+        const largura = percentuais[i];
+        html += '<div class="mb-2">';
+        html += '<div class="d-flex justify-content-between mb-1">';
+        html += '<span><strong>' + i + ' acertos:</strong></span>';
+        html += '<span>' + acertos[i] + 'x (' + percentuais[i] + '%)</span>';
+        html += '</div>';
+        html += '<div class="progress">';
+        html += '<div class="progress-bar bg-primary" style="width: ' + largura + '%"></div>';
+        html += '</div>';
+        html += '</div>';
+    }
+
+    container.innerHTML = html;
+}
+
+function exibirMelhorPior(melhor, pior) {
+    const meses = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    document.getElementById('melhorResultado').innerHTML = 
+        '<p class="mb-2"><strong>Concurso:</strong> ' + melhor.concurso + '</p>' +
+        '<p class="mb-2"><strong>Acertos:</strong> ' + melhor.quantidade_acertos + '/7</p>' +
+        '<p class="mb-2"><strong>Números:</strong> ' + melhor.acertos.join(', ') + '</p>' +
+        '<p class="mb-2"><strong>Mês:</strong> ' + meses[melhor.mes_sorteio] + (melhor.acerto_mes ? ' ✅' : '') + '</p>' +
+        '<p class="mb-0"><strong>Prêmio:</strong> R$ ' + melhor.premio_estimado.toFixed(2) + '</p>';
+
+    document.getElementById('piorResultado').innerHTML = 
+        '<p class="mb-2"><strong>Concurso:</strong> ' + pior.concurso + '</p>' +
+        '<p class="mb-2"><strong>Acertos:</strong> ' + pior.quantidade_acertos + '/7</p>' +
+        '<p class="mb-0"><strong>Prêmio:</strong> R$ ' + pior.premio_estimado.toFixed(2) + '</p>';
+}
+
+function gerarInsights(data) {
+    const insights = [];
+
+    if (data.lucro_liquido > 0) {
+        insights.push({
+            icone: '💰',
+            titulo: 'Estratégia Lucrativa!',
+            texto: 'Sua aposta teria gerado um lucro de R$ ' + data.lucro_liquido.toFixed(2) + ' ao longo de ' + data.total_concursos + ' concursos. Taxa de retorno: ' + ((data.premio_total / data.custo_total) * 100).toFixed(1) + '%'
+        });
+    } else {
+        insights.push({
+            icone: '💔',
+            titulo: 'Estratégia com Prejuízo',
+            texto: 'Sua aposta teria gerado prejuízo de R$ ' + Math.abs(data.lucro_liquido).toFixed(2) + '. Investimento: R$ ' + data.custo_total.toFixed(2) + ', Retorno: R$ ' + data.premio_total.toFixed(2)
+        });
+    }
+
+    if (data.melhor_resultado.quantidade_acertos >= 5) {
+        insights.push({
+            icone: '🏆',
+            titulo: 'Melhor Resultado: ' + data.melhor_resultado.quantidade_acertos + ' Acertos',
+            texto: 'No concurso ' + data.melhor_resultado.concurso + ', você teria acertado ' + data.melhor_resultado.quantidade_acertos + ' números (' + data.melhor_resultado.acertos.join(', ') + ') e ganho R$ ' + data.melhor_resultado.premio_estimado.toFixed(2) + '!'
+        });
+    }
+
+    if (data.taxa_acerto < 50) {
+        insights.push({
+            icone: '⚠️',
+            titulo: 'Baixa Taxa de Acerto: ' + data.taxa_acerto + '%',
+            texto: 'Apenas ' + data.concursos_com_acerto + ' de ' + data.total_concursos + ' concursos tiveram ao menos 1 acerto. Considere ajustar sua estratégia.'
+        });
+    } else {
+        insights.push({
+            icone: '✅',
+            titulo: 'Boa Consistência: ' + data.taxa_acerto + '%',
+            texto: data.concursos_com_acerto + ' concursos tiveram acertos. Média de ' + data.media_acertos + ' números por concurso.'
+        });
+    }
+
+    exibirInsights(insights);
+}
+
+function exibirInsights(insights) {
+    const container = document.getElementById('insightsContainer');
+    let html = '';
+
+    const insightsExibir = insights.slice(0, 3);
+    const medalhas = ['🥇', '🥈', '🥉'];
+
+    insightsExibir.forEach(function(insight, index) {
+        html += '<div class="alert alert-light border-start border-5 border-warning mb-3">';
+        html += '<h6>' + medalhas[index] + ' ' + insight.titulo + '</h6>';
+        html += '<p class="mb-0">' + insight.icone + ' ' + insight.texto + '</p>';
+        html += '</div>';
+    });
+
+    html += '<div class="alert alert-info mb-0">';
+    html += '<strong>💡 Recomendação Estratégica:</strong><br>';
+    html += 'Use este simulador para testar diferentes combinações. Números com alto índice de "dívida" + posições favoritas + meses regulares tendem a gerar melhores resultados. ';
+    html += 'Lembre-se: resultados passados não garantem ganhos futuros!';
+    html += '</div>';
+
+    container.innerHTML = html;
+}
+
+// =============================================
+// NÚCLEO ESTRATÉGICO
+// =============================================
+function verificarNucleoDisponivel() {
+    const nucleoData = localStorage.getItem('nucleoEstrategico');
+    const chk = document.getElementById('chk-usar-nucleo-simulador');
+    const infoDiv = document.getElementById('info-nucleo-simulador');
+    const numerosSpan = document.getElementById('nucleo-numeros-simulador');
+
+    if (nucleoData) {
+        try {
+            const nucleo = JSON.parse(nucleoData);
+            const nucleoPrincipal = nucleo.principal || [];
+            
+            chk.disabled = false;
+            numerosSpan.textContent = nucleoPrincipal.map(n => String(n).padStart(2, '0')).join(', ');
+            
+            if (chk.checked) {
+                infoDiv.style.display = 'block';
+                aplicarNucleoNaSelecao(nucleoPrincipal);
+            }
+        } catch (e) {
+            chk.disabled = true;
+            console.warn('Erro ao carregar núcleo:', e);
+        }
+    } else {
+        chk.disabled = true;
+        infoDiv.style.display = 'none';
+    }
+}
+
+function aplicarNucleoNaSelecao(nucleoPrincipal) {
+    // Limpar seleção atual
+    limparSelecao();
+    
+    // Adicionar números do núcleo
+    nucleoPrincipal.forEach(num => {
+        if (num >= 1 && num <= 31) {
+            toggleNumero(num);
+        }
+    });
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    verificarNucleoDisponivel();
+    
+    document.getElementById('chk-usar-nucleo-simulador')?.addEventListener('change', function() {
+        const infoDiv = document.getElementById('info-nucleo-simulador');
+        infoDiv.style.display = this.checked ? 'block' : 'none';
+        
+        if (this.checked) {
+            const nucleoData = localStorage.getItem('nucleoEstrategico');
+            if (nucleoData) {
+                const nucleo = JSON.parse(nucleoData);
+                aplicarNucleoNaSelecao(nucleo.principal || []);
+            }
+        }
+    });
+    
+    window.addEventListener('storage', verificarNucleoDisponivel);
+});
+</script>
+{% endblock %}
