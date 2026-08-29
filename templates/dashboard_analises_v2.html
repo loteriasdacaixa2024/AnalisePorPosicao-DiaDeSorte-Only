@@ -2,7 +2,7 @@
 {% block title %}Dashboard de Análises - Dia de Sorte{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="/static/css/analise_linhas.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/analise_linhas.css">
 <style>
     :root {
         --cor-primary: #D4B31A;
@@ -1455,5 +1455,5 @@ async function sincronizarTodas() {
     btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Sincronizar API';
 }
 </script>
-<script src="/static/js/components/analise_linhas.js"></script>
+<script src="{{ app_root }}/static/js/components/analise_linhas.js"></script>
 {% endblock %}

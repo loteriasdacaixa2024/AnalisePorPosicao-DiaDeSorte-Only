@@ -168,7 +168,7 @@
                 
                 // Redirecionar após 1 segundo
                 setTimeout(() => {
-                    window.location.href = '/';
+                    window.location.href = window.appUrl('/');
                 }, 1000);
             } else {
                 mostrarAlerta(data.erro || 'Erro ao fazer login', 'danger');
@@ -227,7 +227,7 @@
                 
                 // Redirecionar após 1 segundo
                 setTimeout(() => {
-                    window.location.href = '/';
+                    window.location.href = window.appUrl('/');
                 }, 1000);
             } else {
                 mostrarAlerta(data.erro || 'Erro ao criar conta', 'danger');
@@ -245,7 +245,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('access_token');
         if (token) {
-            window.location.href = '/';
+            window.location.href = window.appUrl('/');
         }
     });
 </script>

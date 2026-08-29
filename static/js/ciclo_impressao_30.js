@@ -356,7 +356,7 @@
                             String(data.sessao_id)
                         );
                     }
-                    window.location.href = '/central-conferencias#pane-conferencia-historica';
+                    window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
                 } else {
                     alert('Erro: ' + (data.erro || 'Falha ao enviar'));
                 }

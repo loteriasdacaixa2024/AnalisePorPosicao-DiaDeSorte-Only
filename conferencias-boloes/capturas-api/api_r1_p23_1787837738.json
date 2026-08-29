@@ -1,0 +1,139 @@
+[
+  {
+    "data": {
+      "dataHoraServidor": "2026-08-27T08:09:32.293",
+      "payload": {
+        "apostas": [
+          {
+            "dezenas": [
+              3,
+              6,
+              9,
+              10,
+              17,
+              20,
+              24,
+              27,
+              29
+            ],
+            "indicadorSurpresinha": true,
+            "mesDeSorte": {
+              "abreviacao": "ABR",
+              "nome": "Abril",
+              "numero": 4
+            }
+          },
+          {
+            "dezenas": [
+              1,
+              7,
+              11,
+              17,
+              18,
+              21,
+              23,
+              26,
+              30
+            ],
+            "indicadorSurpresinha": true,
+            "mesDeSorte": {
+              "abreviacao": "JUN",
+              "nome": "Junho",
+              "numero": 6
+            }
+          },
+          {
+            "dezenas": [
+              1,
+              3,
+              6,
+              7,
+              8,
+              9,
+              13,
+              20,
+              29
+            ],
+            "indicadorSurpresinha": true,
+            "mesDeSorte": {
+              "abreviacao": "JAN",
+              "nome": "Janeiro",
+              "numero": 1
+            }
+          }
+        ],
+        "concurso": 1283,
+        "contemResiduo": false,
+        "dataSorteio": "27/08/2026",
+        "diaSorteio": "Quinta-feira",
+        "horaSorteio": "21:00:00",
+        "loterica": 7181,
+        "lotericaFormatada": {
+          "bairro": "JARDIM AMERICA DA PENHA                 ",
+          "codigo": "21.007181-8",
+          "dv": 8,
+          "dvMunicipio": 8,
+          "id": 7181,
+          "idMunicipio": 5030,
+          "idUF": 35,
+          "logradouro": "AV CDSSA ELISABETH DE ROBIANO 5500                ",
+          "nome": "LANZARA LOTERIAS LTDA                                                                                              ",
+          "nomeFantasia": "LOTERICA AMIGOS",
+          "nomeMunicipio": "SAO PAULO                          ",
+          "nomeUF": "SAO PAULO           ",
+          "numeroFormatado": "21.007181-8",
+          "polo": 21,
+          "situacao": {
+            "descricao": "ATIVO                              ",
+            "valor": 1
+          }
+        },
+        "modalidade": "DIA_DE_SORTE",
+        "municipioCota": {
+          "id": {
+            "codigoUF": 35,
+            "digitoVerificador": 8,
+            "numero": 5030
+          },
+          "nome": "SAO PAULO",
+          "uf": {
+            "id": 35,
+            "nome": "SAO PAULO           ",
+            "sigla": "SP"
+          }
+        },
+        "nomeFantasia": "LOTERICA AMIGOS",
+        "nomeRazaoSocial": "LANZARA LOTERIAS LTDA",
+        "qtdApostas": 3,
+        "qtdCotaBaixadas": 0,
+        "qtdCotaBaixadasImpressas": 0,
+        "qtdCotaDigital": 25,
+        "qtdCotaDisponivel": 17,
+        "qtdCotaFisica": 0,
+        "qtdCotaReservada": 0,
+        "qtdCotaTotal": 25,
+        "qtdCotaVendidas": 8,
+        "qtdNumeros": 9,
+        "tipoConcurso": 1,
+        "uf": {
+          "id": 35,
+          "nome": "SAO PAULO           ",
+          "sigla": "SP"
+        },
+        "vrCotaComTarifa": 14.58,
+        "vrCotaSemTarifa": 10.8,
+        "vrPremioEstimado": 1600000,
+        "vrTarifaBolao": 94.5,
+        "vrTarifaServicoCota": 3.78,
+        "vrTarifaServicoUltimaCota": 3.78,
+        "vrTotalBolaoComTarifa": 364.5,
+        "vrTotalBolaoSemTarifa": 270,
+        "vrUltimaCotaComTarifa": 14.58,
+        "vrUltimaCotaSemTarifa": 10.8
+      },
+      "versao": "2.99.2.10"
+    },
+    "ts": 1787837677969,
+    "url": "/silce-servico-rest/rest/v1/Ym9sb2VzL2RldGFsaGFyLWJvbGFv/?q=%60%0F%26%04Ra%1B%C3%B8$%C3%9C%C3%BCg%03%C2%B2$%1A%25%C3%9B%C2%91aO%C2%A8f,%2B%C3%B5%C3%AB%C3%AD%230%C2%BD%C3%9C%C3%B6%C2%A1%3D%5C%13u%13%C3%95%C3%AB%C2%BD%00%C2%9B%C3%9E%C3%9D%C2%98%C3%9A!%23!%23!%C2%85%C3%BA%C3%88YSY%0Bl%C3%A4ta%C2%A4%C2%9Ahl%1B!%23!%23!forge.random.get"
+  }
+]

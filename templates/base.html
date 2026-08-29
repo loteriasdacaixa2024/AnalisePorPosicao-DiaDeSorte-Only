@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-app-root="{{ app_root }}">
 
 <head>
     <meta charset="UTF-8">
@@ -17,9 +17,10 @@
 
 
     <!-- CSS Customizado -->
-    <link rel="stylesheet" href="/static/css/colors.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
-    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="{{ app_root }}/static/css/colors.css">
+    <link rel="stylesheet" href="{{ app_root }}/static/css/styles.css">
+    <link rel="stylesheet" href="{{ app_root }}/static/css/responsive.css">
+    <script src="{{ app_root }}/static/js/app_root.js"></script>
 
 
     <!-- CSS Dinâmico das Cores dos Meses via config_meses.json -->
@@ -48,7 +49,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="{{ app_root }}/">
                 <div class="logo d-inline-block me-2"></div>
                 <span class="fw-bold">Análise por Posição</span>
             </a>
@@ -61,7 +62,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
+                        <a class="nav-link" href="{{ app_root }}/">
                             <i class="fas fa-home me-1"></i>Início
                         </a>
                     </li>
@@ -76,47 +77,47 @@
                         <ul class="dropdown-menu" aria-labelledby="dashboards">
                             <li><h6 class="dropdown-header">Especiais</h6></li>
                             <li>
-                                <a class="dropdown-item" href="/central-conferencias#conferencia-historica" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/central-conferencias#conferencia-historica" target="_blank"
                                     rel="noopener noreferrer">⚖️ Conferência Histórica</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/filtrador-combinacoes/" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/filtrador-combinacoes/" target="_blank"
                                     rel="noopener noreferrer">⚖️ Filtrador Combinações</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/central-conferencias#conferencia-filtro" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/central-conferencias#conferencia-filtro" target="_blank"
                                     rel="noopener noreferrer">⚖️ Conferência Filtro</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/analise-visual/#pane-simulador-filtros" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/analise-visual/#pane-simulador-filtros" target="_blank"
                                     rel="noopener noreferrer">⚖️ Simulador Filtro</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/analise/numeros-atrasados" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/analise/numeros-atrasados" target="_blank"
                                     rel="noopener noreferrer">⚖️ Números Atrasados</a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Comparar em Conferência Histórica</h6></li>
                             <li>
-                                <a class="dropdown-item" href="/gerador-especial/" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/gerador-especial/" target="_blank"
                                     rel="noopener noreferrer">🎯 Gerador Especial (Turbinado)</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/analise/numeros-atrasados#tab-afinidade" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/analise/numeros-atrasados#tab-afinidade" target="_blank"
                                     rel="noopener noreferrer">🧠 Afinidade IA</a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item" href="/indice-analises">
+                                <a class="dropdown-item" href="{{ app_root }}/indice-analises">
                                     <i class="fas fa-sitemap me-1 text-primary"></i>Índice Central de Análises
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/dashboard-analises" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/dashboard-analises" target="_blank"
                                     rel="noopener noreferrer">⚖️ Dashboard</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/dashboard-analises-v2" target="_blank"
+                                <a class="dropdown-item" href="{{ app_root }}/dashboard-analises-v2" target="_blank"
                                     rel="noopener noreferrer">⚖️ Dashboard com análises (Testando) </a>
                             </li>
                       </ul>
@@ -130,27 +131,27 @@
 						
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownIndispensaveis">
 						
-                            <li><a class="dropdown-item" href="/analise/tubular">🎯 Análise Tubular Inteligente</a></li>
-                            <li><a class="dropdown-item" href="/analise/estrutura-apostas">🧩 Estrutura de Apostas
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/tubular">🎯 Análise Tubular Inteligente</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/estrutura-apostas">🧩 Estrutura de Apostas
                                     (Teoria 3 Faltantes)</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                                 <span><small><b>Diversos (Mas indispensáveis)</b></small></span>
                             </li>
                             <!--🆕 NOVO MÓDULO ESTRATÉGICO -->
-                            <li><a class="dropdown-item" href="/analise-ciclos-dezenas">🔄 Ciclos das Dezenas (NOVO)</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise-ciclos-dezenas">🔄 Ciclos das Dezenas (NOVO)</a>
                             </li>
-                            <!--<li><hr class="dropdown-divider"><span><small><b>Fechamentos</b><a href="/conceitos">Saiba+</a></a></small></span></li>-->
+                            <!--<li><hr class="dropdown-divider"><span><small><b>Fechamentos</b><a href="{{ app_root }}/conceitos">Saiba+</a></a></small></span></li>-->
                             <li>
                                 <hr class="dropdown-divider">
                                 <span>
                                     <small>
                                         <b>Fechamentos</b>
-                                        <a href="/conceitos">Saiba+</a>
+                                        <a href="{{ app_root }}/conceitos">Saiba+</a>
                                     </small>
                                 </span>
                             </li>
-                            <li><a class="dropdown-item" href="/ferramentas/fechamentos">🎰 Central de Fechamentos</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/ferramentas/fechamentos">🎰 Central de Fechamentos</a>
                             </li>
                             <!--<li><hr class="dropdown-divider"><span><small><b>Desdobramentos</b></small></span></li>-->
                             <li>
@@ -158,50 +159,50 @@
                                 <span>
                                     <small>
                                         <b>Desdobramentos</b>
-                                        <a href="/conceitos">Saiba+</a>
+                                        <a href="{{ app_root }}/conceitos">Saiba+</a>
                                     </small>
                                 </span>
                             </li>
-                            <li><a class="dropdown-item" href="/analise-visual">🧮 Análise Visual </a></li>
-                            <li><a class="dropdown-item" href="/desdobramentos">🎯 Vários Modelos (E)</a></li>
-                            <li><a class="dropdown-item" href="/estatisticas">🧮 Estatística</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise-visual">🧮 Análise Visual </a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/desdobramentos">🎯 Vários Modelos (E)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">🧮 Estatística</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                                 <span>
                                     <small>
                                         <b>Garantias</b>
-                                        <a href="/conceitos">Saiba+</a>
+                                        <a href="{{ app_root }}/conceitos">Saiba+</a>
                                     </small>
                                 </span>
                             </li>
-                            <!--<li><a class="dropdown-item" href="/apostas-com-garantia">🔒 Apostas</a></li>
-                        <li><a class="dropdown-item" href="/estrategias-dinamicas">⚙️ Estratégias Dinâmicas</a></li>-->
-                            <li><a class="dropdown-item" href="/central-garantias">⚙️ Central de Garantias</a></li>
+                            <!--<li><a class="dropdown-item" href="{{ app_root }}/apostas-com-garantia">🔒 Apostas</a></li>
+                        <li><a class="dropdown-item" href="{{ app_root }}/estrategias-dinamicas">⚙️ Estratégias Dinâmicas</a></li>-->
+                            <li><a class="dropdown-item" href="{{ app_root }}/central-garantias">⚙️ Central de Garantias</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Resultados</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/resultados">🏆 Resultados dos Concursos (Abas)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/resultados">🏆 Resultados dos Concursos (Abas)</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Conferidores (Apostas)</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/central-conferencias">✅ Central de Conferências</a></li>
-                            <li><a class="dropdown-item" href="/analise-ausentes">✅ Backtest de Ausentes (Escapes)</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/central-conferencias">✅ Central de Conferências</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise-ausentes">✅ Backtest de Ausentes (Escapes)</a>
                             </li>
-                            <!--<li><a class="dropdown-item" href="/conferencia-pos-apostas">✅ Pós-Apostas</a></li>
-                        <li><a class="dropdown-item" href="/conferencia-apostas-ocr">✅ Via OCR (Combinações Inteligentes)</a></li>-->
+                            <!--<li><a class="dropdown-item" href="{{ app_root }}/conferencia-pos-apostas">✅ Pós-Apostas</a></li>
+                        <li><a class="dropdown-item" href="{{ app_root }}/conferencia-apostas-ocr">✅ Via OCR (Combinações Inteligentes)</a></li>-->
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Geradores / Simuladores /
                                             Palpites</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/estatisticas#gerador-palpites">✅ Gerador de Palpites
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas#gerador-palpites">✅ Gerador de Palpites
                                     (Stats)</a></li>
-                            <li><a class="dropdown-item" href="/gerador-inteligente/">✅ Gerador Inteligente (2.6M
+                            <li><a class="dropdown-item" href="{{ app_root }}/gerador-inteligente/">✅ Gerador Inteligente (2.6M
                                     Combinações)</a></li>
-                            <li><a class="dropdown-item" href="/gerador-padroes">✅ Gerador Completo por Padrões
+                            <li><a class="dropdown-item" href="{{ app_root }}/gerador-padroes">✅ Gerador Completo por Padrões
                                     (Abas)</a></li>
-                            <li><a class="dropdown-item" href="/gerador-especial/">✅ Gerador Especial (Turbinado)</a></li>
-                            <li><a class="dropdown-item" href="/analise/simulador-apostas">🎲 Simulador (Apostas)</a></li>
-                            <li><a class="dropdown-item" href="/palpites"><i class="fas fa-lightbulb me-1"></i>🎰
+                            <li><a class="dropdown-item" href="{{ app_root }}/gerador-especial/">✅ Gerador Especial (Turbinado)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/simulador-apostas">🎲 Simulador (Apostas)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/palpites"><i class="fas fa-lightbulb me-1"></i>🎰
                                     Palpites </a></li>
                             <!--
 							TRATAR ESTA ROTA NA BUSCA INTELIGENTE E TRANSFORMAR O REALCE EM QUE VAI APARECENDO A SEQUENCIA PROCURADA
@@ -210,25 +211,25 @@
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Conversor</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/conversor-apostas">📄 ⚔️ 🧩 TXT vs Json</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/conversor-apostas">📄 ⚔️ 🧩 TXT vs Json</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Filtradores</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/filtrador-combinacoes/">✅ Filtrador de Combinações</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/filtrador-combinacoes/">✅ Filtrador de Combinações</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Monitoramentos</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/monitoramento-apostas">✅ Apostas (testanto)</a></li>
-                            <li><a class="dropdown-item" href="/analise/frequencia-premios">🏆 Frequência de Prêmios</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/monitoramento-apostas">✅ Apostas (testanto)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/frequencia-premios">🏆 Frequência de Prêmios</a>
                             </li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Estatisticas</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/estatisticas">🏆 Estatisticas (Abas)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">🏆 Estatisticas (Abas)</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Registro de Eventos</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/eventos-intuitivos">🎯 Eventos Intuitivos </a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/eventos-intuitivos">🎯 Eventos Intuitivos </a></li>
 
                         </ul>
                     </li>
@@ -240,35 +241,35 @@
                             <i class="fa-solid fa-chart-pie me-1"></i>Estatísticas Gerais I
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticas1">
-                            <li><a class="dropdown-item" href="/estatisticas">📊 Frequência Geral</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">📊 Frequência Geral</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/analise/pares-impares">⚖️ Pares e Ímpares</a></li>
-                            <li><a class="dropdown-item" href="/analise/previsao-atrasados">🔮 Previsão de Aparição -
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/pares-impares">⚖️ Pares e Ímpares</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/previsao-atrasados">🔮 Previsão de Aparição -
                                     Atrasados</a></li>
-                            <li><a class="dropdown-item" href="/analise/matriz-probabilidade">📐 Matriz de
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/matriz-probabilidade">📐 Matriz de
                                     Probabilidade</a></li>
-                            <li><a class="dropdown-item" href="/analise/soma-dezenas">➕ Soma das Dezenas</a></li>
-                            <li><a class="dropdown-item" href="/analise/digito-padrao-inicial-final">🔹 Padrão Dígito
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/soma-dezenas">➕ Soma das Dezenas</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/digito-padrao-inicial-final">🔹 Padrão Dígito
                                     Inicial/Final</a></li>
-                            <li><a class="dropdown-item" href="/analise/digitos-unicos">🎲 Dígitos Únicos Usados em Cada
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/digitos-unicos">🎲 Dígitos Únicos Usados em Cada
                                     Sorteio</a></li>
-                            <li><a class="dropdown-item" href="/analise/gaps-distancias">📏 Distância/Gap entre
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/gaps-distancias">📏 Distância/Gap entre
                                     Números</a></li>
-                            <li><a class="dropdown-item" href="/analise/quadrantes-volante">🎯 Quadrantes do Volante</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/quadrantes-volante">🎯 Quadrantes do Volante</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/multiplos">🧩 Múltiplos (3, 5, 7)</a></li>
-                            <li><a class="dropdown-item" href="/analise/raiz-digital">🔸 Raiz Digital</a></li>
-                            <li><a class="dropdown-item" href="/analise/ciclos-intervalos">⏱️ Ciclos e Intervalos</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/multiplos">🧩 Múltiplos (3, 5, 7)</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/raiz-digital">🔸 Raiz Digital</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/ciclos-intervalos">⏱️ Ciclos e Intervalos</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/repeticao-persistencia">🔁 Repetição e
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/repeticao-persistencia">🔁 Repetição e
                                     Persistência</a></li>
-                            <li><a class="dropdown-item" href="/analise/distribuicao-numerica">📊 Distribuição
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/distribuicao-numerica">📊 Distribuição
                                     Numérica</a></li>
-                            <li><a class="dropdown-item" href="/analise/padroes-sequencias">🧩 Padrões de Sequências</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/padroes-sequencias">🧩 Padrões de Sequências</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/probabilidade-condicional">🎯 Probabilidade
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/probabilidade-condicional">🎯 Probabilidade
                                     Condicional</a></li>
                         </ul>
                     </li>
@@ -279,36 +280,36 @@
                             <i class="fas fa-chart-bar me-1"></i>Estatísticas Gerais II
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticasII">
-                            <li><a class="dropdown-item" href="/estatisticas">📊 Análises Geral</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">📊 Análises Geral</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/analise-profunda">🎲 Análise Profunda Simples </a></li>
-                            <li><a class="dropdown-item" href="/analise/volante">🎲 Análise Volante </a></li>
-                            <li><a class="dropdown-item" href="/posicao-minima-maxima">🎲 Análise Posição Máxima
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise-profunda">🎲 Análise Profunda Simples </a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/volante">🎲 Análise Volante </a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/posicao-minima-maxima">🎲 Análise Posição Máxima
                                     Minima</a></li>
-                            <li><a class="dropdown-item" href="/analises/finais-iguais">🎲 Análise Finais Iguais </a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analises/finais-iguais">🎲 Análise Finais Iguais </a>
                             </li>
-                            <li><a class="dropdown-item" href="/analises/sequencias-dezenas">🎲 Análises Sequencia
+                            <li><a class="dropdown-item" href="{{ app_root }}/analises/sequencias-dezenas">🎲 Análises Sequencia
                                     Dezenas </a></li>
-                            <li><a class="dropdown-item" href="/analises/repeticao-concurso-anterior">🎲 Análise
+                            <li><a class="dropdown-item" href="{{ app_root }}/analises/repeticao-concurso-anterior">🎲 Análise
                                     Repetição Concurso Anterior I</a></li>
-                            <li><a class="dropdown-item" href="/repeticao">🎲 Análise Repetição Concurso Anterior II</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/repeticao">🎲 Análise Repetição Concurso Anterior II</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise-colunas/dashboard">🎲 Análises Colunas </a></li>
-                            <li><a class="dropdown-item" href="/cruzamentos/dashboard">🎲 Análises Colunas -
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise-colunas/dashboard">🎲 Análises Colunas </a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/cruzamentos/dashboard">🎲 Análises Colunas -
                                     Cruzamentos</a></li>
-                            <li><a class="dropdown-item" href="/sequenciais/dashboard">🎲 Análises Sequenciais</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/sequenciais/dashboard">🎲 Análises Sequenciais</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Análises Avançadas</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/analise-profunda/v2">🎲 Análise Profunda Avançada</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise-profunda/v2">🎲 Análise Profunda Avançada</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/sazonal">🌍 Análise Sazonal</a></li>
-                            <li><a class="dropdown-item" href="/analise/dezenas-faixas">📈 Análise por Dezenas</a></li>
-                            <li><a class="dropdown-item" href="/analise/sequencias">🔢 Análise de Sequências</a></li>
-                            <li><a class="dropdown-item" href="/analise/defasagem">📉 Análise de Defasagem</a></li>
-                            <li><a class="dropdown-item" href="/analise/fibonacci">📐 Análise Fibonacci</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/sazonal">🌍 Análise Sazonal</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/dezenas-faixas">📈 Análise por Dezenas</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/sequencias">🔢 Análise de Sequências</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/defasagem">📉 Análise de Defasagem</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/fibonacci">📐 Análise Fibonacci</a></li>
                         </ul>
                     </li>
 
@@ -319,26 +320,26 @@
                             <i class="fa-solid fa-chart-simple me-1"></i>Estatísticas Numerais
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownNumerais">
-                            <li><a class="dropdown-item" href="/estatisticas">📊 Por Posição</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">📊 Por Posição</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/analise/numeros-atrasados">⏰ Números Atrasados por
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-atrasados">⏰ Números Atrasados por
                                     Posição</a></li>
-                            <li><a class="dropdown-item" href="/analise/numeros-juntos">🤝 Números que Saem Juntos</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-juntos">🤝 Números que Saem Juntos</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/quentes-frios">🔥❄️ Números Quentes e Frios</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/quentes-frios">🔥❄️ Números Quentes e Frios</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/numeros-repetem">🔁 Números que se Repetem</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-repetem">🔁 Números que se Repetem</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/numeros-devidos">📈 Números "Devidos"</a></li>
-                            <li><a class="dropdown-item" href="/analise/primos-compostos">🔢 Primos vs Compostos</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-devidos">📈 Números "Devidos"</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/primos-compostos">🔢 Primos vs Compostos</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/numeros-consecutivos">👯 Vizinhos /
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-consecutivos">👯 Vizinhos /
                                     Consecutivos</a></li>
-                            <li><a class="dropdown-item" href="/analise/numeros-espelhados">🔄 Números Espelhados</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-espelhados">🔄 Números Espelhados</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/numeros-capicua">♾️ Números Capicua</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/numeros-capicua">♾️ Números Capicua</a></li>
                         </ul>
                     </li>
                     <!-- MESES -->
@@ -348,20 +349,20 @@
                             Meses
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticas3">
-                            <li><a class="dropdown-item" href="/estatisticas">📅 Meses da Sorte</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">📅 Meses da Sorte</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/analise/meses-atrasados">📆 Meses Atrasados</a></li>
-                            <li><a class="dropdown-item" href="/analise/evolucao-meses">📈 Evolução Temporal</a></li>
-                            <li><a class="dropdown-item" href="/analise/expectativa-meses">🧮 Expectativa por Mês</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/meses-atrasados">📆 Meses Atrasados</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/evolucao-meses">📈 Evolução Temporal</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/expectativa-meses">🧮 Expectativa por Mês</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/ciclos-meses">🔄 Ciclos e Padrões</a></li>
-                            <li><a class="dropdown-item" href="/analise/transicao-meses">↔️ Transição entre Meses</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/ciclos-meses">🔄 Ciclos e Padrões</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/transicao-meses">↔️ Transição entre Meses</a>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/correlacao-mes-dezenas">🔗 Correlação
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/correlacao-mes-dezenas">🔗 Correlação
                                     Mês/Dezenas</a></li>
-                            <li><a class="dropdown-item" href="/analise/acumulos-mes">💰 Acúmulos x Mês</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/acumulos-mes">💰 Acúmulos x Mês</a></li>
                         </ul>
                     </li>
 
@@ -372,13 +373,13 @@
                             <i class="fa-solid fa-chart-kanban me-1"></i>Cálculos Variados
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstatisticas4">
-                            <li><a class="dropdown-item" href="/estatisticas">🧮 Atrasados</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/estatisticas">🧮 Atrasados</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/analise/calculadora-probabilidade">🔢 Calculadora de
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/calculadora-probabilidade">🔢 Calculadora de
                                     Probabilidade</a></li>
-                            <li><a class="dropdown-item" href="/analise/valores-probabilidades">📊 Valores e
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/valores-probabilidades">📊 Valores e
                                     Probabilidades</a></li>
                         </ul>
                     </li>
@@ -391,7 +392,7 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownVisualizacoes">
                             <li><a class="dropdown-item" href="https://gerarpalpitesindividualdiadesorte.netlify.app/"
                                     target="_blank">📊 Visualização Tubular (Externo)</a></li>
-                            <li><a class="dropdown-item" href="/visualizacao-tubular">📈 Visualização Tubular
+                            <li><a class="dropdown-item" href="{{ app_root }}/visualizacao-tubular">📈 Visualização Tubular
                                     (Interno)</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>&#128315; Resultados
@@ -415,12 +416,12 @@
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Gaps</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/gaps-completo">📏 x Dígitos</a></li>
-                            <li><a class="dropdown-item" href="/analise/gaps-expandido">📏 x Outras</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/gaps-completo">📏 x Dígitos</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/gaps-expandido">📏 x Outras</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small><b>Padrões Faltantes</b></small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/analise/digito-padrao-inicial-final">🔹 Padrões
+                            <li><a class="dropdown-item" href="{{ app_root }}/analise/digito-padrao-inicial-final">🔹 Padrões
                                     Faltantes</a></li>
                         </ul>
                     </li>
@@ -465,15 +466,15 @@
                             <li>
                                 <hr class="dropdown-divider"><span><small>Configurável</small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/sistema/configuracoes">💲 Valor da Aposta Mínima</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/sistema/configuracoes">💲 Valor da Aposta Mínima</a>
                             </li>
-                            <li><a class="dropdown-item" href="/sistema/configuracoes">🎨 Cores dos Meses</a></li>
+                            <li><a class="dropdown-item" href="{{ app_root }}/sistema/configuracoes">🎨 Cores dos Meses</a></li>
                             <li>
                                 <hr class="dropdown-divider"><span><small>Informativo</small></span>
                             </li>
-                            <li><a class="dropdown-item" href="/sistema/configuracoes">ℹ️ Informações do Sistema</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/sistema/configuracoes">ℹ️ Informações do Sistema</a>
                             </li>
-                            <li><a class="dropdown-item" href="/sistema/configuracoes">⚙️ Todas as Configurações</a>
+                            <li><a class="dropdown-item" href="{{ app_root }}/sistema/configuracoes">⚙️ Todas as Configurações</a>
                             </li>
                         </ul>
                     </li>
@@ -508,7 +509,7 @@
     <!-- SheetJS para exportação XLSX -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <script src="/static/js/laboratorio_alteracoes_enviar.js"></script>
+    <script src="{{ app_root }}/static/js/laboratorio_alteracoes_enviar.js"></script>
 
     {% block extra_js %}{% endblock %}
 </body>

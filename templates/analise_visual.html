@@ -4,9 +4,9 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="/api/configuracoes/cores-analise.css">
-<link rel="stylesheet" href="/static/css/analise_linhas.css">
-<link rel="stylesheet" href="/static/css/analise_colunas.css">
-<link rel="stylesheet" href="/static/css/analise_volante_inteligente.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/analise_linhas.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/analise_colunas.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/analise_volante_inteligente.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mes_da_sorte.css') }}">
 {% endblock %}
 
@@ -11385,13 +11385,13 @@
         }
     });
 </script>
-<script src="/static/js/components/analise_linhas.js"></script>
-<script src="/static/js/components/analise_colunas.js"></script>
-<script src="/static/js/components/analise_volante_inteligente.js"></script>
-<script src="/static/js/components/simulador_elite_analise.js"></script>
-<script src="/static/js/concentracao_estrategica.js"></script>
-<script src="/static/js/mutacao_controlada.js"></script>
-<script src="/static/js/engine_final_elite_dia_sorte.js"></script>
-<script src="/static/js/laboratorio_alteracoes.js"></script>
-<script src="/static/js/tab-hash-activator.js"></script>
+<script src="{{ app_root }}/static/js/components/analise_linhas.js"></script>
+<script src="{{ app_root }}/static/js/components/analise_colunas.js"></script>
+<script src="{{ app_root }}/static/js/components/analise_volante_inteligente.js"></script>
+<script src="{{ app_root }}/static/js/components/simulador_elite_analise.js"></script>
+<script src="{{ app_root }}/static/js/concentracao_estrategica.js"></script>
+<script src="{{ app_root }}/static/js/mutacao_controlada.js"></script>
+<script src="{{ app_root }}/static/js/engine_final_elite_dia_sorte.js"></script>
+<script src="{{ app_root }}/static/js/laboratorio_alteracoes.js"></script>
+<script src="{{ app_root }}/static/js/tab-hash-activator.js"></script>
 {% endblock %}

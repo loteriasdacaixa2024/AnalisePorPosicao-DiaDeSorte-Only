@@ -676,7 +676,7 @@
             btn.disabled = false;
             if (data.sucesso) {
                 alert('Enviado! ' + data.mensagem);
-                window.location.href = '/central-conferencias#pane-conferencia-historica';
+                window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
             } else alert(data.mensagem || 'Erro ao enviar');
         }).catch(() => { btn.innerHTML = orig; btn.disabled = false; });
     };

@@ -534,7 +534,7 @@
             // Redirecionar para página original de resultados
             mostrarToast('Análise concluída! Redirecionando...', 'success');
             setTimeout(() => {
-                window.location.href = '/analise-profunda/';
+                window.location.href = window.appUrl('/analise-profunda/');
             }, 1000);
 
         } catch (error) {

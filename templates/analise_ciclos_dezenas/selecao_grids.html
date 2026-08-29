@@ -470,7 +470,7 @@
         localStorage.setItem('ciclos_fixas', document.getElementById('toggleFixas').checked);
 
         // Redirecionar para gerador
-        window.location.href = '/analise-ciclos-dezenas/gerador';
+        window.location.href = window.appUrl('/analise-ciclos-dezenas/gerador');
     }
 
     function mostrarErro(mensagem) {

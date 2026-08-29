@@ -9,5 +9,14 @@ venv/
 *.log
 login_caixa_config.json
 conferencias-boloes/logs/
+capturas-api
 *.pdf
 *.xlsx
+
+# Somente as pasta e todos os json dentro dela..
+conferencias-boloes/capturas-api/
+
+# Deixa explicito  que são apenas os json
+conferencias-boloes/capturas-api/*.json
+
+

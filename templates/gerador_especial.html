@@ -315,7 +315,7 @@
                 </div>
 
                 <!-- CSS Cores Meses -->
-                <link rel="stylesheet" href="/static/css/cores-meses.css">
+                <link rel="stylesheet" href="{{ app_root }}/static/css/cores-meses.css">
 
                 <div id="resultado" class="resultado" style="display: none;">
                     <h2>Apostas Geradas</h2>
@@ -5418,7 +5418,7 @@
             btn.disabled = false;
             if (data.sucesso) {
                 alert(`✅ SUCESSO!\n\n${data.mensagem}\n\nAgora você pode ir na Central de Conferências para ver os resultados.`);
-                window.location.href = '/central-conferencias#pane-conferencia-historica';
+                window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
             } else {
                 alert('Erro ao enviar duelo: ' + (data.erro || 'Desconhecido'));
             }
@@ -5632,7 +5632,7 @@
             btn.disabled = false;
             if (data.sucesso) {
                 alert("Apostas enviadas para a Central de Conferência com sucesso!");
-                window.location.href = '/central-conferencias#pane-conferencia-historica';
+                window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
             } else {
                 alert("Erro: " + data.erro);
             }
@@ -5767,7 +5767,7 @@
             btn.disabled = false;
             if (data.sucesso) {
                 alert("Apostas enviadas para a Central de Conferência com sucesso!");
-                window.location.href = '/central-conferencias#pane-conferencia-historica';
+                window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
             } else {
                 alert("Erro: " + data.erro);
             }
@@ -6035,7 +6035,7 @@
             btn.disabled = false;
             if (data.sucesso) {
                 alert("As 9 sessões foram enviadas com SUCESSO para a Central de Conferências!");
-                window.location.href = '/central-conferencias#pane-conferencia-historica';
+                window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
             } else {
                 alert("Erro ao enviar: " + data.erro);
             }
@@ -7264,7 +7264,7 @@
             
             if (data.sucesso) {
                 alert("Apostas híbridas enviadas para a Central de Conferência com sucesso!");
-                window.location.href = '/central-conferencias#pane-conferencia-historica';
+                window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
             } else {
                 alert("Erro: " + data.erro);
             }

@@ -5,7 +5,7 @@
 {% block content %}
 
 <!-- Carregar CSS de Cores dos Meses -->
-<link rel="stylesheet" href="/static/css/cores-meses.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/cores-meses.css">
 
 <!-- Estilos para troféu de premiação nas abas -->
 <style>
@@ -3888,7 +3888,7 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="/static/js/boloes_conferencia_modalidades.js"></script>
+<script src="{{ app_root }}/static/js/boloes_conferencia_modalidades.js"></script>
 
 <script>
     // ============================================
@@ -7387,7 +7387,7 @@
         const tbody = document.getElementById('tbodyRankingHistorica');
         tbody.innerHTML = '<tr><td colspan="16" class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2 text-muted">Aguardando IA calcular...</p></td></tr>';
 
-        const url = new URL(`/api/conferencia-historica/sessoes/${sessaoHistoricaAtual}/ranking`, window.location.origin);
+        const url = new URL((window.appUrl ? window.appUrl(`/api/conferencia-historica/sessoes/${sessaoHistoricaAtual}/ranking`) : `/api/conferencia-historica/sessoes/${sessaoHistoricaAtual}/ranking`), window.location.origin);
         url.searchParams.append('pagina', pagina);
         url.searchParams.append('por_pagina', '50');
 
@@ -11327,7 +11327,7 @@
 
     const SERVIDOR_URL = (typeof window.SERVIDOR_BOLOES_URL === 'string' && window.SERVIDOR_BOLOES_URL.trim())
         ? window.SERVIDOR_BOLOES_URL.replace(/\/$/, '')
-        : (window.location.origin + '/boloes-api');
+        : (window.appUrl ? window.appUrl('/boloes-api') : (window.location.origin + '/boloes-api'));
     let extracaoAtiva = false;
     let tempoInicio = null;
     let intervalTempo = null;

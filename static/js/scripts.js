@@ -3,7 +3,7 @@
 
 // ==================== CONFIGURAÇÕES GLOBAIS ====================
 
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = (typeof window.APP_ROOT === 'string') ? window.APP_ROOT : '';
 
 // ==================== FUNÇÕES DE AUTENTICAÇÃO ====================
 
@@ -115,7 +115,7 @@ async function fetchAPI(url, options = {}) {
             } else {
                 // Falha ao renovar, fazer logout
                 clearTokens();
-                window.location.href = '/login';
+                window.location.href = window.appUrl ? window.appUrl('/login') : '/login';
                 return null;
             }
         }

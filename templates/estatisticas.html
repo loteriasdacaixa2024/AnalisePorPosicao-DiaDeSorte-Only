@@ -3,7 +3,7 @@
 {% block title %}Estatísticas - Análise por Posição{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="/static/css/cores-meses.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/cores-meses.css">
 <style id="cores-meses-dinamicas">
     /* As cores dos meses serão carregadas dinamicamente da API /api/cores-meses/listar */
 </style>
@@ -1515,7 +1515,7 @@
         <!-- Aba: Gerador de Palpites - NOVA -->
         <!-- Aba: Ciclo por Posição -->
         <div class="tab-pane fade ciclo-pos-tab" id="ciclo-por-posicao" role="tabpanel">
-            <link rel="stylesheet" href="/static/css/ciclo_por_posicao_estatisticas.css?v=20260528j">
+            <link rel="stylesheet" href="{{ app_root }}/static/css/ciclo_por_posicao_estatisticas.css?v=20260528j">
             <div class="ciclo-pos-ajuda card border-0 shadow-sm mb-3">
                 <div class="card-body py-3">
                     <div class="d-flex align-items-start gap-2 mb-2">
@@ -7865,7 +7865,7 @@
     }
 
 </script>
-<script src="/static/js/ciclo_por_posicao_estatisticas.js?v=20260528h"></script>
-<script src="/static/js/ciclo_impressao_30.js?v=20260528m"></script>
+<script src="{{ app_root }}/static/js/ciclo_por_posicao_estatisticas.js?v=20260528h"></script>
+<script src="{{ app_root }}/static/js/ciclo_impressao_30.js?v=20260528m"></script>
 
 {% endblock %}

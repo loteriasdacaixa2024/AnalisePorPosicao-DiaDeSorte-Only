@@ -718,7 +718,7 @@
         const payload = jogos.map(j => ({ numeros: j, mes: mesSugerido }));
 
         localStorage.setItem('importarParaSimuladorFiltros', JSON.stringify(payload));
-        window.location.href = '/analise-visual/#pane-simulador-filtros';
+        window.location.href = window.appUrl('/analise-visual/#pane-simulador-filtros');
     }
 
     // ==========================================

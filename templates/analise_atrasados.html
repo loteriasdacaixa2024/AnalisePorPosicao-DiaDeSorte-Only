@@ -1636,7 +1636,7 @@
                 btn.disabled = false;
                 if (data.sucesso) {
                     alert(`✅ SUCESSO!\n\n${data.mensagem}\n\nAgora você pode ir na Central de Conferências para ver os acertos.`);
-                    window.location.href = '/central-conferencias#pane-conferencia-historica';
+                    window.location.href = window.appUrl('/central-conferencias#pane-conferencia-historica');
                 } else {
                     alert('Erro ao enviar duelo.');
                 }

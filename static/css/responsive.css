@@ -254,10 +254,10 @@ main.container-fluid > .container-fluid {
         position: absolute !important;
         float: none;
         width: auto;
-        max-width: min(100vw - 2rem, 22rem);
-        max-height: min(70vh, 32rem);
+        max-width: min(100vw - 2rem, 28rem);
+        max-height: calc(100vh - 4.5rem);
+        overflow-x: hidden;
         overflow-y: auto;
-        overscroll-behavior: contain;
         margin: 0;
         border: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);

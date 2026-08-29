@@ -134,6 +134,31 @@ def create_app():
     @app.context_processor
     def inject_meses():
         return dict(config_meses=meses_config_global)
+
+    def _public_script_root():
+        root = (request.script_root or '').rstrip('/')
+        if not root:
+            fwd = (request.headers.get('X-Forwarded-Prefix') or '').strip().rstrip('/')
+            if fwd and fwd != '/':
+                root = fwd if fwd.startswith('/') else f'/{fwd}'
+        return root
+
+    @app.before_request
+    def apply_forwarded_prefix():
+        """Garante SCRIPT_NAME quando o Nginx envia X-Forwarded-Prefix."""
+        if request.script_root:
+            return
+        fwd = (request.headers.get('X-Forwarded-Prefix') or '').strip().rstrip('/')
+        if not fwd or fwd == '/':
+            return
+        if not fwd.startswith('/'):
+            fwd = f'/{fwd}'
+        request.environ['SCRIPT_NAME'] = fwd
+
+    @app.context_processor
+    def inject_app_root():
+        """Prefixo público (/diadesorte). Vazio em acesso direto a localhost."""
+        return dict(app_root=_public_script_root())
         
     @app.route('/api/config_meses', methods=['GET'])
     def api_config_meses():

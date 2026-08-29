@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <!-- CSS Externo para cores dos meses -->
-<link rel="stylesheet" href="/static/css/cores-meses.css">
+<link rel="stylesheet" href="{{ app_root }}/static/css/cores-meses.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mes_da_sorte.css') }}">
 <style id="cores-meses-dinamicas">
     /* As cores dos meses serão carregadas dinamicamente da API /api/cores-meses/listar */
