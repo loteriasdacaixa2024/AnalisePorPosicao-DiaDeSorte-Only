@@ -11,6 +11,9 @@
     --app-touch: 2.75rem;
     --app-radius: 0.5rem;
     --app-content-max: 100%;
+    --nav-dropdown-min: 10rem;
+    --nav-dropdown-max: min(36rem, calc(100vw - 1.5rem));
+    --nav-dropdown-viewport-gap: 4.5rem;
 }
 
 html {
@@ -46,6 +49,20 @@ h1, h2, h3, h4, h5, h6,
     overflow-wrap: anywhere;
     word-break: break-word;
     line-height: 1.25;
+}
+
+/* Menus não herdam a quebra agressiva dos títulos (h6.dropdown-header) */
+.dropdown-menu,
+.dropdown-menu h1,
+.dropdown-menu h2,
+.dropdown-menu h3,
+.dropdown-menu h4,
+.dropdown-menu h5,
+.dropdown-menu h6,
+.dropdown-header,
+.dropdown-item {
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 h1, .h1 { font-size: clamp(1.35rem, 4vw, 2rem); }
@@ -141,27 +158,37 @@ main.container-fluid > .container-fluid {
     min-height: var(--app-touch);
     display: flex;
     align-items: center;
+    white-space: nowrap;
     padding-inline: 0.85rem !important;
+}
+
+/* Largura pelo maior item; uma linha; overflow só se o viewport realmente não couber */
+.navbar .dropdown-menu {
+    width: max-content;
+    min-width: var(--nav-dropdown-min);
+    max-width: var(--nav-dropdown-max);
+    overflow-x: clip;
+    overflow-y: visible;
 }
 
 .navbar .dropdown-item {
     min-height: 2.5rem;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    white-space: normal;
+    flex-wrap: nowrap;
+    white-space: nowrap;
     padding-block: 0.5rem;
+    width: 100%;
 }
 
 .navbar .dropdown-header,
 .navbar .dropdown-menu p,
+.navbar .dropdown-menu li > span,
 .navbar .dropdown-menu span small {
-    white-space: normal;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
     padding-inline: 1rem;
-}
-
-.navbar .dropdown-menu {
-    max-width: min(100vw - 1.5rem, 22rem);
 }
 
 /* Menu colapsado até o menu horizontal realmente caber (12 itens) */
@@ -177,9 +204,9 @@ main.container-fluid > .container-fluid {
         right: 0;
         top: 100%;
         z-index: 1031;
-        max-height: min(calc(100dvh - 4.5rem), 36rem);
+        max-height: calc(100dvh - var(--nav-dropdown-viewport-gap));
         overflow-y: auto;
-        overflow-x: hidden;
+        overflow-x: clip;
         overscroll-behavior: contain;
         padding-block: 0.5rem 1rem;
         padding-inline: var(--app-pad-inline);
@@ -193,10 +220,11 @@ main.container-fluid > .container-fluid {
     .navbar .dropdown-menu {
         position: static !important;
         float: none;
-        width: 100%;
-        max-width: none;
-        max-height: min(50vh, 18rem);
-        overflow-y: auto;
+        width: max-content;
+        min-width: var(--nav-dropdown-min);
+        max-width: 100%;
+        max-height: none;
+        overflow: visible;
         margin: 0 0 0.35rem;
         border: 0;
         border-radius: var(--app-radius);
@@ -207,6 +235,18 @@ main.container-fluid > .container-fluid {
 
     .navbar .dropdown-item {
         color: #fff;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+
+    .navbar .dropdown-header,
+    .navbar .dropdown-menu p,
+    .navbar .dropdown-menu li > span,
+    .navbar .dropdown-menu span small {
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
     }
 
     .navbar .dropdown-item:hover,
@@ -253,20 +293,39 @@ main.container-fluid > .container-fluid {
     .navbar .dropdown-menu {
         position: absolute !important;
         float: none;
-        width: auto;
-        max-width: min(100vw - 2rem, 28rem);
-        max-height: calc(100vh - 4.5rem);
-        overflow-x: hidden;
+        width: max-content;
+        min-width: var(--nav-dropdown-min);
+        max-width: min(36rem, calc(100vw - 2rem));
+        max-height: calc(100dvh - var(--nav-dropdown-viewport-gap));
+        overflow-x: clip;
         overflow-y: auto;
+        overscroll-behavior: contain;
         margin: 0;
         border: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         background: #fff;
-        padding-block: 0.5rem;
+        padding-block: 0.25rem;
     }
 
     .navbar .dropdown-item {
         color: #212529;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+        min-height: 0;
+        padding-block: 0.12rem;
+        line-height: 1.25;
+    }
+
+    .navbar .dropdown-header,
+    .navbar .dropdown-menu p,
+    .navbar .dropdown-menu li > span,
+    .navbar .dropdown-menu span small {
+        white-space: nowrap;
+        padding-block: 0.15rem;
+    }
+
+    .navbar .dropdown-divider {
+        margin: 0.2rem 0;
     }
 
     .navbar .dropdown-item:hover,
@@ -290,6 +349,20 @@ main.container-fluid > .container-fluid {
     .navbar .nav-link {
         font-size: 0.95rem;
         padding-inline: 0.55rem !important;
+        flex-shrink: 0;
+    }
+}
+
+/* Celular: o painel é estreito — permite quebra só quando a linha não cabe */
+@media (max-width: 575.98px) {
+    .navbar .dropdown-item,
+    .navbar .dropdown-header,
+    .navbar .dropdown-menu p,
+    .navbar .dropdown-menu li > span,
+    .navbar .dropdown-menu span small {
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: normal;
     }
 }
 
@@ -507,8 +580,12 @@ textarea.form-control {
     overflow: auto;
 }
 
+/* Dropdowns de página (Download, Exportar, etc.): mesma regra de conteúdo */
 .dropdown-menu {
-    max-width: min(100vw - 1rem, 22rem);
+    width: max-content;
+    min-width: 10rem;
+    max-width: min(36rem, calc(100vw - 1.5rem));
+    overflow-x: clip;
 }
 
 /* Toasts / alertas fixos não estouram a tela */
