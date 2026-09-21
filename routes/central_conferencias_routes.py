@@ -395,7 +395,7 @@ def validar_dados_extraidos_ocr():
 
 @central_conferencias_bp.route('/api/conferencia-ocr/exportar-relatorio/<int:concurso>', methods=['GET'])
 def exportar_relatorio_ocr(concurso):
-    """Exporta relatório de um concurso em formato JSON/CSV"""
+    """Exporta relatório de um concurso em formato JSON ou XLSX"""
     try:
         formato = request.args.get('formato', 'json')
 
@@ -405,40 +405,16 @@ def exportar_relatorio_ocr(concurso):
         if not resultado['sucesso']:
             return jsonify(resultado), 400
 
-        if formato == 'csv':
-            import io
-            import csv
+        if formato in ('csv', 'xlsx'):
             from flask import send_file
+            from services.relatorio_conferencia_xlsx import gerar_xlsx_relatorio
 
-            output = io.StringIO()
-            writer = csv.writer(output)
-
-            # Cabeçalho
-            writer.writerow([
-                'Aposta', 'Arquivo', 'Números Apostados', 'Mês Apostado',
-                'Acertos', 'Acertou Mês', 'Faixa', 'Valor Ganho'
-            ])
-
-            # Dados
-            for aposta in resultado['apostas']:
-                if not aposta.get('erro_ocr') and not aposta.get('dados_incompletos'):
-                    writer.writerow([
-                        aposta['numero_aposta'],
-                        aposta['arquivo'],
-                        ' '.join(map(str, aposta['dados_extraidos']['numeros_apostados'])),
-                        aposta['dados_extraidos']['mes_apostado'],
-                        aposta['resultado']['acertos'],
-                        'Sim' if aposta['resultado']['acertou_mes'] else 'Não',
-                        aposta['resultado']['faixa'] or 'Sem prêmio',
-                        f"R$ {aposta['valor_ganho']:.2f}"
-                    ])
-
-            output.seek(0)
+            buf = gerar_xlsx_relatorio(resultado)
             return send_file(
-                io.BytesIO(output.getvalue().encode('utf-8')),
-                mimetype='text/csv',
+                buf,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 as_attachment=True,
-                download_name=f'concurso_{concurso}_relatorio.csv'
+                download_name=f'concurso_{concurso}_relatorio.xlsx'
             )
 
         else:
@@ -1092,3 +1068,67 @@ def estatisticas_gerais_historica():
 
     except Exception as e:
         return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@central_conferencias_bp.route('/api/conferencia-ocr/backtest', methods=['POST'])
+def executar_backtest_conferencia():
+    """Compara as apostas da conferência atual com concursos anteriores do Dia de Sorte."""
+    try:
+        from services.backtest_apostas_service import BacktestApostasService
+
+        dados = request.get_json(force=True, silent=True) or {}
+        concurso_origem = dados.get('concurso')
+        try:
+            concurso_origem = int(concurso_origem) if concurso_origem is not None else None
+        except (TypeError, ValueError):
+            concurso_origem = None
+
+        apostas = dados.get('apostas') or []
+        if not isinstance(apostas, list):
+            apostas = []
+
+        limite = dados.get('limite_concursos')
+        try:
+            limite = int(limite) if limite else None
+        except (TypeError, ValueError):
+            limite = None
+        if limite is not None and limite <= 0:
+            limite = None
+
+        concurso_min = dados.get('concurso_min')
+        concurso_max = dados.get('concurso_max')
+        try:
+            concurso_min = int(concurso_min) if concurso_min not in (None, '') else None
+        except (TypeError, ValueError):
+            concurso_min = None
+        try:
+            concurso_max = int(concurso_max) if concurso_max not in (None, '') else None
+        except (TypeError, ValueError):
+            concurso_max = None
+
+        min_acertos = dados.get('min_acertos', 3)
+        try:
+            min_acertos = int(min_acertos)
+        except (TypeError, ValueError):
+            min_acertos = 3
+        min_acertos = max(0, min(15, min_acertos))
+
+        resultado = BacktestApostasService.executar(
+            apostas=apostas,
+            concurso_origem=concurso_origem,
+            limite_concursos=limite,
+            concurso_min=concurso_min,
+            concurso_max=concurso_max,
+            data_ini=dados.get('data_ini') or None,
+            data_fim=dados.get('data_fim') or None,
+            min_acertos=min_acertos,
+        )
+        status = 200 if resultado.get('sucesso') else 400
+        return jsonify(resultado), status
+    except Exception as e:
+        return jsonify({
+            'sucesso': False,
+            'erro': str(e),
+            'mensagem': f'Erro ao executar backtest: {str(e)}',
+        }), 500
+

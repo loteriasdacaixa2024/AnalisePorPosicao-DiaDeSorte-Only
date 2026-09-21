@@ -4612,6 +4612,8 @@
             </div>
         </div>
 
+        ${window.renderizarParecerTecnicoRelatorio ? window.renderizarParecerTecnicoRelatorio(concurso, resultado) : ''}
+
         <!-- ============================================ -->
         <!-- NOVO: Cobertura de Acertos Estratégico (Client-Side) -->
         <!-- ============================================ -->
@@ -4835,6 +4837,9 @@
                 <button type="button" class="btn btn-outline-primary px-4 py-2" id="btn-visao-variancia-${concurso}" onclick="alternarVisao(${concurso}, 'variancia')">
                     <i class="fas fa-table me-1"></i> Análise de Variância
                 </button>
+                <button type="button" class="btn btn-outline-primary px-4 py-2" id="btn-visao-backtest-${concurso}" onclick="alternarVisao(${concurso}, 'backtest')">
+                    <i class="fas fa-search me-1"></i> BACKTEST
+                </button>
             </div>
         </div>
 
@@ -4873,9 +4878,14 @@
             </div>
         </div>
 
+        <!-- CONTAINER: BACKTEST -->
+        <div id="container-backtest-${concurso}" style="display: none;">
+            ${window.montarHtmlPainelBacktest ? window.montarHtmlPainelBacktest(concurso) : '<div class="alert alert-warning">Módulo de backtest não carregado. Recarregue a página.</div>'}
+        </div>
+
         <div class="mt-4">
-            <button class="btn btn-success" onclick="exportarRelatorio(${concurso}, 'csv')">
-                <i class="fas fa-file-csv"></i> Exportar CSV
+            <button class="btn btn-success" onclick="exportarRelatorio(${concurso}, 'xlsx')">
+                <i class="fas fa-file-excel"></i> Exportar Excel
             </button>
             <button class="btn btn-primary" onclick="exportarRelatorio(${concurso}, 'json')">
                 <i class="fas fa-file-code"></i> Exportar JSON
@@ -5538,9 +5548,191 @@
     // ==========================================
 
     function exportarRelatorio(concurso, formato) {
-        const url = `/api/conferencia-ocr/exportar-relatorio/${concurso}?formato=${formato}`;
+        const prefixo = (typeof window.appUrl === 'function') ? window.appUrl : (p) => p;
+        const url = prefixo(`/api/conferencia-ocr/exportar-relatorio/${concurso}?formato=${formato}`);
         window.open(url, '_blank');
     }
+    window.exportarRelatorio = exportarRelatorio;
+
+    window.renderizarParecerTecnicoRelatorio = function (concurso, resultado) {
+        const apostas = (resultado.apostas || []).filter(a => !a.erro && !a.erro_ocr && !a.dados_incompletos);
+        if (!apostas.length) return '';
+
+        const numsDe = function (aposta) {
+            const raw = (aposta.dados_extraidos && aposta.dados_extraidos.numeros_apostados)
+                || aposta.numeros_apostados || aposta.numeros || [];
+            return raw.map(function (n) { return parseInt(n, 10); }).filter(function (n) { return n >= 1 && n <= 31; });
+        };
+
+        const pad = function (n) { return String(n).padStart(2, '0'); };
+        const sorteio = resultado.resultado_sorteio || {};
+        const resumo = resultado.resumo || {};
+        const sorteados = (sorteio.numeros || []).map(function (n) { return parseInt(n, 10); });
+        const setSaiu = new Set(sorteados);
+        const n = apostas.length;
+        const freq = {};
+        const meses = {};
+        let melhorAc = -1;
+        let melhorAposta = null;
+        let melhorNums = [];
+        let melhorHits = [];
+
+        apostas.forEach(function (a) {
+            const nums = numsDe(a);
+            const mes = window.obterMesAposta ? window.obterMesAposta(a) : (a.dados_extraidos && a.dados_extraidos.mes_apostado);
+            if (mes != null && mes !== '') {
+                const mk = String(mes);
+                meses[mk] = (meses[mk] || 0) + 1;
+            }
+            nums.forEach(function (num) { freq[num] = (freq[num] || 0) + 1; });
+            const hits = nums.filter(function (num) { return setSaiu.has(num); });
+            const ac = (a.resultado && a.resultado.acertos != null) ? a.resultado.acertos : hits.length;
+            if (ac > melhorAc) {
+                melhorAc = ac;
+                melhorAposta = a.numero_aposta;
+                melhorNums = nums.slice().sort(function (x, y) { return x - y; });
+                melhorHits = hits;
+            }
+        });
+
+        const setHitsMelhor = new Set(melhorHits);
+        const furos = sorteados.filter(function (d) { return !freq[d]; }).sort(function (a, b) { return a - b; });
+        const cobertas = sorteados.filter(function (d) { return freq[d]; }).sort(function (a, b) { return a - b; });
+        const dist = resumo.distribuicao_acertos || {};
+        const maxDist = Math.max(1, ...Object.values(dist).map(Number));
+        const media = apostas.reduce(function (s, a) {
+            return s + ((a.resultado && a.resultado.acertos) || 0);
+        }, 0) / n;
+        const acertouMes = apostas.some(function (a) { return a.resultado && a.resultado.acertou_mes; });
+        const mesSorte = sorteio.mes_sorte;
+        const nucleo = Object.entries(freq)
+            .filter(function (e) { return !setSaiu.has(parseInt(e[0], 10)); })
+            .sort(function (a, b) { return b[1] - a[1]; })
+            .slice(0, 6)
+            .map(function (e) { return { n: parseInt(e[0], 10), c: e[1] }; });
+
+        const estiloBola = function (bg, fg, extra) {
+            return 'display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:42px;border-radius:8px;font-weight:700;font-size:15px;background:' + bg + ';color:' + fg + ';' + (extra || '');
+        };
+        const bola = function (num, tipo, vezes) {
+            const label = pad(num) + (vezes > 0 ? '<small style="font-size:9px;font-weight:600;margin-left:1px;">×' + vezes + '</small>' : '');
+            if (tipo === 'furo') {
+                return '<span class="me-1 mb-1" title="Saiu e ninguém jogou" style="' + estiloBola('#c0392b', '#fff', 'border:2px solid #922b21;') + '">' + pad(num) + '</span>';
+            }
+            if (tipo === 'hit') {
+                return '<span class="me-1 mb-1" title="Saiu e estava nos jogos" style="' + estiloBola('#FFD700', '#111', 'border:2px solid #e6a800;') + '">' + label + '</span>';
+            }
+            if (tipo === 'vicio') {
+                return '<span class="me-1 mb-1" title="Muito apostada e não saiu" style="' + estiloBola('#1a5276', '#fff', 'border:2px solid #154360;') + '">' + label + '</span>';
+            }
+            if (tipo === 'aposta') {
+                return '<span class="me-1 mb-1" title="Apostada" style="' + estiloBola('#6c757d', '#fff', '') + '">' + label + '</span>';
+            }
+            return '<span class="me-1 mb-1" title="Fora dos jogos" style="' + estiloBola('#f4f6f7', '#95a5a6', 'border:1px dashed #bdc3c7;') + '">' + pad(num) + '</span>';
+        };
+
+        const volante = [];
+        for (let d = 1; d <= 31; d++) {
+            const vezes = freq[d] || 0;
+            let tipo = 'fora';
+            if (setSaiu.has(d) && vezes === 0) tipo = 'furo';
+            else if (setSaiu.has(d)) tipo = 'hit';
+            else if (vezes >= Math.max(5, Math.ceil(n * 0.5))) tipo = 'vicio';
+            else if (vezes > 0) tipo = 'aposta';
+            volante.push(bola(d, tipo, vezes || 0));
+        }
+
+        const barras = [0, 1, 2, 3, 4, 5, 6, 7].map(function (k) {
+            const q = Number(dist[k] || dist[String(k)] || 0);
+            const h = Math.max(q ? 8 : 2, Math.round((q / maxDist) * 56));
+            const cor = k >= 4 ? '#1e8449' : (k === 3 ? '#d4a017' : '#adb5bd');
+            return '<div class="text-center px-1" style="min-width:36px;">' +
+                '<div class="d-flex align-items-end justify-content-center" style="height:60px;"><div style="width:18px;height:' + h + 'px;background:' + cor + ';border-radius:4px 4px 0 0;"></div></div>' +
+                '<div class="fw-bold" style="font-size:12px;">' + k + '</div>' +
+                '<div class="text-muted" style="font-size:11px;">' + q + '</div></div>';
+        }).join('');
+
+        const headline = furos.length
+            ? furos.length + ' dezena(s) saíram e ninguém jogou — 7 acertos eram impossíveis neste arquivo.'
+            : 'Todas as dezenas sorteadas estavam em algum jogo.';
+
+        const mesesHtml = Object.entries(meses).sort(function (a, b) { return b[1] - a[1]; }).map(function (e) {
+            const badge = window.badgeMesHtml ? window.badgeMesHtml(e[0], null, 'font-size:13px;padding:4px 8px;') : ('<span class="badge bg-secondary">' + e[0] + '</span>');
+            return '<span class="me-2 mb-1 d-inline-flex align-items-center gap-1">' + badge + '<small class="text-muted">×' + e[1] + '</small></span>';
+        }).join('');
+
+        const mesSorteHtml = window.badgeMesHtml
+            ? window.badgeMesHtml(mesSorte, (typeof MESES !== 'undefined' && MESES[mesSorte]) ? MESES[mesSorte] : null, 'font-weight:bold;font-size:14px;padding:6px 12px;')
+            : pad(mesSorte || 0);
+
+        return `
+        <div class="card border-0 shadow-sm mb-4" style="border-top:4px solid #C9A227 !important;">
+            <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h5 class="mb-0" style="color:#6b5710;">Parecer — concurso ${concurso}</h5>
+                <span class="small text-muted">Bater o olho: ouro = saiu e você jogou · vermelho = saiu e ninguém jogou · azul = vício (muito jogado, não saiu)</span>
+            </div>
+            <div class="card-body">
+                <div class="alert ${furos.length ? 'alert-danger' : 'alert-success'} py-2 mb-3">
+                    <strong>${headline}</strong>
+                    <span class="ms-2">${n} jogos · média ${media.toFixed(1)} acerto(s) · premiadas ${resumo.apostas_premiadas || 0} · mês ${acertouMes ? 'sim' : 'não'}</span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-6">
+                        <div class="small text-muted fw-bold mb-1">O QUE SAIU</div>
+                        <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
+                            ${sorteados.map(function (d) { return bola(d, freq[d] ? 'hit' : 'furo', freq[d] || 0); }).join('')}
+                            <span class="ms-2">${mesSorteHtml}</span>
+                        </div>
+                        <div class="small text-muted">Ouro = você cobriu. Vermelho = furo (saiu fora dos jogos).</div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="small text-muted fw-bold mb-1">FUROS DESTE CONCURSO</div>
+                        <div class="d-flex flex-wrap align-items-center mb-1">
+                            ${furos.length ? furos.map(function (d) { return bola(d, 'furo'); }).join('') : '<span class="text-success fw-bold">Nenhum</span>'}
+                        </div>
+                        <div class="small text-muted">${cobertas.length ? 'Cobertas: ' + cobertas.map(pad).join(' ') : 'Nenhuma sorteada estava nos jogos.'}</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small text-muted fw-bold mb-1">VOLANTE 01–31 — o que você montou neste arquivo</div>
+                    <div class="d-flex flex-wrap">${volante.join('')}</div>
+                    <div class="small text-muted mt-1">O número pequeno é quantas vezes a dezena entrou nos ${n} jogos. Contorno tracejado = nem apareceu.</div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="small text-muted fw-bold mb-1">QUASE — melhor cartela (aposta ${melhorAposta != null ? pad(melhorAposta) : '—'}, ${Math.max(melhorAc, 0)} acerto(s))</div>
+                        <div class="d-flex flex-wrap mb-1">
+                            ${melhorNums.map(function (d) { return bola(d, setHitsMelhor.has(d) ? 'hit' : 'aposta'); }).join('')}
+                        </div>
+                        <div class="small text-muted">${furos.length && melhorAc < 4 ? 'Para chegar em 4, troque um cinza por um vermelho (furo).' : ''}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="small text-muted fw-bold mb-1">VÍCIO — mais jogadas e não saíram</div>
+                        <div class="d-flex flex-wrap mb-1">
+                            ${nucleo.length ? nucleo.map(function (x) { return bola(x.n, 'vicio', x.c); }).join('') : '<span class="text-muted">—</span>'}
+                        </div>
+                        <div class="small text-muted">No próximo concurso, não recicle esse bloco em 8 de 10 jogos.</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <div class="small text-muted fw-bold mb-1">QUANTOS JOGOS FIZERAM CADA QUANTIDADE DE ACERTOS</div>
+                        <div class="d-flex">${barras}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="small text-muted fw-bold mb-1">MESES NOS JOGOS</div>
+                        <div class="mb-1">${mesesHtml || '—'}</div>
+                        <div class="small text-muted">Sorteado: ${mesSorteHtml} ${acertouMes ? '(algum jogo acertou)' : '(nenhum jogo neste mês)'}</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    };
+
 
     // ==========================================
     // VALIDAÇÃO DE DADOS OCR
@@ -11903,21 +12095,29 @@ if __name__ == '__main__':
     window.alternarVisao = function(concurso, visao) {
         const btnCards = document.getElementById(`btn-visao-cards-${concurso}`);
         const btnVariancia = document.getElementById(`btn-visao-variancia-${concurso}`);
+        const btnBacktest = document.getElementById(`btn-visao-backtest-${concurso}`);
         const containerCards = document.getElementById(`container-cards-${concurso}`);
         const containerVariancia = document.getElementById(`container-variancia-${concurso}`);
+        const containerBacktest = document.getElementById(`container-backtest-${concurso}`);
 
         if (!btnCards || !btnVariancia || !containerCards || !containerVariancia) return;
 
+        btnCards.classList.remove('active');
+        btnVariancia.classList.remove('active');
+        if (btnBacktest) btnBacktest.classList.remove('active');
+        containerCards.style.display = 'none';
+        containerVariancia.style.display = 'none';
+        if (containerBacktest) containerBacktest.style.display = 'none';
+
         if (visao === 'cards') {
             btnCards.classList.add('active');
-            btnVariancia.classList.remove('active');
             containerCards.style.display = 'block';
-            containerVariancia.style.display = 'none';
-        } else {
-            btnCards.classList.remove('active');
+        } else if (visao === 'variancia') {
             btnVariancia.classList.add('active');
-            containerCards.style.display = 'none';
             containerVariancia.style.display = 'block';
+        } else if (visao === 'backtest') {
+            if (btnBacktest) btnBacktest.classList.add('active');
+            if (containerBacktest) containerBacktest.style.display = 'block';
         }
     };
 
@@ -12652,5 +12852,6 @@ if __name__ == '__main__':
     }
 
 </script>
+<script src="{{ app_root }}/static/js/backtest_conferencia.js"></script>
 
 {% endblock %}

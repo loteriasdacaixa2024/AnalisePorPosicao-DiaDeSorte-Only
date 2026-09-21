@@ -1,10 +1,13 @@
 # Sistema pertencente à Prefeitura Municipal de Cosmópolis — uso autorizado para terceiros.
 instance/
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.pyc
 __pycache__/
 venv/
+.venv/
 .env
 *.log
 login_caixa_config.json
