@@ -14,7 +14,7 @@ Esta aba será dedicada exclusivamente à modalidade Dia de Sorte, com foco em a
 
 Os dados já estão sendo baixados manualmente e armazenados em:
 
-D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\conferencias-locais-da-sorte\Dia-de-Sorte
+D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\conferencias-locais-da-sorte\Dia-de-Sorte
 Regras:
 Essa pasta será exclusiva dessa nova interface
 Não interferir em outras modalidades já existentes
@@ -94,7 +94,7 @@ Criar camada responsável por:
 
 Ler JSON da pasta:
 
-D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\conferencias-locais-da-sorte\Dia-de-Sorte
+D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\conferencias-locais-da-sorte\Dia-de-Sorte
 Converter e inserir no SQL
 Atualizar incrementalmente (não duplicar registros)
 API REST para fornecer dados à interface
@@ -144,7 +144,7 @@ AI  É SO  FAZER PARA 8 DEZENAS, 10,12,14,15,18,20
 
 
 
-sl D:\loterias\AnalisePorPosicao-DiaDeSorte-Only\
+sl D:\loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\
 .\venv\scripts\activate
 
 
@@ -174,12 +174,12 @@ quatro  dezenas por  coluna
 
 
 TOME COMO EXEMPLO
-D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\templates\central_conferencias.html (Concursos Disponiveis
+D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\templates\central_conferencias.html (Concursos Disponiveis
 
 APLIQUE NO  MEGASENA...
 
 A PASTA ASER CHEGADA SEMPRE SERÁ ESTA..
-D:\Loterias\LoteriasPosicao\AnalisePorPosicao-MegaSena-Only\conferencia_apostas MAIS O  NUMERO DO CONCURSO...
+D:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao-MegaSena-Only\conferencia_apostas MAIS O  NUMERO DO CONCURSO...
 
 
 

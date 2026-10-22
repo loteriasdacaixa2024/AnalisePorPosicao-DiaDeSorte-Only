@@ -34,15 +34,65 @@ def pagina_central_conferencias():
 
 @central_conferencias_bp.route('/api/conferencia-ocr/concursos-disponiveis', methods=['GET'])
 def listar_concursos_disponiveis_ocr():
-    """Lista todos os concursos disponíveis na pasta mnt/conferencia_apostas/"""
+    """Lista concursos em conferencia_apostas conforme o alcance pedido.
+
+    escopo=indice — só os números das pastas, sem abrir apostas.json
+    escopo=ultimo — só o último concurso que já tem resultado oficial
+    escopo=especifico&concurso=N — só a pasta informada
+    escopo=todos — lê o apostas.json de cada pasta
+    """
     try:
         from services.conferencia_apostas_ocr_service import ConferenciaApostasOCRService
-        concursos = ConferenciaApostasOCRService.listar_concursos_disponiveis()
+
+        escopo = (request.args.get('escopo') or 'todos').strip().lower()
+        concurso = request.args.get('concurso', type=int)
+        escopos_validos = {'todos', 'especifico', 'ultimo', 'indice'}
+        if escopo not in escopos_validos:
+            return jsonify({
+                'sucesso': False,
+                'erro': 'escopo inválido',
+                'mensagem': 'Escolha todos, um concurso específico ou o último concurso apurado.'
+            }), 400
+
+        if escopo == 'indice':
+            indice = ConferenciaApostasOCRService.listar_indice_concursos()
+            return jsonify({
+                'sucesso': True,
+                'escopo': 'indice',
+                'total': indice['total'],
+                'ultimo_apurado': indice['ultimo_apurado'],
+                'concursos': indice['concursos'],
+            })
+
+        if escopo == 'especifico' and not concurso:
+            return jsonify({
+                'sucesso': False,
+                'erro': 'concurso obrigatório',
+                'mensagem': 'Informe o número do concurso para pesquisar somente um.'
+            }), 400
+
+        concursos = ConferenciaApostasOCRService.listar_concursos_disponiveis(
+            escopo=escopo,
+            concurso=concurso,
+        )
+
+        mensagem = None
+        ultimo_apurado = None
+        if escopo == 'ultimo':
+            ultimo_apurado = concursos[0]['numero_concurso'] if concursos else None
+            if not concursos:
+                mensagem = 'Nenhum concurso com resultado oficial foi encontrado nas pastas.'
+        elif escopo == 'especifico' and not concursos:
+            mensagem = f'A pasta do concurso {concurso} não foi encontrada.'
 
         return jsonify({
             'sucesso': True,
+            'escopo': escopo,
+            'concurso': concurso,
+            'ultimo_apurado': ultimo_apurado,
             'total': len(concursos),
-            'concursos': concursos
+            'mensagem': mensagem,
+            'concursos': concursos,
         })
 
     except Exception as e:

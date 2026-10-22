@@ -16,10 +16,10 @@ set "PYTHON_EXE="
 
 :: Ordem de busca da RAIZ do servidor Flask
 call :resolver_raiz "%PASTA_BOLOES%\.."
-if "%RAIZ%"=="" call :resolver_raiz "D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only"
-if "%RAIZ%"=="" call :resolver_raiz "%PASTA_BOLOES%\..\LoteriasBoloesDaSorte"
+if "%RAIZ%"=="" call :resolver_raiz "D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte"
+if "%RAIZ%"=="" call :resolver_raiz "%PASTA_BOLOES%\..\LBS-LoteriasBoloesDaSorte"
 if "%RAIZ%"=="" call :resolver_raiz "I:\Meu Drive\LoteriasBoloesDaSorte"
-if "%RAIZ%"=="" call :resolver_raiz "D:\Loterias\LoteriasBoloesDaSorte"
+if "%RAIZ%"=="" call :resolver_raiz "D:\Loterias\LBS-LoteriasBoloesDaSorte"
 
 if "%RAIZ%"=="" (
   echo.

@@ -1,6 +1,6 @@
 import os
 
-file_path = r"D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\templates\gerador_especial.html"
+file_path = r"D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\templates\gerador_especial.html"
 with open(file_path, "r", encoding="utf-8") as f:
     content = f.read()
 

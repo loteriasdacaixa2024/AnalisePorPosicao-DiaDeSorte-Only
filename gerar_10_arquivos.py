@@ -4,7 +4,7 @@ from collections import defaultdict
 from itertools import combinations
 
 # Add the project root to sys.path so we can import services
-sys.path.append(r'd:\Loterias\AnalisePorPosicao-DiaDeSorte-Only')
+sys.path.append(r'd:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte')
 
 from services.analise_digitos_unicos_service import AnaliseDigitosUnicosService
 from flask import Flask
@@ -26,7 +26,7 @@ with app.app_context():
     
     matriz = AnaliseDigitosUnicosService.gerar_matriz_elite(relacoes_alvo)
     
-    output_dir = r"d:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\Exportacoes_SimuladorElite"
+    output_dir = r"d:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\Exportacoes_SimuladorElite"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         

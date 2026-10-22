@@ -612,6 +612,41 @@ def create_app():
     return app
 
 
+def _disparar_atualizacao_sorteios(app):
+    """
+    Assim que o servidor sobe, busca na Caixa o concurso mais recente
+    e grava os sorteios que ainda faltam no banco.
+    Roda em segundo plano para a porta abrir na hora.
+    """
+    # app.run usa debug=False, então existe um único processo.
+    # Se o reloader for ligado no futuro, só o processo filho atualiza.
+    if os.environ.get('WERKZEUG_RUN_MAIN') not in (None, 'true'):
+        return
+
+    import threading
+
+    def _executar():
+        with app.app_context():
+            try:
+                from services.configuracao_service import ConfiguracaoService
+                print("[INFO] Procurando sorteios novos na Caixa...")
+                resultado = ConfiguracaoService.sincronizar_concursos_recentes()
+                if resultado.get('sucesso'):
+                    print(f"[OK] {resultado.get('mensagem')}")
+                else:
+                    print(f"[AVISO] {resultado.get('mensagem')}")
+            except Exception as e:
+                print(f"[AVISO] Atualização automática dos sorteios não concluída: {e}")
+            finally:
+                db.session.remove()
+
+    threading.Thread(
+        target=_executar,
+        name='atualizacao-sorteios',
+        daemon=True,
+    ).start()
+
+
 def main():
     app = create_app()
     modo = os.getenv('FLASK_ENV', 'development')
@@ -622,6 +657,7 @@ def main():
         print(f"[OK] Servidor rodando em PRODUÇÃO na porta {porta}")
         print(f"[URL] Acesse: http://localhost:{porta}")
         print(f"[STATS] Monitoramento: http://localhost:{porta}/monitoramento-apostas/")
+        _disparar_atualizacao_sorteios(app)
         serve(app, host='0.0.0.0', port=porta)
     else:
         print(f"[INFO] Servidor rodando em DESENVOLVIMENTO na porta {porta}")
@@ -635,6 +671,7 @@ def main():
                 print(f"   -> {rule} ({', '.join(rule.methods)})")
         print("="*50 + "\n")
 
+        _disparar_atualizacao_sorteios(app)
         # app.run(host='0.0.0.0', port=porta, debug=True)
         app.run(host='0.0.0.0', port=porta, debug=False)
 

@@ -2,7 +2,7 @@
 title Iniciar Servidores Boloes
 echo Abrindo os terminais de servidores...
 
-set "RAIZ=D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only"
+set "RAIZ=D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte"
 set "PY=%RAIZ%\.venv\Scripts\python.exe"
 set "WT=%LOCALAPPDATA%\Microsoft\WindowsApps\wt.exe"
 

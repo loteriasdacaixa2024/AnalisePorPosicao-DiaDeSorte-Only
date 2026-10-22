@@ -2,7 +2,7 @@ import shutil
 import os
 
 brain_dir = r"C:\Users\Marcio Fernando Maia\.gemini\antigravity\brain\dea24b1c-795d-446e-998b-c93e8d65d667"
-dest_dir = r"D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\img"
+dest_dir = r"D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\img"
 
 os.makedirs(dest_dir, exist_ok=True)
 

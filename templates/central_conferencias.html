@@ -1637,16 +1637,45 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    <div class="border rounded p-3 mb-3 bg-light" id="escopo-pesquisa-concursos">
+                        <div class="fw-bold mb-2">
+                            <i class="fas fa-search"></i> Alcance da pesquisa
+                        </div>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label mb-1" for="escopo-concursos">O que pesquisar</label>
+                                <select class="form-select" id="escopo-concursos">
+                                    <option value="ultimo" selected>Último concurso apurado</option>
+                                    <option value="especifico">Somente um concurso</option>
+                                    <option value="todos">Todos os concursos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4" id="grupo-concurso-especifico" style="display: none;">
+                                <label class="form-label mb-1" for="select-concurso-especifico">Concurso</label>
+                                <select class="form-select" id="select-concurso-especifico">
+                                    <option value="">Carregando concursos...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary" id="btn-pesquisar-escopo">
+                                    <i class="fas fa-search"></i> Pesquisar
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2" id="hint-escopo-concursos"></small>
+                    </div>
+
                     <!-- Loading State -->
                     <div id="loading-concursos" class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Carregando...</span>
                         </div>
-                        <p class="text-muted mt-2">Procurando concursos disponíveis...</p>
+                        <p class="text-muted mt-2" id="loading-concursos-texto">Procurando concursos disponíveis...</p>
                     </div>
 
                     <!-- Lista de Concursos -->
                     <div id="lista-concursos" style="display: none;">
+                        <div class="alert alert-secondary py-2 small mb-3" id="resumo-escopo-pesquisa" style="display: none;"></div>
                         <div class="row mb-3 align-items-center">
                             <div class="col-md-3">
                                 <div class="form-check">
@@ -1686,7 +1715,7 @@
                     <div id="empty-state" style="display: none;" class="text-center py-5">
                         <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">Nenhum concurso encontrado</h5>
-                        <p class="text-muted">
+                        <p class="text-muted" id="empty-state-mensagem">
                             Coloque screenshots ou arquivos <code>apostas.json</code> na pasta
                             <code>conferencia_apostas\NUMERO_CONCURSO\</code>
                         </p>
@@ -3897,6 +3926,8 @@
 
     // Conferência OCR
     let concursosDisponiveis = [];
+    let indiceConcursos = [];
+    const ESCOPO_PESQUISA_KEY = 'centralConferenciasEscopoPesquisa';
     let concursosSelecionados = [];
     let resultadosProcessamento = {};
     let charts = {};
@@ -3991,8 +4022,10 @@
     // ============================================
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Concursos primeiro — não bloquear na carga de cores dos meses
-        carregarConcursosDisponiveis();
+        // Concursos primeiro — não bloquear na carga de cores dos meses.
+        // O alcance padrão é o último concurso apurado, para não ler todos os apostas.json.
+        restaurarEscopoConcursos();
+        carregarIndiceConcursos().finally(() => carregarConcursosDisponiveis());
         carregarCoresMesesDoBanco().catch((err) => console.warn('Cores dos meses:', err));
         window.CORES_MESES = CORES_MESES;
 
@@ -4027,10 +4060,20 @@
             }, 500); // Dá um tempinho para a aba renderizar
         }
 
-        // Carregar concursos para combinações (Aba 3)
-        carregarConcursosCombinacoes();
+        // Combinações só lista as pastas quando a aba é aberta.
 
         // Event Listeners - ABA 1 (Conferência)
+        const selectEscopo = document.getElementById('escopo-concursos');
+        if (selectEscopo) {
+            selectEscopo.addEventListener('change', atualizarUiEscopoConcursos);
+        }
+        const btnPesquisarEscopo = document.getElementById('btn-pesquisar-escopo');
+        if (btnPesquisarEscopo) {
+            btnPesquisarEscopo.addEventListener('click', () => {
+                salvarEscopoConcursos();
+                carregarConcursosDisponiveis();
+            });
+        }
         document.getElementById('selecionar-todos').addEventListener('change', function (e) {
             selecionarTodosConcursos(e.target.checked);
         });
@@ -4103,35 +4146,164 @@
     // ABA 1: CONFERÊNCIA - CARREGAR CONCURSOS
     // ============================================
 
+    function obterEscopoConcursos() {
+        const el = document.getElementById('escopo-concursos');
+        const valor = el ? el.value : 'ultimo';
+        return ['todos', 'especifico', 'ultimo'].includes(valor) ? valor : 'ultimo';
+    }
+
+    function atualizarUiEscopoConcursos() {
+        const escopo = obterEscopoConcursos();
+        const grupo = document.getElementById('grupo-concurso-especifico');
+        const hint = document.getElementById('hint-escopo-concursos');
+        if (grupo) grupo.style.display = escopo === 'especifico' ? '' : 'none';
+        if (!hint) return;
+        if (escopo === 'ultimo') {
+            hint.textContent = 'Abre só a pasta do concurso mais recente que já tem resultado oficial.';
+        } else if (escopo === 'especifico') {
+            hint.textContent = 'Abre só a pasta do concurso escolhido.';
+        } else {
+            hint.textContent = 'Lê o apostas.json de cada pasta. Fica mais lento conforme a quantidade de concursos.';
+        }
+    }
+
+    function salvarEscopoConcursos() {
+        try {
+            sessionStorage.setItem(ESCOPO_PESQUISA_KEY, JSON.stringify({
+                escopo: obterEscopoConcursos(),
+                concurso: document.getElementById('select-concurso-especifico')?.value || ''
+            }));
+        } catch (e) { /* armazenamento indisponível */ }
+    }
+
+    function restaurarEscopoConcursos() {
+        try {
+            const raw = sessionStorage.getItem(ESCOPO_PESQUISA_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                const sel = document.getElementById('escopo-concursos');
+                if (sel && ['todos', 'especifico', 'ultimo'].includes(data.escopo)) {
+                    sel.value = data.escopo;
+                }
+                const concurso = document.getElementById('select-concurso-especifico');
+                if (concurso && data.concurso) concurso.dataset.preferido = String(data.concurso);
+            }
+        } catch (e) { /* ignora preferência inválida */ }
+        atualizarUiEscopoConcursos();
+    }
+
+    function preencherSelectsIndice(concursos) {
+        const selectEspecifico = document.getElementById('select-concurso-especifico');
+        const selectVariancia = document.getElementById('select-concurso-variancia');
+        const preferido = selectEspecifico ? (selectEspecifico.dataset.preferido || selectEspecifico.value) : '';
+
+        if (selectEspecifico) {
+            selectEspecifico.innerHTML = '<option value="">Selecione o concurso...</option>';
+            concursos.forEach(concurso => {
+                const opt = document.createElement('option');
+                opt.value = concurso.numero_concurso;
+                const dataStr = concurso.data_sorteio ? ` (${concurso.data_sorteio})` : '';
+                const marca = concurso.resultado_disponivel ? '' : ' — sem resultado';
+                opt.textContent = `Concurso ${concurso.numero_concurso}${dataStr}${marca}`;
+                selectEspecifico.appendChild(opt);
+            });
+            if (preferido) selectEspecifico.value = preferido;
+        }
+
+        if (selectVariancia) {
+            const atual = selectVariancia.value;
+            selectVariancia.innerHTML = '<option value="">Selecione um concurso...</option>';
+            concursos.forEach(concurso => {
+                if (!concurso.tem_json) return;
+                const opt = document.createElement('option');
+                opt.value = concurso.numero_concurso;
+                const dataStr = concurso.data_sorteio ? ` (${concurso.data_sorteio})` : '';
+                opt.textContent = `Concurso ${concurso.numero_concurso}${dataStr}`;
+                if (!concurso.resultado_disponivel) {
+                    opt.textContent += ' — sem resultado';
+                    opt.disabled = true;
+                }
+                selectVariancia.appendChild(opt);
+            });
+            if (atual) selectVariancia.value = atual;
+        }
+    }
+
+    function carregarIndiceConcursos() {
+        return fetch('/api/conferencia-ocr/concursos-disponiveis?escopo=indice')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.sucesso) return;
+                indiceConcursos = data.concursos || [];
+                preencherSelectsIndice(indiceConcursos);
+            })
+            .catch(err => console.warn('Índice de concursos:', err));
+    }
+
+    function textoResumoEscopo(data) {
+        const escopo = data.escopo || obterEscopoConcursos();
+        if (escopo === 'ultimo') {
+            const n = data.ultimo_apurado || (data.concursos && data.concursos[0] && data.concursos[0].numero_concurso);
+            return n
+                ? `Pesquisa limitada ao último concurso apurado: ${n}.`
+                : 'Nenhum concurso apurado encontrado.';
+        }
+        if (escopo === 'especifico') {
+            const n = data.concurso || document.getElementById('select-concurso-especifico')?.value;
+            return `Pesquisa limitada ao concurso ${n}.`;
+        }
+        return `Pesquisa em todos os concursos (${data.total || (data.concursos || []).length}). O apostas.json de cada pasta foi lido.`;
+    }
+
     function carregarConcursosDisponiveis() {
         const loading = document.getElementById('loading-concursos');
         const lista = document.getElementById('lista-concursos');
         const empty = document.getElementById('empty-state');
         const error = document.getElementById('error-state');
+        const loadingTexto = document.getElementById('loading-concursos-texto');
         if (!loading) return;
 
+        const escopo = obterEscopoConcursos();
+        const concursoEspecifico = document.getElementById('select-concurso-especifico')?.value || '';
+        if (escopo === 'especifico' && !concursoEspecifico) {
+            loading.style.display = 'none';
+            if (lista) lista.style.display = 'none';
+            if (empty) empty.style.display = 'none';
+            mostrarErro('Escolha o concurso antes de pesquisar.');
+            return;
+        }
+
+        salvarEscopoConcursos();
         loading.style.display = 'block';
+        if (loadingTexto) {
+            loadingTexto.textContent = escopo === 'todos'
+                ? 'Lendo o apostas.json de todos os concursos...'
+                : (escopo === 'especifico'
+                    ? `Lendo o concurso ${concursoEspecifico}...`
+                    : 'Procurando o último concurso apurado...');
+        }
         if (lista) lista.style.display = 'none';
         if (empty) empty.style.display = 'none';
         if (error) error.style.display = 'none';
 
+        const params = new URLSearchParams({ escopo });
+        if (escopo === 'especifico') params.set('concurso', concursoEspecifico);
+        const timeoutMs = escopo === 'todos' ? 120000 : 30000;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-        fetch('/api/conferencia-ocr/concursos-disponiveis', { signal: controller.signal })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
+        fetch('/api/conferencia-ocr/concursos-disponiveis?' + params.toString(), { signal: controller.signal })
+            .then(response => response.json().then(data => ({ ok: response.ok, data })))
+            .then(({ ok, data }) => {
                 loading.style.display = 'none';
 
-                if (data.sucesso) {
+                if (ok && data.sucesso) {
                     concursosDisponiveis = data.concursos || [];
+                    const resumo = document.getElementById('resumo-escopo-pesquisa');
 
                     if (concursosDisponiveis.length === 0) {
+                        const emptyMsg = document.getElementById('empty-state-mensagem');
+                        if (emptyMsg && data.mensagem) emptyMsg.textContent = data.mensagem;
                         if (empty) empty.style.display = 'block';
                     } else {
                         try {
@@ -4141,6 +4313,10 @@
                             mostrarErro('Erro ao exibir concursos: ' + renderErr.message);
                             return;
                         }
+                        if (resumo) {
+                            resumo.style.display = 'block';
+                            resumo.textContent = textoResumoEscopo(data);
+                        }
                         if (lista) lista.style.display = 'block';
                     }
                 } else {
@@ -4149,8 +4325,9 @@
             })
             .catch(err => {
                 loading.style.display = 'none';
+                const segundos = Math.round(timeoutMs / 1000);
                 const msg = err.name === 'AbortError'
-                    ? 'Tempo esgotado ao carregar concursos (30s). Tente Recarregar.'
+                    ? `Tempo esgotado ao carregar concursos (${segundos}s). Tente Recarregar.`
                     : ('Erro de conexão: ' + err.message);
                 mostrarErro(msg);
             })
@@ -4159,35 +4336,13 @@
 
     function renderizarConcursos() {
         const container = document.getElementById('concursos-container');
-        const selectVariancia = document.getElementById('select-concurso-variancia');
-        
+
         container.innerHTML = '';
-        if (selectVariancia) {
-            selectVariancia.innerHTML = '<option value="">Selecione um concurso...</option>';
-        }
 
         document.getElementById('total-concursos').textContent =
             `${concursosDisponiveis.length} concurso(s) encontrado(s)`;
 
         concursosDisponiveis.forEach(concurso => {
-            // Popula select variância (se houver apostas ou screenshots)
-            if (selectVariancia) {
-                const totalApostas = concurso.total_apostas !== undefined ? concurso.total_apostas : (concurso.total_screenshots || 0);
-                if (totalApostas > 0) {
-                    const opt = document.createElement('option');
-                    opt.value = concurso.numero_concurso;
-                    const dataStr = concurso.data_sorteio ? `(${concurso.data_sorteio})` : '';
-                    opt.textContent = `Concurso ${concurso.numero_concurso} - ${totalApostas} apostas ${dataStr}`;
-                    
-                    if (!concurso.resultado_disponivel) {
-                        opt.textContent += ' ⚠️ Sem resultado';
-                        opt.disabled = true;
-                    }
-                    
-                    selectVariancia.appendChild(opt);
-                }
-            }
-
             const col = document.createElement('div');
             col.className = 'col-md-6 col-lg-4';
 
@@ -4212,6 +4367,7 @@
                                 <div>
                                     <h6 class="mb-1">Concurso ${concurso.numero_concurso}</h6>
                                     <small class="text-muted d-block">${fonteIcon}</small>
+                                    <small class="text-muted d-block">${concurso.total_apostas || 0} aposta(s)${concurso.data_sorteio ? ' · ' + concurso.data_sorteio : ''}</small>
                                     ${!concurso.tem_json ? `<small class="text-muted">${concurso.total_screenshots} screenshot(s)</small>` : ''}
                                 </div>
                             </div>
@@ -5666,8 +5822,23 @@
             : pad(mesSorte || 0);
 
         return `
-        <div class="card border-0 shadow-sm mb-4" style="border-top:4px solid #C9A227 !important;">
-            <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="card border-0 shadow-sm mb-3" style="border-top:4px solid #1a5276 !important; background:#f3f6fb;">
+            <div class="card-body py-3">
+                <h6 class="mb-1" style="color:#1a5276;">
+                    <i class="fas fa-lightbulb me-1"></i> Insight — como fechar as 10
+                </h6>
+                <p class="small text-muted mb-2">Parecer geral do ABS, para o próximo palpite. Vale com o orçamento atual: 10 jogos de 7 dezenas.</p>
+                <ol class="small mb-0 ps-3" style="line-height:1.45;">
+                    <li class="mb-1"><strong>Dez jogos diferentes.</strong> Não gaste vagas variando ±1 a cartela que ficou verde ou amarela no concurso anterior.</li>
+                    <li class="mb-1"><strong>Cubra os dois tetos.</strong> Pelo menos 3 jogos com a última dezena entre 20 e 24, e 3 com a última entre 28 e 31.</li>
+                    <li class="mb-1"><strong>Descarte salto grande.</strong> P1 acima de 8, ou alguma posição a mais de 5 do envelope 04 · 08 · 12 · 16 · 20 · 24 · 28. Um ±1 não fecha esse buraco.</li>
+                    <li class="mb-1"><strong>Leia o ABS assim.</strong> ≤ 20 só diz que o formato não ficou absurdo (em geral 1 ou 2 acertos). Quatro acertos costuma aparecer com ABS ≤ 7.</li>
+                    <li><strong>Gap não substitui a régua.</strong> Gap é a distância entre vizinhos. O jogo 10 14 18 22 26 30 31 tem gaps de 4, vizinho perto de vizinho, e a posição 1 está em 10, seis acima do 04. Os buracos estão certos; o bloco inteiro subiu. A régua olha cada posição; o gap olha só o vizinho.</li>
+                </ol>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm mb-4" style="border-top:4px solid #C9A227 !important; background:#fbf8f0;">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2" style="background:#fbf8f0;">
                 <h5 class="mb-0" style="color:#6b5710;">Parecer — concurso ${concurso}</h5>
                 <span class="small text-muted">Bater o olho: ouro = saiu e você jogou · vermelho = saiu e ninguém jogou · azul = vício (muito jogado, não saiu)</span>
             </div>
@@ -5837,6 +6008,8 @@
 
     async function carregarConcursosCombinacoes() {
         const select = document.getElementById('selectConcursoComb');
+        if (!select || select.dataset.carregando === '1') return;
+        select.dataset.carregando = '1';
         select.innerHTML = '<option value="">Carregando...</option>';
         select.disabled = true;
 
@@ -5862,11 +6035,14 @@
                 });
 
                 select.disabled = false;
+                select.dataset.carregado = '1';
             } else {
                 select.innerHTML = '<option value="">Nenhum concurso com apostas encontrado</option>';
             }
         } catch (error) {
             select.innerHTML = '<option value="">Erro ao carregar concursos</option>';
+        } finally {
+            select.dataset.carregando = '0';
         }
     }
 
@@ -6998,6 +7174,10 @@
 
     // Inicializar Combinações quando a aba for ativada
     document.getElementById('tab-combinacoes').addEventListener('shown.bs.tab', function () {
+        const selectComb = document.getElementById('selectConcursoComb');
+        if (selectComb && selectComb.dataset.carregado !== '1') {
+            carregarConcursosCombinacoes();
+        }
         // Mostrar filtros e botão de geração se o universo já foi carregado
         if (dadosUniverso && dadosUniverso.sucesso) {
             document.getElementById('cardFiltros').style.display = 'block';

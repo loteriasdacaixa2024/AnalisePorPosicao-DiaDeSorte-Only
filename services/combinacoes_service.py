@@ -672,7 +672,7 @@ class CombinacoesService:
                     'total': 0
                 }
 
-            concursos = []
+            candidatos = []
 
             for pasta in os.listdir(CombinacoesService.BASE_DIR):
                 pasta_path = os.path.join(CombinacoesService.BASE_DIR, pasta)
@@ -698,8 +698,17 @@ class CombinacoesService:
                 except Exception:
                     total_apostas = 0
 
-                # Verificar se concurso existe no banco
-                sorteio = Sorteio.query.filter_by(concurso=numero_concurso).first()
+                candidatos.append((numero_concurso, total_apostas))
+
+            sorteios = {}
+            if candidatos:
+                numeros = [numero for numero, _total in candidatos]
+                for sorteio in Sorteio.query.filter(Sorteio.concurso.in_(numeros)).all():
+                    sorteios[int(sorteio.concurso)] = sorteio
+
+            concursos = []
+            for numero_concurso, total_apostas in candidatos:
+                sorteio = sorteios.get(numero_concurso)
 
                 concursos.append({
                     'numero_concurso': numero_concurso,

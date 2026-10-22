@@ -269,150 +269,157 @@ class ConferenciaApostasOCRService:
 
 
     @staticmethod
-
-    def listar_concursos_disponiveis() -> List[Dict]:
-
-        """
-
-        Lista todos os concursos disponíveis na pasta mnt/conferencia_apostas/
-
-
-
-        Returns:
-
-            Lista de dicionários com informações dos concursos
-
-        """
-
-        try:
-
-            if not os.path.exists(ConferenciaApostasOCRService.BASE_DIR):
-
-                os.makedirs(ConferenciaApostasOCRService.BASE_DIR)
-
-                return []
-
-
-
-            concursos = []
-
-
-
-            for pasta in os.listdir(ConferenciaApostasOCRService.BASE_DIR):
-
-                pasta_path = os.path.join(ConferenciaApostasOCRService.BASE_DIR, pasta)
-
-
-
-                # Ignorar arquivos, processar apenas pastas
-
-                if not os.path.isdir(pasta_path):
-
-                    continue
-
-
-
-                # Tentar extrair número do concurso do nome da pasta
-
-                try:
-
-                    numero_concurso = int(pasta)
-
-                except ValueError:
-
-                    continue  # Ignorar pastas com nomes não numéricos
-
-
-
-                # Contar screenshots na pasta
-
-                screenshots = [
-
-                    f for f in os.listdir(pasta_path)
-
-                    if f.lower().endswith(('.jpg', '.jpeg', '.png'))
-
-                ]
-
-
-
-                # Verificar se concurso existe no banco
-
-                sorteio = Sorteio.query.filter_by(concurso=numero_concurso).first()
-
-
-
-                # Verificar se existe arquivo JSON
-
-                arquivo_json = os.path.join(pasta_path, 'apostas.json')
-
-                tem_json = os.path.exists(arquivo_json)
-
-                
-
-                total_apostas = 0
-
-                if tem_json:
-
-                    try:
-
-                        import json
-
-                        with open(arquivo_json, 'r', encoding='utf-8') as f:
-
-                            dados = json.load(f)
-
-                            total_apostas = len(dados.get('apostas', []))
-
-                    except Exception:
-
-                        pass
-
-                else:
-
-                    total_apostas = len(screenshots)
-
-
-
-                concursos.append({
-
-                    'numero_concurso': numero_concurso,
-
-                    'total_screenshots': len(screenshots),
-
-                    'total_apostas': total_apostas,
-
-                    'resultado_disponivel': sorteio is not None,
-
-                    'pasta': pasta,
-
-                    'screenshots': screenshots,
-
-                    'tem_json': tem_json,
-
-                    'data_sorteio': sorteio.data_sorteio.strftime('%d/%m/%Y') if sorteio and sorteio.data_sorteio else None
-
-                })
-
-
-
-            # Ordenar por número do concurso (mais recente primeiro)
-
-            concursos.sort(key=lambda x: x['numero_concurso'], reverse=True)
-
-
-
-            return concursos
-
-
-
-        except Exception as e:
-
-            print(f"Erro ao listar concursos: {str(e)}")
-
+    def _numeros_pastas_concursos() -> List[int]:
+        """Números de concurso pelo nome da pasta, sem abrir apostas.json."""
+        base = ConferenciaApostasOCRService.BASE_DIR
+        if not os.path.exists(base):
+            os.makedirs(base)
             return []
 
+        numeros = []
+        for pasta in os.listdir(base):
+            pasta_path = os.path.join(base, pasta)
+            if not os.path.isdir(pasta_path):
+                continue
+            try:
+                numeros.append(int(pasta))
+            except ValueError:
+                continue
+        numeros.sort(reverse=True)
+        return numeros
 
+    @staticmethod
+    def ultimo_concurso_apurado(numeros: Optional[List[int]] = None) -> Optional[int]:
+        """Maior concurso que já tem pasta e resultado oficial no banco."""
+        if numeros is None:
+            numeros = ConferenciaApostasOCRService._numeros_pastas_concursos()
+        if not numeros:
+            return None
+        sorteio = (
+            Sorteio.query.filter(Sorteio.concurso.in_(numeros))
+            .order_by(Sorteio.concurso.desc())
+            .first()
+        )
+        return int(sorteio.concurso) if sorteio else None
+
+    @staticmethod
+    def listar_indice_concursos() -> Dict:
+        """Lista concursos sem ler apostas.json."""
+        numeros = ConferenciaApostasOCRService._numeros_pastas_concursos()
+        sorteios = {}
+        if numeros:
+            for sorteio in Sorteio.query.filter(Sorteio.concurso.in_(numeros)).all():
+                sorteios[int(sorteio.concurso)] = sorteio
+
+        base = ConferenciaApostasOCRService.BASE_DIR
+        concursos = []
+        for numero in numeros:
+            pasta_path = os.path.join(base, str(numero))
+            sorteio = sorteios.get(numero)
+            concursos.append({
+                'numero_concurso': numero,
+                'tem_json': os.path.exists(os.path.join(pasta_path, 'apostas.json')),
+                'resultado_disponivel': sorteio is not None,
+                'data_sorteio': (
+                    sorteio.data_sorteio.strftime('%d/%m/%Y')
+                    if sorteio and sorteio.data_sorteio else None
+                ),
+            })
+
+        apurados = [n for n in numeros if n in sorteios]
+        return {
+            'concursos': concursos,
+            'total': len(concursos),
+            'ultimo_apurado': max(apurados) if apurados else None,
+        }
+
+    @staticmethod
+    def listar_concursos_disponiveis(escopo: str = 'todos', concurso: Optional[int] = None) -> List[Dict]:
+        """
+        Lista concursos em conferencia_apostas.
+
+        escopo:
+            todos — lê o apostas.json de cada pasta
+            especifico — lê só o concurso informado
+            ultimo — lê só o último concurso que já tem resultado oficial
+        """
+        try:
+            escopo_norm = (escopo or 'todos').strip().lower()
+            if escopo_norm not in ('todos', 'especifico', 'ultimo'):
+                escopo_norm = 'todos'
+
+            numeros = ConferenciaApostasOCRService._numeros_pastas_concursos()
+            if escopo_norm == 'especifico':
+                try:
+                    alvo = int(concurso)
+                except (TypeError, ValueError):
+                    return []
+                numeros_alvo = [alvo] if alvo in numeros else []
+            elif escopo_norm == 'ultimo':
+                alvo = ConferenciaApostasOCRService.ultimo_concurso_apurado(numeros)
+                numeros_alvo = [alvo] if alvo else []
+            else:
+                numeros_alvo = list(numeros)
+
+            if not numeros_alvo:
+                return []
+
+            sorteios = {
+                int(s.concurso): s
+                for s in Sorteio.query.filter(Sorteio.concurso.in_(numeros_alvo)).all()
+            }
+
+            concursos = []
+            base = ConferenciaApostasOCRService.BASE_DIR
+            for numero_concurso in numeros_alvo:
+                pasta_path = os.path.join(base, str(numero_concurso))
+                if not os.path.isdir(pasta_path):
+                    continue
+
+                screenshots = [
+                    f for f in os.listdir(pasta_path)
+                    if f.lower().endswith(('.jpg', '.jpeg', '.png'))
+                ]
+
+                sorteio = sorteios.get(numero_concurso)
+                arquivo_json = os.path.join(pasta_path, 'apostas.json')
+                tem_json = os.path.exists(arquivo_json)
+
+                total_apostas = 0
+                if tem_json:
+                    try:
+                        import json
+                        with open(arquivo_json, 'r', encoding='utf-8') as f:
+                            dados = json.load(f)
+                        if isinstance(dados, dict):
+                            total_apostas = len(dados.get('apostas', []))
+                        elif isinstance(dados, list):
+                            total_apostas = len(dados)
+                    except Exception:
+                        pass
+                else:
+                    total_apostas = len(screenshots)
+
+                concursos.append({
+                    'numero_concurso': numero_concurso,
+                    'total_screenshots': len(screenshots),
+                    'total_apostas': total_apostas,
+                    'resultado_disponivel': sorteio is not None,
+                    'pasta': str(numero_concurso),
+                    'screenshots': screenshots,
+                    'tem_json': tem_json,
+                    'data_sorteio': (
+                        sorteio.data_sorteio.strftime('%d/%m/%Y')
+                        if sorteio and sorteio.data_sorteio else None
+                    ),
+                })
+
+            concursos.sort(key=lambda x: x['numero_concurso'], reverse=True)
+            return concursos
+
+        except Exception as e:
+            print(f"Erro ao listar concursos: {str(e)}")
+            return []
 
     @staticmethod
 

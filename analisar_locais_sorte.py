@@ -4,7 +4,7 @@ import glob
 import re
 from datetime import datetime
 
-PASTA_DADOS = r"D:\Loterias\AnalisePorPosicao-DiaDeSorte-Only\conferencias-locais-da-sorte"
+PASTA_DADOS = r"D:\Loterias\LAPDSO-AnalisePorPosicaoDiaDeSorte\conferencias-locais-da-sorte"
 
 def limpar_valor_monetario(valor_str):
     """Converte 'R$ 168.170.026,00' ou similar em um número float"""

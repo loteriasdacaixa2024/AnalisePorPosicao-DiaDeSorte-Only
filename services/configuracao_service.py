@@ -426,18 +426,19 @@ class ConfiguracaoService:
                 return response.json()
 
             except requests.exceptions.SSLError:
-                if tentativa == max_retries - 1:
-                    # Última tentativa: tenta sem verificar SSL
-                    try:
-                        response = requests.get(
-                            url,
-                            headers=headers,
-                            timeout=15,
-                            verify=False
-                        )
-                        response.raise_for_status()
-                        return response.json()
-                    except:
+                # Neste ambiente o certificado da Caixa falha na verificação.
+                # Na primeira falha, repete sem verificar o certificado.
+                try:
+                    response = requests.get(
+                        url,
+                        headers=headers,
+                        timeout=15,
+                        verify=False
+                    )
+                    response.raise_for_status()
+                    return response.json()
+                except Exception:
+                    if tentativa == max_retries - 1:
                         return None
 
             except requests.exceptions.RequestException:
@@ -591,6 +592,120 @@ class ConfiguracaoService:
             return {
                 'sucesso': False,
                 'mensagem': f'Erro ao atualizar último concurso: {str(e)}'
+            }
+
+    @staticmethod
+    def sincronizar_concursos_recentes(max_faltantes=40):
+        """
+        Usado na inicialização do sistema.
+
+        Busca o concurso mais recente na API da Caixa e grava no banco
+        os sorteios que ainda não existem, do último cadastrado até esse
+        concurso. Se o banco já está atualizado, regrava o último para
+        pegar premiação publicada depois do sorteio.
+
+        Um intervalo maior que max_faltantes não é baixado inteiro:
+        só o concurso mais recente entra, para a abertura não ficar presa.
+        """
+        try:
+            data_ultimo = ConfiguracaoService._buscar_concurso_api()
+
+            if not data_ultimo:
+                return {
+                    'sucesso': False,
+                    'mensagem': 'Não foi possível buscar o último concurso da API. Verifique sua conexão com a internet.'
+                }
+
+            numero_api = data_ultimo.get('numero')
+            if not numero_api:
+                return {
+                    'sucesso': False,
+                    'mensagem': 'A API não informou o número do último concurso.'
+                }
+
+            ultimo_db = Sorteio.query.order_by(Sorteio.concurso.desc()).first()
+            numero_db = ultimo_db.concurso if ultimo_db else None
+
+            if numero_db is None or numero_api <= numero_db:
+                if not ConfiguracaoService._atualizar_sorteio_db(data_ultimo):
+                    return {
+                        'sucesso': False,
+                        'mensagem': f'Erro ao atualizar concurso {numero_api} no banco de dados'
+                    }
+
+                if numero_db is None:
+                    mensagem = f'Banco estava vazio. Concurso {numero_api} gravado.'
+                elif numero_api == numero_db:
+                    mensagem = f'Banco já estava no concurso {numero_api}. Dados atualizados.'
+                else:
+                    mensagem = (
+                        f'API informou o concurso {numero_api}, anterior ao do banco ({numero_db}). '
+                        f'Concurso {numero_api} atualizado.'
+                    )
+
+                return {
+                    'sucesso': True,
+                    'mensagem': mensagem,
+                    'concurso': numero_api,
+                    'novos': 0
+                }
+
+            faltantes = numero_api - numero_db
+            if faltantes > max_faltantes:
+                gravou = ConfiguracaoService._atualizar_sorteio_db(data_ultimo)
+                return {
+                    'sucesso': gravou,
+                    'mensagem': (
+                        f'Há {faltantes} concursos novos ({numero_db + 1} a {numero_api}). '
+                        f'A abertura grava no máximo {max_faltantes} de uma vez. '
+                        f'O concurso {numero_api} '
+                        f'{"foi atualizado" if gravou else "não pôde ser gravado"}. '
+                        f'Use a atualização por intervalo para completar os demais.'
+                    ),
+                    'concurso': numero_api,
+                    'novos': 1 if gravou else 0
+                }
+
+            inicio = numero_db + 1
+            sucesso = 0
+            falhas = []
+
+            for numero in range(inicio, numero_api):
+                data = ConfiguracaoService._buscar_concurso_api(numero)
+                if data and ConfiguracaoService._atualizar_sorteio_db(data):
+                    sucesso += 1
+                else:
+                    falhas.append(numero)
+                time.sleep(0.4)
+
+            if ConfiguracaoService._atualizar_sorteio_db(data_ultimo):
+                sucesso += 1
+            else:
+                falhas.append(numero_api)
+
+            if sucesso == 0:
+                return {
+                    'sucesso': False,
+                    'mensagem': f'Não foi possível gravar os concursos {inicio} a {numero_api}.'
+                }
+
+            mensagem = f'{sucesso} concurso(s) atualizado(s), de {inicio} a {numero_api}.'
+            if falhas:
+                lista = ', '.join(str(n) for n in falhas[:10])
+                mensagem += f' Falha em: {lista}.'
+
+            return {
+                'sucesso': True,
+                'mensagem': mensagem,
+                'concurso': numero_api,
+                'novos': sucesso,
+                'falhas': falhas
+            }
+
+        except Exception as e:
+            return {
+                'sucesso': False,
+                'mensagem': f'Erro ao sincronizar concursos recentes: {str(e)}'
             }
 
     @staticmethod
